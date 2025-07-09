@@ -1,0 +1,21 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Hijrah App API",
+        "description": "API documentation for Hijrah App",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/user/all": {
+            "get": {
+                "summary": "List users",
+                "operationId": "37022e142c3cd2c072c2762f6bc02008",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        }
+    }
+}
