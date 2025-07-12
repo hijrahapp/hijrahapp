@@ -25,7 +25,7 @@ class JwtMiddleware
             $token = JWT::decode($jwt, new Key(env('JWT_SECRET'), 'HS256'));
             $token = (array) $token;
 
-            if (Carbon::now()->timestamp > $token['expiry']) {
+            if ($token['expiry'] != null && Carbon::now()->timestamp > $token['expiry']) {
                 return response()->json(['message' => 'Token expired'], 401);
             }
 

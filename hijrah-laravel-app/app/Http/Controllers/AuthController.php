@@ -21,8 +21,8 @@ class AuthController extends Controller
         return $this->authService->signup($request->all());
     }
 
-    public function generateOTP(Request $request) {
-        return $this->otpService->generateOTP($request->authUserId);
+    public function resendOTP(Request $request) {
+        return $this->otpService->resendOTP($request->authUserId);
     }
 
     public function verifyOTP(Request $request) {
@@ -30,6 +30,6 @@ class AuthController extends Controller
     }
 
     public function firebaseLogin(Request $request) {
-        return $this->firebaseService->login($request);
+//        return $this->firebaseService->login($request);
     }
 }

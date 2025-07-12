@@ -10,5 +10,15 @@ use OpenApi\Annotations as OA;
  *     version="1.0.0",
  *     description="API documentation for Hijrah App"
  * )
+ *
+ * @OA\SecurityScheme(
+ *      type="http",
+ *      description="Use a bearer token to access this endpoint",
+ *      name="Authorization",
+ *      in="header",
+ *      scheme="bearer",
+ *      bearerFormat="JWT",
+ *      securityScheme="bearerAuth",
+ *  )
  */
 class SwaggerInfo {}

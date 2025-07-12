@@ -5,15 +5,12 @@ namespace App\Http\Services;
 use App\Enums\RoleName;
 use App\Http\Repositories\RoleRepository;
 use App\Http\Repositories\UserRepository;
-use App\Resources\UserResource;
 use App\Utils\JWTUtils;
-use Carbon\Carbon;
-use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;
 
 class AuthService
 {
-    public function __construct(private UserRepository $userRepo, private RoleRepository $roleRepo) {}
+    public function __construct(private UserRepository $userRepo, private RoleRepository $roleRepo, private OTPService $otpService) {}
 
     public function login(string $email, string $password) {
         $user = $this->userRepo->findByEmail($email);
@@ -35,6 +32,8 @@ class AuthService
         $request['active'] = false;
 
         $user = $this->userRepo->create($request);
+
+        $this->otpService->sendOTP($user);
 
         return response()->json(JWTUtils::generateTokenResponse($user), 201);
     }

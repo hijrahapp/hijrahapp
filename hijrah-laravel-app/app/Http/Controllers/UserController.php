@@ -15,18 +15,7 @@ class UserController extends Controller
         return response()->json($this->userService->createUser($request->all()));
     }
 
-    /**
-     * @OA\Get(
-     *     path="/user/all",
-     *     summary="List users",
-     *     @OA\Response(response=200, description="Success")
-     * )
-     */
     public function all() {
         return response()->json($this->userService->getAllUsers());
-    }
-
-    public function resetPassword(Request $request) {
-        return response()->json($this->userService->resetPassword($request->authUser, $request->password));
     }
 }
