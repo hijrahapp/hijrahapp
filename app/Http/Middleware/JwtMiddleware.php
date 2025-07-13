@@ -22,7 +22,7 @@ class JwtMiddleware
         $jwt = substr($authHeader, 7);
 
         try {
-            $token = JWT::decode($jwt, new Key(env('JWT_SECRET'), 'HS256'));
+            $token = JWT::decode($jwt, new Key(config('app.jwt_secret'), 'HS256'));
             $token = (array) $token;
 
             if ($token['expiry'] != null && Carbon::now()->timestamp > $token['expiry']) {

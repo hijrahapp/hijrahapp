@@ -23,8 +23,8 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'gender' => $this->gender,
-            'birthDate' => $this->birthDate->format('Y-m-d'),
-            'role' => $this->role->name->value,
+            'birthDate' => $this->birthDate ? $this->birthDate->format('Y-m-d') : null,
+            'role' => $this->role ? $this->role->name->value : null,
         ];
     }
 }
