@@ -18,11 +18,7 @@ class JWTUtils
 
         $token = JWT::encode($payload, config('app.jwt_secret'), 'HS256');
 
-        return [
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'user' => new UserResource($user)
-        ];
+        return self::generateResponse($token, $user);
     }
 
     public static function generateTempTokenResponse($user) {
@@ -36,10 +32,18 @@ class JWTUtils
 
         $token = JWT::encode($payload, config('app.jwt_secret'), 'HS256');
 
-        return [
+
+        return self::generateResponse($token, $user);
+    }
+
+    private static function generateResponse(string $token, $user): array
+    {
+        $response = [
             'access_token' => $token,
             'token_type' => 'bearer',
             'user' => new UserResource($user)
         ];
+
+        return $response;
     }
 }

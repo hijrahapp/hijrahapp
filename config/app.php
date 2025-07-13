@@ -15,4 +15,7 @@ return [
         ),
     ],
     'jwt_secret' => env('JWT_SECRET'),
+    'features' => [
+        'email_verification' => env('EMAIL_VERIFICATION', false),
+    ],
 ];

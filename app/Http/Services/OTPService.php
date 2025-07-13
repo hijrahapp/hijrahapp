@@ -2,11 +2,12 @@
 
 namespace App\Http\Services;
 
-use App\Http\Repositories\RoleRepository;
 use App\Http\Repositories\UserRepository;
+use App\Mail\OtpMail;
 use App\Models\User;
 use App\Utils\JWTUtils;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class OTPService
 {
@@ -17,7 +18,10 @@ class OTPService
         $user->otp_expires_at = Carbon::now()->addMinutes(15);
         $user->save();
 
-        //MailService sendOTP Mail.
+        if(config('app.features.email_verification')) {
+            // Send OTP email
+//            Mail::to($user->email)->send(new OtpMail($user->otp, $user, $user->otp_expires_at));
+        }
     }
 
     public function resendOTP(string $userId) {
@@ -37,7 +41,11 @@ class OTPService
             return response()->json(['message' => 'Unauthorized user'], 401);
         }
 
-        if($user->otp !== $otp) {
+        if(!$user->otp) {
+            return response()->json(['message' => 'Nothing to verify'], 404);
+        }
+
+        if(config('app.features.email_verification') && $user->otp !== $otp) {
             return response()->json(['message' => 'Invalid OTP'], 401);
         }
 
