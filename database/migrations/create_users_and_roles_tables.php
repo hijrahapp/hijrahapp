@@ -23,8 +23,8 @@ return new class extends Migration
             $table->string('otp')->nullable();
             $table->timestamp('otp_expires_at')->nullable();
             $table->boolean('active')->default(false);
-            $table->enum('gender', ['male', 'female']);
-            $table->date('birthDate');
+            $table->enum('gender', ['male', 'female'])->nullable();
+            $table->date('birthDate')->nullable();
             $table->uuid('roleId');
             $table->timestamps();
             $table->foreign('roleId')->references('id')->on('roles');
