@@ -5,8 +5,10 @@ namespace App\Http\Services;
 use App\Enums\RoleName;
 use App\Http\Repositories\RoleRepository;
 use App\Http\Repositories\UserRepository;
+use App\Mail\OtpMail;
 use App\Utils\JWTUtils;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class AuthService
 {
@@ -36,7 +38,12 @@ class AuthService
 
         $user = $this->userRepo->create($request);
 
-        $this->otpService->sendOTP($user);
+        $this->otpService->generateOTP($user);
+
+        if(config('app.features.email_verification')) {
+            // Send OTP email
+            Mail::to($user->email)->send(new OtpMail($user->otp, $user, $user->otp_expires_at));
+        }
 
         return response()->json(JWTUtils::generateTokenResponse($user), 201);
     }

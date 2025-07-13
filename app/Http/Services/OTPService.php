@@ -4,6 +4,8 @@ namespace App\Http\Services;
 
 use App\Http\Repositories\UserRepository;
 use App\Mail\OtpMail;
+use App\Mail\PasswordResetAttemptMail;
+use App\Mail\WelcomeMail;
 use App\Models\User;
 use App\Utils\JWTUtils;
 use Carbon\Carbon;
@@ -13,15 +15,10 @@ class OTPService
 {
     public function __construct(private UserRepository $userRepo) {}
 
-    public function sendOTP(User $user) {
+    public function generateOTP(User $user) {
         $user->otp = random_int(100000, 999999);
         $user->otp_expires_at = Carbon::now()->addMinutes(15);
         $user->save();
-
-        if(config('app.features.email_verification')) {
-            // Send OTP email
-//            Mail::to($user->email)->send(new OtpMail($user->otp, $user, $user->otp_expires_at));
-        }
     }
 
     public function resendOTP(string $userId) {
@@ -30,7 +27,12 @@ class OTPService
             return response()->json(['message' => 'Unauthorized user'], 401);
         }
 
-        $this->sendOTP($user);
+        $this->generateOTP($user);
+
+        if(config('app.features.email_verification')) {
+            // Send OTP email
+            Mail::to($user->email)->send(new OtpMail($user->otp, $user, $user->otp_expires_at));
+        }
 
         return response()->json(null, 201);
     }
@@ -48,6 +50,11 @@ class OTPService
         if(!$user->active) {
             $user->active = true;
             $user->email_verified_at = Carbon::now();
+
+            // Send welcome email for newly activated users
+            if(config('app.features.email_verification')) {
+                Mail::to($user->email)->send(new WelcomeMail($user));
+            }
         }
         $user->save();
 
@@ -59,7 +66,12 @@ class OTPService
         $user = $this->userRepo->findByEmail($userEmail);
 
         if ($user) {
-            $this->sendOTP($user);
+            $this->generateOTP($user);
+
+            // Send password reset attempt email
+            if(config('app.features.email_verification')) {
+                Mail::to($user->email)->send(new PasswordResetAttemptMail($user, $user->otp, $user->otp_expires_at));
+            }
         }
     }
 
