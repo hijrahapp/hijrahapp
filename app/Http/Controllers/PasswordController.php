@@ -67,7 +67,7 @@ class PasswordController
      *  )
      */
     public function verifyOTP(Request $request) {
-        return response()->json($this->otpService->verifyPasswordOTP($request['email'], $request['otp']));
+        return $this->otpService->verifyPasswordOTP($request['email'], $request['otp']);
     }
 
     /**

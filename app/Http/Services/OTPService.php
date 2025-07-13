@@ -37,20 +37,10 @@ class OTPService
 
     public function verifyOTP(string $userId, string $otp) {
         $user = $this->userRepo->findById($userId);
-        if (!$user) {
-            return response()->json(['message' => 'Unauthorized user'], 401);
-        }
 
-        if(!$user->otp) {
-            return response()->json(['message' => 'Nothing to verify'], 404);
-        }
-
-        if(config('app.features.email_verification') && $user->otp !== $otp) {
-            return response()->json(['message' => 'Invalid OTP'], 401);
-        }
-
-        if (Carbon::now()->timestamp > $user->otp_expires_at->timestamp) {
-            return response()->json(['message' => 'OTP expired'], 401);
+        $validate = $this->validate($user, $otp);
+        if($validate) {
+            return $validate;
         }
 
         $user->otp = null;
@@ -76,21 +66,34 @@ class OTPService
     public function verifyPasswordOTP(string $userEmail, string $otp) {
         $user = $this->userRepo->findByEmail($userEmail);
 
-        if(!$user) {
-            return response()->json(['message' => 'Unauthorized user'], 401);
+        $validate = $this->validate($user, $otp);
+        if($validate) {
+            return $validate;
         }
 
-        if($user->otp !== $otp) {
-            return response()->json(['message' => 'Invalid OTP'], 401);
-        }
-
-        if (Carbon::now()->timestamp > $user->otp_expires_at->timestamp) {
-            return response()->json(['message' => 'OTP expired'], 401);
-        }
         $user->otp = null;
         $user->otp_expires_at = null;
         $user->save();
 
         return response()->json(JWTUtils::generateTempTokenResponse($user));
+    }
+
+    private function validate($user, $otp)
+    {
+        if(!$user) {
+            return response()->json(['message' => 'Unauthorized user'], 401);
+        }
+
+        if(!$user->otp) {
+            return response()->json(['message' => 'Nothing to verify'], 404);
+        }
+
+        if(Carbon::now()->timestamp > $user->otp_expires_at->timestamp) {
+            return response()->json(['message' => 'OTP expired'], 401);
+        }
+
+        if(config('app.features.email_verification') && $user->otp !== $otp) {
+            return response()->json(['message' => 'Invalid OTP'], 401);
+        }
     }
 }
