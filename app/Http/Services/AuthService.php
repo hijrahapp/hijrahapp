@@ -17,6 +17,9 @@ class AuthService
         if (!$user || !Hash::check($password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
+        if (!$user->active) {
+            return response()->json(['message' => 'Inactive user'], 401);
+        }
 
         return response()->json(JWTUtils::generateTokenResponse($user));
     }

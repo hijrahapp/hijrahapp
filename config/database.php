@@ -20,7 +20,14 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_PERSISTENT => false,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION sql_mode='STRICT_TRANS_TABLES'",
             ]) : [],
+            'pool' => [
+                'min' => 2,
+                'max' => 10,
+                'idle_timeout' => 60,
+            ],
         ],
     ],
     'migrations' => [

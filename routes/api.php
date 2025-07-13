@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']); //done
-    Route::post('signup', [AuthController::class, 'signUp']); //done except send otp mail
+    Route::post('signup', [AuthController::class, 'signup']); //done except send otp mail
     Route::post('login/firebase', [AuthController::class, 'firebaseLogin']); // done // not tested
     Route::middleware(['auth.jwt'])->post('otp/verify', [AuthController::class, 'verifyOTP']); //done
     Route::middleware(['auth.jwt'])->post('otp/resend', [AuthController::class, 'resendOTP']); //done except otp mail
