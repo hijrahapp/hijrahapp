@@ -26,6 +26,8 @@ class User extends Model
         'gender',
         'birthDate',
         'roleId',
+        'firebase_uid',
+        'profile_picture',
     ];
 
     protected $hidden = [

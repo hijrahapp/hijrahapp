@@ -23,4 +23,17 @@ class UserRepository
     public function findByEmail(string $email): ?User {
         return User::where('email', $email)->first();
     }
+
+    public function update(string $userId, array $data): bool {
+        $user = User::find($userId);
+        if (!$user) {
+            return false;
+        }
+        
+        return $user->update($data);
+    }
+
+    public function findByFirebaseUid(string $firebaseUid): ?User {
+        return User::where('firebase_uid', $firebaseUid)->first();
+    }
 }

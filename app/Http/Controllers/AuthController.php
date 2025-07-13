@@ -29,7 +29,13 @@ class AuthController extends Controller
         return $this->otpService->verifyOTP($request->authUserId, $request->otp);
     }
 
+    /**
+     * Authenticate user with Firebase token
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function firebaseLogin(Request $request) {
-//        return $this->firebaseService->login($request);
+        return $this->firebaseService->login($request->all());
     }
 }

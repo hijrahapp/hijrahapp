@@ -16,7 +16,12 @@ class JWTUtils
             'expiry' => null,
         ];
 
-        $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
+        $jwtSecret = config('app.jwt_secret');
+        if (empty($jwtSecret)) {
+            throw new \Exception('JWT_SECRET is not configured. Please check your .env file.');
+        }
+
+        $token = JWT::encode($payload, $jwtSecret, 'HS256');
 
         return [
             'access_token' => $token,
@@ -34,7 +39,12 @@ class JWTUtils
             'expiry' => Carbon::now()->addHours(15)->timestamp,
         ];
 
-        $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
+        $jwtSecret = config('app.jwt_secret');
+        if (empty($jwtSecret)) {
+            throw new \Exception('JWT_SECRET is not configured. Please check your .env file.');
+        }
+
+        $token = JWT::encode($payload, $jwtSecret, 'HS256');
 
         return [
             'access_token' => $token,

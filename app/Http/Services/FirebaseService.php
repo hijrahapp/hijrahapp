@@ -6,58 +6,143 @@ use App\Enums\RoleName;
 use App\Http\Repositories\RoleRepository;
 use App\Http\Repositories\UserRepository;
 use App\Utils\JWTUtils;
-use Kreait\Firebase\Factory;
+use Kreait\Laravel\Firebase\Facades\Firebase;
+use Kreait\Firebase\Exception\Auth\FailedToVerifyToken;
+use Illuminate\Http\JsonResponse;
 
 class FirebaseService
 {
-    protected $firebaseAuth;
     protected $userRepo;
     protected $roleRepo;
 
-    public function __construct(Factory $firebaseAuth, UserRepository $userRepo, RoleRepository $roleRepo)
+    public function __construct(UserRepository $userRepo, RoleRepository $roleRepo)
     {
-        $this->firebaseAuth = $firebaseAuth->createAuth();
         $this->userRepo = $userRepo;
         $this->roleRepo = $roleRepo;
     }
 
-    public function login($request)
+    /**
+     * Authenticate user with Firebase token and create/update user in database
+     * 
+     * @param array $request
+     * @return JsonResponse
+     */
+    public function login($request): JsonResponse
     {
-        $firebaseToken = $request['token'];
+        $firebaseToken = $request['token'] ?? null;
 
         if (empty($firebaseToken)) {
-            return response()->json(['error' => 'ID token is missing.'], 400);
+            return response()->json([
+                'error' => 'Firebase ID token is missing.',
+                'message' => 'Please provide a valid Firebase authentication token.'
+            ], 400);
         }
 
         try {
-            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($firebaseToken);
+            // Verify the Firebase ID token
+            $verifiedIdToken = Firebase::auth()->verifyIdToken($firebaseToken);
             $uid = $verifiedIdToken->claims()->get('sub');
-            $firebaseUser = $this->firebaseAuth->getUser($uid);
+            
+            // Get user details from Firebase
+            $firebaseUser = Firebase::auth()->getUser($uid);
             $email = $firebaseUser->email;
             $displayName = $firebaseUser->displayName;
+            $photoUrl = $firebaseUser->photoUrl;
 
+            // Check if user exists in our database
             $user = $this->userRepo->findByEmail($email);
 
             if (!$user) {
+                // Create new user if not exists
                 $customerRole = $this->roleRepo->findByRoleName(RoleName::Customer);
-                $user = $this->userRepo->create([
+                
+                $userData = [
                     'name' => $displayName ?? explode('@', $email)[0],
                     'email' => $email,
                     'email_verified_at' => now(),
-                    'password' => null,
-                    'gender' => $request['gender'],
-                    'birthDate' => $request['birthDate'],
+                    'password' => null, // Firebase users don't have passwords
                     'active' => true,
-                    'roleId' => $customerRole->id
-                ]);
+                    'roleId' => $customerRole->id,
+                    'firebase_uid' => $uid,
+                ];
+
+                // Add optional fields if provided
+                if (isset($request['gender'])) {
+                    $userData['gender'] = $request['gender'];
+                }
+                
+                if (isset($request['birthDate'])) {
+                    $userData['birthDate'] = $request['birthDate'];
+                }
+
+                if ($photoUrl) {
+                    $userData['profile_picture'] = $photoUrl;
+                }
+
+                $user = $this->userRepo->create($userData);
+            } else {
+                // Update existing user's Firebase UID and other details
+                $updateData = [
+                    'firebase_uid' => $uid,
+                    'email_verified_at' => now(),
+                    'active' => true,
+                ];
+
+                if ($photoUrl) {
+                    $updateData['profile_picture'] = $photoUrl;
+                }
+
+                if ($displayName && $user->name !== $displayName) {
+                    $updateData['name'] = $displayName;
+                }
+
+                $this->userRepo->update($user->id, $updateData);
+                $user->refresh();
             }
 
+            // Generate JWT token for the user
             return response()->json(JWTUtils::generateTokenResponse($user));
 
         } catch (FailedToVerifyToken $e) {
-            return response()->json(['error' => 'Invalid or expired ID token: ' . $e->getMessage()], 401);
+            return response()->json([
+                'error' => 'Invalid or expired Firebase token.',
+                'message' => 'The provided Firebase authentication token is invalid or has expired.',
+                'details' => $e->getMessage()
+            ], 401);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'An error occurred: ' . $e->getMessage()], 500);
+            return response()->json([
+                'error' => 'Authentication failed.',
+                'message' => 'An error occurred during Firebase authentication.',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get user details from Firebase UID
+     * 
+     * @param string $uid
+     * @return JsonResponse
+     */
+    public function getUserByUid(string $uid): JsonResponse
+    {
+        try {
+            $firebaseUser = Firebase::auth()->getUser($uid);
+            
+            return response()->json([
+                'uid' => $firebaseUser->uid,
+                'email' => $firebaseUser->email,
+                'displayName' => $firebaseUser->displayName,
+                'photoUrl' => $firebaseUser->photoUrl,
+                'emailVerified' => $firebaseUser->emailVerified,
+                'disabled' => $firebaseUser->disabled,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'User not found.',
+                'message' => 'The Firebase user with the provided UID was not found.',
+                'details' => $e->getMessage()
+            ], 404);
         }
     }
 }

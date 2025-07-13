@@ -14,4 +14,5 @@ return [
             explode(',', env('APP_PREVIOUS_KEYS', ''))
         ),
     ],
+    'jwt_secret' => env('JWT_SECRET'),
 ];
