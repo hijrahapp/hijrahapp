@@ -16,7 +16,7 @@ class OTPService
     public function __construct(private UserRepository $userRepo) {}
 
     public function generateOTP(User $user) {
-        $user->otp = random_int(100000, 999999);
+        $user->otp = random_int(1000, 9999);
         $user->otp_expires_at = Carbon::now()->addMinutes(15);
         $user->save();
     }
