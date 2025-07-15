@@ -1,9 +1,6 @@
 import './bootstrap';
-import Alpine from 'alpinejs';
 
 // Start Alpine.js
-window.Alpine = Alpine;
-Alpine.start();
 
 // Metronic Core JavaScript functionality
 document.addEventListener('DOMContentLoaded', function() {

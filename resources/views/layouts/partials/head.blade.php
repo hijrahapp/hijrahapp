@@ -1,4 +1,4 @@
-<title>Metronic - Tailwind CSS</title>
+<title>Hijrah App</title>
 <meta charset="utf-8" />
 <meta content="follow, index" name="robots" />
 <link href="{{ url(request()->path()) }}" rel="canonical" />
@@ -7,16 +7,17 @@
 <meta content="@keenthemes" name="twitter:site" />
 <meta content="@keenthemes" name="twitter:creator" />
 <meta content="summary_large_image" name="twitter:card" />
-<meta content="Metronic - Tailwind CSS " name="twitter:title" />
+<meta content="Hijrah App" name="twitter:title" />
 <meta content="" name="twitter:description" />
 <meta content="{{ asset('assets/media/app/og-image.png') }}" name="twitter:image" />
 <meta content="{{ url(request()->path()) }}" property="og:url" />
 <meta content="en_US" property="og:locale" />
 <meta content="website" property="og:type" />
 <meta content="@keenthemes" property="og:site_name" />
-<meta content="Metronic - Tailwind CSS " property="og:title" />
+<meta content="Hijrah App" property="og:title" />
 <meta content="" property="og:description" />
 <meta content="{{ asset('assets/media/app/og-image.png') }}" property="og:image" />
+<meta content="{{ csrf_token() }}" name="csrf-token" />
 <link href="{{ asset('assets/media/app/apple-touch-icon.png') }}" rel="apple-touch-icon" sizes="180x180" />
 <link href="{{ asset('assets/media/app/favicon-32x32.png') }}" rel="icon" sizes="32x32" type="image/png" />
 <link href="{{ asset('assets/media/app/favicon-16x16.png') }}" rel="icon" sizes="16x16" type="image/png" />
