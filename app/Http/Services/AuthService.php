@@ -27,8 +27,13 @@ class AuthService
     }
 
     public function signup($request) {
-        if ($this->userRepo->findByEmail($request['email'])) {
-            return response()->json(['message' => 'Email already exists'], 401);
+        $user = $this->userRepo->findByEmail($request['email']);
+        if ($user) {
+            if($user->active) {
+                return response()->json(['message' => 'Email already exists'], 401);
+            }
+
+            $this->userRepo->delete($user);
         }
 
         $customerRole = $this->roleRepo->findByRoleName(RoleName::Customer);
