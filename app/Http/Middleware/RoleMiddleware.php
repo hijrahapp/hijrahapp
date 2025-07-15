@@ -13,11 +13,12 @@ class RoleMiddleware
     {
         $user = $request->authUser;
 
-        if (!empty($roles)) {
-            $role = $user->role;
-            if (!$role || (RoleName::SuperAdmin !== $role->name && !in_array($role->name->value, $roles))) {
-                return response()->json(['error' => 'Unauthorized Role'], 403);
-            }
+        $role = $user->role;
+        if(!$role) {
+            return response()->json(['error' => 'Unauthorized Role'], 403);
+        }
+        if(RoleName::SuperAdmin !== $role->name && (empty($roles) || !in_array($role->name->value, $roles))) {
+            return response()->json(['error' => 'Unauthorized Role'], 403);
         }
 
         return $next($request);

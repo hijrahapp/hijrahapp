@@ -20,7 +20,8 @@ Route::prefix('password')->group(function () {
     Route::middleware(['auth.jwt','auth.user'])->post('reset', [PasswordController::class, 'resetPassword']); //done
 });
 
-Route::prefix('user')->middleware(['auth.jwt','auth.user','auth.role:Admin'])->group(function () {
-    Route::post('create', [UserController::class, 'create']);
-    Route::get('all', [UserController::class, 'all']);
+Route::prefix('user')->middleware(['auth.jwt','auth.user'])->group(function () {
+    Route::middleware(['auth.role:Admin'])->post('', [UserController::class, 'create']);
+    Route::middleware(['auth.role:Admin'])->get('all', [UserController::class, 'all']);
+    Route::middleware(['auth.role:SuperAdmin'])->delete('', [UserController::class, 'delete']);
 });

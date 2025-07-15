@@ -101,11 +101,11 @@ class OTPService
         }
 
         if(Carbon::now()->timestamp > $user->otp_expires_at->timestamp) {
-            return response()->json(['message' => 'OTP expired'], 401);
+            return response()->json(['message' => 'OTP expired'], 406);
         }
 
         if(config('app.features.email_verification') && $user->otp !== $otp) {
-            return response()->json(['message' => 'Invalid OTP'], 401);
+            return response()->json(['message' => 'Invalid OTP'], 406);
         }
     }
 }

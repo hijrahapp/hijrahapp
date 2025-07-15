@@ -18,4 +18,14 @@ class UserController extends Controller
     public function all() {
         return response()->json($this->userService->getAllUsers());
     }
+
+    public function delete(Request $request) {
+        $deleted = $this->userService->deleteUser($request->email);
+
+        if($deleted) {
+            return response()->json(['message' => 'User deleted successfully'], 200);
+        }
+
+        return response()->json(['message' => 'User not found'], 404);
+    }
 }
