@@ -23,7 +23,7 @@ class FirebaseService
 
     /**
      * Authenticate user with Firebase token and create/update user in database
-     * 
+     *
      * @param array $request
      * @return JsonResponse
      */
@@ -42,7 +42,7 @@ class FirebaseService
             // Verify the Firebase ID token
             $verifiedIdToken = Firebase::auth()->verifyIdToken($firebaseToken);
             $uid = $verifiedIdToken->claims()->get('sub');
-            
+
             // Get user details from Firebase
             $firebaseUser = Firebase::auth()->getUser($uid);
             $email = $firebaseUser->email;
@@ -52,10 +52,12 @@ class FirebaseService
             // Check if user exists in our database
             $user = $this->userRepo->findByEmail($email);
 
+            $isNewUser = $user == null;
+
             if (!$user) {
                 // Create new user if not exists
                 $customerRole = $this->roleRepo->findByRoleName(RoleName::Customer);
-                
+
                 $userData = [
                     'name' => $displayName ?? explode('@', $email)[0],
                     'email' => $email,
@@ -70,7 +72,7 @@ class FirebaseService
                 if (isset($request['gender'])) {
                     $userData['gender'] = $request['gender'];
                 }
-                
+
                 if (isset($request['birthDate'])) {
                     $userData['birthDate'] = $request['birthDate'];
                 }
@@ -100,8 +102,11 @@ class FirebaseService
                 $user->refresh();
             }
 
+            $response = JWTUtils::generateTokenResponse($user);
+            $response['isNewUser'] = $isNewUser;
+
             // Generate JWT token for the user
-            return response()->json(JWTUtils::generateTokenResponse($user));
+            return response()->json($response);
 
         } catch (FailedToVerifyToken $e) {
             return response()->json([
@@ -120,7 +125,7 @@ class FirebaseService
 
     /**
      * Get user details from Firebase UID
-     * 
+     *
      * @param string $uid
      * @return JsonResponse
      */
@@ -128,7 +133,7 @@ class FirebaseService
     {
         try {
             $firebaseUser = Firebase::auth()->getUser($uid);
-            
+
             return response()->json([
                 'uid' => $firebaseUser->uid,
                 'email' => $firebaseUser->email,

@@ -27,11 +27,10 @@ class JWTUtils
             'name' => $user->name,
             'email' => $user->email,
             'role' => $user->role->name,
-            'expiry' => Carbon::now()->addHours(15)->timestamp,
+            'expiry' => Carbon::now()->addMinutes(15)->timestamp,
         ];
 
         $token = JWT::encode($payload, config('app.jwt_secret'), 'HS256');
-
 
         return self::generateResponse($token, $user);
     }
