@@ -31,11 +31,15 @@ class AuthController extends Controller
 
     /**
      * Authenticate user with Firebase token
-     * 
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function firebaseLogin(Request $request) {
         return $this->firebaseService->login($request->all());
+    }
+
+    public function completeSignup(Request $request) {
+        return $this->authService->completeSignup($request->authUser, $request->all());
     }
 }

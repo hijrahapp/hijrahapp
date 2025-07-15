@@ -47,4 +47,17 @@ class AuthService
 
         return response()->json(JWTUtils::generateTokenResponse($user), 201);
     }
+
+    public function completeSignup($user, $request) {
+        $updateData = [];
+        if (isset($request['gender'])) {
+            $updateData['gender'] = $request['gender'];
+        }
+        if (isset($request['birthDate'])) {
+            $updateData['birthDate'] = $request['birthDate'];
+        }
+        $this->userRepo->update($user->id, $updateData);
+        $user->refresh();
+        return response()->json(["message" => "Signup complete."]);
+    }
 }
