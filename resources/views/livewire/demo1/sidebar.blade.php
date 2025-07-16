@@ -4,12 +4,12 @@
     <div class="kt-sidebar-header relative hidden shrink-0 items-center justify-between px-3 lg:flex lg:px-6"
         id="sidebar_header">
         <a class="dark:hidden" href="html/demo1.html">
-            <img class="default-logo min-h-[22px] max-w-none" src="assets/media/app/default-logo.svg" />
-            <img class="small-logo min-h-[22px] max-w-none" src="assets/media/app/mini-logo.svg" />
+            <img class="default-logo min-h-[22px] max-w-none" src="/assets/media/app/default-logo.svg" />
+            <img class="small-logo min-h-[22px] max-w-none" src="/assets/media/app/mini-logo.svg" />
         </a>
         <a class="hidden dark:block" href="html/demo1.html">
-            <img class="default-logo min-h-[22px] max-w-none" src="assets/media/app/default-logo-dark.svg" />
-            <img class="small-logo min-h-[22px] max-w-none" src="assets/media/app/mini-logo.svg" />
+            <img class="default-logo min-h-[22px] max-w-none" src="/assets/media/app/default-logo-dark.svg" />
+            <img class="small-logo min-h-[22px] max-w-none" src="/assets/media/app/mini-logo.svg" />
         </a>
         <button
             class="kt-btn kt-btn-outline kt-btn-icon absolute start-full top-2/4 size-[30px] -translate-x-2/4 -translate-y-2/4 rtl:translate-x-2/4"
@@ -37,7 +37,7 @@
                             class="kt-menu-title kt-menu-item-active:text-primary kt-menu-link-hover:!text-primary text-sm font-medium text-foreground">
                             Dashboards
                         </span>
-                        <span class="kt-menu-arrow me-[-10px] ms-1 w-[20px] shrink-0 justify-end text-muted-foreground">
+                        <!-- <span class="kt-menu-arrow me-[-10px] ms-1 w-[20px] shrink-0 justify-end text-muted-foreground">
                             <span class="kt-menu-item-show:hidden inline-flex">
                                 <i class="ki-filled ki-plus text-[11px]">
                                 </i>
@@ -46,9 +46,9 @@
                                 <i class="ki-filled ki-minus text-[11px]">
                                 </i>
                             </span>
-                        </span>
+                        </span> -->
                     </div>
-                    <div
+                    <!-- <div
                         class="kt-menu-accordion relative gap-1 ps-[10px] before:absolute before:bottom-0 before:start-[20px] before:top-0 before:border-s before:border-border">
                         <div class="kt-menu-item">
                             <a class="kt-menu-link kt-menu-item-active:bg-accent/60 dark:menu-item-active:border-border kt-menu-item-active:rounded-lg hover:bg-accent/60 grow items-center gap-[14px] border border-transparent py-[8px] pe-[10px] ps-[10px] hover:rounded-lg"
@@ -74,7 +74,7 @@
                                 </span>
                             </a>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="kt-menu-item pt-2.25 pb-px">
                     <span
@@ -82,7 +82,7 @@
                         User
                     </span>
                 </div>
-                <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
+                <!-- <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
                     <div class="kt-menu-link flex grow cursor-pointer items-center gap-[10px] border border-transparent py-[6px] pe-[10px] ps-[10px]"
                         tabindex="0">
                         <span class="kt-menu-icon w-[20px] items-start text-muted-foreground">
@@ -449,7 +449,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
                     <div class="kt-menu-link flex grow cursor-pointer items-center gap-[10px] border border-transparent py-[6px] pe-[10px] ps-[10px]"
                         tabindex="0">
@@ -1023,7 +1023,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
+                <!-- <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
                     <div class="kt-menu-link flex grow cursor-pointer items-center gap-[10px] border border-transparent py-[6px] pe-[10px] ps-[10px]"
                         tabindex="0">
                         <span class="kt-menu-icon w-[20px] items-start text-muted-foreground">
@@ -1295,8 +1295,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
+                </div> -->
+                <!-- <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
                     <div class="kt-menu-link flex grow cursor-pointer items-center gap-[10px] border border-transparent py-[6px] pe-[10px] ps-[10px]"
                         tabindex="0">
                         <span class="kt-menu-icon w-[20px] items-start text-muted-foreground">
@@ -1678,14 +1678,14 @@
                             </a>
                         </div>
                     </div>
-                </div>
-                <div class="kt-menu-item pt-2.25 pb-px">
+                </div> -->
+                <!-- <div class="kt-menu-item pt-2.25 pb-px">
                     <span
                         class="kt-menu-heading pe-[10px] ps-[10px] text-xs font-medium uppercase text-muted-foreground">
                         Apps
                     </span>
-                </div>
-                <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
+                </div> -->
+                <!-- <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
                     <div class="kt-menu-link flex grow cursor-pointer items-center gap-[10px] border border-transparent py-[6px] pe-[10px] ps-[10px]"
                         tabindex="0">
                         <span class="kt-menu-icon w-[20px] items-start text-muted-foreground">
@@ -1882,8 +1882,8 @@
                             </a>
                         </div>
                     </div>
-                </div>
-                <div class="kt-menu-item">
+                </div> -->
+                <!-- <div class="kt-menu-item">
                     <div class="kt-menu-label gap-[10px] border border-transparent py-[6px] pe-[10px] ps-[10px]"
                         href="" tabindex="0">
                         <span class="kt-menu-icon w-[20px] items-start text-muted-foreground">
@@ -1899,8 +1899,8 @@
                             </span>
                         </span>
                     </div>
-                </div>
-                <div class="kt-menu-item">
+                </div> -->
+                <!-- <div class="kt-menu-item">
                     <div class="kt-menu-label gap-[10px] border border-transparent py-[6px] pe-[10px] ps-[10px]"
                         href="" tabindex="0">
                         <span class="kt-menu-icon w-[20px] items-start text-muted-foreground">
@@ -1916,8 +1916,8 @@
                             </span>
                         </span>
                     </div>
-                </div>
-                <div class="kt-menu-item">
+                </div> -->
+                <!-- <div class="kt-menu-item">
                     <div class="kt-menu-label gap-[10px] border border-transparent py-[6px] pe-[10px] ps-[10px]"
                         href="" tabindex="0">
                         <span class="kt-menu-icon w-[20px] items-start text-muted-foreground">
@@ -1933,8 +1933,8 @@
                             </span>
                         </span>
                     </div>
-                </div>
-                <div class="kt-menu-item">
+                </div> -->
+                <!-- <div class="kt-menu-item">
                     <div class="kt-menu-label gap-[10px] border border-transparent py-[6px] pe-[10px] ps-[10px]"
                         href="" tabindex="0">
                         <span class="kt-menu-icon w-[20px] items-start text-muted-foreground">
@@ -1950,7 +1950,7 @@
                             </span>
                         </span>
                     </div>
-                </div>
+                </div> -->
             </div>
             <!-- End of Sidebar Menu -->
         </div>

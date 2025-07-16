@@ -13,7 +13,7 @@
                 <!--Megamenu Item-->
                 <div class="kt-menu-item active">
                     <a class="kt-menu-link kt-menu-item-hover:text-primary kt-menu-item-active:text-mono kt-menu-item-active:font-medium text-nowrap text-sm font-medium text-foreground"
-                        href="html/demo1.html">
+                        href="{{ route('demo1.index') }}">
                         <span class="kt-menu-title text-nowrap">
                             Home
                         </span>
@@ -21,7 +21,7 @@
                 </div>
                 <!--End of Megamenu Item-->
                 <!--Megamenu Item-->
-                <div class="kt-menu-item" data-kt-menu-item-placement="bottom-start"
+                <!-- <div class="kt-menu-item" data-kt-menu-item-placement="bottom-start"
                     data-kt-menu-item-placement-rtl="bottom-end" data-kt-menu-item-toggle="accordion|lg:dropdown"
                     data-kt-menu-item-trigger="click|lg:hover">
                     <div
@@ -431,10 +431,10 @@
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <!--End of Megamenu Item-->
                 <!--Megamenu Item-->
-                <div class="kt-menu-item" data-kt-menu-item-offset="-300px, 0"
+                <!-- <div class="kt-menu-item" data-kt-menu-item-offset="-300px, 0"
                     data-kt-menu-item-offset-rtl="300px, 0" data-kt-menu-item-overflow="true"
                     data-kt-menu-item-placement="bottom-start" data-kt-menu-item-placement-rtl="bottom-end"
                     data-kt-menu-item-toggle="accordion|lg:dropdown" data-kt-menu-item-trigger="click|lg:hover">
@@ -925,10 +925,10 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <!--End of Megamenu Item-->
                 <!--Megamenu Item-->
-                <div class="kt-menu-item" data-kt-menu-item-offset="-300px, 0"
+                <!-- <div class="kt-menu-item" data-kt-menu-item-offset="-300px, 0"
                     data-kt-menu-item-offset-rtl="300px, 0" data-kt-menu-item-overflow="true"
                     data-kt-menu-item-placement="bottom-start" data-kt-menu-item-placement-rtl="bottom-end"
                     data-kt-menu-item-toggle="accordion|lg:dropdown" data-kt-menu-item-trigger="click|lg:hover">
@@ -1167,10 +1167,10 @@
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <!--End of Megamenu Item-->
                 <!--Megamenu Item-->
-                <div class="kt-menu-item" data-kt-menu-item-offset="-300px, 0"
+                <!-- <div class="kt-menu-item" data-kt-menu-item-offset="-300px, 0"
                     data-kt-menu-item-offset-rtl="300px, 0" data-kt-menu-item-overflow="true"
                     data-kt-menu-item-placement="bottom-start" data-kt-menu-item-placement-rtl="bottom-end"
                     data-kt-menu-item-toggle="accordion|lg:dropdown" data-kt-menu-item-trigger="click|lg:hover">
@@ -1369,10 +1369,10 @@
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <!--End of Megamenu Item-->
                 <!--Megamenu Item-->
-                <div class="kt-menu-item" data-kt-menu-item-offset="-300px, 0"
+                <!-- <div class="kt-menu-item" data-kt-menu-item-offset="-300px, 0"
                     data-kt-menu-item-offset-rtl="300px, 0" data-kt-menu-item-overflow="true"
                     data-kt-menu-item-placement="bottom-start" data-kt-menu-item-placement-rtl="bottom-end"
                     data-kt-menu-item-toggle="accordion|lg:dropdown" data-kt-menu-item-trigger="click|lg:hover">
@@ -1638,10 +1638,10 @@
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <!--End of Megamenu Item-->
                 <!--Megamenu Item-->
-                <div class="kt-menu-item" data-kt-menu-item-offset="0,0|lg:-20px, 0"
+                <!-- <div class="kt-menu-item" data-kt-menu-item-offset="0,0|lg:-20px, 0"
                     data-kt-menu-item-offset-rtl="0,0|lg:20px, 0" data-kt-menu-item-overflow="true"
                     data-kt-menu-item-placement="bottom-start" data-kt-menu-item-placement-rtl="bottom-end"
                     data-kt-menu-item-toggle="dropdown" data-kt-menu-item-trigger="click|lg:hover">
@@ -1775,7 +1775,7 @@
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <!--End of Megamenu Item-->
             </div>
             <!--End of Megamenu-->

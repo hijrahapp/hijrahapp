@@ -25,4 +25,18 @@ class UserMiddleware
 
         return $next($request);
     }
+
+    public function fetchAndValidateUser($userId)
+    {
+        $user = $this->userRepo->findById($userId);
+
+        if (!$user) {
+            return ['message' => __('messages.user_not_found')];
+        }
+        if (!$user->active) {
+            return ['message' => __('messages.inactive_user')];
+        }
+
+        return $user;
+    }
 }

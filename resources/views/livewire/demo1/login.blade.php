@@ -33,10 +33,10 @@
                     </button>
                 </div>
             </div>
-            <label class="kt-label">
+            <!-- <label class="kt-label">
                 <input class="kt-checkbox kt-checkbox-sm" name="check" type="checkbox" wire:model="remember" />
                 <span class="kt-checkbox-label">Remember me</span>
-            </label>
+            </label> -->
             <button class="kt-btn kt-btn-primary flex justify-center grow" type="submit">
                 Sign In
             </button>

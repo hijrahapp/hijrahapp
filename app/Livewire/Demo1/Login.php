@@ -44,9 +44,9 @@ class Login extends Component
 
     public function mount()
     {
-        $this->email = '';
-        $this->password = '';
-        $this->error = '';
+        if (session('jwt_token')) {
+            return redirect()->intended('/');
+        }
     }
 
     public function render()

@@ -5,6 +5,7 @@ namespace App\Livewire\Demo1;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\WithPagination;
+use App\Http\Services\OTPService;
 
 #[Layout('layouts.auth')]
 class ResetPassword2fa extends Component
@@ -30,8 +31,16 @@ class ResetPassword2fa extends Component
             $this->error = 'OTP must be 4 digits.';
             return;
         }
-        // dd($otp); // Print the concatenated OTP string
-        session()->forget('reset_email');
+        $otpService = app(OTPService::class);
+        $response = $otpService->verifyPasswordOTP($this->email, $otp);
+        if (method_exists($response, 'getStatusCode') && $response->getStatusCode() === 200) {
+            $data = $response->getData(true);
+            session(['jwt_token' => $data['access_token'] ?? null]);
+            session()->forget('reset_email');
+            return redirect()->route('password.reset');
+        } else {
+            $this->error = $response->getData(true)['message'] ?? 'OTP verification failed.';
+        }
     }
 
     public function render()

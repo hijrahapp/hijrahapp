@@ -1097,7 +1097,7 @@
                             <div class="flex items-center gap-2.5">
                                 <div class="kt-card bg-muted/70 flex w-40 flex-col gap-3.5 shadow-none">
                                     <div class="kt-card-rounded-t h-24 shrink-0 bg-cover bg-no-repeat"
-                                        style="background-image: url('assets/media/images/600x600/6.jpg')">
+                                        style="background-image: url('/assets/media/images/600x600/6.jpg')">
                                     </div>
                                     <div class="px-2.5 pb-2">
                                         <a class="hover:text-primary mb-0.5 block text-xs font-medium leading-4 text-secondary-foreground"
@@ -1114,7 +1114,7 @@
                                 </div>
                                 <div class="kt-card bg-muted/70 flex w-40 flex-col gap-3.5 shadow-none">
                                     <div class="kt-card-rounded-t h-24 shrink-0 bg-cover bg-no-repeat"
-                                        style="background-image: url('assets/media/images/600x600/1.jpg')">
+                                        style="background-image: url('/assets/media/images/600x600/1.jpg')">
                                     </div>
                                     <div class="px-2.5 pb-2">
                                         <a class="hover:text-primary mb-0.5 block text-xs font-medium leading-4 text-secondary-foreground"
