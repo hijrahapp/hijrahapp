@@ -24,7 +24,7 @@ class OTPService
     public function resendOTP(string $userId) {
         $user = $this->userRepo->findById($userId);
         if (!$user) {
-            return response()->json(['message' => 'Unauthorized user'], 401);
+            return response()->json(['message' => __('messages.unauthorized_user')], 401);
         }
 
         $this->generateOTP($user);
@@ -93,19 +93,19 @@ class OTPService
     private function validate($user, $otp)
     {
         if(!$user) {
-            return response()->json(['message' => 'Unauthorized user'], 401);
+            return response()->json(['message' => __('messages.unauthorized_user')], 401);
         }
 
         if(!$user->otp) {
-            return response()->json(['message' => 'Nothing to verify'], 404);
+            return response()->json(['message' => __('messages.nothing_to_verify')], 404);
         }
 
         if(Carbon::now()->timestamp > $user->otp_expires_at->timestamp) {
-            return response()->json(['message' => 'OTP expired'], 406);
+            return response()->json(['message' => __('messages.otp_expired')], 406);
         }
 
         if(config('app.features.email_verification') && $user->otp !== $otp) {
-            return response()->json(['message' => 'Invalid OTP'], 406);
+            return response()->json(['message' => __('messages.invalid_otp')], 406);
         }
     }
 }

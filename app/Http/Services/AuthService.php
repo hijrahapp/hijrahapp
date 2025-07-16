@@ -33,18 +33,23 @@ class AuthService
     public function login(string $email, string $password) {
         $user = $this->userRepo->findByEmail($email);
         if (!$user || !Hash::check($password, $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json(['message' => __('messages.invalid_credentials')], 401);
         }
         if (!$user->active) {
-            return response()->json(['message' => 'Inactive user'], 401);
+            return response()->json(['message' => __('messages.inactive_user')], 401);
         }
 
         return response()->json(JWTUtils::generateTokenResponse($user));
     }
 
     public function signup($request) {
-        if ($this->userRepo->findByEmail($request['email'])) {
-            return response()->json(['message' => 'Email already exists'], 401);
+        $user = $this->userRepo->findByEmail($request['email']);
+        if ($user) {
+            if($user->active) {
+                return response()->json(['message' => __('messages.email_exists')], 401);
+            }
+
+            $this->userRepo->delete($user);
         }
 
         $customerRole = $this->roleRepo->findByRoleName(RoleName::Customer);
@@ -62,5 +67,18 @@ class AuthService
         }
 
         return response()->json(JWTUtils::generateTokenResponse($user), 201);
+    }
+
+    public function completeSignup($user, $request) {
+        $updateData = [];
+        if (isset($request['gender'])) {
+            $updateData['gender'] = $request['gender'];
+        }
+        if (isset($request['birthDate'])) {
+            $updateData['birthDate'] = $request['birthDate'];
+        }
+        $this->userRepo->update($user->id, $updateData);
+        $user->refresh();
+        return response()->json(["message" => __('messages.signup_complete')]);
     }
 }

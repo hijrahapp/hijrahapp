@@ -16,7 +16,7 @@ class JwtMiddleware
         $authHeader = $request->header('Authorization');
 
         if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
-            return response()->json(['message' => 'Missing or invalid token'], 401);
+            return response()->json(['message' => __('messages.missing_or_invalid_token')], 401);
         }
 
         $jwt = substr($authHeader, 7);
@@ -26,12 +26,12 @@ class JwtMiddleware
             $token = (array) $token;
 
             if ($token['expiry'] != null && Carbon::now()->timestamp > $token['expiry']) {
-                return response()->json(['message' => 'Token expired'], 401);
+                return response()->json(['message' => __('messages.expired_token')], 401);
             }
 
             $request->merge(['authUserId' => $token['sub']]);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Invalid token'], 401);
+            return response()->json(['message' => __('messages.invalid_token')], 401);
         }
 
         return $next($request);

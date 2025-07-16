@@ -15,10 +15,10 @@ class UserMiddleware
     {
         $user = $this->userRepo->findById($request->authUserId);
         if (!$user) {
-            return response()->json(['message' => 'Invalid user'], 401);
+            return response()->json(['message' => __('messages.user_not_found')], 404);
         }
         if (!$user->active) {
-            return response()->json(['message' => 'Inactive user'], 401);
+            return response()->json(['message' => __('messages.inactive_user')], 401);
         }
 
         $request->merge(['authUser' => $user]);

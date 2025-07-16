@@ -29,11 +29,15 @@ class UserRepository
         if (!$user) {
             return false;
         }
-        
+
         return $user->update($data);
     }
 
     public function findByFirebaseUid(string $firebaseUid): ?User {
         return User::where('firebase_uid', $firebaseUid)->first();
+    }
+
+    public function delete($user): bool {
+        return $user->delete();
     }
 }

@@ -41,4 +41,14 @@ class UserService
 
         return JWTUtils::generateTokenResponse($user);
     }
+
+    public function deleteUser($userEmail): bool {
+        $user = $this->userRepo->findByEmail($userEmail);
+
+        if (!$user) {
+            return false;
+        }
+
+        return $this->userRepo->delete($user);
+    }
 }
