@@ -23,9 +23,9 @@ class UserController extends Controller
         $deleted = $this->userService->deleteUser($request->email);
 
         if($deleted) {
-            return response()->json(['message' => 'User deleted successfully'], 200);
+            return response()->json(['message' => __('messages.user_deleted')], 200);
         }
 
-        return response()->json(['message' => 'User not found'], 404);
+        return response()->json(['message' => __('messages.user_not_found')], 404);
     }
 }

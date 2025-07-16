@@ -15,10 +15,10 @@ class RoleMiddleware
 
         $role = $user->role;
         if(!$role) {
-            return response()->json(['error' => 'Unauthorized Role'], 403);
+            return response()->json(['error' => __('messages.unauthorized')], 403);
         }
         if(RoleName::SuperAdmin !== $role->name && (empty($roles) || !in_array($role->name->value, $roles))) {
-            return response()->json(['error' => 'Unauthorized Role'], 403);
+            return response()->json(['error' => __('mesages.unauthorized')], 403);
         }
 
         return $next($request);

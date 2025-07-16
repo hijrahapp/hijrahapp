@@ -17,10 +17,10 @@ class AuthService
     public function login(string $email, string $password) {
         $user = $this->userRepo->findByEmail($email);
         if (!$user || !Hash::check($password, $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json(['message' => __('messages.invalid_credentials')], 401);
         }
         if (!$user->active) {
-            return response()->json(['message' => 'Inactive user'], 401);
+            return response()->json(['message' => __('messages.inactive_user')], 401);
         }
 
         return response()->json(JWTUtils::generateTokenResponse($user));
@@ -30,7 +30,7 @@ class AuthService
         $user = $this->userRepo->findByEmail($request['email']);
         if ($user) {
             if($user->active) {
-                return response()->json(['message' => 'Email already exists'], 401);
+                return response()->json(['message' => __('messages.email_exists')], 401);
             }
 
             $this->userRepo->delete($user);
@@ -63,6 +63,6 @@ class AuthService
         }
         $this->userRepo->update($user->id, $updateData);
         $user->refresh();
-        return response()->json(["message" => "Signup complete."]);
+        return response()->json(["message" => __('messages.signup_complete')]);
     }
 }

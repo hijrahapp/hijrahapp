@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.jwt' => \App\Http\Middleware\JwtMiddleware::class,
             'auth.user' => \App\Http\Middleware\UserMiddleware::class,
             'auth.role' => \App\Http\Middleware\RoleMiddleware::class,
+            'locale' => \App\Http\Middleware\LocaleMiddleware::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

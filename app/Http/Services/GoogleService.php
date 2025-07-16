@@ -32,8 +32,8 @@ class GoogleService
         $accessToken = $request['token'] ?? null;
         if (empty($accessToken)) {
             return response()->json([
-                'error' => 'Google access token is missing.',
-                'message' => 'Please provide a valid Google access token.'
+                'error' => __('messages.google_token_missing'),
+                'message' => __('messages.provide_valid_google_token')
             ], 400);
         }
 
@@ -98,13 +98,13 @@ class GoogleService
             return response()->json($response);
         } catch (FailedToSignIn $e) {
             return response()->json([
-                'error' => 'Failed to sign in with Google access token.',
+                'error' => __('messages.failed_google_signin'),
                 'message' => $e->getMessage(),
             ], 401);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Authentication failed.',
-                'message' => 'An error occurred during Google access token authentication.',
+                'error' => __('messages.authentication_failed'),
+                'message' => __('messages.error_google_authentication'),
                 'details' => $e->getMessage()
             ], 500);
         }

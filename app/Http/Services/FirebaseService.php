@@ -33,8 +33,8 @@ class FirebaseService
 
         if (empty($firebaseToken)) {
             return response()->json([
-                'error' => 'Firebase ID token is missing.',
-                'message' => 'Please provide a valid Firebase authentication token.'
+                'error' => __('messages.firebase_token_missing'),
+                'message' => __('messages.provide_valid_firebase_token')
             ], 400);
         }
 
@@ -110,14 +110,14 @@ class FirebaseService
 
         } catch (FailedToVerifyToken $e) {
             return response()->json([
-                'error' => 'Invalid or expired Firebase token.',
-                'message' => 'The provided Firebase authentication token is invalid or has expired.',
+                'error' => __('messages.invalid_firebase_token'),
+                'message' => __('messages.invalid_or_expired_firebase_token'),
                 'details' => $e->getMessage()
             ], 401);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Authentication failed.',
-                'message' => 'An error occurred during Firebase authentication.',
+                'error' => __('messages.authentication_failed'),
+                'message' => __('messages.error_firebase_authentication'),
                 'details' => $e->getMessage()
             ], 500);
         }
@@ -144,8 +144,8 @@ class FirebaseService
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'User not found.',
-                'message' => 'The Firebase user with the provided UID was not found.',
+                'error' => __('messages.user_not_found'),
+                'message' => __('messages.firebase_user_not_found'),
                 'details' => $e->getMessage()
             ], 404);
         }
