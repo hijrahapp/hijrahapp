@@ -17,7 +17,7 @@
             <div class="flex flex-col gap-1">
                 <div class="flex items-center justify-between gap-1">
                     <label class="kt-form-label font-normal text-mono">Password</label>
-                    <a class="text-sm kt-link shrink-0" href="#">
+                    <a class="text-sm kt-link shrink-0" href="{{ route('password.enter-email') }}">
                         Forgot Password?
                     </a>
                 </div>
