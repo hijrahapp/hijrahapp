@@ -31,41 +31,34 @@ class ChangePassword extends Component
 
         $user = app(UserDetailsController::class)->getAllUserDetails(session('jwt_token'));
         if (isset($user['message'])) {
-            $this->dispatchBrowserEvent('show-change-password-modal');
-            throw ValidationException::withMessages([
-                'current_password' => $user['message'],
-            ]);
+            $this->error = $user['message'];
         }
 
         $response = app(UserService::class)->resetPasswordWithCurrent($user, $this->current_password, $this->new_password);
         logger($response);
         if (is_array($response) && isset($response['error'])) {
-            $this->dispatchBrowserEvent('show-change-password-modal');
-            throw ValidationException::withMessages([
-                'current_password' => $response['error'],
-            ]);
+            $this->error = $response['error'];
         } elseif (is_array($response) && isset($response['message'])) {
             $this->success = $response['message'];
-            $this->dispatch('click');
+            $this->close();
         } else {
             $this->success = 'Password changed successfully.';
-            $this->dispatch('click');
+            $this->close();
         }
     }
 
     public function close()
     {
+        $this->current_password = '';
+        $this->new_password = '';
+        $this->confirm_password = '';
+        $this->error = '';
+        $this->success = '';
         $this->dispatch('click');
     }
 
     public function render()
     {
-        // $this->current_password = '';
-        // $this->new_password = '';
-        // $this->confirm_password = '';
-        // $this->error = '';
-        // $this->success = '';
-
         return view('livewire.shared.modals.change-password');
     }
 }

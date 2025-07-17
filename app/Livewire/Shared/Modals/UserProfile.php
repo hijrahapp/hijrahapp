@@ -11,9 +11,11 @@ class UserProfile extends Component
     public $name;
     public $gender;
     public $birthdate;
+    public $error;
 
     public function save()
     {
+        $this->error = '';
         $this->validate([
             'name' => 'required',
             'gender' => 'required',
@@ -30,27 +32,37 @@ class UserProfile extends Component
 
         $response = app(UserDetailsController::class)->updateUserDetails($jwt, $data);
         if (isset($response['message'])) {
-            session()->flash('error', $response['message']);
+            $this->error = $response['message'];
+            return;
         }
         session(['user' => $response ?? null]);
 
-        $this->dispatch('click');
+        $this->close();
         return redirect()->route('demo1.index');
     }
 
     public function close()
-    {
-        $this->dispatch('click');
-    }
-
-    public function render()
     {
         $user = session('user');
         $this->email = $user['email'] ?? '';
         $this->name = $user['name'] ?? '';
         $this->gender = $user['gender'] ?? '';
         $this->birthdate = $user['birthDate'] ?? '';
-        
+
+        $this->dispatch('click');
+    }
+
+    public function mount()
+    {
+        $user = session('user');
+        $this->email = $user['email'] ?? '';
+        $this->name = $user['name'] ?? '';
+        $this->gender = $user['gender'] ?? '';
+        $this->birthdate = $user['birthDate'] ?? '';
+    }
+
+    public function render()
+    {
         return view('livewire.shared.modals.user-profile');
     }
 }
