@@ -18,9 +18,13 @@ class ResetPasswordEnterEmail extends Component
         $this->error = '';
         try {
             $otpService = app(OTPService::class);
-            $otpService->resendPasswordOTP($this->email);
-            session(['reset_email' => $this->email]);
-            return redirect()->route('password.2fa');
+            $response = $otpService->resendPasswordOTP($this->email);
+            if (method_exists($response, 'getStatusCode') && $response->getStatusCode() === 200) {
+                session(['reset_email' => $this->email]);
+                return redirect()->route('password.2fa');
+            } else {
+                $this->error = $response->getData(true)['message'] ?? 'OTP verification failed.';
+            }
         } catch (\Exception $e) {
             $this->error = 'An error occurred: ' . $e->getMessage();
         }
@@ -30,4 +34,4 @@ class ResetPasswordEnterEmail extends Component
     {
         return view('livewire.demo1.reset-password-enter-email');
     }
-} 
+}
