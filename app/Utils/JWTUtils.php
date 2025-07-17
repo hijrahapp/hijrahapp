@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Utils;
+
 use App\Resources\UserResource;
 use Carbon\Carbon;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class JWTUtils
 {
@@ -44,5 +46,20 @@ class JWTUtils
         ];
 
         return $response;
+    }
+
+    public static function decodeToken($jwt) {
+        try {
+            $token = JWT::decode($jwt, new Key(config('app.jwt_secret'), 'HS256'));
+            $token = (array) $token;
+
+            if ($token['expiry'] != null && Carbon::now()->timestamp > $token['expiry']) {
+                return ['message' => __('messages.expired_token')];
+            }
+
+            return $token;
+        } catch (\Exception $e) {
+            return ['message' => __('messages.invalid_token')];
+        }
     }
 }

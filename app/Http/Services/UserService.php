@@ -35,6 +35,10 @@ class UserService
         if (Hash::check($password, $user->password)) {
             return response()->json(['message' => __('messages.cannot_enter_same_password')], 401);
         }
+
+        logger('password');
+        logger($password);
+
         $user->password = $password;
         $user->save();
 

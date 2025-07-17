@@ -13,6 +13,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="gender", type="string", enum={"male", "female"}, example="male"),
  *     @OA\Property(property="birthdate", type="date", format="date", example="2000-01-01"),
  *     @OA\Property(property="role", type="string", enum={"SuperAdmin", "Admin", "Expert", "Customer"}, example="Customer")
+ *     @OA\Property(property="profilePhoto", type="string", example="localhost:8000/assets/media/avatars/blank.png"),
  * )
  */
 class UserResource extends JsonResource
@@ -25,6 +26,7 @@ class UserResource extends JsonResource
             'gender' => $this->gender,
             'birthDate' => $this->birthDate ? $this->birthDate->format('Y-m-d') : null,
             'role' => $this->role ? $this->role->name->value : null,
+            'profilePhoto' => $this->profile_photo ?? asset('/assets/media/avatars/blank.png'),
         ];
     }
 }

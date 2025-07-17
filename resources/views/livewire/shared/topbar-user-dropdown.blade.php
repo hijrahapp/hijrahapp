@@ -3,26 +3,26 @@
     data-kt-dropdown-placement="bottom-end" data-kt-dropdown-placement-rtl="bottom-start" data-kt-dropdown-trigger="click">
     <div class="shrink-0 cursor-pointer" data-kt-dropdown-toggle="true">
         <img alt="" class="size-9 shrink-0 rounded-full border-2 border-green-500"
-            src="/assets/media/avatars/300-2.png" />
+            src="{{ $profilePhoto }}" />
     </div>
     <div class="kt-dropdown-menu w-[250px]" data-kt-dropdown-menu="true">
-        <div class="flex items-center justify-between gap-1.5 px-2.5 py-1.5">
-            <div class="flex items-center gap-2">
-                <img alt="" class="size-9 shrink-0 rounded-full border-2 border-green-500"
-                    src="/assets/media/avatars/300-2.png" />
-                <div class="flex flex-col gap-1.5">
+        <div class="flex items-center gap-2">
+            <img alt="" class="size-9 shrink-0 rounded-full border-2 border-green-500"
+                src="{{ $profilePhoto }}" />
+            <div class="flex flex-col gap-1.5">
+                <div class="flex items-center gap-2">
                     <span class="text-sm font-semibold leading-none text-foreground">
-                        Cody Fisher
+                        {{ $userName }}
                     </span>
-                    <a class="hover:text-primary text-xs font-medium leading-none text-secondary-foreground"
-                        href="html/demo1/account/home/get-started.html">
-                        c.fisher@gmail.com
-                    </a>
+                    <span class="kt-badge kt-badge-sm kt-badge-primary kt-badge-outline max-w-full text-ellipsis overflow-hidden" style="min-width:unset;white-space:normal;">
+                        {{ $userRole }}
+                    </span>
                 </div>
+                <a class="hover:text-primary text-xs font-medium leading-none text-secondary-foreground"
+                    href="#">
+                    {{ $userEmail }}
+                </a>
             </div>
-            <!-- <span class="kt-badge kt-badge-sm kt-badge-primary kt-badge-outline">
-                Pro
-            </span> -->
         </div>
         <ul class="kt-dropdown-menu-sub">
             <li>
@@ -37,7 +37,7 @@
                 </a>
             </li> -->
             <li>
-                <a class="kt-dropdown-menu-link" href="html/demo1/account/home/user-profile.html">
+                <a class="kt-dropdown-menu-link" href="#">
                     <i class="ki-filled ki-profile-circle">
                     </i>
                     My Profile

@@ -12,7 +12,7 @@
             @endif
             <div class="flex flex-col gap-1">
                 <label class="kt-form-label font-normal text-mono">Email</label>
-                <input class="kt-input" placeholder="test@example.com" type="email" wire:model="email" />
+                <input class="kt-input" placeholder="email@email.com" type="email" wire:model="email" />
             </div>
             <div class="flex flex-col gap-1">
                 <div class="flex items-center justify-between gap-1">

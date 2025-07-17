@@ -2,8 +2,7 @@
 
 namespace App\Livewire\Demo1;
 
-use App\Http\Middleware\JwtMiddleware;
-use App\Http\Middleware\UserMiddleware;
+use App\Http\Controllers\App\UserDetailsController;
 use App\Http\Services\UserService;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
@@ -23,22 +22,7 @@ class ResetPasswordChangePassword extends Component
             return;
         }
 
-        $jwt = session('jwt_token');
-        if (!$jwt) {
-            $this->error = 'Session expired. Please restart the reset process.';
-            return redirect()->route('login');
-            return;
-        }
-
-        $decodedToken = app(JwtMiddleware::class)->decodeToken($jwt);
-
-        if( isset($decodedToken['message'])) {
-            $this->error = $decodedToken['message'];
-            return redirect()->route('login');
-            return;
-        }
-
-        $user = app(UserMiddleware::class)->fetchAndValidateUser($decodedToken['sub']);
+        $user = app(UserDetailsController::class)->getAllUserDetails(session('jwt_token'));
 
         if( isset($user['message'])) {
             $this->error = $user['message'];
