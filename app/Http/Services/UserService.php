@@ -9,6 +9,7 @@ use App\Mail\PasswordResetSuccessMail;
 use App\Models\Role;
 use App\Resources\UserResource;
 use App\Utils\JWTUtils;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
 class UserService
@@ -31,6 +32,9 @@ class UserService
     }
 
     public function resetPassword($user, $password) {
+        if (Hash::check($password, $user->password)) {
+            return response()->json(['message' => __('messages.cannot_enter_same_password')], 401);
+        }
         $user->password = $password;
         $user->save();
 
@@ -39,7 +43,7 @@ class UserService
             Mail::to($user->email)->send(new PasswordResetSuccessMail($user));
         }
 
-        return JWTUtils::generateTokenResponse($user);
+        return response()->json(JWTUtils::generateTokenResponse($user));
     }
 
     public function deleteUser($userEmail): bool {

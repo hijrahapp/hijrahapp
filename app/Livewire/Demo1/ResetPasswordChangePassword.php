@@ -45,9 +45,13 @@ class ResetPasswordChangePassword extends Component
             return redirect()->route('login');
         }
 
-        app(UserService::class)->resetPassword($user, $this->password);
-        session()->forget('jwt_token');
-        return redirect()->route('password.changed');
+        $response = app(UserService::class)->resetPassword($user, $this->password);
+        if (method_exists($response, 'getStatusCode') && $response->getStatusCode() === 200) {
+            session()->forget('jwt_token');
+            return redirect()->route('password.changed');
+        } else {
+            $this->error = $response->getData(true)['message'] ?? 'Change password failed.';
+        }
     }
 
     public function render()

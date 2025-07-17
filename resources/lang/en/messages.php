@@ -32,5 +32,5 @@ return [
     'error_google_authentication' => 'An error occurred during Google access token authentication',
     'email_not_exists' => 'This email is not registered',
     'incorrect_password' => 'Incorrect password',
-    // Add more messages as needed
+    'cannot_enter_same_password' => 'New password must be different from the current password',
 ];

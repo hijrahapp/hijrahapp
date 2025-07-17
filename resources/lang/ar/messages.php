@@ -32,5 +32,5 @@ return [
     'invalid_token' => 'رمز غير صالح',
     'expired_token' => 'انتهت صلاحية الرمز',
     'missing_or_invalid_token' => 'رمز مفقود أو غير صالح',
-    // Add more messages as needed
+    'cannot_enter_same_password' => 'كلمة المرور الجديدة يجب أن تكون مختلفة عن كلمة المرور الحالية',
 ];

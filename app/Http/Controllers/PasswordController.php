@@ -98,6 +98,6 @@ class PasswordController
      * )
      */
     public function resetPassword(Request $request) {
-        return response()->json($this->userService->resetPassword($request->authUser, $request->password));
+        return $this->userService->resetPassword($request->authUser, $request->password);
     }
 }
