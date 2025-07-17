@@ -18,10 +18,9 @@
                         {{ $userRole }}
                     </span>
                 </div>
-                <a class="hover:text-primary text-xs font-medium leading-none text-secondary-foreground"
-                    href="#">
+                <span class="text-xs font-medium leading-none text-secondary-foreground">
                     {{ $userEmail }}
-                </a>
+                </span>
             </div>
         </div>
         <ul class="kt-dropdown-menu-sub">
@@ -37,7 +36,7 @@
                 </a>
             </li> -->
             <li>
-                <a class="kt-dropdown-menu-link" href="#">
+                <a class="kt-dropdown-menu-link" href="#" data-kt-modal-toggle="#user_profile_modal">
                     <i class="ki-filled ki-profile-circle">
                     </i>
                     My Profile

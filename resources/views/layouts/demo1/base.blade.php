@@ -6,7 +6,8 @@
     </head>
     <body class="demo1 kt-sidebar-fixed kt-header-fixed flex h-full bg-background text-base text-foreground antialiased">
         <livewire:shared.theme-toggle />
-
+        <livewire:shared.modals.search />
+        <livewire:shared.modals.user-profile />
         <!-- Page -->
         <!-- Main -->
         <div class="flex grow">

@@ -6,7 +6,7 @@
         <!-- Mobile Logo -->
         <div class="-ms-1 flex items-center gap-2.5 lg:hidden">
             <a class="shrink-0" href="html/demo1.html">
-                <img class="max-h-[25px] w-full" src="assets/media/app/mini-logo.svg" />
+                <img class="max-h-[25px] w-full" src="/assets/media/app/mini-logo.svg" />
             </a>
             <div class="flex items-center">
                 <button class="kt-btn kt-btn-icon kt-btn-ghost" data-kt-drawer-toggle="#sidebar">
@@ -23,10 +23,10 @@
         <livewire:shared.mega-menu />
         <!-- Topbar -->
         <div class="flex items-center gap-2.5">
-            <!-- livewire:shared.topbar-search-modal -->
-            <!-- livewire:shared.topbar-notification-dropdown -->
-            <!-- livewire:shared.topbar-chat -->
-            <!-- livewire:shared.topbar-apps -->
+            <livewire:shared.topbar-search-modal>
+            <livewire:shared.topbar-notification-dropdown>
+            <livewire:shared.topbar-chat>
+            <livewire:shared.topbar-apps>
             <livewire:shared.topbar-user-dropdown />
         </div>
         <!-- End of Topbar -->
