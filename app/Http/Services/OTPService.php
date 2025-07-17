@@ -64,15 +64,17 @@ class OTPService
 
     public function resendPasswordOTP(string $userEmail) {
         $user = $this->userRepo->findByEmail($userEmail);
-
-        if ($user) {
-            $this->generateOTP($user);
-
-            // Send password reset attempt email
-            if(config('app.features.email_verification')) {
-                Mail::to($user->email)->send(new PasswordResetAttemptMail($user, $user->otp, $user->otp_expires_at));
-            }
+        if (!$user) {
+            return response()->json(['message' => __('messages.email_not_exists')], 404);
         }
+
+        $this->generateOTP($user);
+        // Send password reset attempt email
+        if(config('app.features.email_verification')) {
+            Mail::to($user->email)->send(new PasswordResetAttemptMail($user, $user->otp, $user->otp_expires_at));
+        }
+
+        return response()->json(['message' => __('messages.otp_sent')], 201);
     }
 
     public function verifyPasswordOTP(string $userEmail, string $otp) {

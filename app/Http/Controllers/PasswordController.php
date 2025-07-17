@@ -30,8 +30,7 @@ class PasswordController
      *  )
      */
     public function forgetPassword(Request $request) {
-        $this->otpService->resendPasswordOTP($request['email']);
-        return response()->json(['message' => __('messages.otp_sent')], 201);
+        return $this->otpService->resendPasswordOTP($request['email']);
     }
 
     /**
