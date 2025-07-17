@@ -36,4 +36,19 @@ class JwtMiddleware
 
         return $next($request);
     }
+
+    public function decodeToken($jwt) {
+        try {
+            $token = JWT::decode($jwt, new Key(config('app.jwt_secret'), 'HS256'));
+            $token = (array) $token;
+
+            if ($token['expiry'] != null && Carbon::now()->timestamp > $token['expiry']) {
+                return ['message' => __('messages.expired_token')];
+            }
+
+            return $token;
+        } catch (\Exception $e) {
+            return ['message' => __('messages.invalid_token')];
+        }
+    }
 }
