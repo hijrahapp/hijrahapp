@@ -16,11 +16,11 @@ class AuthService
 
     public function adminLogin(string $email, string $password) {
         $user = $this->userRepo->findByEmail($email);
-        if (!$user || !Hash::check($password, $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+        if (!$user) {
+            return response()->json(['message' => __('messages.email_not_exists')], 404);
         }
-        if (!$user->active) {
-            return response()->json(['message' => 'Inactive user'], 401);
+        if (!Hash::check($password, $user->password)) {
+            return response()->json(['message' => __('messages.incorrect_password')], 401);
         }
         $roles = ['SuperAdmin', 'Admin', 'Expert'];
         if (!$user->role || !in_array($user->role->name->value, $roles)) {
@@ -29,11 +29,14 @@ class AuthService
 
         return response()->json(JWTUtils::generateTokenResponse($user));
     }
-    
+
     public function login(string $email, string $password) {
         $user = $this->userRepo->findByEmail($email);
-        if (!$user || !Hash::check($password, $user->password)) {
-            return response()->json(['message' => __('messages.invalid_credentials')], 401);
+        if (!$user) {
+            return response()->json(['message' => __('messages.email_not_exists')], 404);
+        }
+        if (!Hash::check($password, $user->password)) {
+            return response()->json(['message' => __('messages.incorrect_password')], 401);
         }
         if (!$user->active) {
             return response()->json(['message' => __('messages.inactive_user')], 401);
