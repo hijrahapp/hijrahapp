@@ -50,6 +50,18 @@ class UserService
         return response()->json(JWTUtils::generateTokenResponse($user));
     }
 
+    public function resetPasswordWithCurrent($user, $currentPassword, $newPassword) {
+        if (!Hash::check($currentPassword, $user->password)) {
+            return ['error' => __('messages.current_password_incorrect')];
+        }
+        if (Hash::check($newPassword, $user->password)) {
+            return ['error' => __('messages.cannot_enter_same_password')];
+        }
+        $user->password = $newPassword;
+        $user->save();
+        return ['message' => __('messages.password_reset_success')];
+    }
+
     public function deleteUser($userEmail): bool {
         $user = $this->userRepo->findByEmail($userEmail);
 
@@ -58,5 +70,14 @@ class UserService
         }
 
         return $this->userRepo->delete($user);
+    }
+
+    public function updateUser($user, array $data) {
+        $this->userRepo->update($user->id, $data);
+        $user->refresh();
+
+        logger('user-updated');
+        logger($user);
+        return (new UserResource($user))->userArray();
     }
 }

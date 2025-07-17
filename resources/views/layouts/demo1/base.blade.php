@@ -8,6 +8,7 @@
         <livewire:shared.theme-toggle />
         <livewire:shared.modals.search />
         <livewire:shared.modals.user-profile />
+        <livewire:shared.modals.change-password />
         <!-- Page -->
         <!-- Main -->
         <div class="flex grow">

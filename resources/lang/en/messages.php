@@ -33,4 +33,6 @@ return [
     'email_not_exists' => 'This email is not registered',
     'incorrect_password' => 'Incorrect password',
     'cannot_enter_same_password' => 'New password must be different from the current password',
+    'current_password_incorrect' => 'Current password is incorrect',
+    'password_reset_success' => 'Password reset successfully',
 ];

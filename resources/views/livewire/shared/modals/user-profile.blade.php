@@ -2,7 +2,7 @@
     <div class="kt-modal-content max-w-[600px] top-[15%]">
         <div class="kt-modal-header py-4 px-5">
             <span class="kt-modal-title text-xl font-semibold">My Profile</span>
-            <button class="kt-btn kt-btn-sm kt-btn-icon kt-btn-dim shrink-0" data-kt-modal-dismiss="true">
+            <button class="kt-btn kt-btn-sm kt-btn-icon kt-btn-dim shrink-0" wire:click="close">
                 <i class="ki-filled ki-cross"></i>
             </button>
         </div>
@@ -13,31 +13,34 @@
                     <input type="email" class="kt-input w-full" wire:model="email" disabled />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Name</label>
-                    <input type="text" class="kt-input w-full" wire:model="name" />
+                    <label class="block text-sm font-medium mb-1">Name <span class="text-destructive">*</span></label>
+                    <input type="text" class="kt-input w-full" wire:model="name" required />
+                    @error('name')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Gender</label>
+                    <label class="block text-sm font-medium mb-1">Gender <span class="text-destructive">*</span></label>
                     <div class="flex gap-4">
                         <label class="flex items-center gap-2">
-                            <input type="radio" wire:model="gender" value="male" />
+                            <input type="radio" wire:model="gender" value="male" required />
                             Male
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="radio" wire:model="gender" value="female" />
+                            <input type="radio" wire:model="gender" value="female" required />
                             Female
                         </label>
                     </div>
+                    @error('gender')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Birthdate</label>
-                    <input type="date" class="kt-input w-full" wire:model="birthdate" value="{{ $birthdate }}" max="{{ date('Y-m-d') }}" />
+                    <label class="block text-sm font-medium mb-1">Birthdate <span class="text-destructive">*</span></label>
+                    <input type="date" class="kt-input w-full" wire:model="birthdate" value="{{ $birthdate }}" max="{{ date('Y-m-d') }}" required />
+                    @error('birthdate')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
                 <div class="flex justify-between items-center mt-4">
-                    <button type="button" class="kt-btn kt-btn-outline" wire:click="resetPassword">Reset Password</button>
+                    <button type="button" class="kt-btn kt-btn-outline" data-kt-modal-toggle="#change_password_modal">Change Password</button>
                     <button type="submit" class="kt-btn kt-btn-primary">Save</button>
                 </div>
             </div>
         </form>
     </div>
-</div> 
+</div>
