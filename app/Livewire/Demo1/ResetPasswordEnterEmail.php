@@ -19,7 +19,7 @@ class ResetPasswordEnterEmail extends Component
         try {
             $otpService = app(OTPService::class);
             $response = $otpService->resendPasswordOTP($this->email);
-            if (method_exists($response, 'getStatusCode') && $response->getStatusCode() === 200) {
+            if (method_exists($response, 'getStatusCode') && $response->getStatusCode() === 201) {
                 session(['reset_email' => $this->email]);
                 return redirect()->route('password.2fa');
             } else {
