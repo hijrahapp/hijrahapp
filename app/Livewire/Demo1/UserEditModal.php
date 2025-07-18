@@ -5,7 +5,6 @@ namespace App\Livewire\Demo1;
 use Livewire\Component;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 class UserEditModal extends Component
 {
@@ -16,7 +15,6 @@ class UserEditModal extends Component
     public $gender = '';
     public $birthDate = '';
     public $roleId = '';
-    public $allRoles = [];
     public $roles = [];
 
     protected $listeners = [
@@ -37,31 +35,17 @@ class UserEditModal extends Component
     public function mount()
     {
         $user = session('user');
-        $this->allRoles = Role::orderBy('name', 'asc')->get();
-
         if ($user['role'] == 'SuperAdmin') {
-            $this->roles = $this->allRoles->filter(function($role) {
-                return $role->name !== 'SuperAdmin';
-            })->values();
-        } else if ($user['role'] == 'Admin') {
-            $this->roles = $this->allRoles->filter(function($role) {
-                return !in_array($role->name, ['SuperAdmin', 'Admin']);
-            })->values();
+            $this->roles = Role::where('name', '!=', 'SuperAdmin')->orderBy('name', 'asc')->get();
+        } elseif($user['role'] == 'Admin') {
+            $this->roles = Role::whereNotIn('name', ['SuperAdmin', 'Admin'])->orderBy('name', 'asc')->get();
         } else {
-            $this->roles = $this->allRoles->filter(function($role) {
-                return !in_array($role->name, ['SuperAdmin', 'Admin', 'Expert']);
-            })->values();
+            $this->roles = Role::whereNotIn('name', ['SuperAdmin', 'Admin', 'Expert'])->orderBy('name', 'asc')->get();
         }
     }
 
     public function openUserEditModal($user)
     {
-        //here
-        $superAdminRole = $this->allRoles->firstWhere('name', 'SuperAdmin');
-        if ($superAdminRole && $this->roleId == $superAdminRole->id) {
-            $this->roles = $this->allRoles;
-        }
-
         $this->userId = $user['id'];
         $this->email = $user['email'];
         $this->name = $user['name'];
@@ -77,7 +61,7 @@ class UserEditModal extends Component
 
     public function saveUser()
     {
-        $data = $this->validate();
+        $this->validate();
         $user = User::findOrFail($this->userId);
         $user->name = $this->name;
         $user->gender = $this->gender;

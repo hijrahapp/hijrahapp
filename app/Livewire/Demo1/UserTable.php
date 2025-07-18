@@ -14,7 +14,6 @@ class UserTable extends Component
 
     public $search = '';
     public $perPage = 10;
-    public $currentUserEmail;
 
     protected $paginationTheme = 'tailwind';
 
@@ -29,7 +28,6 @@ class UserTable extends Component
 
     public function mount()
     {
-        $this->currentUserEmail = session('user')['email'] ?? null;
     }
 
     public function getUsersProperty()
@@ -72,7 +70,7 @@ class UserTable extends Component
         return $query->paginate($this->perPage);
     }
 
-    public function handleUserEditOpen($user) 
+    public function handleUserEditOpen($user)
     {
         $this->dispatch('openUserEditModal', $user);
     }
@@ -86,7 +84,23 @@ class UserTable extends Component
         logger("renderrrr");
         return view('livewire.demo1.user-table', [
             'users' => $this->getUsersProperty(),
-            'currentUserEmail' => $this->currentUserEmail,
         ]);
+    }
+
+    public function isUserEditable($user) {
+        if ($user->role->name->value === 'SuperAdmin') {
+            return false;
+        }
+
+        $currentUser = session('user') ?? null;
+        if($user->email === $currentUser['email']) {
+            return false;
+        }
+
+        if ($currentUser['role'] === $user->role->name->value) {
+            return false;
+        }
+
+        return true;
     }
 }
