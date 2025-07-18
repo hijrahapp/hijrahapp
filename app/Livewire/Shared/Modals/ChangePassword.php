@@ -16,6 +16,8 @@ class ChangePassword extends Component
     public $error = '';
     public $success = '';
 
+    protected $listeners = ['reset-modal' => 'resetForm'];
+
     public function save()
     {
         $this->error = '';
@@ -49,12 +51,17 @@ class ChangePassword extends Component
 
     public function close()
     {
+        $this->dispatch('click');
+    }
+
+    public function resetForm()
+    {
+        $this->resetErrorBag();
         $this->current_password = '';
         $this->new_password = '';
         $this->confirm_password = '';
         $this->error = '';
         $this->success = '';
-        $this->dispatch('click');
     }
 
     public function render()

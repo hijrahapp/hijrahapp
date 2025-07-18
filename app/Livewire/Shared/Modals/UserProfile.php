@@ -13,6 +13,8 @@ class UserProfile extends Component
     public $birthdate;
     public $error;
 
+    protected $listeners = ['reset-modal' => 'resetForm'];
+
     public function save()
     {
         $this->error = '';
@@ -43,22 +45,22 @@ class UserProfile extends Component
 
     public function close()
     {
+        $this->dispatch('click');
+    }
+
+    public function resetForm()
+    {
+        $this->resetErrorBag();
         $user = session('user');
         $this->email = $user['email'] ?? '';
         $this->name = $user['name'] ?? '';
         $this->gender = $user['gender'] ?? '';
         $this->birthdate = $user['birthDate'] ?? '';
-
-        $this->dispatch('click');
     }
 
     public function mount()
     {
-        $user = session('user');
-        $this->email = $user['email'] ?? '';
-        $this->name = $user['name'] ?? '';
-        $this->gender = $user['gender'] ?? '';
-        $this->birthdate = $user['birthDate'] ?? '';
+        $this->resetForm();
     }
 
     public function render()
