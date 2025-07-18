@@ -24,12 +24,15 @@
                 <span class="text-2sm text-secondary-foreground me-1.5">
                     Didn’t receive a code?
                 </span>
-                <a class="text-2sm kt-link" href="#">
+                <a class="text-2sm kt-link" wire:click="resendOtp">
                     Resend
                 </a>
             </div>
             @if($error)
                 <div class="kt-error-message">{{ $error }}</div>
+            @endif
+            @if($message)
+                <div class="kt-error-message text-green-600">{{ $message }}</div>
             @endif
             <button class="kt-btn kt-btn-primary flex justify-center grow" type="submit">
                 Continue

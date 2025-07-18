@@ -16,6 +16,7 @@ class ResetPassword2fa extends Component
     public $otp3 = '';
     public $otp4 = '';
     public $error = '';
+    public $message = '';
 
     public function mount()
     {
@@ -47,4 +48,19 @@ class ResetPassword2fa extends Component
     {
         return view('livewire.demo1.reset-password-2fa');
     }
-} 
+
+    public function resendOtp()
+    {
+        try {
+            $otpService = app(OTPService::class);
+            $response = $otpService->resendPasswordOTP($this->email);
+            if (method_exists($response, 'getStatusCode') && $response->getStatusCode() === 201) {
+                $this->message = $response->getData(true)['message'] ?? 'OTP resent successfully.';
+            } else {
+                $this->error = $response->getData(true)['message'] ?? 'Enter email failed.';
+            }
+        } catch (\Exception $e) {
+            $this->error = 'An error occurred: ' . $e->getMessage();
+        }
+    }
+}
