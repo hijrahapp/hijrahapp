@@ -52,6 +52,23 @@ function initMenus() {
                 });
             }
         });
+
+        // Handle main container navigation
+        const containerToggles = menu.querySelectorAll('[data-kt-container-toggle]');
+        const containers = document.querySelectorAll('.kt-main-container');
+        containerToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('data-kt-container-toggle');
+                containers.forEach(container => {
+                    if ('#' + container.id === targetId) {
+                        container.classList.remove('hidden');
+                    } else {
+                        container.classList.add('hidden');
+                    }
+                });
+            });
+        });
     });
 }
 
