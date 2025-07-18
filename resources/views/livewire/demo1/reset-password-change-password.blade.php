@@ -9,9 +9,6 @@
                     Enter your new password
                 </span>
             </div>
-            @if($error)
-                <div class="kt-error-message">{{ $error }}</div>
-            @endif
             <div class="flex flex-col gap-1">
                 <label class="kt-form-label text-mono">
                     New Password
@@ -27,10 +24,11 @@
                         </template>
                     </button>
                 </label>
+                @error('password')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
             </div>
             <div class="flex flex-col gap-1">
-                <label class="kt-form-label font-normal text-mono">
-                    Confirm New Password
+                <label class="kt-form-label text-mono">
+                    Confirm Password
                 </label>
                 <label class="kt-input" x-data="{ show: false }">
                     <input name="user_confirm_password" placeholder="Re-enter a new Password" :type="show ? 'text' : 'password'" wire:model="password_confirmation" />
@@ -43,10 +41,14 @@
                         </template>
                     </button>
                 </label>
+                @error('password_confirmation')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
             </div>
+            @if($error)
+                <div class="kt-error-message">{{ $error }}</div>
+            @endif
             <button class="kt-btn kt-btn-primary flex justify-center grow" type="submit">
                 Submit
             </button>
         </form>
     </div>
-</div> 
+</div>

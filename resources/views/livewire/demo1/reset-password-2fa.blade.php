@@ -14,9 +14,6 @@
                     </span>
                 </div>
             </div>
-            @if($error)
-                <div class="kt-error-message">{{ $error }}</div>
-            @endif
             <div class="flex flex-wrap justify-center gap-2.5">
                 <input id="otp1" class="kt-input focus:border-primary/10 focus:ring-3 focus:ring-primary/10 size-10 shrink-0 px-0 text-center" maxlength="1" type="text" wire:model="otp1" />
                 <input id="otp2" class="kt-input focus:border-primary/10 focus:ring-3 focus:ring-primary/10 size-10 shrink-0 px-0 text-center" maxlength="1" type="text" wire:model="otp2" />
@@ -31,6 +28,9 @@
                     Resend
                 </a>
             </div>
+            @if($error)
+                <div class="kt-error-message">{{ $error }}</div>
+            @endif
             <button class="kt-btn kt-btn-primary flex justify-center grow" type="submit">
                 Continue
             </button>
@@ -58,4 +58,4 @@
             });
         </script>
     </div>
-</div> 
+</div>

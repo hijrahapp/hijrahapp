@@ -13,8 +13,12 @@ class ResetPasswordEnterEmail extends Component
     public $email = '';
     public $error = '';
 
+    protected $rules = [
+        'email' => 'required|email',
+    ];
     public function submit()
     {
+        $this->validate();
         $this->error = '';
         try {
             $otpService = app(OTPService::class);

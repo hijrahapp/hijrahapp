@@ -14,8 +14,14 @@ class ResetPasswordChangePassword extends Component
     public $password_confirmation = '';
     public $error = '';
 
+    protected $rules = [
+        'password' => 'required',
+        'password_confirmation' => 'required|same:password',
+    ];
+
     public function submit()
     {
+        $this->validate();
         $this->error = '';
         if ($this->password !== $this->password_confirmation) {
             $this->error = 'Passwords do not match.';

@@ -7,12 +7,10 @@
                     Sign in
                 </h3>
             </div>
-            @if($error)
-                <div class="kt-error-message">{{ $error }}</div>
-            @endif
             <div class="flex flex-col gap-1">
                 <label class="kt-form-label font-normal text-mono">Email</label>
                 <input class="kt-input" placeholder="email@email.com" type="email" wire:model="email" />
+                @error('email')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
             </div>
             <div class="flex flex-col gap-1">
                 <div class="flex items-center justify-between gap-1">
@@ -32,11 +30,15 @@
                         </template>
                     </button>
                 </div>
+                @error('password')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
             </div>
             <!-- <label class="kt-label">
                 <input class="kt-checkbox kt-checkbox-sm" name="check" type="checkbox" wire:model="remember" />
                 <span class="kt-checkbox-label">Remember me</span>
             </label> -->
+            @if($error)
+                <div class="kt-error-message">{{ $error }}</div>
+            @endif
             <button class="kt-btn kt-btn-primary flex justify-center grow" type="submit">
                 Sign In
             </button>

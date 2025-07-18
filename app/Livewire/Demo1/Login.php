@@ -16,8 +16,14 @@ class Login extends Component
     public $remember = false;
     public $error = '';
 
+    protected $rules = [
+        'email' => 'required|email',
+        'password' => 'required',
+    ];
+
     public function login()
     {
+        $this->validate();
         $this->error = '';
         try {
             $authService = app(AuthService::class);
@@ -53,4 +59,4 @@ class Login extends Component
     {
         return view('livewire.demo1.login');
     }
-} 
+}

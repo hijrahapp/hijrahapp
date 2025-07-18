@@ -9,19 +9,20 @@
                     Enter your email to reset password
                 </span>
             </div>
-            @if($error)
-                <div class="kt-error-message">{{ $error }}</div>
-            @endif
             <div class="flex flex-col gap-1">
                 <label class="kt-form-label font-normal text-mono">
                     Email
                 </label>
                 <input class="kt-input" placeholder="email@email.com" type="email" wire:model="email" />
+                @error('email')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
             </div>
+            @if($error)
+                <div class="kt-error-message">{{ $error }}</div>
+            @endif
             <button class="kt-btn kt-btn-primary flex justify-center grow" type="submit">
                 Continue
                 <i class="ki-filled ki-black-right"></i>
             </button>
         </form>
     </div>
-</div> 
+</div>
