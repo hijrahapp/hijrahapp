@@ -35,4 +35,5 @@ return [
     'cannot_enter_same_password' => 'New password must be different from the current password',
     'current_password_incorrect' => 'Current password is incorrect',
     'password_reset_success' => 'Password reset successfully',
+    'user_created_successfully' => 'User is created successfully'
 ];

@@ -31,7 +31,7 @@ class UserResource extends JsonResource
             'gender' => $this->gender,
             'birthDate' => $this->birthDate ? $this->birthDate->format('Y-m-d') : null,
             'role' => $this->role ? $this->role->name->value : null,
-            'profilePhoto' => $this->profile_photo ?? asset('/assets/media/avatars/blank.png'),
+            'profilePhoto' => $this->profile_picture ?? asset('/assets/media/avatars/blank.png'),
         ];
     }
 }

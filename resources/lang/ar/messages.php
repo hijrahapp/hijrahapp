@@ -35,4 +35,5 @@ return [
     'cannot_enter_same_password' => 'كلمة المرور الجديدة يجب أن تكون مختلفة عن كلمة المرور الحالية',
     'current_password_incorrect' => 'كلمة المرور الحالية غير صحيحة',
     'password_reset_success' => 'تم إعادة تعيين كلمة المرور بنجاح',
+    'user_created_successfully' => 'تم إنشاء المستخدم بنجاح'
 ];

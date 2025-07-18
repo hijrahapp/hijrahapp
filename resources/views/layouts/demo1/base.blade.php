@@ -9,6 +9,9 @@
         <livewire:shared.modals.search />
         <livewire:shared.modals.user-profile />
         <livewire:shared.modals.change-password />
+        <livewire:demo1.user-add-modal />
+        <livewire:demo1.user-edit-modal />
+        <livewire:demo1.user-status-modal />
         <!-- Page -->
         <!-- Main -->
         <div class="flex grow">

@@ -93,12 +93,16 @@ function initModals() {
 
 // Close modals when clicking outside
 document.addEventListener('click', function(e) {
+    
     const modals = document.querySelectorAll('.kt-modal');
 
     modals.forEach(modal => {
         if (e.target === modal) {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+            if (window.Livewire) {
+                window.Livewire.dispatch('reset-modal');
+            }
         }
     });
 });
