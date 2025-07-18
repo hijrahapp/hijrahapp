@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers\App;
 
-use App\Http\Middleware\UserMiddleware;
-use App\Http\Services\UserService;
-use App\Resources\UserResource;
-use App\Utils\JWTUtils;
+use App\Http\Repositories\UserRepository;
+use Illuminate\Support\Facades\Hash;
 
-class UserDetails
+class UserController
 {
     public function __construct(private UserRepository $userRepo) {}
 
     public function createNewUser(array $data) {
-        $user = $this->userRepo->findByEmail($request['email']);
+        $user = $this->userRepo->findByEmail($data['email']);
         if ($user) {
             return ['error' => __('messages.email_exists')];
         }
