@@ -16,6 +16,22 @@ class ChangePassword extends Component
     public $error = '';
     public $success = '';
 
+    protected $rules = [
+        'current_password' => 'required',
+        'new_password' => 'required|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/',
+        'confirm_password' => 'required|same:new_password',
+    ];
+
+    protected function messages()
+    {
+        return [
+            'confirm_password.same' => __('messages.password_and_confirmation_mismatch'),
+            'new_password.min' => __('messages.invalid_password_format'),
+            'new_password.regex' => __('messages.invalid_password_format')
+        ];
+    }
+
+
     protected $listeners = ['reset-modal' => 'resetForm'];
 
     public function save()
@@ -23,13 +39,7 @@ class ChangePassword extends Component
         $this->error = '';
         $this->success = '';
 
-        $this->validate([
-            'current_password' => ['required'],
-            'new_password' => ['required'],
-            'confirm_password' => ['required', 'same:new_password'],
-        ], [
-            'confirm_password.same' => 'The confirmation password does not match the new password.',
-        ]);
+        $this->validate();
 
         $user = app(UserDetailsController::class)->getAllUserDetails(session('jwt_token'));
         if (isset($user['message'])) {

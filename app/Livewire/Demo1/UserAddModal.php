@@ -22,11 +22,19 @@ class UserAddModal extends Component
     protected $rules = [
         'email' => 'required|email|unique:users,email',
         'name' => 'required',
-        'password' => 'required|min:6',
+        'password' => 'required|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/',
         'gender' => 'required|in:male,female',
         'birthDate' => 'required|date',
         'roleId' => 'required|exists:roles,id',
     ];
+
+    protected function messages()
+    {
+        return [
+            'password.min' => __('messages.invalid_password_format'),
+            'password.regex' => __('messages.invalid_password_format')
+        ];
+    }
 
     protected $listeners = ['reset-modal' => 'resetForm'];
 
@@ -35,7 +43,7 @@ class UserAddModal extends Component
         $user = session('user');
         if ($user['role'] == 'SuperAdmin') {
             $this->roles = Role::where('name', '!=', 'SuperAdmin')->orderBy('name', 'asc')->get();
-        } else if($user['role'] == 'Admin') {
+        } elseif($user['role'] == 'Admin') {
             $this->roles = Role::whereNotIn('name', ['SuperAdmin', 'Admin'])->orderBy('name', 'asc')->get();
         } else {
             $this->roles = Role::whereNotIn('name', ['SuperAdmin', 'Admin', 'Expert'])->orderBy('name', 'asc')->get();

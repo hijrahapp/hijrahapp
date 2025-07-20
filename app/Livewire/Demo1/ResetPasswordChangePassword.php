@@ -15,9 +15,18 @@ class ResetPasswordChangePassword extends Component
     public $error = '';
 
     protected $rules = [
-        'password' => 'required',
+        'password' => 'required|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/',
         'password_confirmation' => 'required|same:password',
     ];
+
+    protected function messages()
+    {
+        return [
+            'password_confirmation.same' => __('messages.password_and_confirmation_mismatch'),
+            'password.min' => __('messages.invalid_password_format'),
+            'password.regex' => __('messages.invalid_password_format')
+        ];
+    }
 
     public function submit()
     {

@@ -11,7 +11,7 @@ return [
     'invalid_credentials' => 'بيانات الاعتماد غير صحيحة',
     'email_not_exists' => 'هذا البريد غير مسجل لدينا',
     'incorrect_password' => 'كلمة المرور غير صحيحة',
-    'inactive_user' => 'المستخدم غير نشط',
+    'inactive_user' => 'هذا الحساب موقوف مؤقتًا, يرجى التواصل مع الدعم لمزيد من المعلومات',
     'email_exists' => 'البريد الإلكتروني موجود بالفعل',
     'signup_complete' => 'اكتمل التسجيل',
     'unauthorized_user' => 'مستخدم غير مصرح',
@@ -35,5 +35,8 @@ return [
     'cannot_enter_same_password' => 'كلمة المرور الجديدة يجب أن تكون مختلفة عن كلمة المرور الحالية',
     'current_password_incorrect' => 'كلمة المرور الحالية غير صحيحة',
     'password_reset_success' => 'تم إعادة تعيين كلمة المرور بنجاح',
-    'user_created_successfully' => 'تم إنشاء المستخدم بنجاح'
+    'user_created_successfully' => 'تم إنشاء المستخدم بنجاح',
+    'unauthorized_role' => 'الدور غير مصرح به لهذا الإجراء',
+    'invalid_password_format' => 'يجب أن تحتوي على 8 أحرف على الأقل, حرف كبير, حرف صغير, رقم ورمز خاص',
+    'password_and_confirmation_mismatch' => 'كلمة المرور وتأكيد كلمة المرور غير متطابقتين',
 ];

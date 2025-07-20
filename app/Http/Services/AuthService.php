@@ -22,9 +22,12 @@ class AuthService
         if (!Hash::check($password, $user->password)) {
             return response()->json(['message' => __('messages.incorrect_password')], 401);
         }
+        if (!$user->active) {
+            return response()->json(['message' => __('messages.inactive_user')], 401);
+        }
         $roles = ['SuperAdmin', 'Admin', 'Expert'];
         if (!$user->role || !in_array($user->role->name->value, $roles)) {
-            return response()->json(['error' => 'Unauthorized Role'], 403);
+            return response()->json(['message' => __('messages.unauthorized_role')], 403);
         }
 
         return response()->json(JWTUtils::generateTokenResponse($user));

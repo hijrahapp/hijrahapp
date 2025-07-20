@@ -12,7 +12,7 @@ return [
     'expired_token' => 'Token expired',
     'missing_or_invalid_token' => 'Missing or invalid token',
     'invalid_credentials' => 'Invalid credentials',
-    'inactive_user' => 'Inactive user',
+    'inactive_user' => 'This account is temporarily suspended, please contact support for more information',
     'email_exists' => 'Email already exists',
     'signup_complete' => 'Signup complete',
     'unauthorized_user' => 'Unauthorized user',
@@ -35,5 +35,8 @@ return [
     'cannot_enter_same_password' => 'New password must be different from the current password',
     'current_password_incorrect' => 'Current password is incorrect',
     'password_reset_success' => 'Password reset successfully',
-    'user_created_successfully' => 'User is created successfully'
+    'user_created_successfully' => 'User is created successfully',
+    'unauthorized_role' => 'Unauthorized role for this action',
+    'invalid_password_format' => 'Password must be at least 8 characters and include a number, an uppercase letter, and a special character',
+    'password_and_confirmation_mismatch' => 'The confirmation password does not match the new password',
 ];
