@@ -13,8 +13,8 @@ class UserAddModal extends Component
     public $email = '';
     public $name = '';
     public $password = '';
-    public $gender = '';
-    public $birthDate = '';
+    // public $gender = '';
+    // public $birthDate = '';
     public $roleId = '';
     public $roles = [];
     public $error = '';
@@ -23,8 +23,8 @@ class UserAddModal extends Component
         'email' => 'required|email|unique:users,email',
         'name' => 'required',
         'password' => 'required|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/',
-        'gender' => 'required|in:male,female',
-        'birthDate' => 'required|date',
+        // 'gender' => 'required|in:male,female',
+        // 'birthDate' => 'required|date',
         'roleId' => 'required|exists:roles,id',
     ];
 
@@ -42,11 +42,11 @@ class UserAddModal extends Component
     {
         $user = session('user');
         if ($user['role'] == 'SuperAdmin') {
-            $this->roles = Role::where('name', '!=', 'SuperAdmin')->orderBy('name', 'asc')->get();
+            $this->roles = Role::whereNotIn('name', ['Customer', 'SuperAdmin'])->orderBy('name', 'asc')->get();
         } elseif($user['role'] == 'Admin') {
-            $this->roles = Role::whereNotIn('name', ['SuperAdmin', 'Admin'])->orderBy('name', 'asc')->get();
+            $this->roles = Role::whereNotIn('name', ['Customer', 'SuperAdmin', 'Admin'])->orderBy('name', 'asc')->get();
         } else {
-            $this->roles = Role::whereNotIn('name', ['SuperAdmin', 'Admin', 'Expert'])->orderBy('name', 'asc')->get();
+            $this->roles = Role::whereNotIn('name', ['Customer', 'SuperAdmin', 'Admin', 'Expert'])->orderBy('name', 'asc')->get();
         }
     }
 
@@ -72,8 +72,8 @@ class UserAddModal extends Component
         $this->resetErrorBag();
         $this->email = '';
         $this->password = '';
-        $this->gender = '';
-        $this->birthDate = '';
+        // $this->gender = '';
+        // $this->birthDate = '';
         $this->roleId = '';
     }
 

@@ -19,25 +19,6 @@
                     @error('name')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Gender <span class="text-destructive">*</span></label>
-                    <div class="flex gap-4">
-                        <label class="flex items-center gap-2">
-                            <input type="radio" wire:model="gender" value="male" />
-                            Male
-                        </label>
-                        <label class="flex items-center gap-2">
-                            <input type="radio" wire:model="gender" value="female" />
-                            Female
-                        </label>
-                    </div>
-                    @error('gender')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Date of Birth <span class="text-destructive">*</span></label>
-                    <input type="date" class="kt-input w-full" wire:model.defer="birthDate" max="{{ date('Y-m-d') }}" />
-                    @error('birthDate')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                </div>
-                <div>
                     <label class="block text-sm font-medium mb-1">Role <span class="text-destructive">*</span></label>
                     <select class="kt-select w-full" wire:model.defer="roleId">
                         <option value="">Select Role</option>

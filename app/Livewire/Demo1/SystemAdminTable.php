@@ -8,7 +8,7 @@ use Livewire\WithFileUploads;
 use App\Models\Role;
 use Livewire\WithPagination;
 
-class UserTable extends Component
+class SystemAdminTable extends Component
 {
     use WithFileUploads, WithPagination;
 
@@ -35,7 +35,9 @@ class UserTable extends Component
         $user = session('user');
         if ($user['role'] === 'SuperAdmin')
         {
+            $customerRoleId = Role::where('name', 'Customer')->value('id');
             $query = User::with('role')
+                ->whereNotIn('roleId', [$customerRoleId])
                 ->orderBy('created_at', 'asc')
                 ->when($this->search, function($q) {
                     $q->where(function($q) {
@@ -45,8 +47,9 @@ class UserTable extends Component
                 });
         } else if ($user['role'] === 'Admin') {
             $superAdminRoleId = Role::where('name', 'SuperAdmin')->value('id');
+            $customerRoleId = Role::where('name', 'Customer')->value('id');
             $query = User::with('role')
-                ->where('roleId', '!=', $superAdminRoleId)
+                ->whereNotIn('roleId', [$superAdminRoleId, $customerRoleId])
                 ->orderBy('created_at', 'asc')
                 ->when($this->search, function($q) {
                     $q->where(function($q) {
@@ -57,8 +60,9 @@ class UserTable extends Component
         } else {
             $superAdminRoleId = Role::where('name', 'SuperAdmin')->value('id');
             $adminRoleId = Role::where('name', 'Admin')->value('id');
+            $customerRoleId = Role::where('name', 'Customer')->value('id');
             $query = User::with('role')
-                ->whereNotIn('roleId', [$superAdminRoleId, $adminRoleId])
+                ->whereNotIn('roleId', [$superAdminRoleId, $adminRoleId, $customerRoleId])
                 ->orderBy('created_at', 'asc')
                 ->when($this->search, function($q) {
                     $q->where(function($q) {
@@ -82,7 +86,7 @@ class UserTable extends Component
     public function render()
     {
         logger("renderrrr");
-        return view('livewire.demo1.user-table', [
+        return view('livewire.demo1.system-admin-table', [
             'users' => $this->getUsersProperty(),
         ]);
     }

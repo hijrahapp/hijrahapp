@@ -1,10 +1,10 @@
 <div class="kt-card kt-card-grid h-full min-w-full">
     <div class="kt-card-header flex justify-between items-center">
-        <h3 class="kt-card-title">Users</h3>
+        <h3 class="kt-card-title">System Users</h3>
         <div class="flex gap-2 items-center">
             <!-- <div class="kt-input max-w-48">
                 <i class="ki-filled ki-magnifier"></i>
-                <input type="text" class="kt-input" placeholder="Search Users" wire:model.debounce.500ms="search" />
+                <input type="text" class="kt-input" placeholder="Search Admins" wire:model.debounce.500ms="search" />
             </div> -->
             <button class="kt-btn kt-btn-outline flex items-center justify-center" data-kt-modal-toggle="#user_add_modal" title="Add User">
                 <i class="ki-filled ki-plus"></i>
@@ -16,26 +16,26 @@
             <table class="kt-table kt-table-border table-fixed w-full">
                 <thead>
                     <tr>
-                        <th class="w-20">Profile</th>
-                        <th class="w-40">Name</th>
-                        <th class="w-56">Email</th>
-                        <th class="text-center">Date of Birth</th>
-                        <th class="text-center">Gender</th>
+                        <!-- <th class="w-20">Profile</th> -->
+                        <th class="">Name</th>
+                        <th class="">Email</th>
+                        <!-- <th class="text-center">Date of Birth</th> -->
+                        <!-- <th class="text-center">Gender</th> -->
                         <th class="text-center">Role</th>
-                        <th class="w-40 text-center">Activate/Deactivate</th>
+                        <th class="text-center">Activate/Deactivate</th>
                         <th class="text-center">Edit</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($users as $user)
                         <tr>
-                            <td>
+                            <!-- <td>
                                 <img src="{{ $user->profile_picture ?? '/assets/media/avatars/blank.png' }}" class="size-9 rounded-full border-2 border-gray-300" />
-                            </td>
+                            </td> -->
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
-                            <td class="text-center">{{ $user->birthDate ? $user->birthDate->format('d M, Y') : '-' }}</td>
-                            <td class="text-center">{{ ucfirst($user->gender) }}</td>
+                            <!-- <td class="text-center">{{ $user->birthDate ? $user->birthDate->format('d M, Y') : '-' }}</td> -->
+                            <!-- <td class="text-center">{{ ucfirst($user->gender) }}</td> -->
                             <td class="text-center">
                                 <span class="kt-badge kt-badge-sm {{
                                     match($user->role->name->value ?? '') {
