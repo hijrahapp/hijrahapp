@@ -21,8 +21,14 @@ class CustomerTable extends Component
         'refreshUserTable' => '$refresh'
     ];
 
-    public function updatingSearch()
+    public function getSearchProperty()
     {
+        return $this->search;
+    }
+
+    public function setSearchProperty($value)
+    {
+        $this->search = $value;
         $this->resetPage();
     }
 

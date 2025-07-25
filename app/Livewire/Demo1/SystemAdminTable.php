@@ -7,6 +7,7 @@ use App\Models\User;
 use Livewire\WithFileUploads;
 use App\Models\Role;
 use Livewire\WithPagination;
+use Livewire\Attributes\Computed;
 
 class SystemAdminTable extends Component
 {
@@ -21,8 +22,14 @@ class SystemAdminTable extends Component
         'refreshUserTable' => '$refresh'
     ];
 
-    public function updatingSearch()
+    public function getSearchProperty()
     {
+        return $this->search;
+    }
+
+    public function setSearchProperty($value)
+    {
+        $this->search = $value;
         $this->resetPage();
     }
 
@@ -30,7 +37,8 @@ class SystemAdminTable extends Component
     {
     }
 
-    public function getUsersProperty()
+    #[Computed]
+    public function users()
     {
         $user = session('user');
         if ($user['role'] === 'SuperAdmin')
@@ -72,9 +80,8 @@ class SystemAdminTable extends Component
 
     public function render()
     {
-        logger("renderrrr");
         return view('livewire.demo1.system-admin-table', [
-            'users' => $this->getUsersProperty(),
+            'users' => $this->users,
         ]);
     }
 

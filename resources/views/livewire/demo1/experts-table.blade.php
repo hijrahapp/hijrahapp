@@ -2,6 +2,10 @@
     <div class="kt-card-header flex justify-between items-center">
         <h3 class="kt-card-title">Experts</h3>
         <div class="flex gap-2 items-center">
+            <div class="kt-input max-w-48">
+                <i class="ki-filled ki-magnifier"></i>
+                <input type="text" class="kt-input" placeholder="Search Users" wire:input="setSearchProperty($event.target.value)" />
+            </div>
             <button class="kt-btn kt-btn-outline flex items-center justify-center" data-kt-modal-toggle="#expert_add_modal" title="Add Expert">
                 <i class="ki-filled ki-plus"></i>
             </button>
