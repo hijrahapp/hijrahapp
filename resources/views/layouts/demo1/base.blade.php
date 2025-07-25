@@ -12,6 +12,7 @@
         <livewire:demo1.user-add-modal />
         <livewire:demo1.user-edit-modal />
         <livewire:demo1.user-status-modal />
+        <livewire:demo1.expert-add-modal />
         <!-- Page -->
         <!-- Main -->
         <div class="flex grow">

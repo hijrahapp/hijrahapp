@@ -1,7 +1,7 @@
-<div class="kt-modal hidden" data-kt-modal="true" id="user_add_modal" wire:ignore.self>
+<div class="kt-modal hidden" data-kt-modal="true" id="expert_add_modal" wire:ignore.self>
     <div class="kt-modal-content max-w-[600px] top-[15%]">
         <div class="kt-modal-header py-4 px-5">
-            <span class="kt-modal-title text-xl font-semibold">Add User</span>
+            <span class="kt-modal-title text-xl font-semibold">Add Expert</span>
             <button class="kt-btn kt-btn-sm kt-btn-icon kt-btn-dim shrink-0" wire:click="closeModal">
                 <i class="ki-filled ki-cross"></i>
             </button>

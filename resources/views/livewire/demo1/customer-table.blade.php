@@ -16,14 +16,13 @@
             <table class="kt-table kt-table-border table-fixed w-full">
                 <thead>
                     <tr>
-                        <th class="w-20">Profile</th>
-                        <th class="w-40">Name</th>
-                        <th class="w-56">Email</th>
+                        <th class="w-20 text-center">Profile</th>
+                        <th class="">Name</th>
+                        <th class="">Email</th>
                         <th class="text-center">Date of Birth</th>
                         <th class="text-center">Gender</th>
                         <th class="text-center">Role</th>
-                        <th class="w-40 text-center">Activate/Deactivate</th>
-                        <!-- <th class="text-center">Edit</th> -->
+                        <th class="text-center">Activate/Deactivate</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -59,22 +58,6 @@
                                     </button>
                                 @endif
                             </td>
-                            <!-- <td class="text-center flex gap-2 justify-center">
-                                <button
-                                    class="kt-btn kt-btn-outline flex items-center justify-center"
-                                    data-kt-modal-toggle="#user_edit_modal"
-                                    x-on:click="$wire.call('handleUserEditOpen', {{ Js::from([
-                                                                                    'id' => $user->id,
-                                                                                    'name' => $user->name,
-                                                                                    'email' => $user->email,
-                                                                                    'gender' => $user->gender,
-                                                                                    'birthDate' => optional($user->birthDate)->toDateString(),
-                                                                                    'roleId' => $user->roleId,
-                                                                                ]) }})"
-                                    title="Edit User" @if(!$this->isUserEditable($user)) disabled @endif>
-                                    <i class="ki-filled ki-pencil"></i>
-                                </button>
-                            </td> -->
                         </tr>
                     @empty
                         <tr>
@@ -87,14 +70,14 @@
     </div>
     <div class="kt-card-footer flex-col justify-center gap-5 text-sm font-medium text-secondary-foreground md:flex-row md:justify-between">
         <div class="order-2 flex items-center gap-2 md:order-1">
-            Show
-            <select class="kt-select w-16" wire:model="perPage">
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-            </select>
-            per page
+{{--            Show--}}
+{{--            <select class="kt-select w-16" wire:model="perPage">--}}
+{{--                <option value="5">5</option>--}}
+{{--                <option value="10">10</option>--}}
+{{--                <option value="25">25</option>--}}
+{{--                <option value="50">50</option>--}}
+{{--            </select>--}}
+{{--            per page--}}
         </div>
         <div class="order-1 flex items-center gap-4 md:order-2">
             <span>

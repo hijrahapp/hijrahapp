@@ -13,7 +13,7 @@ class SystemAdminTable extends Component
     use WithFileUploads, WithPagination;
 
     public $search = '';
-    public $perPage = 10;
+    public $perPage = 15;
 
     protected $paginationTheme = 'tailwind';
 
@@ -35,21 +35,10 @@ class SystemAdminTable extends Component
         $user = session('user');
         if ($user['role'] === 'SuperAdmin')
         {
-            $customerRoleId = Role::where('name', 'Customer')->value('id');
+            $superAdmin = Role::where('name', 'SuperAdmin')->value('id');
+            $adminRoleId = Role::where('name', 'Admin')->value('id');
             $query = User::with('role')
-                ->whereNotIn('roleId', [$customerRoleId])
-                ->orderBy('created_at', 'asc')
-                ->when($this->search, function($q) {
-                    $q->where(function($q) {
-                        $q->where('name', 'like', '%'.$this->search.'%')
-                        ->orWhere('email', 'like', '%'.$this->search.'%');
-                    });
-                });
-        } else if ($user['role'] === 'Admin') {
-            $superAdminRoleId = Role::where('name', 'SuperAdmin')->value('id');
-            $customerRoleId = Role::where('name', 'Customer')->value('id');
-            $query = User::with('role')
-                ->whereNotIn('roleId', [$superAdminRoleId, $customerRoleId])
+                ->whereIn('roleId', [$superAdmin, $adminRoleId])
                 ->orderBy('created_at', 'asc')
                 ->when($this->search, function($q) {
                     $q->where(function($q) {
@@ -58,11 +47,9 @@ class SystemAdminTable extends Component
                     });
                 });
         } else {
-            $superAdminRoleId = Role::where('name', 'SuperAdmin')->value('id');
             $adminRoleId = Role::where('name', 'Admin')->value('id');
-            $customerRoleId = Role::where('name', 'Customer')->value('id');
             $query = User::with('role')
-                ->whereNotIn('roleId', [$superAdminRoleId, $adminRoleId, $customerRoleId])
+                ->whereIn('roleId', [$adminRoleId])
                 ->orderBy('created_at', 'asc')
                 ->when($this->search, function($q) {
                     $q->where(function($q) {

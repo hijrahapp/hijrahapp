@@ -3,10 +3,10 @@
 namespace App\Livewire\Demo1;
 
 use App\Http\Controllers\App\UserController;
-use Livewire\Component;
 use App\Models\Role;
+use Livewire\Component;
 
-class UserAddModal extends Component
+class ExpertAddModal extends Component
 {
     public $email = '';
     public $name = '';
@@ -34,7 +34,7 @@ class UserAddModal extends Component
 
     public function mount()
     {
-        $this->roles = Role::whereIn('name', ['Admin'])->orderBy('name', 'asc')->get();
+        $this->roles = Role::whereIn('name', ['Expert'])->orderBy('name', 'asc')->get();
         $this->roleId = $this->roles[0]['id'];
     }
 
@@ -66,6 +66,6 @@ class UserAddModal extends Component
 
     public function render()
     {
-        return view('livewire.demo1.user-add-modal');
+        return view('livewire.demo1.expert-add-modal');
     }
 }

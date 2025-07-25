@@ -1,8 +1,8 @@
 <div class="kt-card kt-card-grid h-full min-w-full">
     <div class="kt-card-header flex justify-between items-center">
-        <h3 class="kt-card-title">System Users</h3>
+        <h3 class="kt-card-title">Experts</h3>
         <div class="flex gap-2 items-center">
-            <button class="kt-btn kt-btn-outline flex items-center justify-center" data-kt-modal-toggle="#user_add_modal" title="Add User">
+            <button class="kt-btn kt-btn-outline flex items-center justify-center" data-kt-modal-toggle="#expert_add_modal" title="Add Expert">
                 <i class="ki-filled ki-plus"></i>
             </button>
         </div>
@@ -11,22 +11,22 @@
         <div class="kt-scrollable-x-auto">
             <table class="kt-table kt-table-border table-fixed w-full">
                 <thead>
-                    <tr>
-                        <th class="">Id</th>
-                        <th class="">Name</th>
-                        <th class="">Email</th>
-                        <th class="text-center">Role</th>
-                        <th class="text-center">Activate/Deactivate</th>
-                        <th class="text-center">Edit</th>
-                    </tr>
+                <tr>
+                    <th class="">Id</th>
+                    <th class="">Name</th>
+                    <th class="">Email</th>
+                    <th class="text-center">Role</th>
+                    <th class="text-center">Activate/Deactivate</th>
+                    <th class="text-center">Edit</th>
+                </tr>
                 </thead>
                 <tbody>
-                    @forelse($users as $user)
-                        <tr>
-                            <td>{{ $user->id }}</td>
-                            <td>{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td class="text-center">
+                @forelse($users as $user)
+                    <tr>
+                        <td>{{ $user->id }}</td>
+                        <td>{{ $user->name }}</td>
+                        <td>{{ $user->email }}</td>
+                        <td class="text-center">
                                 <span class="kt-badge kt-badge-sm {{
                                     match($user->role->name->value ?? '') {
                                         'SuperAdmin' => 'kt-badge-destructive',
@@ -38,22 +38,22 @@
                                 }} kt-badge-outline">
                                     {{ $user->role->name->value ?? '-' }}
                                 </span>
-                            <td class="text-center justify-center">
-                                @if($user->active)
-                                    <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" data-kt-modal-toggle="#user_status_modal" x-on:click="$wire.call('handleUserStatusOpen', {{ Js::from(['userId' => $user->id,'status' => false]) }})" title="Deactivate User" @if(!$this->isUserEditable($user)) disabled @endif>
-                                        Deactivate
-                                    </button>
-                                @else
-                                    <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-primary" data-kt-modal-toggle="#user_status_modal" x-on:click="$wire.call('handleUserStatusOpen', {{ Js::from(['userId' => $user->id,'status' => true]) }})" title="Activate User" @if(!$this->isUserEditable($user)) disabled @endif>
-                                        Activate
-                                    </button>
-                                @endif
-                            </td>
-                            <td class="text-center flex gap-2 justify-center">
-                                <button
-                                    class="kt-btn kt-btn-outline flex items-center justify-center"
-                                    data-kt-modal-toggle="#user_edit_modal"
-                                    x-on:click="$wire.call('handleUserEditOpen', {{ Js::from([
+                        <td class="text-center justify-center">
+                            @if($user->active)
+                                <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" data-kt-modal-toggle="#user_status_modal" x-on:click="$wire.call('handleUserStatusOpen', {{ Js::from(['userId' => $user->id,'status' => false]) }})" title="Deactivate User" @if(!$this->isUserEditable($user)) disabled @endif>
+                                    Deactivate
+                                </button>
+                            @else
+                                <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-primary" data-kt-modal-toggle="#user_status_modal" x-on:click="$wire.call('handleUserStatusOpen', {{ Js::from(['userId' => $user->id,'status' => true]) }})" title="Activate User" @if(!$this->isUserEditable($user)) disabled @endif>
+                                    Activate
+                                </button>
+                            @endif
+                        </td>
+                        <td class="text-center flex gap-2 justify-center">
+                            <button
+                                class="kt-btn kt-btn-outline flex items-center justify-center"
+                                data-kt-modal-toggle="#user_edit_modal"
+                                x-on:click="$wire.call('handleUserEditOpen', {{ Js::from([
                                                                                     'id' => $user->id,
                                                                                     'name' => $user->name,
                                                                                     'email' => $user->email,
@@ -61,16 +61,16 @@
                                                                                     'birthDate' => optional($user->birthDate)->toDateString(),
                                                                                     'roleId' => $user->roleId,
                                                                                 ]) }})"
-                                    title="Edit User" @if(!$this->isUserEditable($user)) disabled @endif>
-                                    <i class="ki-filled ki-pencil"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="text-center py-4">No users found.</td>
-                        </tr>
-                    @endforelse
+                                title="Edit User" @if(!$this->isUserEditable($user)) disabled @endif>
+                                <i class="ki-filled ki-pencil"></i>
+                            </button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8" class="text-center py-4">No users found.</td>
+                    </tr>
+                @endforelse
                 </tbody>
             </table>
         </div>
