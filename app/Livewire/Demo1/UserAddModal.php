@@ -72,6 +72,7 @@ class UserAddModal extends Component
         $this->resetErrorBag();
         $this->email = '';
         $this->password = '';
+        $this->name = '';
         // $this->gender = '';
         // $this->birthDate = '';
         $this->roleId = '';
