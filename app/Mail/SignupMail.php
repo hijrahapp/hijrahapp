@@ -6,22 +6,20 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class PasswordResetAttemptMail extends Mailable
+class SignupMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
     public $otp;
-    public $expiresAt;
+    public $user;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($user, $otp, $expiresAt)
+    public function __construct($otp, $user)
     {
-        $this->user = $user;
         $this->otp = $otp;
-        $this->expiresAt = $expiresAt;
+        $this->user = $user;
     }
 
     /**
@@ -33,12 +31,11 @@ class PasswordResetAttemptMail extends Mailable
 
         return $this->locale($locale)
             ->from(config('mail.from.address'), __('mail.app-name'))
-            ->subject(__('mail.password-reset-attempt-subject'))
-            ->markdown("emails.$locale.password-reset-attempt")
+            ->subject(__('mail.signup-subject'))
+            ->markdown("emails.$locale.signup")
             ->with([
-                'user' => $this->user,
                 'otp' => $this->otp,
-                'expiresAt' => $this->expiresAt,
+                'user' => $this->user,
             ]);
     }
 }

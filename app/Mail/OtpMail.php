@@ -29,8 +29,12 @@ class OtpMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Your One-Time Password (OTP)')
-            ->markdown('emails.otp')
+        $locale = app()->getLocale() ?? 'en';
+
+        return $this->locale($locale)
+            ->from(config('mail.from.address'), __('mail.app-name'))
+            ->subject(__('mail.otp-subject'))
+            ->markdown("emails.$locale.otp")
             ->with([
                 'otp' => $this->otp,
                 'user' => $this->user,

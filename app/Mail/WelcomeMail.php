@@ -25,10 +25,14 @@ class WelcomeMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Welcome to Hijrah App!')
-            ->markdown('emails.welcome')
+        $locale = app()->getLocale() ?? 'en';
+
+        return $this->locale($locale)
+            ->from(config('mail.from.address'), __('mail.app-name'))
+            ->subject(__('mail.welcome-subject'))
+            ->markdown("emails.$locale.welcome")
             ->with([
                 'user' => $this->user,
             ]);
     }
-} 
+}

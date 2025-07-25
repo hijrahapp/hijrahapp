@@ -25,10 +25,14 @@ class PasswordResetSuccessMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Password Reset Successful - Hijrah App')
-            ->markdown('emails.password-reset-success')
+        $locale = app()->getLocale() ?? 'en';
+
+        return $this->locale($locale)
+            ->from(config('mail.from.address'), __('mail.app-name'))
+            ->subject(__('mail.password-reset-success-subject'))
+            ->markdown("emails.$locale.password-reset-success")
             ->with([
                 'user' => $this->user,
             ]);
     }
-} 
+}
