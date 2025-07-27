@@ -9,8 +9,8 @@ class UserProfile extends Component
 {
     public $email;
     public $name;
-    public $gender;
-    public $birthdate;
+//    public $gender;
+//    public $birthdate;
     public $error;
 
     protected $listeners = ['reset-modal' => 'resetForm'];
@@ -20,16 +20,16 @@ class UserProfile extends Component
         $this->error = '';
         $this->validate([
             'name' => 'required',
-            'gender' => 'required',
-            'birthdate' => 'required',
+//            'gender' => 'required',
+//            'birthdate' => 'required',
         ]);
 
         $jwt = session('jwt_token');
 
         $data = [
             'name' => $this->name,
-            'gender' => $this->gender,
-            'birthDate' => $this->birthdate
+//            'gender' => $this->gender,
+//            'birthDate' => $this->birthdate
         ];
 
         $response = app(UserDetailsController::class)->updateUserDetails($jwt, $data);
@@ -54,8 +54,8 @@ class UserProfile extends Component
         $user = session('user');
         $this->email = $user['email'] ?? '';
         $this->name = $user['name'] ?? '';
-        $this->gender = $user['gender'] ?? '';
-        $this->birthdate = $user['birthDate'] ?? '';
+//        $this->gender = $user['gender'] ?? '';
+//        $this->birthdate = $user['birthDate'] ?? '';
     }
 
     public function mount()
