@@ -21,7 +21,7 @@ class OTPService
         $user->save();
     }
 
-    public function resendOTP(string $userId) {
+    public function resendOTP(int $userId) {
         $user = $this->userRepo->findById($userId);
         if (!$user) {
             return response()->json(['message' => __('messages.unauthorized_user')], 401);
@@ -37,7 +37,7 @@ class OTPService
         return response()->json(null, 201);
     }
 
-    public function verifyOTP(string $userId, string $otp) {
+    public function verifyOTP(int $userId, string $otp) {
         $user = $this->userRepo->findById($userId);
 
         $validate = $this->validate($user, $otp);

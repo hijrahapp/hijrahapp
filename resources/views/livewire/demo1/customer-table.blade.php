@@ -16,6 +16,7 @@
             <table class="kt-table kt-table-border table-fixed w-full">
                 <thead>
                     <tr>
+                        <th class="">Id</th>
                         <th class="w-20 text-center">Profile</th>
                         <th class="">Name</th>
                         <th class="">Email</th>
@@ -27,7 +28,8 @@
                 <tbody>
                     @forelse($users as $user)
                         <tr>
-                            <td>
+                            <td>{{ $user->id }}</td>
+                            <td class="text-center flex justify-center">
                                 <img src="{{ $user->profile_picture ?? '/assets/media/avatars/blank.png' }}" class="size-9 rounded-full border-2 border-gray-300" />
                             </td>
                             <td>{{ $user->name }}</td>

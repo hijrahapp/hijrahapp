@@ -9,13 +9,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('roles', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->enum('name', ['SuperAdmin', 'Admin', 'Expert', 'Customer'])->unique();
             $table->timestamps();
         });
 
         Schema::create('users', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->boolean('active')->default(false);
             $table->enum('gender', ['male', 'female'])->nullable();
             $table->date('birthDate')->nullable();
-            $table->uuid('roleId');
+            $table->unsignedBigInteger('roleId');
             $table->timestamps();
             $table->foreign('roleId')->references('id')->on('roles');
         });
@@ -33,7 +33,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('roles');
         Schema::dropIfExists('users');
+        Schema::dropIfExists('roles');
     }
 };

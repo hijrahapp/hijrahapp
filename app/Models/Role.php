@@ -10,11 +10,9 @@ class Role extends Model
 {
     use HasFactory;
 
-    public $incrementing = false;
-    protected $keyType = 'string';
     protected $table = 'roles';
 
-    protected $fillable = ['id', 'name'];
+    protected $fillable = ['name'];
 
     public function users()
     {
@@ -26,7 +24,6 @@ class Role extends Model
     ];
 
     protected $hidden = [
-        'id',
         'created_at',
         'updated_at',
     ];

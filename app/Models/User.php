@@ -10,12 +10,9 @@ class User extends Model
 {
     use HasFactory, Notifiable;
 
-    public $incrementing = false;
-    protected $keyType = 'string';
     protected $table = 'users';
 
     protected $fillable = [
-        'id',
         'name',
         'email',
         'email_verified_at',
@@ -31,7 +28,6 @@ class User extends Model
     ];
 
     protected $hidden = [
-        'id',
         'password',
         'otp',
         'active',

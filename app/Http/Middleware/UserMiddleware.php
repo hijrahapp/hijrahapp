@@ -26,7 +26,7 @@ class UserMiddleware
         return $next($request);
     }
 
-    public function fetchAndValidateUser($userId)
+    public function fetchAndValidateUser(int $userId)
     {
         $user = $this->userRepo->findById($userId);
 
