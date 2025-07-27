@@ -1,7 +1,7 @@
 <div class="kt-modal hidden" data-kt-modal="true" id="user_add_modal" wire:ignore.self>
     <div class="kt-modal-content max-w-[600px] top-[15%]">
         <div class="kt-modal-header py-4 px-5">
-            <span class="kt-modal-title text-xl font-semibold">Add User</span>
+            <span class="kt-modal-title text-xl font-semibold">Add Admin</span>
             <button class="kt-btn kt-btn-sm kt-btn-icon kt-btn-dim shrink-0" wire:click="closeModal">
                 <i class="ki-filled ki-cross"></i>
             </button>
@@ -32,16 +32,6 @@
                         </button>
                     </div>
                     @error('password')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Role <span class="text-destructive">*</span></label>
-                    <select class="kt-select w-full" wire:model.defer="roleId" disabled>
-                        <option value="">Select Role</option>
-                        @foreach($roles as $role)
-                            <option value="{{ $role->id }}">{{ $role->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('roleId')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
                 @if($error)
                     <div class="kt-error-message text-destructive">{{ $error }}</div>

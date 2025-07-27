@@ -18,16 +18,6 @@
                     <input type="text" class="kt-input w-full" wire:model.defer="name" />
                     @error('name')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Role <span class="text-destructive">*</span></label>
-                    <select class="kt-select w-full" wire:model.defer="roleId">
-                        <option value="">Select Role</option>
-                        @foreach($roles as $role)
-                            <option value="{{ $role->id }}">{{ $role->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('roleId')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                </div>
                 <div class="flex justify-end mt-4">
                     <button type="button" class="kt-btn kt-btn-outline me-2" wire:click="closeModal">Cancel</button>
                     <button type="submit" class="kt-btn kt-btn-primary">Save</button>

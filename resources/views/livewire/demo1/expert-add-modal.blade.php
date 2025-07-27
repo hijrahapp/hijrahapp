@@ -33,16 +33,6 @@
                     </div>
                     @error('password')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Role <span class="text-destructive">*</span></label>
-                    <select class="kt-select w-full" wire:model.defer="roleId" disabled>
-                        <option value="">Select Role</option>
-                        @foreach($roles as $role)
-                            <option value="{{ $role->id }}">{{ $role->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('roleId')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                </div>
                 @if($error)
                     <div class="kt-error-message text-destructive">{{ $error }}</div>
                 @endif

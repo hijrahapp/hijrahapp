@@ -12,14 +12,12 @@ class UserAddModal extends Component
     public $name = '';
     public $password = '';
     public $roleId = '';
-    public $roles = [];
     public $error = '';
 
     protected $rules = [
         'email' => 'required|email|unique:users,email',
         'name' => 'required',
         'password' => 'required|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/',
-        'roleId' => 'required|exists:roles,id',
     ];
 
     protected function messages()
@@ -34,8 +32,8 @@ class UserAddModal extends Component
 
     public function mount()
     {
-        $this->roles = Role::whereIn('name', ['Admin'])->orderBy('name', 'asc')->get();
-        $this->roleId = $this->roles[0]['id'];
+        $roles = Role::whereIn('name', ['Admin'])->orderBy('name', 'asc')->get();
+        $this->roleId = $roles[0]['id'];
     }
 
     public function closeModal()
@@ -46,6 +44,7 @@ class UserAddModal extends Component
     public function saveUser()
     {
         $data = $this->validate();
+        $data['roleId'] = $this->roleId;
         $response = app(UserController::class)->createNewUser($data);
         if (isset($response['error'])) {
             $this->error = $response['error'];
@@ -61,7 +60,6 @@ class UserAddModal extends Component
         $this->email = '';
         $this->password = '';
         $this->name = '';
-        $this->roleId = $this->roles[0]['id'];
     }
 
     public function render()

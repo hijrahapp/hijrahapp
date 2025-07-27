@@ -11,11 +11,6 @@ class UserEditModal extends Component
     public $userId;
     public $email = '';
     public $name = '';
-    public $password = '';
-    public $gender = '';
-    public $birthDate = '';
-    public $roleId = '';
-    public $roles = [];
 
     protected $listeners = [
         'openUserEditModal' => 'openUserEditModal',
@@ -26,22 +21,11 @@ class UserEditModal extends Component
     {
         return [
             'name' => 'required|string|max:255',
-            // 'gender' => 'required|in:male,female',
-            // 'birthDate' => 'required|date',
-            'roleId' => 'required|exists:roles,id',
         ];
     }
 
     public function mount()
     {
-        $user = session('user');
-        if ($user['role'] == 'SuperAdmin') {
-            $this->roles = Role::whereNotIn('name', ['Customer', 'SuperAdmin'])->orderBy('name', 'asc')->get();
-        } elseif($user['role'] == 'Admin') {
-            $this->roles = Role::whereNotIn('name', ['Customer', 'SuperAdmin', 'Admin'])->orderBy('name', 'asc')->get();
-        } else {
-            $this->roles = Role::whereNotIn('name', ['Customer', 'SuperAdmin', 'Admin', 'Expert'])->orderBy('name', 'asc')->get();
-        }
     }
 
     public function openUserEditModal($user)
@@ -49,9 +33,6 @@ class UserEditModal extends Component
         $this->userId = $user['id'];
         $this->email = $user['email'];
         $this->name = $user['name'];
-        // $this->gender = $user['gender'];
-        // $this->birthDate = $user['birthDate'];
-        $this->roleId = $user['roleId'];
     }
 
     public function closeModal()
@@ -64,9 +45,6 @@ class UserEditModal extends Component
         $this->validate();
         $user = User::findOrFail($this->userId);
         $user->name = $this->name;
-        // $user->gender = $this->gender;
-        // $user->birthDate = $this->birthDate;
-        $user->roleId = $this->roleId;
         $user->save();
         $this->closeModal();
         $this->dispatch('refreshUserTable');
@@ -78,10 +56,6 @@ class UserEditModal extends Component
         $this->userId = null;
         $this->email = '';
         $this->name = '';
-        $this->password = '';
-        // $this->gender = '';
-        // $this->birthDate = '';
-        $this->roleId = '';
     }
 
     public function render()
