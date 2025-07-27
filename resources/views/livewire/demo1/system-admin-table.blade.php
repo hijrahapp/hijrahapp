@@ -1,4 +1,5 @@
 <div class="kt-card kt-card-grid h-full min-w-full">
+    @php $role = session('user')["role"] ?? null; @endphp
     <div class="kt-card-header flex justify-between items-center">
         <h3 class="kt-card-title">System Users</h3>
         <div class="flex gap-2 items-center">
@@ -6,9 +7,11 @@
                 <i class="ki-filled ki-magnifier"></i>
                 <input type="text" class="kt-input" placeholder="Search Users" wire:input="setSearchProperty($event.target.value)" />
             </div>
+            @if($role === 'SuperAdmin')
             <button class="kt-btn kt-btn-outline flex items-center justify-center" data-kt-modal-toggle="#user_add_modal" title="Add User">
                 <i class="ki-filled ki-plus"></i>
             </button>
+            @endif
         </div>
     </div>
     <div class="kt-card-table">
@@ -20,8 +23,14 @@
                         <th class="">Name</th>
                         <th class="">Email</th>
 {{--                        <th class="text-center">Role</th>--}}
+                        @if($role === 'SuperAdmin')
                         <th class="text-center">Activate/Deactivate</th>
+                        @else
+                        <th class="text-center">Status</th>
+                        @endif
+                        @if($role === 'SuperAdmin')
                         <th class="text-center">Edit</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
@@ -43,6 +52,7 @@
 {{--                                    {{ $user->role->name->value ?? '-' }}--}}
 {{--                                </span>--}}
                             <td class="text-center justify-center">
+                                @if($role === 'SuperAdmin')
                                 @if($user->active)
                                     <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" data-kt-modal-toggle="#user_status_modal" x-on:click="$wire.call('handleUserStatusOpen', {{ Js::from(['userId' => $user->id,'status' => false]) }})" title="Deactivate User" @if(!$this->isUserEditable($user)) disabled @endif>
                                         Deactivate
@@ -52,7 +62,19 @@
                                         Activate
                                     </button>
                                 @endif
+                                @else
+                                    @if($user->active)
+                                        <span class="kt-badge kt-badge-sm kt-badge-success kt-badge-outline">
+                                            Active
+                                        </span>
+                                    @else
+                                        <span class="kt-badge kt-badge-sm kt-badge-destructive kt-badge-outline">
+                                            Suspended
+                                        </span>
+                                    @endif
+                                @endif
                             </td>
+                            @if($role === 'SuperAdmin')
                             <td class="text-center flex gap-2 justify-center">
                                 <button
                                     class="kt-btn kt-btn-outline flex items-center justify-center"
@@ -69,6 +91,7 @@
                                     <i class="ki-filled ki-pencil"></i>
                                 </button>
                             </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
