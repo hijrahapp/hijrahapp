@@ -21,7 +21,6 @@
                         <th class="">Email</th>
                         <th class="text-center">Date of Birth</th>
                         <th class="text-center">Gender</th>
-                        <th class="text-center">Role</th>
                         <th class="text-center">Activate/Deactivate</th>
                     </tr>
                 </thead>
@@ -35,18 +34,6 @@
                             <td>{{ $user->email }}</td>
                             <td class="text-center">{{ $user->birthDate ? $user->birthDate->format('d M, Y') : '-' }}</td>
                             <td class="text-center">{{ ucfirst($user->gender) }}</td>
-                            <td class="text-center">
-                                <span class="kt-badge kt-badge-sm {{
-                                    match($user->role->name->value ?? '') {
-                                        'SuperAdmin' => 'kt-badge-destructive',
-                                        'Admin' => 'kt-badge-warning',
-                                        'Expert' => 'kt-badge-success',
-                                        'Customer' => 'kt-badge-secondary',
-                                        default => 'kt-badge-secondary',
-                                    }
-                                }} kt-badge-outline">
-                                    {{ $user->role->name->value ?? '-' }}
-                                </span>
                             <td class="text-center justify-center">
                                 @if($user->active)
                                     <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" data-kt-modal-toggle="#user_status_modal" x-on:click="$wire.call('handleUserStatusOpen', {{ Js::from(['userId' => $user->id,'status' => false]) }})" title="Deactivate User" @if(!$this->isUserEditable($user)) disabled @endif>
