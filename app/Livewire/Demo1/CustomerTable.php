@@ -41,7 +41,7 @@ class CustomerTable extends Component
         $customerRoleId = Role::where('name', 'Customer')->value('id');
         $query = User::with('role')
             ->whereIn('roleId', [$customerRoleId])
-            ->orderBy('created_at', 'asc')
+            ->orderBy('id', 'asc')
             ->when($this->search, function($q) {
                 $q->where(function($q) {
                     $q->where('name', 'like', '%'.$this->search.'%')

@@ -41,7 +41,7 @@ class ExpertsTable extends Component
         $expertsRoleId = Role::where('name', 'Expert')->value('id');
         $query = User::with('role')
             ->whereIn('roleId', [$expertsRoleId])
-            ->orderBy('created_at', 'asc')
+            ->orderBy('id', 'asc')
             ->when($this->search, function($q) {
                 $q->where(function($q) {
                     $q->where('name', 'like', '%'.$this->search.'%')

@@ -16,19 +16,19 @@
             <table class="kt-table kt-table-border table-fixed w-full">
                 <thead>
                     <tr>
-                        <th class="">Id</th>
+                        <th class="w-20 text-center">#</th>
                         <th class="w-20 text-center">Profile</th>
                         <th class="">Name</th>
-                        <th class="">Email</th>
+                        <th class="w-80">Email</th>
                         <th class="text-center">Date of Birth</th>
                         <th class="text-center">Gender</th>
                         <th class="text-center">Activate/Deactivate</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($users as $user)
+                    @forelse($users as $index => $user)
                         <tr>
-                            <td>{{ $user->id }}</td>
+                            <td class="text-center">{{ $users->firstItem() + $index }}</td>
                             <td class="text-center flex justify-center">
                                 <img src="{{ $user->profile_picture ?? '/assets/media/avatars/blank.png' }}" class="size-9 rounded-full border-2 border-gray-300" />
                             </td>
@@ -50,7 +50,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-4">No users found.</td>
+                            <td colspan="9" class="text-center py-4">No users found.</td>
                         </tr>
                     @endforelse
                 </tbody>

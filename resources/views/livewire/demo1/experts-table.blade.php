@@ -16,17 +16,17 @@
             <table class="kt-table kt-table-border table-fixed w-full">
                 <thead>
                 <tr>
-                    <th class="">Id</th>
+                    <th class="w-20 text-center">#</th>
                     <th class="">Name</th>
-                    <th class="">Email</th>
+                    <th class="w-80">Email</th>
                     <th class="text-center">Activate/Deactivate</th>
                     <th class="text-center">Edit</th>
                 </tr>
                 </thead>
                 <tbody>
-                @forelse($users as $user)
+                @forelse($users as $index => $user)
                     <tr>
-                        <td>{{ $user->id }}</td>
+                        <td class="text-center">{{ $users->firstItem() + $index }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
                         <td class="text-center justify-center">
@@ -59,7 +59,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="text-center py-4">No users found.</td>
+                        <td colspan="9" class="text-center py-4">No users found.</td>
                     </tr>
                 @endforelse
                 </tbody>

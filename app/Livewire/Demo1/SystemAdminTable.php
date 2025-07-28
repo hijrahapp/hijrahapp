@@ -47,7 +47,7 @@ class SystemAdminTable extends Component
             $adminRoleId = Role::where('name', 'Admin')->value('id');
             $query = User::with('role')
                 ->whereIn('roleId', [$superAdmin, $adminRoleId])
-                ->orderBy('created_at', 'asc')
+                ->orderBy('id', 'asc')
                 ->when($this->search, function($q) {
                     $q->where(function($q) {
                         $q->where('name', 'like', '%'.$this->search.'%')
@@ -58,7 +58,7 @@ class SystemAdminTable extends Component
             $adminRoleId = Role::where('name', 'Admin')->value('id');
             $query = User::with('role')
                 ->whereIn('roleId', [$adminRoleId])
-                ->orderBy('created_at', 'asc')
+                ->orderBy('id', 'asc')
                 ->when($this->search, function($q) {
                     $q->where(function($q) {
                         $q->where('name', 'like', '%'.$this->search.'%')
