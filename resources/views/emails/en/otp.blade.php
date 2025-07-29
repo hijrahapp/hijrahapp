@@ -7,11 +7,7 @@
 
 Hello {{ $user->name ?? $user->email }},
 
-Your One-Time Password (OTP) is:
-
-# **{{ $otp }}**
-
-This code will expire at {{ $expiresAt->format('H:i, d M Y') }} (in about 15 minutes).
+Your One-Time Password (OTP) is: # **{{ $otp }}**
 
 If you did not request this code, please ignore this email.
 
