@@ -1,6 +1,6 @@
 <!-- Header -->
 <header class="kt-header fixed end-0 start-0 top-0 z-10 flex shrink-0 items-stretch bg-background" data-kt-sticky="true"
-    data-kt-sticky-class="border-b border-border" data-kt-sticky-name="header" id="header">
+    data-kt-sticky-class="border-b border-border" data-kt-sticky-name="header" id="header" style="background-color: var(--card)">
     <!-- Container -->
     <div class="kt-container-fixed flex items-stretch justify-between lg:gap-4" id="headerContainer">
         <!-- Mobile Logo -->

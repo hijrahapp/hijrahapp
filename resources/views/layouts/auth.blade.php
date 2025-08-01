@@ -5,10 +5,12 @@
     @livewireStyles
     <style>
     .page-bg {
-        background-image: url('/assets/media/images/2600x1200/bg-5.png');
+        background-image: url('/assets/media/images/2600x1600/bg-4.png');
+        background-size: 100% 100%;
     }
     .dark .page-bg {
-        background-image: url('/assets/media/images/2600x1200/bg-5-dark.png');
+        background-image: url('/assets/media/images/2600x1600/bg-4.png');
+        background-size: 100% 100%;
     }
     </style>
 </head>
@@ -17,4 +19,4 @@
     @include('layouts.partials.scripts')
     @livewireScripts
 </body>
-</html> 
+</html>

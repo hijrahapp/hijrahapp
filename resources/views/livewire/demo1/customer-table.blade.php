@@ -1,4 +1,4 @@
-<div class="kt-card kt-card-grid h-full min-w-full">
+<div class="kt-card kt-card-grid kt-card-div h-full min-w-full">
     <div class="kt-card-header flex justify-between items-center">
         <h3 class="kt-card-title">Customers</h3>
         <div class="flex gap-2 items-center">
@@ -50,7 +50,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center py-4">No users found.</td>
+                            <td colspan="7" class="text-center py-4">No users found.</td>
                         </tr>
                     @endforelse
                 </tbody>

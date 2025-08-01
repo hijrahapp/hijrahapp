@@ -6408,14 +6408,15 @@
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(27.4% 0.006 286.033);
-  --card: oklch(1 0 0);
+  --card: #F9F9ED;
   --card-foreground: oklch(27.4% 0.006 286.033);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(27.4% 0.006 286.033);
-  --primary: #1379F0;
+  --primary: #47624F;
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(96.7% 0.003 264.542);
   --secondary-foreground: oklch(44.6% 0.03 256.802);
+  --secondary-background: #D6E1DC;
   --muted: oklch(96.7% 0.003 264.542);
   --muted-foreground: oklch(70.5% 0.015 286.067);
   --accent: oklch(96.7% 0.003 264.542);
@@ -6436,7 +6437,7 @@
   --card-foreground: oklch(98.5% 0 0);
   --popover: oklch(14.1% 0.005 285.823);
   --popover-foreground: oklch(98.5% 0 0);
-  --primary: #1379F0;
+  --primary: #47624F;
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(27.4% 0.006 286.033);
   --secondary-foreground: oklch(70.5% 0.015 286.067);
@@ -13549,14 +13550,15 @@
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(27.4% 0.006 286.033);
-  --card: oklch(1 0 0);
+  --card: #F9F9ED;
   --card-foreground: oklch(27.4% 0.006 286.033);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(27.4% 0.006 286.033);
-  --primary: #1379F0;
+  --primary: #47624F;
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(96.7% 0.003 264.542);
   --secondary-foreground: oklch(44.6% 0.03 256.802);
+  --secondary-background: #D6E1DC;
   --muted: oklch(96.7% 0.003 264.542);
   --muted-foreground: oklch(70.5% 0.015 286.067);
   --accent: oklch(96.7% 0.003 264.542);
@@ -13577,7 +13579,7 @@
   --card-foreground: oklch(98.5% 0 0);
   --popover: oklch(14.1% 0.005 285.823);
   --popover-foreground: oklch(98.5% 0 0);
-  --primary: #1379F0;
+  --primary: #47624F;
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(27.4% 0.006 286.033);
   --secondary-foreground: oklch(70.5% 0.015 286.067);
@@ -14315,7 +14317,7 @@
     width: 100%;
     align-items: center;
     gap: calc(var(--spacing) * 2);
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-sm--line-height));
     --tw-leading: 1;
     line-height: 1;
@@ -15359,6 +15361,9 @@
     @supports (color: color-mix(in lab, red, red)) {
       --tw-shadow-color: color-mix(in oklab, rgba(0,0,0,0.05) var(--tw-shadow-alpha), transparent);
     }
+  }
+  .kt-card-div {
+    background-color: var(--background);
   }
   .kt-card-header {
     display: flex;
@@ -17622,13 +17627,13 @@
       color: var(--muted-foreground);
     }
     thead {
+      background-color: var(--secondary-background);
       & tr {
         border-bottom-style: var(--tw-border-style);
         border-bottom-width: 1px;
       }
       th {
         height: calc(var(--spacing) * 10);
-        background-color: var(--muted);
         @supports (color: color-mix(in lab, red, red)) {
           background-color: color-mix(in oklab, var(--muted) 40%, transparent);
         }
@@ -17777,7 +17782,7 @@
     border-color: var(--border);
     & td,	& th {
       border-inline-end-style: var(--tw-border-style);
-      border-inline-end-width: 1px;
+      border-inline-end-width: 0§px;
       border-color: var(--border);
       &:last-child {
         border-inline-end-style: var(--tw-border-style);
@@ -18271,7 +18276,7 @@
       margin-inline: auto;
     }
     @media (width >= 80rem) {
-      max-width: var(--breakpoint-xl);
+      max-width: var(--breakpoint-2xl);
     }
     @media (width >= 80rem) {
       padding-inline: calc(var(--spacing) * 7.5);

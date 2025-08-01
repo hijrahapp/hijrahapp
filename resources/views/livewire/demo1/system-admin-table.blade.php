@@ -1,4 +1,4 @@
-<div class="kt-card kt-card-grid h-full min-w-full">
+<div class="kt-card kt-card-grid kt-card-div h-full min-w-full">
     @php $role = session('user')["role"] ?? null; @endphp
     <div class="kt-card-header flex justify-between items-center">
         <h3 class="kt-card-title">System Users</h3>
@@ -95,7 +95,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center py-4">No users found.</td>
+                            <td @if($role === 'SuperAdmin') colspan="5" @else colspan = "4" @endif  class="text-center py-4">No users found.</td>
                         </tr>
                     @endforelse
                 </tbody>

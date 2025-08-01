@@ -1,18 +1,18 @@
 <div class="kt-sidebar fixed bottom-0 top-0 z-20 hidden shrink-0 flex-col items-stretch border-e border-e-border bg-background [--kt-drawer-enable:true] lg:flex lg:[--kt-drawer-enable:false]"
-    data-kt-drawer="true" data-kt-drawer-class="kt-drawer kt-drawer-start top-0 bottom-0" id="sidebar">
+    data-kt-drawer="true" data-kt-drawer-class="kt-drawer kt-drawer-start top-0 bottom-0" id="sidebar" style="background-color: var(--card); border: unset;">
     <div class="kt-sidebar-header relative hidden shrink-0 items-center justify-between px-3 lg:flex lg:px-6"
         id="sidebar_header">
         <a class="dark:hidden" href="html/demo1.html">
-            <img class="default-logo min-h-[22px] max-w-none" src="/assets/media/app/default-logo.svg" />
-            <img class="small-logo min-h-[22px] max-w-none" src="/assets/media/app/mini-logo.svg" />
+            <img class="default-logo max-w-32" src="/assets/media/app/big-logo.png" />
+            <img class="small-logo" style="max-width: 31px;" src="/assets/media/app/logo.png" />
         </a>
         <a class="hidden dark:block" href="html/demo1.html">
-            <img class="default-logo min-h-[22px] max-w-none" src="/assets/media/app/default-logo-dark.svg" />
-            <img class="small-logo min-h-[22px] max-w-none" src="/assets/media/app/mini-logo.svg" />
+            <img class="default-logo max-w-32" src="/assets/media/app/big-logo.png" />
+            <img class="small-logo" style="max-width: 31px;" src="/assets/media/app/logo.png" />
         </a>
         <button
-            class="kt-btn kt-btn-outline kt-btn-icon absolute start-full top-2/4 size-[30px] -translate-x-2/4 -translate-y-2/4 rtl:translate-x-2/4"
-            data-kt-toggle="body" data-kt-toggle-class="kt-sidebar-collapse" id="sidebar_toggle">
+            class="kt-btn kt-btn-outline kt-btn-icon absolute start-full top-2/4 -translate-x-2/4 -translate-y-2/4 rtl:translate-x-2/4"
+            data-kt-toggle="body" data-kt-toggle-class="kt-sidebar-collapse" id="sidebar_toggle" style="background-color: #F8D87D; border-radius: 100%;">
             <i
                 class="ki-filled ki-black-right-line kt-toggle-active:rotate-180 rtl:translate rtl:kt-toggle-active:rotate-0 transition-all duration-300 rtl:rotate-180">
             </i>

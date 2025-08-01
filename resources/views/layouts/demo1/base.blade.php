@@ -19,7 +19,7 @@
             <livewire:demo1.sidebar />
 
             <!-- Wrapper -->
-            <div class="kt-wrapper flex grow flex-col">
+            <div class="kt-wrapper flex grow flex-col" style="background-color: var(--secondary)">
                 @persist('mega-menu')
                 <livewire:demo1.header />
                 @endpersist
