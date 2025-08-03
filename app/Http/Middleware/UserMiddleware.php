@@ -18,7 +18,7 @@ class UserMiddleware
             return response()->json(['message' => __('messages.user_not_found')], 404);
         }
         if (!$user->active) {
-            return response()->json(['message' => __('messages.inactive_user')], 401);
+            return response()->json(['message' => __('messages.inactive_user')], 403);
         }
 
         $request->merge(['authUser' => $user]);

@@ -35,7 +35,7 @@ class FirebaseService
             return response()->json([
                 'error' => __('messages.firebase_token_missing'),
                 'message' => __('messages.provide_valid_firebase_token')
-            ], 400);
+            ], 404);
         }
 
         try {

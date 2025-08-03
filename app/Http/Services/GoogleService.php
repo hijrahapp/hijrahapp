@@ -34,7 +34,7 @@ class GoogleService
             return response()->json([
                 'error' => __('messages.google_token_missing'),
                 'message' => __('messages.provide_valid_google_token')
-            ], 400);
+            ], 404);
         }
 
         try {

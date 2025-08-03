@@ -23,7 +23,7 @@ class AuthService
             return response()->json(['message' => __('messages.incorrect_password')], 401);
         }
         if (!$user->active) {
-            return response()->json(['message' => __('messages.inactive_user')], 401);
+            return response()->json(['message' => __('messages.inactive_user')], 403);
         }
         $roles = ['SuperAdmin', 'Admin', 'Expert'];
         if (!$user->role || !in_array($user->role->name->value, $roles)) {
@@ -42,7 +42,7 @@ class AuthService
             return response()->json(['message' => __('messages.incorrect_password')], 401);
         }
         if (!$user->active) {
-            return response()->json(['message' => __('messages.inactive_user')], 401);
+            return response()->json(['message' => __('messages.inactive_user')], 403);
         }
 
         return response()->json(JWTUtils::generateTokenResponse($user));
@@ -52,7 +52,7 @@ class AuthService
         $user = $this->userRepo->findByEmail($request['email']);
         if ($user) {
             if($user->active) {
-                return response()->json(['message' => __('messages.email_exists')], 401);
+                return response()->json(['message' => __('messages.email_exists')], 403);
             }
 
             $this->userRepo->delete($user);

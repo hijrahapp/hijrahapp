@@ -33,7 +33,7 @@ class UserService
 
     public function resetPassword($user, $password) {
         if (Hash::check($password, $user->password)) {
-            return response()->json(['message' => __('messages.cannot_enter_same_password')], 401);
+            return response()->json(['message' => __('messages.cannot_enter_same_password')], 400);
         }
 
         logger('password');
