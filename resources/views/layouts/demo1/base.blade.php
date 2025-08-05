@@ -19,13 +19,13 @@
             <livewire:demo1.sidebar />
 
             <!-- Wrapper -->
-            <div class="kt-wrapper flex grow flex-col" style="background-color: var(--secondary)">
+            <div class="kt-wrapper flex grow flex-col">
                 @persist('mega-menu')
                 <livewire:demo1.header />
                 @endpersist
 
                 <!-- Content -->
-                <main class="grow pt-5" id="content" role="content">
+                <main class="grow pt-5" style="background-color: var(--secondary)" id="content" role="content">
                     {{ $slot }}
                 </main>
                 <!-- End of Content -->

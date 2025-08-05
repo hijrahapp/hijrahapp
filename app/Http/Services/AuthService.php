@@ -51,8 +51,12 @@ class AuthService
     public function signup($request) {
         $user = $this->userRepo->findByEmail($request['email']);
         if ($user) {
-            if($user->active) {
-                return response()->json(['message' => __('messages.email_exists')], 403);
+            if($user->email_verified_at) {
+                if (!$user->active) {
+                    return response()->json(['message' => __('messages.exists_inactive_user')], 403);
+                } else {
+                    return response()->json(['message' => __('messages.email_exists')], 403);
+                }
             }
 
             $this->userRepo->delete($user);

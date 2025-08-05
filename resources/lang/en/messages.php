@@ -39,4 +39,5 @@ return [
     'unauthorized_role' => 'Unauthorized role for this action',
     'invalid_password_format' => 'Password must be at least 8 characters and include a number, an uppercase letter, and a special character',
     'password_and_confirmation_mismatch' => 'The confirmation password does not match the new password',
+    'exists_inactive_user' => 'This email already exists but is temporarily suspended, please contact support for more information',
 ];
