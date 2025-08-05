@@ -46,7 +46,7 @@ class UserEditModal extends Component
         $user->name = $this->name;
         $user->save();
         $this->closeModal();
-        $this->dispatch('refreshUserTable');
+        $this->dispatch('refreshTable');
     }
 
     public function resetForm()

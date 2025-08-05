@@ -15,7 +15,8 @@ class MegaMenu extends Component
         // Set default section based on user role
         $role = session('user')["role"] ?? null;
         if ($role === 'Expert') {
-            $this->currentSection = 'Welcome';
+            $this->currentSection = 'Methodologies';
+            $this->currentSubSection = 'Methodologies Management';
         } elseif ($role === 'SuperAdmin' || $role === 'Admin') {
             $this->currentSection = 'Network';
             $this->currentSubSection = 'Admins Management';

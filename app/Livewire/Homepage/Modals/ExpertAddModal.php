@@ -50,7 +50,7 @@ class ExpertAddModal extends Component
             $this->error = $response['error'];
             return;
         }
-        $this->dispatch('refreshUserTable');
+        $this->dispatch('refreshTable');
         $this->closeModal();
     }
 

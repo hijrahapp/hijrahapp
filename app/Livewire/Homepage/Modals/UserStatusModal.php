@@ -36,7 +36,7 @@ class UserStatusModal extends Component
         $user->active = $this->active;
         $user->save();
         $this->closeModal();
-        $this->dispatch('refreshUserTable');
+        $this->dispatch('refreshTable');
     }
 
     public function resetForm()

@@ -18,7 +18,7 @@ class CustomersTable extends Component
     protected $paginationTheme = 'tailwind';
 
     protected $listeners = [
-        'refreshUserTable' => '$refresh'
+        'refreshTable' => '$refresh'
     ];
 
     public function getSearchProperty()
