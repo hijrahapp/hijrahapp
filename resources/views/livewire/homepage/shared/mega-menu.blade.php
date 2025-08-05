@@ -12,12 +12,13 @@
             <div class="kt-menu flex-col gap-5 lg:flex-row lg:gap-7.5" data-kt-menu="true" id="mega_menu">
                 <!--Megamenu Item-->
                 <div class="kt-menu-item active">
-                    <a class="kt-menu-link kt-menu-item-hover:text-primary kt-menu-item-active:text-mono kt-menu-item-active:font-medium text-nowrap text-sm font-medium text-foreground"
-                        href="{{ route('homepage.index') }}">
-                        <span class="kt-menu-title text-nowrap">
-                            Home
-                        </span>
-                    </a>
+                    <h1 class="kt-menu-title font-medium text-xl text-secondary-foreground">
+                        @if($currentSubSection)
+                            {{ $currentSection }} > {{ $currentSubSection }}
+                        @else
+                            {{ $currentSection }}
+                        @endif
+                    </h1>
                 </div>
                 <!--End of Megamenu Item-->
                 <!--Megamenu Item-->

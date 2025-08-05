@@ -1,7 +1,7 @@
 <div class="kt-card kt-card-grid kt-card-div h-full min-w-full">
     @php $role = session('user')["role"] ?? null; @endphp
     <div class="kt-card-header flex justify-between items-center">
-        <h3 class="kt-card-title">System Users</h3>
+        <h3 class="kt-card-title">Admins</h3>
         <div class="flex gap-2 items-center">
             <div class="kt-input max-w-48">
                 <i class="ki-filled ki-magnifier"></i>

@@ -9,7 +9,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
-class SystemAdminTable extends Component
+class AdminsTable extends Component
 {
     use WithFileUploads, WithPagination;
 
@@ -80,7 +80,7 @@ class SystemAdminTable extends Component
 
     public function render()
     {
-        return view('livewire.homepage.tables.system-admin-table', [
+        return view('livewire.homepage.tables.admins-table', [
             'users' => $this->users,
         ]);
     }
