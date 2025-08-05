@@ -1,17 +1,20 @@
 <?php
 
+use App\Livewire\Auth\Login;
+use App\Livewire\Auth\ResetPasswordEnterEmail;
+use App\Livewire\Auth\ResetPassword2fa;
+use App\Livewire\Auth\ResetPasswordChangePassword;
+use App\Livewire\Auth\ResetPasswordChanged;
+use App\Livewire\Homepage\Index as HomepageIndex;
 use Illuminate\Support\Facades\Route;
-use App\Livewire\Demo1\Index as Demo1Index;
-use App\Livewire\Demo1\Login;
 
 Route::get('/', function () {
-    return redirect()->route('demo1.index');
+    return redirect()->route('homepage.index');
 });
 
-// Demo1 routes
-Route::prefix('app')->get('/demo1', Demo1Index::class)->name('demo1.index');
+Route::prefix('app')->get('/home', HomepageIndex::class)->name('homepage.index');
 Route::prefix('app')->get('/login', Login::class)->name('login');
-Route::prefix('app')->get('/reset-password/enter-email', \App\Livewire\Demo1\ResetPasswordEnterEmail::class)->name('password.enter-email');
-Route::prefix('app')->get('/reset-password/2fa', \App\Livewire\Demo1\ResetPassword2fa::class)->name('password.2fa');
-Route::prefix('app')->get('/reset-password/change-password', \App\Livewire\Demo1\ResetPasswordChangePassword::class)->name('password.reset');
-Route::prefix('app')->get('/reset-password/password-changed', \App\Livewire\Demo1\ResetPasswordChanged::class)->name('password.changed');
+Route::prefix('app')->get('/reset-password/enter-email', ResetPasswordEnterEmail::class)->name('password.enter-email');
+Route::prefix('app')->get('/reset-password/2fa', ResetPassword2fa::class)->name('password.2fa');
+Route::prefix('app')->get('/reset-password/change-password', ResetPasswordChangePassword::class)->name('password.reset');
+Route::prefix('app')->get('/reset-password/password-changed', ResetPasswordChanged::class)->name('password.changed');
