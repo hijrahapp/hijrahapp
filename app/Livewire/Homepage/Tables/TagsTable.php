@@ -23,32 +23,12 @@ class TagsTable extends Component
         'deleteTag' => 'deleteTag',
     ];
 
-    public function getSearchProperty()
-    {
-        return $this->search;
-    }
-
-    public function setSearchProperty($value)
-    {
-        $this->search = $value;
-        $this->resetPage();
-    }
-
-    public function mount()
-    {
-    }
-
     #[Computed]
     public function tags()
     {
         $query = Tag::where('title', 'like', '%'.$this->search.'%')
             ->orderBy('id', 'asc');
         return $query->paginate($this->perPage);
-    }
-
-    public function handleUserEditOpen($user)
-    {
-        $this->dispatch('openUserEditModal', $user);
     }
 
     public function openTagStatusModal($request) {
@@ -86,6 +66,17 @@ class TagsTable extends Component
         $tag = Tag::findOrFail($request['id']);
         $tag->delete();
         $this->dispatch('refreshTable');
+    }
+
+    public function getSearchProperty()
+    {
+        return $this->search;
+    }
+
+    public function setSearchProperty($value)
+    {
+        $this->search = $value;
+        $this->resetPage();
     }
 
     public function render()

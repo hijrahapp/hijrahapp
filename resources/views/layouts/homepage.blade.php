@@ -13,6 +13,7 @@
         <livewire:homepage.modals.user-status-modal />
         <livewire:homepage.modals.expert-add-modal />
         <livewire:homepage.modals.tag-add-modal />
+        <livewire:homepage.modals.question-add-modal />
         <livewire:homepage.modals.confirmation-modal />
         <!-- Page -->
         <!-- Main -->

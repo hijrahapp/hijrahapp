@@ -17,4 +17,9 @@ class Answer extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function questions()
+    {
+        return $this->belongsToMany(Question::class, 'questions_answers');
+    }
 } 

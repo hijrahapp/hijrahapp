@@ -14,7 +14,7 @@ class AdminsTable extends Component
     use WithFileUploads, WithPagination;
 
     public $search = '';
-    public $perPage = 15;
+    public $perPage = 10;
 
     protected $paginationTheme = 'tailwind';
 

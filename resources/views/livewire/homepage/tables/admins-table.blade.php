@@ -29,7 +29,7 @@
                         <th class="text-center">Status</th>
                         @endif
                         @if($role === 'SuperAdmin')
-                        <th class="text-center">Edit</th>
+                        <th class="text-center">Actions</th>
                         @endif
                     </tr>
                 </thead>
@@ -88,7 +88,7 @@
                                                                                     'roleId' => $user->roleId,
                                                                                 ]) }})"
                                     title="Edit User" @if(!$this->isUserEditable($user)) disabled @endif>
-                                    <i class="ki-filled ki-pencil"></i>
+                                    <i class="ki-filled ki-pencil text-secondary-foreground"></i>
                                 </button>
                             </td>
                             @endif

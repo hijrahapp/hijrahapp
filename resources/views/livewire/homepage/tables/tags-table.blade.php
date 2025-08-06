@@ -44,7 +44,7 @@
                                     data-kt-modal-toggle="#confirmation_modal"
                                     x-on:click="$wire.call('openTagDeleteModal', {{ Js::from([ 'id' => $tag->id ]) }})"
                                     title="Delete Tag">
-                                    <i class="ki-filled ki-trash"></i>
+                                    <i class="ki-filled ki-trash text-destructive"></i>
                                 </button>
                             </td>
                         </tr>
