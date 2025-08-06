@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('methodology', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('description');
-            $table->string('definition');
+            $table->text('description');
+            $table->text('definition');
             $table->longText('objectives')->nullable();
             $table->enum('type', ['simple', 'complex', 'twoSection']);
             $table->string('first_section_name')->nullable();

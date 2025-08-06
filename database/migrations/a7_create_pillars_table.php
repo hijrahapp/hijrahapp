@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('pillars', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('description');
-            $table->string('definition');
+            $table->text('description');
+            $table->text('definition');
             $table->longText('objectives')->nullable();
             $table->json('tags')->nullable();
             $table->timestamps();

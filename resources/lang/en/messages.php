@@ -40,4 +40,13 @@ return [
     'invalid_password_format' => 'Password must be at least 8 characters and include a number, an uppercase letter, and a special character',
     'password_and_confirmation_mismatch' => 'The confirmation password does not match the new password',
     'exists_inactive_user' => 'This email already exists but is temporarily suspended, please contact support for more information',
+    'methodologies_fetched_successfully' => 'Methodologies fetched successfully',
+    'methodology_fetched_successfully' => 'Methodology fetched successfully',
+    'methodology_not_found' => 'Methodology not found',
+    'error_fetching_methodologies' => 'Error fetching methodologies',
+    'error_fetching_methodology' => 'Error fetching methodology',
+    'invalid_section_number' => 'Invalid section number. Must be 1 or 2',
+    'methodology_section_fetched_successfully' => 'Methodology section fetched successfully',
+    'error_fetching_methodology_section' => 'Error fetching methodology section',
+    'methodology_not_two_section_type' => 'Methodology must be of two-section type to use section endpoints',
 ];

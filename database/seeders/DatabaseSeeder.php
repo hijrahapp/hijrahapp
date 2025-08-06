@@ -9,11 +9,13 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-         collect(['SuperAdmin', 'Admin', 'Expert', 'Customer'])->map(function ($roleName) {
-            return Role::factory()->create(['name' => $roleName]);
-        });
+        // Roles
+        collect(['SuperAdmin', 'Admin', 'Expert', 'Customer'])->each(fn ($roleName) => Role::factory()->create(['name' => $roleName]));
 
-        // Create 10 users assigned to random roles
-//        User::factory(10)->create();
+        // Seed answers and demo methodologies
+        $this->call([
+            AnswerSeeder::class,
+            DemoMethodologiesSeeder::class,
+        ]);
     }
 }

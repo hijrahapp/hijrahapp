@@ -40,4 +40,13 @@ return [
     'invalid_password_format' => 'يجب أن تحتوي على 8 أحرف على الأقل, حرف كبير, حرف صغير, رقم ورمز خاص',
     'password_and_confirmation_mismatch' => 'كلمة المرور وتأكيد كلمة المرور غير متطابقتين',
     'exists_inactive_user' => 'هذا البريد الإلكتروني موجود بالفعل لكن موقوف مؤقتًا, يرجى التواصل مع الدعم لمزيد من المعلومات',
+    'methodologies_fetched_successfully' => 'تم جلب المنهجيات بنجاح',
+    'methodology_fetched_successfully' => 'تم جلب المنهجية بنجاح',
+    'methodology_not_found' => 'المنهجية غير موجودة',
+    'error_fetching_methodologies' => 'خطأ في جلب المنهجيات',
+    'error_fetching_methodology' => 'خطأ في جلب المنهجية',
+    'invalid_section_number' => 'رقم القسم غير صحيح. يجب أن يكون 1 أو 2',
+    'methodology_section_fetched_successfully' => 'تم جلب قسم المنهجية بنجاح',
+    'error_fetching_methodology_section' => 'خطأ في جلب قسم المنهجية',
+    'methodology_not_two_section_type' => 'يجب أن تكون المنهجية من نوع قسمين لاستخدام نقاط نهاية الأقسام',
 ];
