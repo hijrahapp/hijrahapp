@@ -40,7 +40,7 @@ class UserProfile extends Component
         session(['user' => $response ?? null]);
 
         $this->close();
-        return redirect()->route('demo1.index');
+        return redirect()->route('homepage.index');
     }
 
     public function close()

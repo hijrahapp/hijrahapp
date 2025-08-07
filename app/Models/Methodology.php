@@ -97,5 +97,26 @@ class Methodology extends Model
             ->using(\App\Models\ModuleQuestion::class);
     }
 
+    /**
+     * Modules within pillars of this methodology.
+     */
+    public function pillarModules(): BelongsToMany
+    {
+        return $this->belongsToMany(Module::class, 'pillar_module')
+            ->withPivot('pillar_id')
+            ->wherePivot('methodology_id', $this->id);
+    }
+
+    /**
+     * Modules within a specific pillar of this methodology.
+     */
+    public function modulesInPillar(int $pillarId): BelongsToMany
+    {
+        return $this->belongsToMany(Module::class, 'pillar_module')
+            ->withPivot('pillar_id')
+            ->wherePivot('methodology_id', $this->id)
+            ->wherePivot('pillar_id', $pillarId);
+    }
+
 
 }

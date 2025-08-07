@@ -88,7 +88,16 @@ class DemoMethodologiesArabicSeeder extends Seeder
                     'questions_estimated_time' => '5-7 دقائق',
                     'questions_count' => 4,
                 ]);
-                $pillar->modules()->attach($module->id);
+                
+                // Attach module to pillar with methodology context
+                \DB::table('pillar_module')->insert([
+                    'methodology_id' => $complex->id,
+                    'pillar_id' => $pillar->id,
+                    'module_id' => $module->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                
                 $this->attachQuestions($module, 4);
             }
         }
@@ -345,6 +354,9 @@ class DemoMethodologiesArabicSeeder extends Seeder
 
     private function createModulesForPillar(Pillar $pillar, int $index): void
     {
+        // Find the methodology that contains this pillar
+        $methodologyId = $this->findMethodologyForPillar($pillar);
+        
         for ($m=1; $m<=4; $m++) {
             $module = Module::factory()->create([
                 'name' => $pillar->name."-الوحدة $m",
@@ -353,7 +365,16 @@ class DemoMethodologiesArabicSeeder extends Seeder
                 'questions_estimated_time' => '5-7 دقائق',
                 'questions_count' => 4,
             ]);
-            $pillar->modules()->attach($module->id);
+            
+            // Attach module to pillar with methodology context
+            \DB::table('pillar_module')->insert([
+                'methodology_id' => $methodologyId,
+                'pillar_id' => $pillar->id,
+                'module_id' => $module->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            
             $this->attachQuestions($module, 4);
         }
     }
@@ -403,22 +424,16 @@ class DemoMethodologiesArabicSeeder extends Seeder
             ];
         }
         
-        // If not, check if module is attached to a pillar
+        // If not, check if module is attached to a pillar (now with methodology_id)
         $pillarModule = \DB::table('pillar_module')
             ->where('module_id', $module->id)
             ->first();
         
         if ($pillarModule) {
-            $methodologyPillar = \DB::table('methodology_pillar')
-                ->where('pillar_id', $pillarModule->pillar_id)
-                ->first();
-            
-            if ($methodologyPillar) {
-                return [
-                    'methodology_id' => $methodologyPillar->methodology_id,
-                    'pillar_id' => $pillarModule->pillar_id
-                ];
-            }
+            return [
+                'methodology_id' => $pillarModule->methodology_id,
+                'pillar_id' => $pillarModule->pillar_id
+            ];
         }
         
         throw new \Exception("Module {$module->id} is not associated with any methodology");

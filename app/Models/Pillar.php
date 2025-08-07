@@ -61,6 +61,16 @@ class Pillar extends Model
     }
 
     /**
+     * Modules attached to this pillar within a specific methodology.
+     */
+    public function modulesForMethodology(int $methodologyId): BelongsToMany
+    {
+        return $this->belongsToMany(Module::class, 'pillar_module')
+            ->withPivot('methodology_id')
+            ->wherePivot('methodology_id', $methodologyId);
+    }
+
+    /**
      * Questions attached directly to this pillar within a methodology.
      */
     public function questions(): BelongsToMany

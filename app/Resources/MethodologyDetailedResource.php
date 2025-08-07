@@ -2,6 +2,7 @@
 
 namespace App\Resources;
 
+use App\Services\ResultCalculationService;
 use App\Traits\HasTagTitles;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -52,15 +53,36 @@ class MethodologyDetailedResource extends JsonResource
             'pillars' => [
                 'definition' => $this->pillars_definition,
                 'list' => $this->whenLoaded('pillars', function () {
-                    return PillarResource::collection($this->pillars);
+                    return PillarResource::collection($this->pillars->map(function ($pillar) {
+                        $pillar->setAttribute('user_id', $this->user_id ?? null);
+                        return $pillar;
+                    }));
                 }),
             ],
             'modules' => [
                 'definition' => $this->modules_definition,
                 'list' => $this->whenLoaded('modules', function () {
-                    return ModuleResource::collection($this->modules);
+                    return ModuleResource::collection($this->modules->map(function ($module) {
+                        $module->setAttribute('user_id', $this->user_id ?? null);
+                        return $module;
+                    }));
                 }),
             ],
+            'result' => $this->calculateResult(),
         ];
+    }
+
+    /**
+     * Calculate result for this methodology
+     */
+    private function calculateResult(): array
+    {
+        $service = new ResultCalculationService();
+        
+        if ($this->user_id) {
+            return $service->calculateMethodologyResult($this->user_id, $this->id);
+        } else {
+            return [];
+        }
     }
 } 

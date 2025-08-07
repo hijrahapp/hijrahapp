@@ -12,10 +12,15 @@ class MethodologyController
 {
     public function __construct(private MethodologyRepository $methodologyRepo) {}
 
-    public function all(): JsonResponse
+    public function all(Request $request): JsonResponse
     {
         try {
             $methodologies = $this->methodologyRepo->getAllBasic();
+            
+            // Pass user ID to resources
+            $methodologies->each(function ($methodology) use ($request) {
+                $methodology->setAttribute('user_id', $request->authUser->id);
+            });
             
             return response()->json(MethodologyResource::collection($methodologies));
         } catch (\Exception $e) {
@@ -27,10 +32,10 @@ class MethodologyController
         }
     }
 
-    public function get(int $id): JsonResponse
+    public function get(Request $request, int $methodologyId): JsonResponse
     {
         try {
-            $methodology = $this->methodologyRepo->findByIdWithFullDetails($id);
+            $methodology = $this->methodologyRepo->findByIdWithFullDetails($methodologyId);
             
             if (!$methodology) {
                 return response()->json([
@@ -38,6 +43,9 @@ class MethodologyController
                     'message' => __('messages.methodology_not_found')
                 ], 404);
             }
+
+            // Pass user ID to resource
+            $methodology->setAttribute('user_id', $request->authUser->id);
 
             return response()->json(new MethodologyDetailedResource($methodology));
         } catch (\Exception $e) {
@@ -52,7 +60,7 @@ class MethodologyController
     /**
      * Get a specific methodology by ID with pillars from a specific section
      */
-    public function getBySection(int $id, int $sectionNumber): JsonResponse
+    public function getBySection(Request $request, int $methodologyId, int $sectionNumber): JsonResponse
     {
         try {
             // Validate section number
@@ -63,7 +71,7 @@ class MethodologyController
                 ], 400);
             }
 
-            $methodology = $this->methodologyRepo->findByIdWithSectionPillars($id, $sectionNumber);
+            $methodology = $this->methodologyRepo->findByIdWithSectionPillars($methodologyId, $sectionNumber);
             
             if (!$methodology) {
                 return response()->json([
@@ -79,6 +87,9 @@ class MethodologyController
                     'message' => __('messages.methodology_not_two_section_type')
                 ], 400);
             }
+
+            // Pass user ID to resource
+            $methodology->setAttribute('user_id', $request->authUser->id);
 
             return response()->json(new MethodologyDetailedResource($methodology));
         } catch (\Exception $e) {

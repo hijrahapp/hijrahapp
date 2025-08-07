@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\MethodologyController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\UserAnswerController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\UserController;
@@ -33,12 +34,25 @@ Route::middleware('locale')->group(function () {
 
     Route::prefix('methodology')->middleware(['auth.jwt','auth.user'])->group(function () {
         Route::get('all', [MethodologyController::class, 'all']);
-        Route::get('{id}', [MethodologyController::class, 'get']);
-        Route::get('{id}/section/{sectionNumber}', [MethodologyController::class, 'getBySection']);
-        Route::get('{id}/questions', [QuestionController::class, 'getMethodologyQuestions']);
+        Route::get('{methodologyId}', [MethodologyController::class, 'get']);
+        Route::get('{methodologyId}/section/{sectionNumber}', [MethodologyController::class, 'getBySection']);
+        Route::get('{methodologyId}/questions', [QuestionController::class, 'getMethodologyQuestions']);
         Route::get('{methodologyId}/pillar/{pillarId}/questions', [QuestionController::class, 'getPillarQuestionsForMethodology']);
         Route::get('{methodologyId}/module/{moduleId}/questions', [QuestionController::class, 'getModuleQuestionsForMethodology']);
         Route::get('{methodologyId}/pillar/{pillarId}/module/{moduleId}/questions', [QuestionController::class, 'getModuleQuestionsForPillarInMethodology']);
+
+
+        // Submit answers endpoints
+        Route::post('{methodologyId}/answers', [UserAnswerController::class, 'submitMethodologyAnswers']);
+        Route::post('{methodologyId}/pillar/{pillarId}/answers', [UserAnswerController::class, 'submitPillarAnswers']);
+        Route::post('{methodologyId}/module/{moduleId}/answers', [UserAnswerController::class, 'submitModuleAnswers']);
+        Route::post('{methodologyId}/pillar/{pillarId}/module/{moduleId}/answers', [UserAnswerController::class, 'submitPillarModuleAnswers']);
+
+        // Get answers endpoints
+        Route::get('{methodologyId}/answers', [UserAnswerController::class, 'getMethodologyAnswers']);
+        Route::get('{methodologyId}/pillar/{pillarId}/answers', [UserAnswerController::class, 'getPillarAnswers']);
+        Route::get('{methodologyId}/module/{moduleId}/answers', [UserAnswerController::class, 'getModuleAnswers']);
+        Route::get('{methodologyId}/pillar/{pillarId}/module/{moduleId}/answers', [UserAnswerController::class, 'getPillarModuleAnswers']);
     });
 
 });
