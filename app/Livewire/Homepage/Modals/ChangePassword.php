@@ -52,7 +52,7 @@ class ChangePassword extends Component
             $this->success = $response['message'];
             $this->close();
         } else {
-            $this->success = 'Password changed successfully.';
+            $this->success = __('messages.password_changed_successfully');
             $this->close();
         }
     }

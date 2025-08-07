@@ -12,7 +12,7 @@ class UserDetailsController
     public function __construct(private UserMiddleware $userMiddleware, private UserService $userService) {}
     public function getAllUserDetails($jwt) {
         if (!$jwt) {
-            return ['message' => 'Session expired. Please restart the reset process.'];
+            return ['message' => __('messages.session_expired')];
         }
 
         $decodedToken = JWTUtils::decodeToken($jwt);

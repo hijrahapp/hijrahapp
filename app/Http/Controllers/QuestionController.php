@@ -38,7 +38,7 @@ class QuestionController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching pillar questions',
+                'message' => __('messages.error_fetching_pillar_questions'),
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -59,7 +59,7 @@ class QuestionController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching module questions',
+                'message' => __('messages.error_fetching_module_questions'),
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -81,7 +81,7 @@ class QuestionController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching module questions for pillar',
+                'message' => __('messages.error_fetching_module_questions_for_pillar'),
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -96,13 +96,13 @@ class QuestionController
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed',
+                'message' => __('messages.validation_failed'),
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching questions',
+                'message' => __('messages.error_fetching_questions'),
                 'error' => $e->getMessage()
             ], 500);
         }

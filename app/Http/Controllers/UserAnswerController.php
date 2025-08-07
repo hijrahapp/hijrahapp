@@ -32,7 +32,7 @@ class UserAnswerController
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Validation failed',
+                    'message' => __('messages.validation_failed'),
                     'errors' => $validator->errors()
                 ], 422);
             }
@@ -44,7 +44,7 @@ class UserAnswerController
 
             return response()->json([
                 'success' => true,
-                'message' => 'Methodology answers submitted successfully',
+                'message' => __('messages.methodology_answers_submitted_successfully'),
             ], 201);
 
         } catch (\InvalidArgumentException $e) {
@@ -55,7 +55,7 @@ class UserAnswerController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error submitting methodology answers',
+                'message' => __('messages.error_submitting_methodology_answers'),
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -82,7 +82,7 @@ class UserAnswerController
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Validation failed',
+                    'message' => __('messages.validation_failed'),
                     'errors' => $validator->errors()
                 ], 422);
             }
@@ -94,7 +94,7 @@ class UserAnswerController
 
             return response()->json([
                 'success' => true,
-                'message' => 'Pillar answers submitted successfully',
+                'message' => __('messages.pillar_answers_submitted_successfully'),
             ], 201);
 
         } catch (\InvalidArgumentException $e) {
@@ -105,7 +105,7 @@ class UserAnswerController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error submitting pillar answers',
+                'message' => __('messages.error_submitting_pillar_answers'),
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -132,7 +132,7 @@ class UserAnswerController
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Validation failed',
+                    'message' => __('messages.validation_failed'),
                     'errors' => $validator->errors()
                 ], 422);
             }
@@ -144,7 +144,7 @@ class UserAnswerController
 
             return response()->json([
                 'success' => true,
-                'message' => 'Module answers submitted successfully',
+                'message' => __('messages.module_answers_submitted_successfully'),
             ], 201);
 
         } catch (\InvalidArgumentException $e) {
@@ -155,7 +155,7 @@ class UserAnswerController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error submitting module answers',
+                'message' => __('messages.error_submitting_module_answers'),
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -183,7 +183,7 @@ class UserAnswerController
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Validation failed',
+                    'message' => __('messages.validation_failed'),
                     'errors' => $validator->errors()
                 ], 422);
             }
@@ -195,7 +195,7 @@ class UserAnswerController
 
             return response()->json([
                 'success' => true,
-                'message' => 'Pillar module answers submitted successfully',
+                'message' => __('messages.pillar_module_answers_submitted_successfully'),
             ], 201);
 
         } catch (\InvalidArgumentException $e) {
@@ -206,7 +206,7 @@ class UserAnswerController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error submitting pillar module answers',
+                'message' => __('messages.error_submitting_pillar_module_answers'),
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -229,7 +229,7 @@ class UserAnswerController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching methodology answers',
+                'message' => __('messages.error_fetching_methodology_answers'),
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -253,7 +253,7 @@ class UserAnswerController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching pillar answers',
+                'message' => __('messages.error_fetching_pillar_answers'),
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -277,7 +277,7 @@ class UserAnswerController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching module answers',
+                'message' => __('messages.error_fetching_module_answers'),
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -302,7 +302,7 @@ class UserAnswerController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching pillar module answers',
+                'message' => __('messages.error_fetching_pillar_module_answers'),
                 'error' => $e->getMessage()
             ], 500);
         }

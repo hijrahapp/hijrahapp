@@ -33,22 +33,22 @@ class TagsTable extends Component
 
     public function openTagStatusModal($request) {
         if($request['active']) {
-            $title = 'Activate Tag';
-            $message = 'Are you sure you want to activate this tag?';
-            $action = 'Activate';
+            $title = __('messages.activate_tag_title');
+            $message = __('messages.activate_tag_message');
+            $action = __('messages.activate_action');
         } else {
-            $title = 'Deactivate Tag';
-            $message = 'Are you sure you want to deactivate this tag?';
-            $action = 'Deactivate';
+            $title = __('messages.deactivate_tag_title');
+            $message = __('messages.deactivate_tag_message');
+            $action = __('messages.deactivate_action');
         }
         $callback = 'changeTagStatus';
         $this->dispatch('openConfirmationModal', $title, $message, $action, $callback, $request);
     }
 
     public function openTagDeleteModal($request) {
-        $title = 'Delete Tag';
-        $message = 'Are you sure you want to delete this tag?';
-        $action = 'Delete';
+        $title = __('messages.delete_tag_title');
+        $message = __('messages.delete_tag_message');
+        $action = __('messages.delete_action');
         $callback = 'deleteTag';
         $this->dispatch('openConfirmationModal', $title, $message, $action, $callback, $request);
     }

@@ -69,9 +69,9 @@ class QuestionsTable extends Component
     }
 
     public function openDeleteQuestionModal($request) {
-        $title = 'Delete Question';
-        $message = 'Are you sure you want to delete this question?';
-        $action = 'Delete';
+        $title = __('messages.delete_question_title');
+        $message = __('messages.delete_question_message');
+        $action = __('messages.delete_action');
         $callback = 'deleteQuestion';
         $this->dispatch('openConfirmationModal', $title, $message, $action, $callback, $request);
     }

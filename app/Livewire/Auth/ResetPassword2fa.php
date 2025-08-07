@@ -28,7 +28,7 @@ class ResetPassword2fa extends Component
         $this->error = '';
         $otp = $this->otp1 . $this->otp2 . $this->otp3 . $this->otp4;
         if (strlen($otp) !== 4) {
-            $this->error = 'OTP must be 4 digits.';
+            $this->error = __('messages.otp_must_be_4_digits');
             return;
         }
         $otpService = app(OTPService::class);
@@ -39,7 +39,7 @@ class ResetPassword2fa extends Component
             session()->forget('reset_email');
             return redirect()->route('password.reset');
         } else {
-            $this->error = $response->getData(true)['message'] ?? 'OTP verification failed.';
+            $this->error = $response->getData(true)['message'] ?? __('messages.otp_verification_failed');
         }
     }
 
@@ -54,12 +54,12 @@ class ResetPassword2fa extends Component
             $otpService = app(OTPService::class);
             $response = $otpService->resendPasswordOTP($this->email);
             if (method_exists($response, 'getStatusCode') && $response->getStatusCode() === 201) {
-                $this->message = $response->getData(true)['message'] ?? 'OTP resent successfully.';
+                $this->message = $response->getData(true)['message'] ?? __('messages.otp_resent_successfully');
             } else {
-                $this->error = $response->getData(true)['message'] ?? 'Enter email failed.';
+                $this->error = $response->getData(true)['message'] ?? __('messages.enter_email_failed');
             }
         } catch (\Exception $e) {
-            $this->error = 'An error occurred: ' . $e->getMessage();
+            $this->error = __('messages.an_error_occurred') . $e->getMessage();
         }
     }
 }
