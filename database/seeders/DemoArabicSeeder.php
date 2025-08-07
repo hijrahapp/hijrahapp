@@ -12,7 +12,7 @@ use App\Models\QuestionAnswerWeight;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
-class DemoSeeder extends Seeder
+class DemoArabicSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -73,7 +73,7 @@ class DemoSeeder extends Seeder
         \DB::statement('ALTER TABLE questions AUTO_INCREMENT = 1');
         \DB::statement('ALTER TABLE answers AUTO_INCREMENT = 1');
 
-        echo "All existing data cleared successfully and counters reset.\n";
+        echo "تم مسح جميع البيانات الموجودة وإعادة تعيين العدادات بنجاح.\n";
     }
 
     /**
@@ -83,12 +83,12 @@ class DemoSeeder extends Seeder
     {
         $answers = [
             // Yes/No answers
-            'Yes',
-            'No',
+            'نعم',
+            'لا',
             
             // True/False answers
-            'True',
-            'False',
+            'صحيح',
+            'خطأ',
             
             // Rating scale 1-5
             '1',
@@ -105,11 +105,11 @@ class DemoSeeder extends Seeder
             '10',
             
             // Agree/Disagree scale
-            'Strongly Agree',
-            'Agree',
-            'Neutral',
-            'Disagree',
-            'Strongly Disagree',
+            'أوافق بشدة',
+            'أوافق',
+            'محايد',
+            'لا أوافق',
+            'لا أوافق بشدة',
         ];
 
         foreach ($answers as $answer) {
@@ -134,13 +134,13 @@ class DemoSeeder extends Seeder
 
         $questions = [];
         $questionTitles = [
-            'Do you understand the basic concepts?',
-            'Is this statement correct?',
-            'How would you rate your knowledge level?',
-            'Rate your confidence level from 1 to 10',
-            'Do you agree with this approach?',
-            'Which option best describes your experience?',
-            'Select all that apply to your situation',
+            'هل تفهم المفاهيم الأساسية؟',
+            'هل هذا البيان صحيح؟',
+            'كيف تقيم مستوى معرفتك؟',
+            'قيّم مستوى ثقتك من 1 إلى 10',
+            'هل توافق على هذا النهج؟',
+            'أي خيار يصف تجربتك بشكل أفضل؟',
+            'اختر جميع ما ينطبق على وضعك',
         ];
 
         foreach ($questionTypes as $index => $type) {
@@ -168,10 +168,10 @@ class DemoSeeder extends Seeder
         
         switch ($type) {
             case QuestionType::YesNo:
-                $answers = Answer::whereIn('title', ['Yes', 'No'])->get();
+                $answers = Answer::whereIn('title', ['نعم', 'لا'])->get();
                 break;
             case QuestionType::TrueFalse:
-                $answers = Answer::whereIn('title', ['True', 'False'])->get();
+                $answers = Answer::whereIn('title', ['صحيح', 'خطأ'])->get();
                 break;
             case QuestionType::Rating1to5:
                 $answers = Answer::whereIn('title', ['1', '2', '3', '4', '5'])->get();
@@ -181,21 +181,21 @@ class DemoSeeder extends Seeder
                 break;
             case QuestionType::ScaleAgreeDisagree:
                 $answers = Answer::whereIn('title', [
-                    'Strongly Agree',
-                    'Agree',
-                    'Neutral',
-                    'Disagree',
-                    'Strongly Disagree'
+                    'أوافق بشدة',
+                    'أوافق',
+                    'محايد',
+                    'لا أوافق',
+                    'لا أوافق بشدة'
                 ])->get();
                 break;
             case QuestionType::MCQSingle:
             case QuestionType::MCQMultiple:
                 // Create custom answers for MCQ questions
                 $customAnswers = [
-                    'Option A - Basic understanding',
-                    'Option B - Intermediate knowledge',
-                    'Option C - Advanced expertise',
-                    'Option D - Expert level',
+                    'الخيار أ - فهم أساسي',
+                    'الخيار ب - معرفة متوسطة',
+                    'الخيار ج - خبرة متقدمة',
+                    'الخيار د - مستوى خبير',
                 ];
                 
                 foreach ($customAnswers as $answerTitle) {
@@ -214,19 +214,19 @@ class DemoSeeder extends Seeder
     private function createMethodology1(array $questions): void
     {
         $methodology = Methodology::create([
-            'name' => 'Simple Assessment Methodology',
-            'description' => 'A straightforward methodology for basic assessment and evaluation.',
-            'definition' => 'This methodology provides a simple framework for evaluating basic competencies.',
-            'objectives' => 'To assess fundamental knowledge and skills in a structured manner.',
+            'name' => 'منهجية التقييم البسيطة',
+            'description' => 'منهجية مباشرة للتقييم والتقييم الأساسي.',
+            'definition' => 'توفر هذه المنهجية إطار عمل بسيط لتقييم الكفاءات الأساسية.',
+            'objectives' => 'تقييم المعرفة والمهارات الأساسية بطريقة منظمة.',
             'type' => 'simple',
-            'first_section_name' => 'Core Modules',
+            'first_section_name' => 'الوحدات الأساسية',
             'second_section_name' => null,
-            'pillars_definition' => 'Not applicable for simple methodology.',
-            'modules_definition' => 'Core modules provide foundational knowledge and basic assessment capabilities.',
-            'questions_description' => 'Basic questions covering essential concepts and skills.',
-            'questions_estimated_time' => '15-20 minutes',
+            'pillars_definition' => 'غير قابل للتطبيق للمنهجية البسيطة.',
+            'modules_definition' => 'توفر الوحدات الأساسية المعرفة الأساسية وقدرات التقييم الأساسية.',
+            'questions_description' => 'أسئلة أساسية تغطي المفاهيم والمهارات الأساسية.',
+            'questions_estimated_time' => '15-20 دقيقة',
             'questions_count' => 7,
-            'first_section_description' => 'Core modules provide foundational knowledge assessment.',
+            'first_section_description' => 'توفر الوحدات الأساسية تقييم المعرفة الأساسية.',
             'second_section_description' => null,
             'tags' => ['simple', 'basic', 'assessment'],
         ]);
@@ -239,12 +239,12 @@ class DemoSeeder extends Seeder
         // Create 2 modules
         for ($i = 1; $i <= 2; $i++) {
             $module = Module::create([
-                'name' => "Module $i",
-                'description' => "Module $i provides essential knowledge and skills.",
-                'definition' => "Module $i covers fundamental concepts and basic competencies.",
-                'objectives' => "To assess understanding of core concepts in module $i.",
-                'questions_description' => "Module $i contains questions that assess fundamental concepts.",
-                'questions_estimated_time' => '5-7 minutes',
+                'name' => "الوحدة $i",
+                'description' => "توفر الوحدة $i المعرفة والمهارات الأساسية.",
+                'definition' => "تغطي الوحدة $i المفاهيم الأساسية والكفاءات الأساسية.",
+                'objectives' => "تقييم فهم المفاهيم الأساسية في الوحدة $i.",
+                'questions_description' => "تحتوي الوحدة $i على أسئلة تقيم المفاهيم الأساسية.",
+                'questions_estimated_time' => '5-7 دقائق',
                 'questions_count' => 7,
                 'tags' => ['module', 'basic'],
             ]);
@@ -269,19 +269,19 @@ class DemoSeeder extends Seeder
     private function createMethodology2(array $questions): void
     {
         $methodology = Methodology::create([
-            'name' => 'Complex Assessment Methodology',
-            'description' => 'A comprehensive methodology for advanced assessment and evaluation.',
-            'definition' => 'This methodology provides a complex framework for evaluating advanced competencies.',
-            'objectives' => 'To assess advanced knowledge and skills across multiple domains.',
+            'name' => 'منهجية التقييم المعقدة',
+            'description' => 'منهجية شاملة للتقييم والتقييم المتقدم.',
+            'definition' => 'توفر هذه المنهجية إطار عمل معقد لتقييم الكفاءات المتقدمة.',
+            'objectives' => 'تقييم المعرفة والمهارات المتقدمة عبر مجالات متعددة.',
             'type' => 'complex',
-            'first_section_name' => 'Advanced Pillars',
+            'first_section_name' => 'الأركان المتقدمة',
             'second_section_name' => null,
-            'pillars_definition' => 'Advanced pillars represent core areas of knowledge and expertise that require comprehensive assessment.',
-            'modules_definition' => 'Specialized modules within pillars provide focused assessment of specific competencies.',
-            'questions_description' => 'Advanced questions covering comprehensive concepts and skills.',
-            'questions_estimated_time' => '45-60 minutes',
+            'pillars_definition' => 'تمثل الأركان المتقدمة مجالات أساسية للمعرفة والخبرة التي تتطلب تقييم شامل.',
+            'modules_definition' => 'توفر الوحدات المتخصصة داخل الأركان تقييم مركز للمكفاءات المحددة.',
+            'questions_description' => 'أسئلة متقدمة تغطي المفاهيم والمهارات الشاملة.',
+            'questions_estimated_time' => '45-60 دقيقة',
             'questions_count' => 7,
-            'first_section_description' => 'Advanced pillars provide in-depth analysis and assessment.',
+            'first_section_description' => 'توفر الأركان المتقدمة تحليل متعمق وتقييم شامل.',
             'second_section_description' => null,
             'tags' => ['complex', 'advanced', 'assessment'],
         ]);
@@ -294,12 +294,12 @@ class DemoSeeder extends Seeder
         // Create 2 pillars
         for ($i = 1; $i <= 2; $i++) {
             $pillar = Pillar::create([
-                'name' => "Pillar $i",
-                'description' => "Pillar $i represents a core area of knowledge and expertise.",
-                'definition' => "Pillar $i covers advanced concepts and specialized competencies.",
-                'objectives' => "To assess comprehensive understanding of pillar $i domain.",
-                'questions_description' => "Pillar $i contains questions that assess advanced understanding.",
-                'questions_estimated_time' => '10-15 minutes',
+                'name' => "الركن $i",
+                'description' => "يمثل الركن $i مجال أساسي للمعرفة والخبرة.",
+                'definition' => "يغطي الركن $i المفاهيم المتقدمة والكفاءات المتخصصة.",
+                'objectives' => "تقييم الفهم الشامل لمجال الركن $i.",
+                'questions_description' => "يحتوي الركن $i على أسئلة تقيم الفهم المتقدم.",
+                'questions_estimated_time' => '10-15 دقيقة',
                 'questions_count' => 7,
                 'tags' => ['pillar', 'advanced'],
             ]);
@@ -318,12 +318,12 @@ class DemoSeeder extends Seeder
             // Create 2 modules for each pillar
             for ($j = 1; $j <= 2; $j++) {
                 $module = Module::create([
-                    'name' => "Pillar{$i}-Module{$j}",
-                    'description' => "Module $j within Pillar $i provides specialized knowledge.",
-                    'definition' => "Module $j covers specific competencies within Pillar $i.",
-                    'objectives' => "To assess specialized skills in module $j of pillar $i.",
-                    'questions_description' => "This module contains questions for specific competencies.",
-                    'questions_estimated_time' => '5-7 minutes',
+                    'name' => "الركن{$i}-الوحدة{$j}",
+                    'description' => "توفر الوحدة $j داخل الركن $i معرفة متخصصة.",
+                    'definition' => "تغطي الوحدة $j كفاءات محددة داخل الركن $i.",
+                    'objectives' => "تقييم المهارات المتخصصة في الوحدة $j من الركن $i.",
+                    'questions_description' => "تحتوي هذه الوحدة على أسئلة للكفاءات المحددة.",
+                    'questions_estimated_time' => '5-7 دقائق',
                     'questions_count' => 7,
                     'tags' => ['module', 'specialized'],
                 ]);
@@ -353,20 +353,20 @@ class DemoSeeder extends Seeder
     private function createMethodology3(array $questions): void
     {
         $methodology = Methodology::create([
-            'name' => 'Two-Section Assessment Methodology',
-            'description' => 'A methodology with two sections and complex dependencies.',
-            'definition' => 'This methodology provides a structured approach with interdependent sections.',
-            'objectives' => 'To assess knowledge and skills with consideration of dependencies.',
+            'name' => 'منهجية التقييم ذات القسمين',
+            'description' => 'منهجية مع قسمين وتبعيات معقدة.',
+            'definition' => 'توفر هذه المنهجية نهج منظم مع أقسام مترابطة.',
+            'objectives' => 'تقييم المعرفة والمهارات مع مراعاة التبعيات.',
             'type' => 'twoSection',
-            'first_section_name' => 'Foundation Section',
-            'second_section_name' => 'Advanced Section',
-            'pillars_definition' => 'Pillars represent interdependent knowledge domains where later sections depend on earlier ones.',
-            'modules_definition' => 'Modules within pillars provide specialized assessment with consideration of dependencies.',
-            'questions_description' => 'Structured questions with section-based dependencies.',
-            'questions_estimated_time' => '60-90 minutes',
+            'first_section_name' => 'قسم الأساسيات',
+            'second_section_name' => 'قسم المتقدم',
+            'pillars_definition' => 'تمثل الأركان مجالات معرفة مترابطة حيث تعتمد الأقسام اللاحقة على الأقسام السابقة.',
+            'modules_definition' => 'توفر الوحدات داخل الأركان تقييم متخصص مع مراعاة التبعيات.',
+            'questions_description' => 'أسئلة منظمة مع تبعيات قائمة على الأقسام.',
+            'questions_estimated_time' => '60-90 دقيقة',
             'questions_count' => 7,
-            'first_section_description' => 'First section provides foundational assessment.',
-            'second_section_description' => 'Second section builds upon first section results.',
+            'first_section_description' => 'يوفر القسم الأول تقييم أساسي.',
+            'second_section_description' => 'يبني القسم الثاني على نتائج القسم الأول.',
             'tags' => ['two-section', 'dependent', 'assessment'],
         ]);
 
@@ -377,46 +377,46 @@ class DemoSeeder extends Seeder
 
         // Create section 1 pillars
         $section1Pillar1 = Pillar::create([
-            'name' => 'Section 1 - Pillar 1',
-            'description' => 'First pillar of section 1 provides foundational knowledge.',
-            'definition' => 'This pillar covers basic concepts and fundamental skills.',
-            'objectives' => 'To establish foundational understanding.',
-            'questions_description' => 'Basic questions for foundational assessment.',
-            'questions_estimated_time' => '10-15 minutes',
+            'name' => 'القسم 1 - الركن 1',
+            'description' => 'يوفر الركن الأول من القسم الأول المعرفة الأساسية.',
+            'definition' => 'يغطي هذا الركن المفاهيم الأساسية والمهارات الأساسية.',
+            'objectives' => 'إرساء الفهم الأساسي.',
+            'questions_description' => 'أسئلة أساسية للتقييم الأساسي.',
+            'questions_estimated_time' => '10-15 دقيقة',
             'questions_count' => 7,
             'tags' => ['section1', 'foundational'],
         ]);
 
         $section1Pillar2 = Pillar::create([
-            'name' => 'Section 1 - Pillar 2',
-            'description' => 'Second pillar of section 1 builds on pillar 1.',
-            'definition' => 'This pillar covers intermediate concepts dependent on pillar 1.',
-            'objectives' => 'To assess intermediate skills with pillar 1 dependency.',
-            'questions_description' => 'Intermediate questions with pillar 1 dependency.',
-            'questions_estimated_time' => '10-15 minutes',
+            'name' => 'القسم 1 - الركن 2',
+            'description' => 'يبني الركن الثاني من القسم الأول على الركن الأول.',
+            'definition' => 'يغطي هذا الركن المفاهيم المتوسطة المعتمدة على الركن الأول.',
+            'objectives' => 'تقييم المهارات المتوسطة مع تبعية الركن الأول.',
+            'questions_description' => 'أسئلة متوسطة مع تبعية الركن الأول.',
+            'questions_estimated_time' => '10-15 دقيقة',
             'questions_count' => 7,
             'tags' => ['section1', 'intermediate'],
         ]);
 
         // Create section 2 pillars
         $section2Pillar1 = Pillar::create([
-            'name' => 'Section 2 - Pillar 1',
-            'description' => 'First pillar of section 2 depends on section 1 pillar 1.',
-            'definition' => 'This pillar covers advanced concepts dependent on section 1 pillar 1.',
-            'objectives' => 'To assess advanced skills with section 1 pillar 1 dependency.',
-            'questions_description' => 'Advanced questions with section 1 pillar 1 dependency.',
-            'questions_estimated_time' => '10-15 minutes',
+            'name' => 'القسم 2 - الركن 1',
+            'description' => 'يعتمد الركن الأول من القسم الثاني على الركن الأول من القسم الأول.',
+            'definition' => 'يغطي هذا الركن المفاهيم المتقدمة المعتمدة على الركن الأول من القسم الأول.',
+            'objectives' => 'تقييم المهارات المتقدمة مع تبعية الركن الأول من القسم الأول.',
+            'questions_description' => 'أسئلة متقدمة مع تبعية الركن الأول من القسم الأول.',
+            'questions_estimated_time' => '10-15 دقيقة',
             'questions_count' => 7,
             'tags' => ['section2', 'advanced'],
         ]);
 
         $section2Pillar2 = Pillar::create([
-            'name' => 'Section 2 - Pillar 2',
-            'description' => 'Second pillar of section 2 depends on section 1 pillar 2.',
-            'definition' => 'This pillar covers specialized concepts dependent on section 1 pillar 2.',
-            'objectives' => 'To assess specialized skills with section 1 pillar 2 dependency.',
-            'questions_description' => 'Specialized questions with section 1 pillar 2 dependency.',
-            'questions_estimated_time' => '10-15 minutes',
+            'name' => 'القسم 2 - الركن 2',
+            'description' => 'يعتمد الركن الثاني من القسم الثاني على الركن الثاني من القسم الأول.',
+            'definition' => 'يغطي هذا الركن المفاهيم المتخصصة المعتمدة على الركن الثاني من القسم الأول.',
+            'objectives' => 'تقييم المهارات المتخصصة مع تبعية الركن الثاني من القسم الأول.',
+            'questions_description' => 'أسئلة متخصصة مع تبعية الركن الثاني من القسم الأول.',
+            'questions_estimated_time' => '10-15 دقيقة',
             'questions_count' => 7,
             'tags' => ['section2', 'specialized'],
         ]);
@@ -442,12 +442,12 @@ class DemoSeeder extends Seeder
         foreach ($allPillars as $pillarIndex => $pillar) {
             for ($j = 1; $j <= 2; $j++) {
                 $module = Module::create([
-                    'name' => "{$pillar->name}-Module{$j}",
-                    'description' => "Module $j within {$pillar->name} provides specialized knowledge.",
-                    'definition' => "Module $j covers specific competencies within {$pillar->name}.",
-                    'objectives' => "To assess specialized skills in module $j of {$pillar->name}.",
-                    'questions_description' => "This module contains questions for specific competencies.",
-                    'questions_estimated_time' => '5-7 minutes',
+                    'name' => "{$pillar->name}-الوحدة{$j}",
+                    'description' => "توفر الوحدة $j داخل {$pillar->name} معرفة متخصصة.",
+                    'definition' => "تغطي الوحدة $j كفاءات محددة داخل {$pillar->name}.",
+                    'objectives' => "تقييم المهارات المتخصصة في الوحدة $j من {$pillar->name}.",
+                    'questions_description' => "تحتوي هذه الوحدة على أسئلة للكفاءات المحددة.",
+                    'questions_estimated_time' => '5-7 دقائق',
                     'questions_count' => 7,
                     'tags' => ['module', 'specialized'],
                 ]);

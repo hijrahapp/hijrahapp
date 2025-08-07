@@ -15,7 +15,9 @@ class DatabaseSeeder extends Seeder
         // Seed answers and demo methodologies
         $this->call([
             AnswerSeeder::class,
-            DemoSeeder::class,
+            // Choose one of the following seeders:
+            DemoSeeder::class,        // English demo data
+            // DemoArabicSeeder::class, // Arabic demo data
         ]);
     }
 }
