@@ -13,12 +13,12 @@ class ResultCalculationService
     /**
      * Calculate methodology results based on user answers
      */
-    public function calculateMethodologyResult(int $userId, int $methodologyId): array
+    public function calculateMethodologyResult(int $userId, int $methodologyId)
     {
         $methodology = Methodology::with(['pillars', 'modules'])->find($methodologyId);
 
         if (!$methodology) {
-            return [];
+            return null;
         }
 
         // Get total questions and answered questions
@@ -30,7 +30,7 @@ class ResultCalculationService
             ->count('question_id');
 
         if ($answeredQuestions != $totalQuestions) {
-            return [];
+            return null;
         }
 
         $result = [
@@ -121,12 +121,12 @@ class ResultCalculationService
     /**
      * Calculate pillar results based on user answers
      */
-    public function calculatePillarResult(int $userId, int $pillarId, int $methodologyId): array
+    public function calculatePillarResult(int $userId, int $pillarId, int $methodologyId)
     {
         $pillar = Pillar::with(['modules'])->find($pillarId);
 
         if (!$pillar) {
-            return [];
+            return null;
         }
 
         // Get total questions and answered questions for this pillar in this methodology
@@ -139,7 +139,7 @@ class ResultCalculationService
             ->count('question_id');
 
         if ($answeredQuestions != $totalQuestions) {
-            return [];
+            return null;
         }
 
         $result = [
@@ -198,12 +198,12 @@ class ResultCalculationService
     /**
      * Calculate module results based on user answers
      */
-    public function calculateModuleResult(int $userId, int $moduleId, int $methodologyId, ?int $pillarId = null): array
+    public function calculateModuleResult(int $userId, int $moduleId, int $methodologyId, ?int $pillarId = null)
     {
         $module = Module::find($moduleId);
 
         if (!$module) {
-            return [];
+            return null;
         }
 
         // Get questions for this module in the specific context
@@ -214,7 +214,7 @@ class ResultCalculationService
         $totalQuestions = $questions->count();
 
         if ($totalQuestions === 0) {
-            return [];
+            return null;
         }
 
         // Get user answers for this module
@@ -227,7 +227,7 @@ class ResultCalculationService
         $answeredQuestions = $userAnswers->unique('question_id')->count();
 
         if ($answeredQuestions != $totalQuestions) {
-            return [];
+            return null;
         }
 
         // Calculate percentage (for now, using random values as placeholder)

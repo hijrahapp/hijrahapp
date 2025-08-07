@@ -28,14 +28,14 @@ class ModuleResource extends JsonResource
     /**
      * Calculate result for this module
      */
-    private function calculateResult(): array
+    private function calculateResult()
     {
         $service = new ResultCalculationService();
-        
+
         if($this->user_id && request()->route('methodologyId') && request()->route('pillarId')) {
             return $service->calculateModuleResult($this->user_id, $this->id, request()->route('methodologyId') ,request()->route('pillarId'));
         } else {
-            return [];
+            return null;
         }
     }
 }

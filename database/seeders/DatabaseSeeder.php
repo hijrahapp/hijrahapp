@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
         // Seed answers and demo methodologies
         $this->call([
             AnswerSeeder::class,
-            DemoMethodologiesSeeder::class,
+            DemoSeeder::class,
         ]);
     }
 }

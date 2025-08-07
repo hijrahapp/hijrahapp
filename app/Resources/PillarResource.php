@@ -33,14 +33,14 @@ class PillarResource extends JsonResource
     /**
      * Calculate result for this pillar
      */
-    private function calculateResult(): array
+    private function calculateResult()
     {
         $service = new ResultCalculationService();
-        
+
         if($this->user_id && request()->route('methodologyId')){
             return $service->calculatePillarResult($this->user_id, $this->id, request()->route('methodologyId'));
         } else {
-            return [];
+            return null;
         }
     }
 }

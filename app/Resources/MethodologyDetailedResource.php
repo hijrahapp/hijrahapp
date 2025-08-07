@@ -75,14 +75,14 @@ class MethodologyDetailedResource extends JsonResource
     /**
      * Calculate result for this methodology
      */
-    private function calculateResult(): array
+    private function calculateResult()
     {
         $service = new ResultCalculationService();
-        
+
         if ($this->user_id) {
             return $service->calculateMethodologyResult($this->user_id, $this->id);
         } else {
-            return [];
+            return null;
         }
     }
-} 
+}
