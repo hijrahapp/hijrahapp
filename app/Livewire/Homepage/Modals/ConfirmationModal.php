@@ -8,6 +8,7 @@ class ConfirmationModal extends Component
 {
     public $title;
     public $message;
+    public $note;
     public $action;
     public $callBack;
     public $object;
@@ -17,25 +18,22 @@ class ConfirmationModal extends Component
         'reset-modal' => 'resetForm',
     ];
 
-    public function openModal($title, $message, $action, $callBack, $object)
+    public function openModal($modal)
     {
-        $this->title = $title;
-        $this->message = $message;
-        $this->action = $action;
-        $this->callBack = $callBack;
-        $this->object = $object;
-    }
+        $this->title = $modal['title'] ?? null;
+        $this->message = $modal['message'] ?? null;
+        $this->note = $modal['note'] ?? null;
+        $this->action = $modal['action'] ?? null;
+        $this->callBack = $modal['callback'] ?? null;
+        $this->object = $modal['object'] ?? null;
 
-    public function closeModal()
-    {
-        $this->resetForm();
-        $this->dispatch('click');
+        $this->dispatch('show-modal', selector: '#confirmation_modal');
     }
 
     public function performConfirmAction()
     {
         $this->dispatch($this->callBack, $this->object);
-        $this->closeModal();
+        $this->resetForm();
     }
 
     public function resetForm()

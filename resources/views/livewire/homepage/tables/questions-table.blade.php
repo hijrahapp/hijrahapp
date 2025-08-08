@@ -57,15 +57,13 @@
                             <td class="text-center flex gap-2 justify-center">
                                 <button
                                     class="kt-btn kt-btn-outline flex items-center justify-center"
-                                    data-kt-modal-toggle="#question_add_modal"
                                     wire:click="editQuestion({{ $question->id }})"
                                     title="Edit Question">
                                     <i class="ki-filled ki-pencil text-secondary-foreground"></i>
                                 </button>
                                 <button
                                     class="kt-btn kt-btn-outline flex items-center justify-center"
-                                    data-kt-modal-toggle="#confirmation_modal"
-                                    x-on:click="$wire.call('openDeleteQuestionModal', {{ Js::from([ 'id' => $question->id ]) }})"
+                                    wire:click="openDeleteQuestionModal({{ Js::from(['id' => $question->id]) }})"
                                     title="Delete Question">
                                     <i class="ki-filled ki-trash text-destructive"></i>
                                 </button>

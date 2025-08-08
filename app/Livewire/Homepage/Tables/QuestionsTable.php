@@ -27,6 +27,7 @@ class QuestionsTable extends Component
     public function questions()
     {
         $query = Question::where('title', 'like', '%'.$this->search.'%')
+            ->withCount(['modules', 'pillars', 'methodologies'])
             ->orderBy('id', 'asc');
         return $query->paginate($this->perPage);
     }
@@ -58,27 +59,49 @@ class QuestionsTable extends Component
         ];
     }
 
-    public function handleUserEditOpen($user)
-    {
-        $this->dispatch('openUserEditModal', $user);
-    }
-
     public function editQuestion($questionId)
     {
         $this->dispatch('edit-question', $questionId);
     }
 
     public function openDeleteQuestionModal($request) {
-        $title = __('messages.delete_question_title');
-        $message = __('messages.delete_question_message');
-        $action = __('messages.delete_action');
-        $callback = 'deleteQuestion';
-        $this->dispatch('openConfirmationModal', $title, $message, $action, $callback, $request);
+        $question = Question::findOrFail($request['id']);
+
+        $isUsed = $question->modules()->exists() || $question->pillars()->exists() || $question->methodologies()->exists();
+        
+        if ($isUsed) {
+            $this->dispatch('show-toast', type: 'error', message: __('messages.cannot_delete_question_used'));
+            return;
+        }
+
+        $modal = [ 
+            'title' => __('messages.delete_question_title'),
+            'message' => __('messages.delete_question_message'),
+            'note' => __('messages.delete_question_note'),
+            'action' => __('messages.delete_action'),
+            'callback' => 'deleteQuestion',
+            'object' => $request
+        ];
+
+        $this->dispatch('openConfirmationModal', $modal);
     }
 
     public function deleteQuestion($request)
     {
         $question = Question::findOrFail($request['id']);
+        // Detach question from any related pillars, modules, and methodologies before deletion
+        try {
+            $question->answers()->detach();
+        } catch (\Throwable $e) {}
+        try {
+            $question->pillars()->detach();
+        } catch (\Throwable $e) {}
+        try {
+            $question->modules()->detach();
+        } catch (\Throwable $e) {}
+        try {
+            $question->methodologies()->detach();
+        } catch (\Throwable $e) {}
         $question->delete();
         $this->dispatch('refreshTable');
     }

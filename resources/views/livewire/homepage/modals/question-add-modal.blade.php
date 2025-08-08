@@ -106,7 +106,7 @@
                                 <input
                                     type="text"
                                     class="kt-input w-full"
-                                    wire:input="setNewTagProperty($event.target.value)"
+                                    wire:model.live="newTag"
                                     wire:keydown.enter.prevent="addTag"
                                     placeholder="Type tag name and press Enter or select from suggestions"
                                 />

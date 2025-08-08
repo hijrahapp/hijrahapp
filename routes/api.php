@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('locale')->group(function () {
 
     Route::prefix('auth')->group(function () {
-        Route::post('login', [AuthController::class, 'login']);
         Route::post('signup', [AuthController::class, 'signup']);
+        Route::post('login', [AuthController::class, 'login']);
         Route::post('login/firebase', [AuthController::class, 'firebaseLogin']);
         Route::post('login/google', [AuthController::class, 'googleAccessTokenLogin']);
         Route::middleware(['auth.jwt','auth.user'])->post('signup/complete', [AuthController::class, 'completeSignup']);
@@ -40,7 +40,6 @@ Route::middleware('locale')->group(function () {
         Route::get('{methodologyId}/pillar/{pillarId}/questions', [QuestionController::class, 'getPillarQuestionsForMethodology']);
         Route::get('{methodologyId}/module/{moduleId}/questions', [QuestionController::class, 'getModuleQuestionsForMethodology']);
         Route::get('{methodologyId}/pillar/{pillarId}/module/{moduleId}/questions', [QuestionController::class, 'getModuleQuestionsForPillarInMethodology']);
-
 
         // Submit answers endpoints
         Route::post('{methodologyId}/answers', [UserAnswerController::class, 'submitMethodologyAnswers']);

@@ -36,21 +36,34 @@ class TagsTable extends Component
             $title = __('messages.activate_tag_title');
             $message = __('messages.activate_tag_message');
             $action = __('messages.activate_action');
+            $note = null;
         } else {
             $title = __('messages.deactivate_tag_title');
             $message = __('messages.deactivate_tag_message');
             $action = __('messages.deactivate_action');
+            $note = __('messages.deactivate_tag_note');
         }
-        $callback = 'changeTagStatus';
-        $this->dispatch('openConfirmationModal', $title, $message, $action, $callback, $request);
+        $modal = [ 
+            'title' => $title,
+            'message' => $message,
+            'note' => $note,
+            'action' => $action,
+            'callback' => 'changeTagStatus',
+            'object' => $request
+        ];
+        $this->dispatch('openConfirmationModal', $modal);
     }
 
     public function openTagDeleteModal($request) {
-        $title = __('messages.delete_tag_title');
-        $message = __('messages.delete_tag_message');
-        $action = __('messages.delete_action');
-        $callback = 'deleteTag';
-        $this->dispatch('openConfirmationModal', $title, $message, $action, $callback, $request);
+        $modal = [ 
+            "title" => __('messages.delete_tag_title'),
+            "message" => __("messages.delete_tag_message"),
+            "note" => __("messages.delete_tag_note"),
+            "action" => __("messages.delete_action"),
+            "callback" => "deleteTag",
+            "object" => $request
+        ];
+        $this->dispatch('openConfirmationModal', $modal);
     }
 
     public function changeTagStatus($request)
@@ -58,14 +71,60 @@ class TagsTable extends Component
         $tag = Tag::findOrFail($request['id']);
         $tag->active = $request['active'];
         $tag->save();
+        if ($tag->active === false) {
+            // On deactivation, remove the tag from all related entities
+            $this->removeTagFromAllEntities((int) $tag->id);
+        }
         $this->dispatch('refreshTable');
     }
 
     public function deleteTag($request)
     {
         $tag = Tag::findOrFail($request['id']);
+        // Remove tag from all related entities' tags arrays
+        $this->removeTagFromAllEntities((int) $tag->id);
+        // Delete the tag itself
         $tag->delete();
         $this->dispatch('refreshTable');
+    }
+
+    private function removeTagFromAllEntities(int $tagId): void
+    {
+        // Questions
+        \App\Models\Question::whereJsonContains('tags', $tagId)->chunkById(200, function ($questions) use ($tagId) {
+            foreach ($questions as $question) {
+                $tags = array_values(array_filter((array) $question->tags, fn ($id) => (int) $id !== $tagId));
+                $question->tags = $tags;
+                $question->save();
+            }
+        });
+
+        // Pillars
+        \App\Models\Pillar::whereJsonContains('tags', $tagId)->chunkById(200, function ($pillars) use ($tagId) {
+            foreach ($pillars as $pillar) {
+                $tags = array_values(array_filter((array) $pillar->tags, fn ($id) => (int) $id !== $tagId));
+                $pillar->tags = $tags;
+                $pillar->save();
+            }
+        });
+
+        // Modules
+        \App\Models\Module::whereJsonContains('tags', $tagId)->chunkById(200, function ($modules) use ($tagId) {
+            foreach ($modules as $module) {
+                $tags = array_values(array_filter((array) $module->tags, fn ($id) => (int) $id !== $tagId));
+                $module->tags = $tags;
+                $module->save();
+            }
+        });
+
+        // Methodologies
+        \App\Models\Methodology::whereJsonContains('tags', $tagId)->chunkById(200, function ($methodologies) use ($tagId) {
+            foreach ($methodologies as $methodology) {
+                $tags = array_values(array_filter((array) $methodology->tags, fn ($id) => (int) $id !== $tagId));
+                $methodology->tags = $tags;
+                $methodology->save();
+            }
+        });
     }
 
     public function getSearchProperty()

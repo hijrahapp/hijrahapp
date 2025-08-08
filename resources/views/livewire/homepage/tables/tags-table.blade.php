@@ -29,11 +29,11 @@
                             <td>{{ $tag->title }}</td>
                             <td class="text-center justify-center">
                                 @if($tag->active)
-                                    <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" data-kt-modal-toggle="#confirmation_modal" x-on:click="$wire.call('openTagStatusModal', {{ Js::from(['id' => $tag->id, 'active' => false]) }})" title="Deactivate Tag">
+                                    <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" x-on:click="$wire.call('openTagStatusModal', {{ Js::from(['id' => $tag->id, 'active' => false]) }})" title="Deactivate Tag">
                                         Deactivate
                                     </button>
                                 @else
-                                    <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-primary" data-kt-modal-toggle="#confirmation_modal" x-on:click="$wire.call('openTagStatusModal', {{ Js::from(['id' => $tag->id, 'active' => true]) }})" title="Activate Tag">
+                                    <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-primary" x-on:click="$wire.call('openTagStatusModal', {{ Js::from(['id' => $tag->id, 'active' => true]) }})" title="Activate Tag">
                                         Activate
                                     </button>
                                 @endif
@@ -41,7 +41,6 @@
                             <td class="text-center flex gap-2 justify-center">
                                 <button
                                     class="kt-btn kt-btn-outline flex items-center justify-center"
-                                    data-kt-modal-toggle="#confirmation_modal"
                                     x-on:click="$wire.call('openTagDeleteModal', {{ Js::from([ 'id' => $tag->id ]) }})"
                                     title="Delete Tag">
                                     <i class="ki-filled ki-trash text-destructive"></i>

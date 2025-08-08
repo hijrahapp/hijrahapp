@@ -133,6 +133,68 @@ document.addEventListener('livewire:init', () => {
         initStickyHeaders();
         initModals();
     });
+
+    // Global toast listener for Livewire
+    Livewire.on('show-toast', (data) => {
+        console.log('Toast event received:', data);
+        const { type, message } = data;
+        try {
+            if (window.KTToast && typeof window.KTToast.show === 'function') {
+                console.log('Using KTToast.show');
+                window.KTToast.show({
+                    message: message,
+                    type: type || 'info',
+                    position: 'top-end',
+                    dismissible: true,
+                    duration: 3500
+                });
+                return;
+            }
+            if (window.kt && window.kt.toast && typeof window.kt.toast.show === 'function') {
+                console.log('Using kt.toast.show');
+                window.kt.toast.show({
+                    message: message,
+                    type: type || 'info',
+                    position: 'top-end',
+                    dismissible: true,
+                    duration: 3500
+                });
+                return;
+            }
+            console.log('Falling back to alert');
+        } catch (e) {
+            console.error('Toast error:', e);
+        }
+        alert(message);
+    });
+
+    // Global modal toggle listener
+    Livewire.on('toggle-modal', (data) => {
+        console.log('Toggle modal event received:', data);
+        const { selector } = data;
+        const modal = document.querySelector(selector);
+        if (modal) {
+            modal.classList.toggle('hidden');
+            modal.classList.toggle('flex');
+        }
+    });
+
+    // Global modal show listener using KTUI
+    Livewire.on('show-modal', (data) => {
+        console.log('Show modal event received:', data);
+        const { selector } = data;
+        const modal = document.querySelector(selector);
+        if (modal && window.KTModal) {
+            const modalInstance = window.KTModal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.show();
+            } else {
+                // Fallback to direct show if no instance
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+    });
 });
 
 // Export functions for use in other modules

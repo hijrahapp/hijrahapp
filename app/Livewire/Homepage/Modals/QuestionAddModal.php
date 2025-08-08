@@ -81,16 +81,8 @@ class QuestionAddModal extends Component
         }
     }
 
-    #[Computed]
-    public function getNewTagProperty()
+    public function updatedNewTag()
     {
-        return $this->newTag;
-    }
-
-    public function setNewTagProperty($value)
-    {
-        $this->newTag = $value;
-        
         if (strlen($this->newTag) >= 2) {
             $this->tagSuggestions = Tag::where('title', 'like', '%' . $this->newTag . '%')
                 ->where('active', true)
@@ -114,12 +106,15 @@ class QuestionAddModal extends Component
         // Load question data
         $this->title = $question->title;
         $this->type = $question->type->value; // Convert enum to string
-        $this->tags = $question->tags ?? [];
+        // Ensure tags are normalized to an array of integer IDs
+        $this->tags = $this->normalizeTagIds($question->tags ?? []);
         
         // Load custom answers for MCQ questions
         if ($question->type->requiresCustomAnswers()) {
             $this->customAnswers = $question->answers->pluck('title')->toArray();
         }
+
+        $this->dispatch('show-modal', selector: '#question_add_modal');
     }
 
     public function selectTag($tagId, $tagTitle)
@@ -192,6 +187,8 @@ class QuestionAddModal extends Component
 
     public function save()
     {
+        // Normalize tags to avoid validation errors if they were stored as objects/strings
+        $this->tags = $this->normalizeTagIds($this->tags);
         $this->validate();
 
         try {
@@ -284,6 +281,37 @@ class QuestionAddModal extends Component
         if (empty($this->tags)) return [];
         
         return Tag::whereIn('id', $this->tags)->pluck('title', 'id')->toArray();
+    }
+
+    /**
+     * Convert various tag formats into a clean array of unique integer IDs.
+     * Accepts arrays of integers/strings or arrays of objects like [ {id: 1, title: "..."} ].
+     */
+    private function normalizeTagIds($tags): array
+    {
+        if (empty($tags)) {
+            return [];
+        }
+
+        $ids = [];
+        foreach ((array) $tags as $tag) {
+            if (is_array($tag)) {
+                $candidate = $tag['id'] ?? $tag['value'] ?? null;
+                if ($candidate !== null && is_numeric($candidate)) {
+                    $ids[] = (int) $candidate;
+                }
+            } elseif (is_object($tag)) {
+                $candidate = $tag->id ?? $tag->value ?? null;
+                if ($candidate !== null && is_numeric($candidate)) {
+                    $ids[] = (int) $candidate;
+                }
+            } elseif (is_numeric($tag)) {
+                $ids[] = (int) $tag;
+            }
+        }
+
+        $ids = array_values(array_unique(array_filter($ids, fn ($v) => $v > 0)));
+        return $ids;
     }
 
     public function render()
