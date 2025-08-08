@@ -22,21 +22,6 @@ class AdminsTable extends Component
         'refreshTable' => '$refresh'
     ];
 
-    public function getSearchProperty()
-    {
-        return $this->search;
-    }
-
-    public function setSearchProperty($value)
-    {
-        $this->search = $value;
-        $this->resetPage();
-    }
-
-    public function mount()
-    {
-    }
-
     #[Computed]
     public function users()
     {

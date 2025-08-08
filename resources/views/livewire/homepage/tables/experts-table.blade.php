@@ -4,7 +4,7 @@
         <div class="flex gap-2 items-center">
             <div class="kt-input max-w-48">
                 <i class="ki-filled ki-magnifier"></i>
-                <input type="text" class="kt-input" placeholder="Search Users" wire:input="setSearchProperty($event.target.value)" />
+                <input type="text" class="kt-input" placeholder="Search Users" wire:model.live="search" />
             </div>
             <button class="kt-btn kt-btn-outline flex items-center justify-center" data-kt-modal-toggle="#expert_add_modal" title="Add Expert">
                 <i class="ki-filled ki-plus"></i>
@@ -43,7 +43,6 @@
                         <td class="text-center flex gap-2 justify-center">
                             <button
                                 class="kt-btn kt-btn-outline flex items-center justify-center"
-                                data-kt-modal-toggle="#user_edit_modal"
                                 x-on:click="$wire.call('handleUserEditOpen', {{ Js::from([
                                                                                     'id' => $user->id,
                                                                                     'name' => $user->name,

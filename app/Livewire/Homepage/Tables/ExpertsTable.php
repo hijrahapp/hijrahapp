@@ -21,21 +21,6 @@ class ExpertsTable extends Component
         'refreshTable' => '$refresh'
     ];
 
-    public function getSearchProperty()
-    {
-        return $this->search;
-    }
-
-    public function setSearchProperty($value)
-    {
-        $this->search = $value;
-        $this->resetPage();
-    }
-
-    public function mount()
-    {
-    }
-
     public function getUsersProperty()
     {
         $expertsRoleId = Role::where('name', 'Expert')->value('id');
@@ -62,7 +47,6 @@ class ExpertsTable extends Component
 
     public function render()
     {
-        logger("renderrrr");
         return view('livewire.homepage.tables.experts-table', [
             'users' => $this->getUsersProperty(),
         ]);

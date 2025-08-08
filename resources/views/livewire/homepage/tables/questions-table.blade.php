@@ -4,7 +4,7 @@
         <div class="flex gap-2 items-center">
             <div class="kt-input max-w-48">
                 <i class="ki-filled ki-magnifier"></i>
-                <input type="text" class="kt-input" placeholder="Search Questions" wire:input="setSearchProperty($event.target.value)" />
+                <input type="text" class="kt-input" placeholder="Search Questions" wire:model.live="search" />
             </div>
             <button class="kt-btn kt-btn-outline flex items-center justify-center" data-kt-modal-toggle="#question_add_modal" title="Add Question">
                 <i class="ki-filled ki-plus"></i>

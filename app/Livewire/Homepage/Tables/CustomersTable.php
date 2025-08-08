@@ -21,21 +21,6 @@ class CustomersTable extends Component
         'refreshTable' => '$refresh'
     ];
 
-    public function getSearchProperty()
-    {
-        return $this->search;
-    }
-
-    public function setSearchProperty($value)
-    {
-        $this->search = $value;
-        $this->resetPage();
-    }
-
-    public function mount()
-    {
-    }
-
     public function getUsersProperty()
     {
         $customerRoleId = Role::where('name', 'Customer')->value('id');

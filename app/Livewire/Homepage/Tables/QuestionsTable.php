@@ -41,16 +41,16 @@ class QuestionsTable extends Component
                 'totalCount' => 0
             ];
         }
-        
+
         $allTags = Tag::whereIn('id', $tagIds)
             ->where('active', true)
             ->pluck('title')
             ->toArray();
-        
+
         $totalCount = count($allTags);
         $displayedTags = array_slice($allTags, 0, $limit);
         $hasMore = $totalCount > $limit;
-        
+
         return [
             'tags' => $displayedTags,
             'hasMore' => $hasMore,
@@ -68,13 +68,13 @@ class QuestionsTable extends Component
         $question = Question::findOrFail($request['id']);
 
         $isUsed = $question->modules()->exists() || $question->pillars()->exists() || $question->methodologies()->exists();
-        
+
         if ($isUsed) {
             $this->dispatch('show-toast', type: 'error', message: __('messages.cannot_delete_question_used'));
             return;
         }
 
-        $modal = [ 
+        $modal = [
             'title' => __('messages.delete_question_title'),
             'message' => __('messages.delete_question_message'),
             'note' => __('messages.delete_question_note'),
@@ -89,32 +89,8 @@ class QuestionsTable extends Component
     public function deleteQuestion($request)
     {
         $question = Question::findOrFail($request['id']);
-        // Detach question from any related pillars, modules, and methodologies before deletion
-        try {
-            $question->answers()->detach();
-        } catch (\Throwable $e) {}
-        try {
-            $question->pillars()->detach();
-        } catch (\Throwable $e) {}
-        try {
-            $question->modules()->detach();
-        } catch (\Throwable $e) {}
-        try {
-            $question->methodologies()->detach();
-        } catch (\Throwable $e) {}
         $question->delete();
         $this->dispatch('refreshTable');
-    }
-
-    public function getSearchProperty()
-    {
-        return $this->search;
-    }
-
-    public function setSearchProperty($value)
-    {
-        $this->search = $value;
-        $this->resetPage();
     }
 
     public function render()

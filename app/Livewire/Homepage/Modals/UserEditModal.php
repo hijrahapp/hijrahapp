@@ -32,6 +32,8 @@ class UserEditModal extends Component
         $this->userId = $user['id'];
         $this->email = $user['email'];
         $this->name = $user['name'];
+
+        $this->dispatch('show-modal', selector: '#user_edit_modal');
     }
 
     public function closeModal()

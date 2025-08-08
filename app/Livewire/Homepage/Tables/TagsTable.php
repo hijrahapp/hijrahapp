@@ -2,6 +2,10 @@
 
 namespace App\Livewire\Homepage\Tables;
 
+use App\Models\Methodology;
+use App\Models\Module;
+use App\Models\Pillar;
+use App\Models\Question;
 use App\Models\Tag;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -43,7 +47,7 @@ class TagsTable extends Component
             $action = __('messages.deactivate_action');
             $note = __('messages.deactivate_tag_note');
         }
-        $modal = [ 
+        $modal = [
             'title' => $title,
             'message' => $message,
             'note' => $note,
@@ -55,7 +59,7 @@ class TagsTable extends Component
     }
 
     public function openTagDeleteModal($request) {
-        $modal = [ 
+        $modal = [
             "title" => __('messages.delete_tag_title'),
             "message" => __("messages.delete_tag_message"),
             "note" => __("messages.delete_tag_note"),
@@ -91,7 +95,7 @@ class TagsTable extends Component
     private function removeTagFromAllEntities(int $tagId): void
     {
         // Questions
-        \App\Models\Question::whereJsonContains('tags', $tagId)->chunkById(200, function ($questions) use ($tagId) {
+        Question::whereJsonContains('tags', $tagId)->chunkById(200, function ($questions) use ($tagId) {
             foreach ($questions as $question) {
                 $tags = array_values(array_filter((array) $question->tags, fn ($id) => (int) $id !== $tagId));
                 $question->tags = $tags;
@@ -100,7 +104,7 @@ class TagsTable extends Component
         });
 
         // Pillars
-        \App\Models\Pillar::whereJsonContains('tags', $tagId)->chunkById(200, function ($pillars) use ($tagId) {
+        Pillar::whereJsonContains('tags', $tagId)->chunkById(200, function ($pillars) use ($tagId) {
             foreach ($pillars as $pillar) {
                 $tags = array_values(array_filter((array) $pillar->tags, fn ($id) => (int) $id !== $tagId));
                 $pillar->tags = $tags;
@@ -109,7 +113,7 @@ class TagsTable extends Component
         });
 
         // Modules
-        \App\Models\Module::whereJsonContains('tags', $tagId)->chunkById(200, function ($modules) use ($tagId) {
+        Module::whereJsonContains('tags', $tagId)->chunkById(200, function ($modules) use ($tagId) {
             foreach ($modules as $module) {
                 $tags = array_values(array_filter((array) $module->tags, fn ($id) => (int) $id !== $tagId));
                 $module->tags = $tags;
@@ -118,24 +122,13 @@ class TagsTable extends Component
         });
 
         // Methodologies
-        \App\Models\Methodology::whereJsonContains('tags', $tagId)->chunkById(200, function ($methodologies) use ($tagId) {
+        Methodology::whereJsonContains('tags', $tagId)->chunkById(200, function ($methodologies) use ($tagId) {
             foreach ($methodologies as $methodology) {
                 $tags = array_values(array_filter((array) $methodology->tags, fn ($id) => (int) $id !== $tagId));
                 $methodology->tags = $tags;
                 $methodology->save();
             }
         });
-    }
-
-    public function getSearchProperty()
-    {
-        return $this->search;
-    }
-
-    public function setSearchProperty($value)
-    {
-        $this->search = $value;
-        $this->resetPage();
     }
 
     public function render()
