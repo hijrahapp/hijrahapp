@@ -10,7 +10,7 @@
         <livewire:homepage.modals.change-password />
         <livewire:homepage.modals.user-add-modal />
         <livewire:homepage.modals.user-edit-modal />
-        <livewire:homepage.modals.user-status-modal />
+
         <livewire:homepage.modals.expert-add-modal />
         <livewire:homepage.modals.tag-add-modal />
         <livewire:homepage.modals.question-add-modal />

@@ -37,15 +37,15 @@
                             <td class="text-center">{{ $user->birthDate ? $user->birthDate->format('d M, Y') : '-' }}</td>
                             <td class="text-center">{{ ucfirst($user->gender) }}</td>
                             <td class="text-center justify-center">
-                                @if($user->active)
-                                    <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" data-kt-modal-toggle="#user_status_modal" x-on:click="$wire.call('handleUserStatusOpen', {{ Js::from(['userId' => $user->id,'status' => false]) }})" title="Deactivate User" @if(!$this->isUserEditable($user)) disabled @endif>
-                                        Deactivate
-                                    </button>
-                                @else
-                                    <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-primary" data-kt-modal-toggle="#user_status_modal" x-on:click="$wire.call('handleUserStatusOpen', {{ Js::from(['userId' => $user->id,'status' => true]) }})" title="Activate User" @if(!$this->isUserEditable($user)) disabled @endif>
-                                        Activate
-                                    </button>
-                                @endif
+                                                            @if($user->active)
+                                <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" x-on:click="$wire.call('handleUserStatusOpen', {{ Js::from(['userId' => $user->id,'status' => false]) }})" title="Deactivate User" @if(!$this->isUserEditable($user)) disabled @endif>
+                                    Deactivate
+                                </button>
+                            @else
+                                <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-primary" x-on:click="$wire.call('handleUserStatusOpen', {{ Js::from(['userId' => $user->id,'status' => true]) }})" title="Activate User" @if(!$this->isUserEditable($user)) disabled @endif>
+                                    Activate
+                                </button>
+                            @endif
                             </td>
                         </tr>
                     @empty

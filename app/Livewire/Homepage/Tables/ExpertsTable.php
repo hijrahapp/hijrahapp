@@ -18,7 +18,8 @@ class ExpertsTable extends Component
     protected $paginationTheme = 'tailwind';
 
     protected $listeners = [
-        'refreshTable' => '$refresh'
+        'refreshTable' => '$refresh',
+        'changeUserStatus' => 'changeUserStatus'
     ];
 
     public function getUsersProperty()
@@ -42,7 +43,34 @@ class ExpertsTable extends Component
     }
 
     public function handleUserStatusOpen($request) {
-        $this->dispatch('openUserStatusModal', $request['userId'], $request['status']);
+        if($request['status']) {
+            $title = __('messages.activate_user_title');
+            $message = __('messages.activate_user_message');
+            $action = __('messages.activate_action');
+            $note = null;
+        } else {
+            $title = __('messages.deactivate_user_title');
+            $message = __('messages.deactivate_user_message');
+            $action = __('messages.deactivate_action');
+            $note = __('messages.deactivate_user_note');
+        }
+        $modal = [
+            'title' => $title,
+            'message' => $message,
+            'note' => $note,
+            'action' => $action,
+            'callback' => 'changeUserStatus',
+            'object' => $request
+        ];
+        $this->dispatch('openConfirmationModal', $modal);
+    }
+
+    public function changeUserStatus($request)
+    {
+        $user = User::findOrFail($request['userId']);
+        $user->active = $request['status'];
+        $user->save();
+        $this->dispatch('refreshTable');
     }
 
     public function render()

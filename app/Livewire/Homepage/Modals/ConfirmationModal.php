@@ -29,10 +29,11 @@ class ConfirmationModal extends Component
 
         $this->dispatch('show-modal', selector: '#confirmation_modal');
     }
-
+    
     public function performConfirmAction()
     {
         $this->dispatch($this->callBack, $this->object);
+        $this->dispatch('click');
         $this->resetForm();
     }
 

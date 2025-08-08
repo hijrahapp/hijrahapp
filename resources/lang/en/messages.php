@@ -90,4 +90,9 @@ return [
     'password_changed_successfully' => 'Password changed successfully.',
     'password_has_been_changed_successfully' => 'Your password has been changed successfully',
     'password_has_been_successfully_reset' => 'Your password has been successfully reset for your account.',
+    'activate_user_title' => 'Activate User',
+    'activate_user_message' => 'Are you sure you want to activate this user?',
+    'deactivate_user_title' => 'Deactivate User',
+    'deactivate_user_message' => 'Are you sure you want to deactivate this user?',
+    'deactivate_user_note' => 'This will prevent the user from accessing the system.',
 ];
