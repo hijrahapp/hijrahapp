@@ -90,4 +90,9 @@ return [
     'password_changed_successfully' => 'تم تغيير كلمة المرور بنجاح.',
     'password_has_been_changed_successfully' => 'تم تغيير كلمة المرور الخاصة بك بنجاح',
     'password_has_been_successfully_reset' => 'تم إعادة تعيين كلمة المرور الخاصة بك بنجاح.',
+    'activate_user_title' => 'تفعيل المستخدم',
+    'activate_user_message' => 'هل أنت متأكد من أنك تريد تفعيل هذا المستخدم؟',
+    'deactivate_user_title' => 'إلغاء تفعيل المستخدم',
+    'deactivate_user_message' => 'هل أنت متأكد من أنك تريد إلغاء تفعيل هذا المستخدم؟',
+    'deactivate_user_note' => 'سيؤدي ذلك إلى منع المستخدم من الوصول إلى النظام.',
 ];
