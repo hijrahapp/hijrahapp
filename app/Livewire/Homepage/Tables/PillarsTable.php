@@ -2,14 +2,14 @@
 
 namespace App\Livewire\Homepage\Tables;
 
-use App\Models\Question;
+use App\Models\Pillar;
 use App\Models\Tag;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
-class QuestionsTable extends Component
+class PillarsTable extends Component
 {
     use WithFileUploads, WithPagination;
 
@@ -24,46 +24,19 @@ class QuestionsTable extends Component
 
     protected $listeners = [
         'refreshTable' => '$refresh',
-        'deleteQuestion' => 'deleteQuestion',
+        'deletePillar' => 'deletePillar',
     ];
 
     #[Computed]
-    public function questions()
+    public function pillars()
     {
-        $query = Question::where('title', 'like', '%'.$this->search.'%')
+        $query = Pillar::where('name', 'like', '%'.$this->search.'%')
             ->when($this->tagFilter, function ($q) {
                 $q->whereJsonContains('tags', (int) $this->tagFilter);
             })
-            ->withCount(['modules', 'pillars', 'methodologies'])
+            ->withCount(['methodologies', 'modules', 'questions'])
             ->orderBy('id', 'asc');
         return $query->paginate($this->perPage);
-    }
-
-    public function getTagTitles($tagIds, $limit = 3)
-    {
-        if (empty($tagIds) || !is_array($tagIds)) {
-            return [
-                'tags' => [],
-                'hasMore' => false,
-                'totalCount' => 0
-            ];
-        }
-
-        $allTags = Tag::whereIn('id', $tagIds)
-            ->where('active', true)
-            ->pluck('title')
-            ->toArray();
-
-        $totalCount = count($allTags);
-        $displayedTags = array_slice($allTags, 0, $limit);
-        $hasMore = $totalCount > $limit;
-
-        return [
-            'tags' => $displayedTags,
-            'hasMore' => $hasMore,
-            'totalCount' => $totalCount,
-            'remainingCount' => $totalCount - $limit
-        ];
     }
 
     public function updatedTagSearch()
@@ -98,44 +71,71 @@ class QuestionsTable extends Component
         $this->showTagSuggestions = false;
     }
 
-    public function editQuestion($questionId)
+    public function getTagTitles($tagIds, $limit = 3)
     {
-        $this->dispatch('edit-question', $questionId);
+        if (empty($tagIds) || !is_array($tagIds)) {
+            return [
+                'tags' => [],
+                'hasMore' => false,
+                'totalCount' => 0
+            ];
+        }
+
+        $allTags = Tag::whereIn('id', $tagIds)
+            ->where('active', true)
+            ->pluck('title')
+            ->toArray();
+
+        $totalCount = count($allTags);
+        $displayedTags = array_slice($allTags, 0, $limit);
+        $hasMore = $totalCount > $limit;
+
+        return [
+            'tags' => $displayedTags,
+            'hasMore' => $hasMore,
+            'totalCount' => $totalCount,
+            'remainingCount' => $totalCount - $limit
+        ];
     }
 
-    public function openDeleteQuestionModal($request) {
-        $question = Question::findOrFail($request['id']);
+    public function editPillar($pillarId)
+    {
+        $this->dispatch('edit-pillar', $pillarId);
+    }
 
-        $isUsed = $question->modules()->exists() || $question->pillars()->exists() || $question->methodologies()->exists();
+    public function openDeletePillarModal($request) {
+        $pillar = Pillar::findOrFail($request['id']);
+
+        $isUsed = $pillar->methodologies()->exists() || $pillar->modules()->exists() || $pillar->questions()->exists();
 
         if ($isUsed) {
-            $this->dispatch('show-toast', type: 'error', message: __('messages.cannot_delete_question_used'));
+            $this->dispatch('show-toast', type: 'error', message: __('messages.cannot_delete_pillar_used'));
             return;
         }
 
         $modal = [
-            'title' => __('messages.delete_question_title'),
-            'message' => __('messages.delete_question_message'),
-            'note' => __('messages.delete_question_note'),
+            'title' => __('messages.delete_pillar_title'),
+            'message' => __('messages.delete_pillar_message'),
+            'note' => __('messages.delete_pillar_note'),
             'action' => __('messages.delete_action'),
-            'callback' => 'deleteQuestion',
+            'callback' => 'deletePillar',
             'object' => $request
         ];
 
         $this->dispatch('openConfirmationModal', $modal);
     }
 
-    public function deleteQuestion($request)
+    public function deletePillar($request)
     {
-        $question = Question::findOrFail($request['id']);
-        $question->delete();
+        $pillar = Pillar::findOrFail($request['id']);
+        $pillar->delete();
         $this->dispatch('refreshTable');
     }
 
     public function render()
     {
-        return view('livewire.homepage.tables.questions-table', [
-            'questions' => $this->questions,
+        return view('livewire.homepage.tables.pillars-table', [
+            'pillars' => $this->pillars,
         ]);
     }
 }

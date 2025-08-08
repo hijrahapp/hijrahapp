@@ -1,10 +1,10 @@
 <div class="kt-card kt-card-grid kt-card-div h-full min-w-full">
     <div class="kt-card-header flex justify-between items-center">
-        <h3 class="kt-card-title">Questions</h3>
+        <h3 class="kt-card-title">Modules</h3>
         <div class="flex gap-2 items-center">
             <div class="kt-input max-w-48">
                 <i class="ki-filled ki-magnifier"></i>
-                <input type="text" class="kt-input" placeholder="Search Questions" wire:model.live="search" />
+                <input type="text" class="kt-input" placeholder="Search Modules" wire:model.live="search" />
             </div>
             <div class="relative max-w-64 min-w-56">
                 <div class="kt-input">
@@ -26,7 +26,7 @@
                     </div>
                 @endif
             </div>
-            <button class="kt-btn kt-btn-outline flex items-center justify-center" data-kt-modal-toggle="#question_add_modal" title="Add Question">
+            <button class="kt-btn kt-btn-outline flex items-center justify-center" data-kt-modal-toggle="#module_add_modal" title="Add Module">
                 <i class="ki-filled ki-plus"></i>
             </button>
         </div>
@@ -37,25 +37,37 @@
                 <thead>
                     <tr>
                         <th class="w-20 text-center">#</th>
-                        <th class="">Title</th>
-                        <th class="">Type</th>
+                        <th class="">Name</th>
+                        <th class="">Description</th>
+                        <th class="">Definition</th>
+                        <th class="">Objectives</th>
                         <th class="">Tags</th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($questions as $index => $question)
+                    @forelse($modules as $index => $module)
                         <tr>
-                            <td class="text-center">{{ $questions->firstItem() + $index }}</td>
-                            <td>{{ $question->title }}</td>
+                            <td class="text-center">{{ $modules->firstItem() + $index }}</td>
+                            <td>{{ $module->name }}</td>
                             <td>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {{ __('lookups.'.$question->type->value) }}
-                                </span>
+                                <div class="max-w-xs truncate" title="{{ $module->description }}">
+                                    {{ \Illuminate\Support\Str::limit($module->description, 50) }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="max-w-xs truncate" title="{{ $module->definition }}">
+                                    {{ \Illuminate\Support\Str::limit($module->definition, 50) }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="max-w-xs truncate" title="{{ $module->objectives }}">
+                                    {{ \Illuminate\Support\Str::limit($module->objectives, 50) }}
+                                </div>
                             </td>
                             <td>
                                 @php
-                                    $tagData = $this->getTagTitles($question->tags);
+                                    $tagData = $this->getTagTitles($module->tags);
                                 @endphp
                                 @if(count($tagData['tags']) > 0)
                                     <div class="flex flex-wrap gap-1 items-center">
@@ -77,21 +89,21 @@
                             <td class="text-center flex gap-2 justify-center">
                                 <button
                                     class="kt-btn kt-btn-outline flex items-center justify-center"
-                                    wire:click="editQuestion({{ $question->id }})"
-                                    title="Edit Question">
+                                    wire:click="editModule({{ $module->id }})"
+                                    title="Edit Module">
                                     <i class="ki-filled ki-pencil text-secondary-foreground"></i>
                                 </button>
                                 <button
                                     class="kt-btn kt-btn-outline flex items-center justify-center"
-                                    wire:click="openDeleteQuestionModal({{ Js::from(['id' => $question->id]) }})"
-                                    title="Delete Question">
+                                    wire:click="openDeleteModuleModal({{ Js::from(['id' => $module->id]) }})"
+                                    title="Delete Module">
                                     <i class="ki-filled ki-trash text-destructive"></i>
                                 </button>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4">No Questions found.</td>
+                            <td colspan="7" class="text-center py-4">No Modules found.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -103,11 +115,13 @@
         </div>
         <div class="order-1 flex items-center gap-4 md:order-2">
             <span>
-                Showing {{ $questions->firstItem() ?? 0 }} to {{ $questions->lastItem() ?? 0 }} of {{ $questions->total() ?? 0 }} Questions
+                Showing {{ $modules->firstItem() ?? 0 }} to {{ $modules->lastItem() ?? 0 }} of {{ $modules->total() ?? 0 }} Modules
             </span>
             <div>
-                {{ $questions->links() }}
+                {{ $modules->links() }}
             </div>
         </div>
     </div>
 </div>
+
+

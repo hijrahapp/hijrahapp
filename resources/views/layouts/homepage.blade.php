@@ -14,6 +14,8 @@
         <livewire:homepage.modals.expert-add-modal />
         <livewire:homepage.modals.tag-add-modal />
         <livewire:homepage.modals.question-add-modal />
+        <livewire:homepage.modals.pillar-add-modal />
+        <livewire:homepage.modals.module-add-modal />
         <livewire:homepage.modals.confirmation-modal />
         <!-- Page -->
         <!-- Main -->

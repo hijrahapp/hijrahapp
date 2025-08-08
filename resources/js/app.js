@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize modal functionality
     initModals();
+
+    // No rich text editors
 });
 
 // Drawer functionality
@@ -103,10 +105,13 @@ function initModals() {
             if (modal) {
                 modal.classList.toggle('hidden');
                 modal.classList.toggle('flex');
+                // No rich text editors
             }
         });
     });
 }
+
+// No Quill/TinyMCE functionality
 
 // Close modals when clicking outside
 document.addEventListener('click', function(e) {
@@ -194,6 +199,7 @@ document.addEventListener('livewire:init', () => {
                 modal.classList.add('flex');
             }
         }
+        // No editors to initialize
     });
 });
 
