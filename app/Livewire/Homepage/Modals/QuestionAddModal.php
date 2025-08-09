@@ -4,7 +4,7 @@ namespace App\Livewire\Homepage\Modals;
 
 use App\Enums\QuestionType;
 use App\Models\Question;
-use App\Models\Tag;
+// use App\Models\Tag; // No longer directly used; tag handling moved to shared component
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -13,12 +13,10 @@ class QuestionAddModal extends Component
     public $title = '';
     public $type = '';
     public $tags = [];
-    public $newTag = '';
     public $customAnswers = [];
     public $newAnswer = '';
     public $error = '';
-    public $tagSuggestions = [];
-    public $showTagSuggestions = false;
+    // Tag suggestions and creation are handled in the shared TagPicker component
     public $isEditMode = false;
     public $questionId = null;
 
@@ -81,20 +79,7 @@ class QuestionAddModal extends Component
         }
     }
 
-    public function updatedNewTag()
-    {
-        if (strlen($this->newTag) >= 2) {
-            $this->tagSuggestions = Tag::where('title', 'like', '%' . $this->newTag . '%')
-                ->where('active', true)
-                ->limit(5)
-                ->get(['id', 'title'])
-                ->toArray();
-            $this->showTagSuggestions = true;
-        } else {
-            $this->tagSuggestions = [];
-            $this->showTagSuggestions = false;
-        }
-    }
+    // Tag input events removed
 
     public function editQuestion($questionId)
     {
@@ -106,8 +91,8 @@ class QuestionAddModal extends Component
         // Load question data
         $this->title = $question->title;
         $this->type = $question->type->value; // Convert enum to string
-        // Ensure tags are normalized to an array of integer IDs
-        $this->tags = $this->normalizeTagIds($question->tags ?? []);
+        // Tags are stored as an array of IDs on the model
+        $this->tags = $question->tags ?? [];
         
         // Load custom answers for MCQ questions
         if ($question->type->requiresCustomAnswers()) {
@@ -117,54 +102,7 @@ class QuestionAddModal extends Component
         $this->dispatch('show-modal', selector: '#question_add_modal');
     }
 
-    public function selectTag($tagId, $tagTitle)
-    {
-        if (!in_array($tagId, $this->tags)) {
-            $this->tags[] = $tagId;
-        }
-        $this->clearTagInput();
-    }
-
-    public function addTag()
-    {
-        if (!empty(trim($this->newTag))) {
-            $title = trim($this->newTag);
-            
-            // Check if tag already exists
-            $existingTag = Tag::where('title', $title)->first();
-            
-            if ($existingTag) {
-                // Use existing tag
-                if (!in_array($existingTag->id, $this->tags)) {
-                    $this->tags[] = $existingTag->id;
-                }
-            } else {
-                // Create new tag
-                $newTag = Tag::create([
-                    'title' => $title,
-                    'active' => true
-                ]);
-                $this->tags[] = $newTag->id;
-            }
-            
-            $this->clearTagInput();
-        }
-    }
-
-    public function clearTagInput()
-    {
-        $this->newTag = '';
-        $this->tagSuggestions = [];
-        $this->showTagSuggestions = false;
-    }
-
-    public function removeTag($index)
-    {
-        if (isset($this->tags[$index])) {
-            unset($this->tags[$index]);
-            $this->tags = array_values($this->tags);
-        }
-    }
+    // All tag manipulation is handled by the shared TagPicker component
 
     public function addAnswer()
     {
@@ -187,8 +125,6 @@ class QuestionAddModal extends Component
 
     public function save()
     {
-        // Normalize tags to avoid validation errors if they were stored as objects/strings
-        $this->tags = $this->normalizeTagIds($this->tags);
         $this->validate();
 
         try {
@@ -243,12 +179,10 @@ class QuestionAddModal extends Component
         $this->title = '';
         $this->type = '';
         $this->tags = [];
-        $this->newTag = '';
+        // Tags remain bound via shared component
         $this->customAnswers = [];
         $this->newAnswer = '';
         $this->error = '';
-        $this->tagSuggestions = [];
-        $this->showTagSuggestions = false;
         $this->isEditMode = false;
         $this->questionId = null;
     }
@@ -276,50 +210,15 @@ class QuestionAddModal extends Component
         return $questionType->getAnswers();
     }
 
-    public function getSelectedTags()
-    {
-        if (empty($this->tags)) return [];
-        
-        return Tag::whereIn('id', $this->tags)->pluck('title', 'id')->toArray();
-    }
+    // Selected tags list no longer needed in the view
 
-    /**
-     * Convert various tag formats into a clean array of unique integer IDs.
-     * Accepts arrays of integers/strings or arrays of objects like [ {id: 1, title: "..."} ].
-     */
-    private function normalizeTagIds($tags): array
-    {
-        if (empty($tags)) {
-            return [];
-        }
-
-        $ids = [];
-        foreach ((array) $tags as $tag) {
-            if (is_array($tag)) {
-                $candidate = $tag['id'] ?? $tag['value'] ?? null;
-                if ($candidate !== null && is_numeric($candidate)) {
-                    $ids[] = (int) $candidate;
-                }
-            } elseif (is_object($tag)) {
-                $candidate = $tag->id ?? $tag->value ?? null;
-                if ($candidate !== null && is_numeric($candidate)) {
-                    $ids[] = (int) $candidate;
-                }
-            } elseif (is_numeric($tag)) {
-                $ids[] = (int) $tag;
-            }
-        }
-
-        $ids = array_values(array_unique(array_filter($ids, fn ($v) => $v > 0)));
-        return $ids;
-    }
+    // Normalization no longer needed; shared TagPicker provides numeric IDs
 
     public function render()
     {
         return view('livewire.homepage.modals.question-add-modal', [
             'questionTypes' => $this->getQuestionTypes(),
             'predefinedAnswers' => $this->getPredefinedAnswers(),
-            'selectedTags' => $this->getSelectedTags(),
         ]);
     }
 }

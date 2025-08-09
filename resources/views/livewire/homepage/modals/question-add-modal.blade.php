@@ -97,64 +97,8 @@
                     @error('customAnswers.*')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 @endif
 
-                <!-- Tags with Autocomplete -->
-                <div>
-                    <label class="block text-sm font-medium mb-1">Tags</label>
-                    <div class="relative">
-                        <div class="flex gap-2">
-                            <div class="flex-1 relative">
-                                <input
-                                    type="text"
-                                    class="kt-input w-full"
-                                    wire:model.live="newTag"
-                                    wire:keydown.enter.prevent="addTag"
-                                    placeholder="Type tag name and press Enter or select from suggestions"
-                                />
-                                
-                                <!-- Tag Suggestions Dropdown -->
-                                @if($showTagSuggestions && count($tagSuggestions) > 0)
-                                    <div class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                                        @foreach($tagSuggestions as $suggestion)
-                                            <button
-                                                type="button"
-                                                class="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                                                wire:click="selectTag({{ $suggestion['id'] }}, '{{ $suggestion['title'] }}')"
-                                            >
-                                                {{ $suggestion['title'] }}
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                @endif
-                            </div>
-                            <button
-                                type="button"
-                                class="kt-btn kt-btn-primary"
-                                wire:click="addTag"
-                            >
-                                Add Tag
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                @if(count($selectedTags) > 0)
-                    <div>
-                        <div class="flex flex-wrap gap-2">
-                            @foreach($selectedTags as $tagId => $tagTitle)
-                                <div class="flex items-center gap-1 bg-primary/10 text-primary px-3 py-1 rounded-full">
-                                    <span class="text-sm">{{ $tagTitle }}</span>
-                                    <button
-                                        type="button"
-                                        class="text-primary hover:text-destructive ml-1"
-                                        wire:click="removeTag({{ array_search($tagId, array_keys($selectedTags)) }})"
-                                    >
-                                        <i class="ki-filled ki-cross text-xs"></i>
-                                    </button>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
+                <!-- Tags (Shared Component) -->
+                <livewire:shared.tag-picker wire:model="tags" :label="'Tags'" :placeholder="'Search or add tags'" :addButtonText="'Add Tag'" />
                 @error('tags')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 @error('tags.*')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
 

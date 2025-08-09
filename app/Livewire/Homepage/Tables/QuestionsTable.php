@@ -68,7 +68,7 @@ class QuestionsTable extends Component
 
     public function updatedTagSearch()
     {
-        if (strlen($this->tagSearch) >= 2) {
+        if (strlen($this->tagSearch) >= 1) {
             $this->tagSuggestions = Tag::where('title', 'like', '%' . $this->tagSearch . '%')
                 ->where('active', true)
                 ->limit(7)

@@ -45,50 +45,7 @@
                 @error('objectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
 
                 <!-- Tags -->
-                <div>
-                    <label class="block text-sm font-medium mb-1">Tags</label>
-                    <div class="relative">
-                        <div class="flex gap-2">
-                            <input type="text" class="kt-input flex-1" wire:model.live="newTag" placeholder="Search or add tags" />
-                            <button type="button" class="kt-btn kt-btn-outline" wire:click="addTag">
-                                Add
-                            </button>
-                        </div>
-                        
-                        <!-- Tag Suggestions -->
-                        @if($showTagSuggestions && count($tagSuggestions) > 0)
-                            <div class="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
-                                @foreach($tagSuggestions as $suggestion)
-                                    <button type="button" 
-                                        class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between"
-                                        wire:click="selectTag({{ $suggestion['id'] }}, '{{ $suggestion['title'] }}')">
-                                        <span>{{ $suggestion['title'] }}</span>
-                                        <i class="ki-filled ki-plus text-xs"></i>
-                                    </button>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                    
-                    <!-- Selected Tags -->
-                    @if(count($tags) > 0)
-                        <div class="flex flex-wrap gap-2 mt-2">
-                            @foreach($tags as $tagId)
-                                @php
-                                    $tag = \App\Models\Tag::find($tagId);
-                                @endphp
-                                @if($tag)
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-                                        {{ $tag->title }}
-                                        <button type="button" wire:click="removeTag({{ $tagId }})" class="ml-1 hover:text-destructive">
-                                            <i class="ki-filled ki-cross text-xs"></i>
-                                        </button>
-                                    </span>
-                                @endif
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
+                <livewire:shared.tag-picker wire:model="tags" :label="'Tags'" :placeholder="'Search or add tags'" :addButtonText="'Add'" />
                 @error('tags')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
             </div>
             <div class="kt-modal-footer flex gap-2 justify-end p-5">

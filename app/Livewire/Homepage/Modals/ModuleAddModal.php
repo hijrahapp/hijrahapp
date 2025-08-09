@@ -13,10 +13,8 @@ class ModuleAddModal extends Component
     public string $definition = '';
     public string $objectives = '';
     public array $tags = [];
-    public string $newTag = '';
     public string $error = '';
-    public array $tagSuggestions = [];
-    public bool $showTagSuggestions = false;
+    // Tag logic moved to TagPicker shared component
     public bool $isEditMode = false;
     public ?int $moduleId = null;
 
@@ -42,20 +40,7 @@ class ModuleAddModal extends Component
         $this->resetForm();
     }
 
-    public function updatedNewTag()
-    {
-        if (strlen($this->newTag) >= 2) {
-            $this->tagSuggestions = Tag::where('title', 'like', '%' . $this->newTag . '%')
-                ->where('active', true)
-                ->limit(5)
-                ->get(['id', 'title'])
-                ->toArray();
-            $this->showTagSuggestions = true;
-        } else {
-            $this->tagSuggestions = [];
-            $this->showTagSuggestions = false;
-        }
-    }
+    //
 
     public function editModule(int $moduleId)
     {
@@ -67,60 +52,17 @@ class ModuleAddModal extends Component
         $this->description = $module->description;
         $this->definition = $module->definition;
         $this->objectives = $module->objectives ?? '';
-        $this->tags = $this->normalizeTagIds($module->tags ?? []);
+        // Tags already stored as array of IDs
+        $this->tags = $module->tags ?? [];
 
         $this->dispatch('show-modal', selector: '#module_add_modal');
     }
 
-    public function selectTag($tagId, $tagTitle)
-    {
-        if (!in_array($tagId, $this->tags)) {
-            $this->tags[] = $tagId;
-        }
-        $this->clearTagInput();
-    }
+    //
 
-    public function addTag()
-    {
-        if (empty($this->newTag)) {
-            return;
-        }
+    // Normalization no longer needed; TagPicker ensures numeric ID array
 
-        $existingTag = Tag::where('title', $this->newTag)->first();
-        if ($existingTag) {
-            if (!in_array($existingTag->id, $this->tags)) {
-                $this->tags[] = $existingTag->id;
-            }
-        } else {
-            $newTag = Tag::create(['title' => $this->newTag, 'active' => true]);
-            $this->tags[] = $newTag->id;
-        }
-
-        $this->clearTagInput();
-    }
-
-    public function removeTag($tagId)
-    {
-        $this->tags = array_values(array_filter($this->tags, fn($id) => (int)$id !== (int)$tagId));
-    }
-
-    private function normalizeTagIds($tags): array
-    {
-        if (empty($tags)) return [];
-        $ids = [];
-        foreach ((array)$tags as $tag) {
-            if (is_numeric($tag)) $ids[] = (int)$tag;
-            elseif (is_array($tag) && isset($tag['id']) && is_numeric($tag['id'])) $ids[] = (int)$tag['id'];
-        }
-        return array_values(array_unique(array_filter($ids, fn($v)=>$v>0)));
-    }
-
-    public function clearTagInput()
-    {
-        $this->newTag = '';
-        $this->tagSuggestions = [];
-        $this->showTagSuggestions = false;
-    }
+    //
 
     public function resetForm()
     {
@@ -129,17 +71,14 @@ class ModuleAddModal extends Component
         $this->definition = '';
         $this->objectives = '';
         $this->tags = [];
-        $this->newTag = '';
         $this->error = '';
-        $this->tagSuggestions = [];
-        $this->showTagSuggestions = false;
         $this->isEditMode = false;
         $this->moduleId = null;
     }
 
     public function save()
     {
-        $this->tags = $this->normalizeTagIds($this->tags);
+        // Tags are numeric IDs
         $this->validate();
 
         try {

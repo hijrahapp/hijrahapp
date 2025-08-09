@@ -16696,7 +16696,7 @@
     color: var(--mono);
   }
   .kt-modal-body {
-    overflow-y: auto;
+    overflow-y: visible;
     padding-inline: calc(var(--spacing) * 5);
     padding-block: calc(var(--spacing) * 4);
   }

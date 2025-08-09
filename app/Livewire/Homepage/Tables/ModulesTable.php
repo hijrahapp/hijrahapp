@@ -41,7 +41,7 @@ class ModulesTable extends Component
 
     public function updatedTagSearch()
     {
-        if (strlen($this->tagSearch) >= 2) {
+        if (strlen($this->tagSearch) >= 1) {
             $this->tagSuggestions = Tag::where('title', 'like', '%' . $this->tagSearch . '%')
                 ->where('active', true)
                 ->limit(7)
@@ -50,7 +50,6 @@ class ModulesTable extends Component
             $this->showTagSuggestions = true;
         } else {
             $this->tagFilter = '';
-            $this->tagSuggestions = [];
             $this->showTagSuggestions = false;
         }
     }

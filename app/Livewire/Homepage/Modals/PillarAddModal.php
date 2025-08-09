@@ -14,10 +14,7 @@ class PillarAddModal extends Component
     public $definition = '';
     public $objectives = '';
     public $tags = [];
-    public $newTag = '';
     public $error = '';
-    public $tagSuggestions = [];
-    public $showTagSuggestions = false;
     public $isEditMode = false;
     public $pillarId = null;
 
@@ -59,20 +56,7 @@ class PillarAddModal extends Component
         $this->resetForm();
     }
 
-    public function updatedNewTag()
-    {
-        if (strlen($this->newTag) >= 2) {
-            $this->tagSuggestions = Tag::where('title', 'like', '%' . $this->newTag . '%')
-                ->where('active', true)
-                ->limit(5)
-                ->get(['id', 'title'])
-                ->toArray();
-            $this->showTagSuggestions = true;
-        } else {
-            $this->tagSuggestions = [];
-            $this->showTagSuggestions = false;
-        }
-    }
+    // Tag logic moved to shared TagPicker component
 
     public function editPillar($pillarId)
     {
@@ -86,71 +70,15 @@ class PillarAddModal extends Component
         $this->description = $pillar->description;
         $this->definition = $pillar->definition;
         $this->objectives = $pillar->objectives;
-        // Ensure tags are normalized to an array of integer IDs
-        $this->tags = $this->normalizeTagIds($pillar->tags ?? []);
+        // Tags are stored as an array of IDs on the model
+        $this->tags = $pillar->tags ?? [];
 
         $this->dispatch('show-modal', selector: '#pillar_add_modal');
     }
 
-    public function selectTag($tagId, $tagTitle)
-    {
-        if (!in_array($tagId, $this->tags)) {
-            $this->tags[] = $tagId;
-        }
-        $this->clearTagInput();
-    }
+    // Tag methods removed; component handles add/select/remove
 
-    public function addTag()
-    {
-        if (empty($this->newTag)) {
-            return;
-        }
-
-        // Check if tag already exists
-        $existingTag = Tag::where('title', $this->newTag)->first();
-        
-        if ($existingTag) {
-            if (!in_array($existingTag->id, $this->tags)) {
-                $this->tags[] = $existingTag->id;
-            }
-        } else {
-            // Create new tag
-            $newTag = Tag::create([
-                'title' => $this->newTag,
-                'active' => true
-            ]);
-            $this->tags[] = $newTag->id;
-        }
-
-        $this->clearTagInput();
-    }
-
-    public function removeTag($tagId)
-    {
-        $this->tags = array_filter($this->tags, function($id) use ($tagId) {
-            return $id != $tagId;
-        });
-    }
-
-    public function clearTagInput()
-    {
-        $this->newTag = '';
-        $this->tagSuggestions = [];
-        $this->showTagSuggestions = false;
-    }
-
-    private function normalizeTagIds($tags)
-    {
-        if (is_string($tags)) {
-            return json_decode($tags, true) ?? [];
-        }
-        
-        if (is_array($tags)) {
-            return array_map('intval', array_filter($tags, 'is_numeric'));
-        }
-        
-        return [];
-    }
+    // Normalization not needed; TagPicker ensures numeric IDs
 
     public function resetForm()
     {
@@ -172,8 +100,7 @@ class PillarAddModal extends Component
 
     public function save()
     {
-        // Normalize tags to avoid validation errors if they were stored as objects/strings
-        $this->tags = $this->normalizeTagIds($this->tags);
+        // Tags are numeric IDs provided by TagPicker
         $this->validate();
 
         try {
