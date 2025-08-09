@@ -6,3 +6,6 @@
 <!-- Compiled App Scripts -->
 @vite(['resources/js/app.js'])
 <!-- End of Scripts -->
+
+<!-- Quill Rich Text Editor Script -->
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>

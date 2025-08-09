@@ -38,10 +38,8 @@
                 @error('definition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
 
                 <!-- Objectives -->
-                <div>
-                    <label class="block text-sm font-medium mb-1">Objectives <span class="text-destructive">*</span></label>
-                    <textarea class="kt-textarea w-full" rows="3" wire:model.defer="objectives" placeholder="Enter pillar objectives"></textarea>
-                </div>
+                <label class="block text-sm font-medium mb-1">Objectives <span class="text-destructive">*</span></label>
+                <livewire:shared.rich-text :model="$objectives" wire:model="objectives" :placeholder="'Enter pillar objectives'" :editorId="'pillar_objectives_editor'" :minHeight="'150px'" />
                 @error('objectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
 
                 <!-- Tags -->
@@ -59,4 +57,3 @@
         </form>
     </div>
 </div>
-<!-- Objectives uses a standard textarea (no rich text) -->

@@ -21,4 +21,7 @@
         <!--begin::Global Stylesheets Bundle(used by all pages)-->
         <link href="{{ asset('/assets/css/styles.css') }}" rel="stylesheet" type="text/css" />
         <!--end::Global Stylesheets Bundle-->
+
+        <!-- Quill Rich Text Editor Styles -->
+        <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet" />
     </head>

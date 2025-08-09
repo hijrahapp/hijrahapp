@@ -34,10 +34,8 @@
                 </div>
                 @error('definition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
 
-                <div>
-                    <label class="block text-sm font-medium mb-1">Objectives <span class="text-destructive">*</span></label>
-                    <textarea class="kt-textarea w-full" rows="3" wire:model.defer="objectives" placeholder="Enter module objectives"></textarea>
-                </div>
+                <label class="block text-sm font-medium mb-1">Objectives <span class="text-destructive">*</span></label>
+                <livewire:shared.rich-text :model="$objectives" wire:model="objectives" :placeholder="'Enter module objectives'" :editorId="'module_objectives_editor'" :minHeight="'150px'" />
                 @error('objectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
 
                 <!-- Tags -->
