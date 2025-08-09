@@ -40,7 +40,6 @@
                         <th class="">Name</th>
                         <th class="">Description</th>
                         <th class="">Definition</th>
-                        <th class="">Objectives</th>
                         <th class="">Tags</th>
                         <th class="text-center">Actions</th>
                     </tr>
@@ -52,17 +51,12 @@
                             <td>{{ $pillar->name }}</td>
                             <td>
                                 <div class="max-w-xs truncate" title="{{ $pillar->description }}">
-                                    {{ \Illuminate\Support\Str::limit($pillar->description, 50) }}
+                                    {{ Str::limit($pillar->description, 50) }}
                                 </div>
                             </td>
                             <td>
                                 <div class="max-w-xs truncate" title="{{ $pillar->definition }}">
-                                    {{ \Illuminate\Support\Str::limit($pillar->definition, 50) }}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="max-w-xs truncate" title="{{ $pillar->objectives }}">
-                                    {{ \Illuminate\Support\Str::limit(strip_tags($pillar->objectives), 50) }}
+                                    {{ Str::limit($pillar->definition, 50) }}
                                 </div>
                             </td>
                             <td>
@@ -103,7 +97,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-4">No Pillars found.</td>
+                            <td colspan="6" class="text-center py-4">No Pillars found.</td>
                         </tr>
                     @endforelse
                 </tbody>

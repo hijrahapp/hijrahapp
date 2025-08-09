@@ -40,7 +40,6 @@
                         <th class="">Name</th>
                         <th class="">Description</th>
                         <th class="">Definition</th>
-                        <th class="">Objectives</th>
                         <th class="">Tags</th>
                         <th class="text-center">Actions</th>
                     </tr>
@@ -52,17 +51,12 @@
                             <td>{{ $module->name }}</td>
                             <td>
                                 <div class="max-w-xs truncate" title="{{ $module->description }}">
-                                    {{ \Illuminate\Support\Str::limit($module->description, 50) }}
+                                    {{ Str::limit($module->description, 50) }}
                                 </div>
                             </td>
                             <td>
                                 <div class="max-w-xs truncate" title="{{ $module->definition }}">
-                                    {{ \Illuminate\Support\Str::limit($module->definition, 50) }}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="max-w-xs truncate" title="{{ $module->objectives }}">
-                                    {{ \Illuminate\Support\Str::limit($module->objectives, 50) }}
+                                    {{ Str::limit($module->definition, 50) }}
                                 </div>
                             </td>
                             <td>
@@ -103,7 +97,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-4">No Modules found.</td>
+                            <td colspan="6" class="text-center py-4">No Modules found.</td>
                         </tr>
                     @endforelse
                 </tbody>
