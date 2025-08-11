@@ -143,12 +143,17 @@ document.addEventListener('livewire:init', () => {
     Livewire.on('show-toast', (data) => {
         console.log('Toast event received:', data);
         const { type, message } = data;
+        const variant = mapToastVariant(type);
         try {
             if (window.KTToast && typeof window.KTToast.show === 'function') {
                 console.log('Using KTToast.show');
                 window.KTToast.show({
                     message: message,
-                    type: type || 'info',
+                    // KTUI uses `variant` for color scheme
+                    variant: variant,
+                    // keep legacy `type` in case of version differences
+                    type: variant,
+                    appearance: 'solid',
                     position: 'top-end',
                     dismissible: true,
                     duration: 3500
@@ -159,7 +164,10 @@ document.addEventListener('livewire:init', () => {
                 console.log('Using kt.toast.show');
                 window.kt.toast.show({
                     message: message,
-                    type: type || 'info',
+                    // Some builds expect `type`; keep both for compatibility
+                    variant: variant,
+                    type: variant,
+                    appearance: 'solid',
                     position: 'top-end',
                     dismissible: true,
                     duration: 3500
@@ -210,3 +218,15 @@ window.MetronicCore = {
     initStickyHeaders,
     initModals
 };
+
+// Normalize toast type to KTUI `variant`
+function mapToastVariant(rawType) {
+    const t = (rawType || 'info').toString().toLowerCase();
+    if (t === 'success') return 'success';
+    if (t === 'warning' || t === 'warn') return 'warning';
+    if (t === 'error' || t === 'danger' || t === 'destructive' || t === 'fail' || t === 'failed') return 'destructive';
+    if (t === 'primary') return 'primary';
+    if (t === 'secondary') return 'secondary';
+    if (t === 'mono') return 'mono';
+    return 'info';
+}

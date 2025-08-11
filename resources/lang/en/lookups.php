@@ -26,7 +26,7 @@ return [
     //Question Types
     'YesNo' => 'Yes/No',
     'TrueFalse' => 'True/False',
-    'MCQSing' => 'Multiple Choice - Single Answer',
+    'MCQSingle' => 'Multiple Choice - Single Answer',
     'MCQMultiple' => 'Multiple Choice - Multiple Answers',
     'Rating1to5' => 'Rating 1 to 5',
     'Rating1to10' => 'Rating 1 to 10',
@@ -35,4 +35,4 @@ return [
     'simple' => 'Simple',
     'complex' => 'Complex',
     'two_section' => 'Two Section',
-]; 
+];

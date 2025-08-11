@@ -22,6 +22,9 @@
         <link href="{{ asset('/assets/css/styles.css') }}" rel="stylesheet" type="text/css" />
         <!--end::Global Stylesheets Bundle-->
 
+        <!-- App styles (if needed by other components) -->
+        @vite(['resources/css/app.css'])
+
         <!-- Quill Rich Text Editor Styles -->
         <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet" />
     </head>
