@@ -26,6 +26,7 @@ class PillarResource extends JsonResource
                 return $module;
             })),
             'questions' => QuestionResource::collection($this->questions),
+            'status' => $this->calculateStatus(),
             'result' => $this->calculateResult(),
         ];
     }
@@ -42,5 +43,21 @@ class PillarResource extends JsonResource
         } else {
             return null;
         }
+    }
+
+    /**
+     * Calculate completion status for this pillar based on user answers
+     * not_started | in_progress | completed
+     */
+    private function calculateStatus(): ?string
+    {
+        $methodologyId = request()->route('methodologyId');
+
+        if (!$this->user_id || !$methodologyId) {
+            return null;
+        }
+
+        $service = new ResultCalculationService();
+        return $service->getPillarStatus($this->user_id, $this->id, (int) $methodologyId);
     }
 }

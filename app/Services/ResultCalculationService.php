@@ -242,4 +242,80 @@ class ResultCalculationService
             ]
         ];
     }
+
+    /**
+     * Determine completion status for a pillar for a given user in a methodology
+     * Returns: not_started | in_progress | completed
+     */
+    public function getPillarStatus(int $userId, int $pillarId, int $methodologyId): string
+    {
+        $pillar = Pillar::find($pillarId);
+        if (!$pillar) {
+            return 'not_started';
+        }
+
+        $totalQuestions = $pillar->questionsForMethodology($methodologyId)->count();
+        if ($totalQuestions === 0) {
+            return 'not_started';
+        }
+
+        $questionIds = $pillar->questionsForMethodology($methodologyId)->pluck('questions.id');
+
+        $answeredQuestions = UserAnswer::where('user_id', $userId)
+            ->where('context_type', 'pillar')
+            ->where('context_id', $pillarId)
+            ->whereIn('question_id', $questionIds)
+            ->distinct('question_id')
+            ->count('question_id');
+
+        if ($answeredQuestions === 0) {
+            return 'not_started';
+        }
+
+        if ($answeredQuestions < $totalQuestions) {
+            return 'in_progress';
+        }
+
+        return 'completed';
+    }
+
+    /**
+     * Determine completion status for a module for a given user in a methodology (and pillar when applicable)
+     * Returns: not_started | in_progress | completed
+     */
+    public function getModuleStatus(int $userId, int $moduleId, int $methodologyId, ?int $pillarId = null): string
+    {
+        $module = Module::find($moduleId);
+        if (!$module) {
+            return 'not_started';
+        }
+
+        $questions = $pillarId
+            ? $module->questionsForPillarInMethodology($methodologyId, $pillarId)
+            : $module->questionsForMethodology($methodologyId);
+
+        $totalQuestions = $questions->count();
+        if ($totalQuestions === 0) {
+            return 'not_started';
+        }
+
+        $questionIds = $questions->pluck('questions.id');
+
+        $answeredQuestions = UserAnswer::where('user_id', $userId)
+            ->where('context_type', 'module')
+            ->where('context_id', $moduleId)
+            ->whereIn('question_id', $questionIds)
+            ->distinct('question_id')
+            ->count('question_id');
+
+        if ($answeredQuestions === 0) {
+            return 'not_started';
+        }
+
+        if ($answeredQuestions < $totalQuestions) {
+            return 'in_progress';
+        }
+
+        return 'completed';
+    }
 }
