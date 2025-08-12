@@ -100,7 +100,7 @@ class GoogleService
             return response()->json([
                 'error' => __('messages.failed_google_signin'),
                 'message' => $e->getMessage(),
-            ], 401);
+            ], 500);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => __('messages.authentication_failed'),

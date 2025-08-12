@@ -88,8 +88,9 @@ class MethodologyController
                 ], 400);
             }
 
-            // Pass user ID to resource
+            // Pass user ID and selected section to resource
             $methodology->setAttribute('user_id', $request->authUser->id);
+            $methodology->setAttribute('section_number', $sectionNumber);
 
             return response()->json(new MethodologyDetailedResource($methodology));
         } catch (\Exception $e) {

@@ -35,4 +35,8 @@ return [
     'simple' => 'بسيط',
     'complex' => 'معقد',
     'two_section' => 'قسمين',
+    //Status
+    'not_started' => 'لم يبدأ',
+    'in_progress' => 'قيد الاستكمال',
+    'completed' => 'مكتمل',
 ]; 

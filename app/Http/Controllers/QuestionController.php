@@ -33,8 +33,21 @@ class QuestionController
     public function getPillarQuestionsForMethodology(int $methodologyId, int $pillarId): JsonResponse
     {
         try {
-            $questions = $this->questionRepo->getQuestionsByContext('pillar', $pillarId, $methodologyId);
-            return response()->json(QuestionResource::collection($questions));
+            // Return questions grouped by modules under this pillar for the methodology
+            $groups = $this->questionRepo->getPillarModuleQuestionsGrouped($methodologyId, $pillarId);
+
+            $response = collect($groups)->map(function ($group) {
+                return [
+                    'module' => [
+                        'id' => $group['module']['id'],
+                        'name' => $group['module']['name'],
+                        'description' => $group['module']['description'],
+                    ],
+                    'questions' => QuestionResource::collection($group['questions'])
+                ];
+            });
+
+            return response()->json($response);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

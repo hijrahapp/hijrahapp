@@ -39,8 +39,13 @@ class DemoSeeder extends Seeder
      */
     private function clearExistingData(): void
     {
-        // Disable foreign key checks
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        // Disable foreign key checks (MySQL) or use SQLite-friendly approach
+        try {
+            \DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        } catch (\Throwable $e) {
+            // Likely SQLite; use pragma
+            \DB::statement('PRAGMA foreign_keys = OFF');
+        }
 
         // Clear pivot tables first (due to foreign key constraints)
         \DB::table('pillar_dependencies')->delete();
@@ -64,14 +69,22 @@ class DemoSeeder extends Seeder
         \DB::table('methodology')->delete();
 
         // Re-enable foreign key checks
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        try {
+            \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        } catch (\Throwable $e) {
+            \DB::statement('PRAGMA foreign_keys = ON');
+        }
 
-        // Reset auto-increment counters
-        \DB::statement('ALTER TABLE methodology AUTO_INCREMENT = 1');
-        \DB::statement('ALTER TABLE pillars AUTO_INCREMENT = 1');
-        \DB::statement('ALTER TABLE modules AUTO_INCREMENT = 1');
-        \DB::statement('ALTER TABLE questions AUTO_INCREMENT = 1');
-        \DB::statement('ALTER TABLE answers AUTO_INCREMENT = 1');
+        // Reset auto-increment counters where supported
+        try {
+            \DB::statement('ALTER TABLE methodology AUTO_INCREMENT = 1');
+            \DB::statement('ALTER TABLE pillars AUTO_INCREMENT = 1');
+            \DB::statement('ALTER TABLE modules AUTO_INCREMENT = 1');
+            \DB::statement('ALTER TABLE questions AUTO_INCREMENT = 1');
+            \DB::statement('ALTER TABLE answers AUTO_INCREMENT = 1');
+        } catch (\Throwable $e) {
+            // SQLite does not support ALTER TABLE AUTO_INCREMENT; ignore.
+        }
 
         echo "All existing data cleared successfully and counters reset.\n";
     }
@@ -218,6 +231,7 @@ class DemoSeeder extends Seeder
             'description' => 'A straightforward methodology for basic assessment and evaluation.',
             'definition' => 'This methodology provides a simple framework for evaluating basic competencies.',
             'objectives' => 'To assess fundamental knowledge and skills in a structured manner.',
+            'img_url' => 'https://picsum.photos/seed/methodology-simple/800/400',
             'type' => 'simple',
             'first_section_name' => 'Core Modules',
             'second_section_name' => null,
@@ -227,7 +241,13 @@ class DemoSeeder extends Seeder
             'questions_estimated_time' => '15-20 minutes',
             'questions_count' => 7,
             'first_section_description' => 'Core modules provide foundational knowledge assessment.',
+            'first_section_definition' => 'Definition for core modules section.',
+            'first_section_objectives' => 'Objectives for core modules section.',
+            'first_section_img_url' => 'https://picsum.photos/seed/section1-simple/800/400',
             'second_section_description' => null,
+            'second_section_definition' => null,
+            'second_section_objectives' => null,
+            'second_section_img_url' => null,
             'tags' => ['simple', 'basic', 'assessment'],
         ]);
 
@@ -243,6 +263,7 @@ class DemoSeeder extends Seeder
                 'description' => "Module $i provides essential knowledge and skills.",
                 'definition' => "Module $i covers fundamental concepts and basic competencies.",
                 'objectives' => "To assess understanding of core concepts in module $i.",
+                'img_url' => 'https://picsum.photos/seed/module-simple-'.$i.'/800/400',
                 'questions_description' => "Module $i contains questions that assess fundamental concepts.",
                 'questions_estimated_time' => '5-7 minutes',
                 'questions_count' => 7,
@@ -273,6 +294,7 @@ class DemoSeeder extends Seeder
             'description' => 'A comprehensive methodology for advanced assessment and evaluation.',
             'definition' => 'This methodology provides a complex framework for evaluating advanced competencies.',
             'objectives' => 'To assess advanced knowledge and skills across multiple domains.',
+            'img_url' => 'https://picsum.photos/seed/methodology-complex/800/400',
             'type' => 'complex',
             'first_section_name' => 'Advanced Pillars',
             'second_section_name' => null,
@@ -282,7 +304,13 @@ class DemoSeeder extends Seeder
             'questions_estimated_time' => '45-60 minutes',
             'questions_count' => 7,
             'first_section_description' => 'Advanced pillars provide in-depth analysis and assessment.',
+            'first_section_definition' => 'Definition for advanced pillars section.',
+            'first_section_objectives' => 'Objectives for advanced pillars section.',
+            'first_section_img_url' => 'https://picsum.photos/seed/section1-complex/800/400',
             'second_section_description' => null,
+            'second_section_definition' => null,
+            'second_section_objectives' => null,
+            'second_section_img_url' => null,
             'tags' => ['complex', 'advanced', 'assessment'],
         ]);
 
@@ -298,6 +326,7 @@ class DemoSeeder extends Seeder
                 'description' => "Pillar $i represents a core area of knowledge and expertise.",
                 'definition' => "Pillar $i covers advanced concepts and specialized competencies.",
                 'objectives' => "To assess comprehensive understanding of pillar $i domain.",
+                'img_url' => 'https://picsum.photos/seed/pillar-complex-'.$i.'/800/400',
                 'questions_description' => "Pillar $i contains questions that assess advanced understanding.",
                 'questions_estimated_time' => '10-15 minutes',
                 'questions_count' => 7,
@@ -322,6 +351,7 @@ class DemoSeeder extends Seeder
                     'description' => "Module $j within Pillar $i provides specialized knowledge.",
                     'definition' => "Module $j covers specific competencies within Pillar $i.",
                     'objectives' => "To assess specialized skills in module $j of pillar $i.",
+                    'img_url' => 'https://picsum.photos/seed/module-complex-'.$i.'-'.$j.'/800/400',
                     'questions_description' => "This module contains questions for specific competencies.",
                     'questions_estimated_time' => '5-7 minutes',
                     'questions_count' => 7,
@@ -357,6 +387,7 @@ class DemoSeeder extends Seeder
             'description' => 'A methodology with two sections and complex dependencies.',
             'definition' => 'This methodology provides a structured approach with interdependent sections.',
             'objectives' => 'To assess knowledge and skills with consideration of dependencies.',
+            'img_url' => 'https://picsum.photos/seed/methodology-two/800/400',
             'type' => 'twoSection',
             'first_section_name' => 'Foundation Section',
             'second_section_name' => 'Advanced Section',
@@ -366,7 +397,13 @@ class DemoSeeder extends Seeder
             'questions_estimated_time' => '60-90 minutes',
             'questions_count' => 7,
             'first_section_description' => 'First section provides foundational assessment.',
+            'first_section_definition' => 'Definition for foundation section.',
+            'first_section_objectives' => 'Objectives for foundation section.',
+            'first_section_img_url' => 'https://picsum.photos/seed/section1-two/800/400',
             'second_section_description' => 'Second section builds upon first section results.',
+            'second_section_definition' => 'Definition for advanced section.',
+            'second_section_objectives' => 'Objectives for advanced section.',
+            'second_section_img_url' => 'https://picsum.photos/seed/section2-two/800/400',
             'tags' => ['two-section', 'dependent', 'assessment'],
         ]);
 
@@ -381,6 +418,7 @@ class DemoSeeder extends Seeder
             'description' => 'First pillar of section 1 provides foundational knowledge.',
             'definition' => 'This pillar covers basic concepts and fundamental skills.',
             'objectives' => 'To establish foundational understanding.',
+            'img_url' => 'https://picsum.photos/seed/pillar-s1-1/800/400',
             'questions_description' => 'Basic questions for foundational assessment.',
             'questions_estimated_time' => '10-15 minutes',
             'questions_count' => 7,
@@ -392,6 +430,7 @@ class DemoSeeder extends Seeder
             'description' => 'Second pillar of section 1 builds on pillar 1.',
             'definition' => 'This pillar covers intermediate concepts dependent on pillar 1.',
             'objectives' => 'To assess intermediate skills with pillar 1 dependency.',
+            'img_url' => 'https://picsum.photos/seed/pillar-s1-2/800/400',
             'questions_description' => 'Intermediate questions with pillar 1 dependency.',
             'questions_estimated_time' => '10-15 minutes',
             'questions_count' => 7,
@@ -404,6 +443,7 @@ class DemoSeeder extends Seeder
             'description' => 'First pillar of section 2 depends on section 1 pillar 1.',
             'definition' => 'This pillar covers advanced concepts dependent on section 1 pillar 1.',
             'objectives' => 'To assess advanced skills with section 1 pillar 1 dependency.',
+            'img_url' => 'https://picsum.photos/seed/pillar-s2-1/800/400',
             'questions_description' => 'Advanced questions with section 1 pillar 1 dependency.',
             'questions_estimated_time' => '10-15 minutes',
             'questions_count' => 7,
@@ -415,6 +455,7 @@ class DemoSeeder extends Seeder
             'description' => 'Second pillar of section 2 depends on section 1 pillar 2.',
             'definition' => 'This pillar covers specialized concepts dependent on section 1 pillar 2.',
             'objectives' => 'To assess specialized skills with section 1 pillar 2 dependency.',
+            'img_url' => 'https://picsum.photos/seed/pillar-s2-2/800/400',
             'questions_description' => 'Specialized questions with section 1 pillar 2 dependency.',
             'questions_estimated_time' => '10-15 minutes',
             'questions_count' => 7,
@@ -446,6 +487,7 @@ class DemoSeeder extends Seeder
                     'description' => "Module $j within {$pillar->name} provides specialized knowledge.",
                     'definition' => "Module $j covers specific competencies within {$pillar->name}.",
                     'objectives' => "To assess specialized skills in module $j of {$pillar->name}.",
+                    'img_url' => 'https://picsum.photos/seed/module-'.$pillarIndex.'-'.$j.'/800/400',
                     'questions_description' => "This module contains questions for specific competencies.",
                     'questions_estimated_time' => '5-7 minutes',
                     'questions_count' => 7,

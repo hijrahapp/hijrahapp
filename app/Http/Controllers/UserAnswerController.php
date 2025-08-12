@@ -72,11 +72,14 @@ class UserAnswerController
     public function submitPillarAnswers(Request $request, int $methodologyId, int $pillarId): JsonResponse
     {
         try {
+            // Accept grouped answers by module for pillar submissions
             $validator = Validator::make($request->all(), [
                 'answers' => 'required|array|min:1',
-                'answers.*.question_id' => 'required|integer|exists:questions,id',
-                'answers.*.answerIds' => 'required|array|min:1',
-                'answers.*.answerIds.*' => 'integer|exists:answers,id',
+                'answers.*.module_id' => 'required|integer|exists:modules,id',
+                'answers.*.items' => 'required|array|min:1',
+                'answers.*.items.*.question_id' => 'required|integer|exists:questions,id',
+                'answers.*.items.*.answerIds' => 'required|array|min:1',
+                'answers.*.items.*.answerIds.*' => 'integer|exists:answers,id',
             ]);
 
             if ($validator->fails()) {
@@ -88,9 +91,20 @@ class UserAnswerController
             }
 
             $userId = $request->authUser->id;
-            $answers = $request->input('answers');
+            // Flatten grouped payload into the repository's expected format per module
+            $grouped = $request->input('answers');
+            foreach ($grouped as $moduleGroup) {
+                $moduleId = $moduleGroup['module_id'];
+                $flat = collect($moduleGroup['items'])->map(function ($item) {
+                    return [
+                        'question_id' => $item['question_id'],
+                        'answerIds' => $item['answerIds'],
+                    ];
+                })->values()->all();
 
-            $submittedAnswers = $this->userAnswerRepo->submitPillarAnswers($userId, $methodologyId, $pillarId, $answers);
+                // Submit as module answers tied to pillar context
+                $this->userAnswerRepo->submitPillarModuleAnswers($userId, $methodologyId, $pillarId, $moduleId, $flat);
+            }
 
             return response()->json([
                 'success' => true,

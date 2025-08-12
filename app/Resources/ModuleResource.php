@@ -19,6 +19,7 @@ class ModuleResource extends JsonResource
             'description' => $this->description,
             'definition' => $this->definition,
             'objectives' => $this->objectives,
+            'imgUrl' => $this->img_url,
             'tags' => $this->getTagTitles($this->tags),
             'questions' => QuestionResource::collection($this->questions),
             'status' => $this->calculateStatus(),
@@ -33,8 +34,16 @@ class ModuleResource extends JsonResource
     {
         $service = new ResultCalculationService();
 
-        if($this->user_id && request()->route('methodologyId') && request()->route('pillarId')) {
-            return $service->calculateModuleResult($this->user_id, $this->id, request()->route('methodologyId') ,request()->route('pillarId'));
+        $methodologyId = request()->route('methodologyId');
+        $pillarId = $this->pillar_id ?? request()->route('pillarId');
+
+        if ($this->user_id && $methodologyId) {
+            return $service->calculateModuleResult(
+                $this->user_id,
+                $this->id,
+                (int) $methodologyId,
+                $pillarId ? (int) $pillarId : null
+            );
         } else {
             return null;
         }
@@ -47,13 +56,14 @@ class ModuleResource extends JsonResource
     private function calculateStatus(): ?string
     {
         $methodologyId = request()->route('methodologyId');
-        $pillarId = request()->route('pillarId');
+        $pillarId = $this->pillar_id ?? request()->route('pillarId');
 
         if (!$this->user_id || !$methodologyId) {
             return null;
         }
 
         $service = new ResultCalculationService();
-        return $service->getModuleStatus($this->user_id, $this->id, (int) $methodologyId, $pillarId ? (int) $pillarId : null);
+        $status = $service->getModuleStatus($this->user_id, $this->id, (int) $methodologyId, $pillarId ? (int) $pillarId : null);
+        return $status ? __('lookups.'.$status) : null;
     }
 }

@@ -29,12 +29,19 @@ class DemoMethodologiesSeeder extends Seeder
             'description' => fake()->paragraph(),
             'definition' => fake()->sentence(),
             'objectives' => fake()->paragraphs(3, true),
+            'img_url' => fake()->imageUrl(),
             'type' => 'simple',
             'questions_description' => 'This methodology contains questions that assess basic understanding of core concepts.',
             'questions_estimated_time' => '15-20 minutes',
             'questions_count' => 0, // Will be updated after questions are attached
             'first_section_description' => 'Core modules provide foundational knowledge and basic assessment.',
+            'first_section_definition' => 'Definition for simple methodology core section.',
+            'first_section_objectives' => 'Objectives for simple methodology core section.',
+            'first_section_img_url' => fake()->imageUrl(),
             'second_section_description' => null,
+            'second_section_definition' => null,
+            'second_section_objectives' => null,
+            'second_section_img_url' => null,
         ]);
 
         $this->attachQuestions($simple, 4);
@@ -45,6 +52,7 @@ class DemoMethodologiesSeeder extends Seeder
             $module = Module::factory()->create([
                 'name' => "Module $m",
                 'definition' => "Module $m provides essential knowledge and skills for basic understanding.",
+                'img_url' => fake()->imageUrl(),
                 'questions_description' => "Module $m contains questions that assess fundamental concepts and basic competencies.",
                 'questions_estimated_time' => '5-7 minutes',
                 'questions_count' => 4,
@@ -61,12 +69,19 @@ class DemoMethodologiesSeeder extends Seeder
             'description' => fake()->paragraph(),
             'definition' => fake()->sentence(),
             'objectives' => fake()->paragraphs(3, true),
+            'img_url' => fake()->imageUrl(),
             'type' => 'complex',
             'questions_description' => 'This methodology contains comprehensive questions that assess advanced understanding across multiple pillars.',
             'questions_estimated_time' => '45-60 minutes',
             'questions_count' => 0, // Will be updated after questions are attached
             'first_section_description' => 'Advanced pillars provide in-depth analysis and comprehensive assessment.',
+            'first_section_definition' => 'Definition for complex methodology section.',
+            'first_section_objectives' => 'Objectives for complex methodology section.',
+            'first_section_img_url' => fake()->imageUrl(),
             'second_section_description' => null,
+            'second_section_definition' => null,
+            'second_section_objectives' => null,
+            'second_section_img_url' => null,
         ]);
 
         $this->attachQuestions($complex, 4);
@@ -76,6 +91,7 @@ class DemoMethodologiesSeeder extends Seeder
             $pillar = Pillar::factory()->create([
                 'name' => "Pillar $p",
                 'definition' => "Pillar $p represents a core area of knowledge and expertise.",
+                'img_url' => fake()->imageUrl(),
                 'questions_description' => "Pillar $p contains questions that assess comprehensive understanding of this domain.",
                 'questions_estimated_time' => '10-15 minutes',
                 'questions_count' => 0, // Will be updated after questions are attached
@@ -90,6 +106,7 @@ class DemoMethodologiesSeeder extends Seeder
                 $module = Module::factory()->create([
                     'name' => "Pillar{$p}-Module{$m}",
                     'definition' => "Module {$m} within Pillar {$p} provides specialized knowledge and skills.",
+                    'img_url' => fake()->imageUrl(),
                     'questions_description' => "This module contains questions that assess specific competencies within Pillar {$p}.",
                     'questions_estimated_time' => '5-7 minutes',
                     'questions_count' => 0, // Will be updated after questions are attached
@@ -117,6 +134,7 @@ class DemoMethodologiesSeeder extends Seeder
             'description' => fake()->paragraph(),
             'definition' => fake()->sentence(),
             'objectives' => fake()->paragraphs(3, true),
+            'img_url' => fake()->imageUrl(),
             'type' => 'twoSection',
             'first_section_name' => 'Section 1',
             'second_section_name' => 'Section 2',
@@ -124,7 +142,13 @@ class DemoMethodologiesSeeder extends Seeder
             'questions_estimated_time' => '60-75 minutes',
             'questions_count' => 0, // Will be updated after questions are attached
             'first_section_description' => 'Section 1 provides foundational knowledge and establishes core concepts.',
+            'first_section_definition' => 'Definition for section 1.',
+            'first_section_objectives' => 'Objectives for section 1.',
+            'first_section_img_url' => fake()->imageUrl(),
             'second_section_description' => 'Section 2 builds upon Section 1 with advanced concepts and dependent assessments.',
+            'second_section_definition' => 'Definition for section 2.',
+            'second_section_objectives' => 'Objectives for section 2.',
+            'second_section_img_url' => fake()->imageUrl(),
         ]);
         $this->attachQuestions($twoSection, 4);
         $twoSection->update(['questions_count' => $twoSection->questions()->count()]);
@@ -138,6 +162,7 @@ class DemoMethodologiesSeeder extends Seeder
             $pillar = Pillar::factory()->create([
                 'name' => "S1-Pillar $p",
                 'definition' => "Section 1 Pillar $p provides foundational knowledge for the methodology.",
+                'img_url' => fake()->imageUrl(),
                 'questions_description' => "This pillar contains questions that assess foundational concepts and basic competencies.",
                 'questions_estimated_time' => '10-15 minutes',
                 'questions_count' => 0, // Will be updated after questions are attached
@@ -155,6 +180,7 @@ class DemoMethodologiesSeeder extends Seeder
             $pillar = Pillar::factory()->create([
                 'name' => "S2-Pillar $p",
                 'definition' => "Section 2 Pillar $p builds upon foundational knowledge with advanced concepts.",
+                'img_url' => fake()->imageUrl(),
                 'questions_description' => "This pillar contains questions that assess advanced concepts and dependent competencies.",
                 'questions_estimated_time' => '10-15 minutes',
                 'questions_count' => 0, // Will be updated after questions are attached

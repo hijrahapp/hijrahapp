@@ -24,6 +24,7 @@ class MethodologyResource extends JsonResource
             'description' => $this->description,
             'definition' => $this->definition,
             'objectives' => $this->objectives,
+            'imgUrl' => $this->img_url,
             'type' => $this->type,
             'first_section_name' => $this->first_section_name,
             'second_section_name' => $this->second_section_name,
@@ -34,7 +35,11 @@ class MethodologyResource extends JsonResource
                 return PillarResource::collection($this->pillars);
             }),
             'modules' => $this->whenLoaded('modules', function () {
-                return ModuleResource::collection($this->modules);
+                return ModuleResource::collection($this->modules->map(function ($module) {
+                    $module->setAttribute('user_id', $this->user_id ?? null);
+                    // No pillar context when listing modules at methodology level
+                    return $module;
+                }));
             }),
             'questions' => $this->whenLoaded('questions', function () {
                 return QuestionResource::collection($this->questions);

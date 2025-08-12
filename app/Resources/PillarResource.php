@@ -2,6 +2,7 @@
 
 namespace App\Resources;
 
+use App\Http\Repositories\QuestionRepository;
 use App\Services\ResultCalculationService;
 use App\Traits\HasTagTitles;
 use Illuminate\Http\Request;
@@ -19,13 +20,15 @@ class PillarResource extends JsonResource
             'description' => $this->description,
             'definition' => $this->definition,
             'objectives' => $this->objectives,
+            'imgUrl' => $this->img_url,
             'tags' => $this->getTagTitles($this->tags),
             'section' => $this->pivot->section ?? null,
             'modules' => ModuleResource::collection($this->modules->map(function ($module) {
                 $module->setAttribute('user_id', $this->user_id ?? null);
+                $module->setAttribute('pillar_id', $this->id);
                 return $module;
             })),
-            'questions' => QuestionResource::collection($this->questions),
+            'questions' => $this->getGroupedModuleQuestions(),
             'status' => $this->calculateStatus(),
             'result' => $this->calculateResult(),
         ];
@@ -58,6 +61,37 @@ class PillarResource extends JsonResource
         }
 
         $service = new ResultCalculationService();
-        return $service->getPillarStatus($this->user_id, $this->id, (int) $methodologyId);
+        $status = $service->getPillarStatus($this->user_id, $this->id, (int) $methodologyId);
+        return $status ? __('lookups.'.$status) : null;
+    }
+
+    /**
+     * Return module-grouped questions for this pillar within the current methodology
+     */
+    private function getGroupedModuleQuestions(): array
+    {
+        $methodologyId = request()->route('methodologyId');
+        if (!$methodologyId) {
+            return [];
+        }
+
+        $modules = $this->modulesForMethodology((int) $methodologyId)->get();
+        if ($modules->isEmpty()) {
+            return [];
+        }
+
+        $questionRepo = new QuestionRepository();
+
+        return $modules->map(function ($module) use ($methodologyId, $questionRepo) {
+            $questions = $questionRepo->getQuestionsByContext('module', $module->id, (int) $methodologyId, $this->id);
+            return [
+                'module' => [
+                    'id' => $module->id,
+                    'name' => $module->name,
+                    'description' => $module->description,
+                ],
+                'questions' => QuestionResource::collection($questions),
+            ];
+        })->values()->all();
     }
 }

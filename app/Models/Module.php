@@ -15,6 +15,7 @@ class Module extends Model
         'description',
         'definition',
         'objectives',
+        'img_url',
         'questions_description',
         'questions_estimated_time',
         'questions_count',

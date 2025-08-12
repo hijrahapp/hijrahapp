@@ -85,32 +85,76 @@ class QuestionRepository
             throw new \InvalidArgumentException("Pillar with ID {$pillarId} not found");
         }
 
-        // Get questions with their weights for this pillar
-        $questions = $methodologyId 
-            ? $pillar->questionsForMethodology($methodologyId)->get()
-            : $pillar->questions;
-        
-        // Load weights for each question in this pillar context
-        foreach ($questions as $question) {
-            $pivotId = \DB::table('pillar_question')
-                ->where('pillar_id', $pillarId)
-                ->where('question_id', $question->id)
-                ->when($methodologyId, function($query) use ($methodologyId) {
-                    return $query->where('methodology_id', $methodologyId);
-                })
-                ->value('id');
-                
-            if ($pivotId) {
-                $weights = \App\Models\QuestionAnswerWeight::where('context_type', 'pillar_question')
-                    ->where('context_id', $pivotId)
-                    ->get()
-                    ->keyBy('answer_id');
-                    
-                $question->setAttribute('answer_weights', $weights);
-            }
+        // LEGACY: previously returned pillar-level questions. Now we return
+        // module-level questions grouped by modules for this pillar within the methodology.
+        // If no methodology is provided, fallback to empty collection.
+        if (!$methodologyId) {
+            return collect();
         }
 
-        return $questions;
+        $modules = $pillar->modulesForMethodology($methodologyId)->get();
+
+        // Attach questions with weights for each module
+        $grouped = collect();
+        foreach ($modules as $module) {
+            $questions = $module->questionsForPillarInMethodology($methodologyId, $pillarId)->get();
+
+            foreach ($questions as $question) {
+                $pivotId = \DB::table('module_question')
+                    ->where('module_id', $module->id)
+                    ->where('question_id', $question->id)
+                    ->where('methodology_id', $methodologyId)
+                    ->where('pillar_id', $pillarId)
+                    ->value('id');
+
+                if ($pivotId) {
+                    $weights = \App\Models\QuestionAnswerWeight::where('context_type', 'module_question')
+                        ->where('context_id', $pivotId)
+                        ->get()
+                        ->keyBy('answer_id');
+
+                    $question->setAttribute('answer_weights', $weights);
+                }
+            }
+
+            $grouped->push((object) [
+                'module_id' => $module->id,
+                'module_name' => $module->name,
+                'questions' => $questions,
+            ]);
+        }
+
+        // Flatten questions into a collection to preserve return type for compatibility.
+        // Note: Controller for pillar questions will now build grouped response explicitly.
+        return $grouped->flatMap(function ($group) { return $group->questions; });
+    }
+
+    /**
+     * New helper to fetch pillar questions grouped by modules.
+     */
+    public function getPillarModuleQuestionsGrouped(int $methodologyId, int $pillarId): array
+    {
+        $pillar = Pillar::find($pillarId);
+        if (!$pillar) {
+            throw new \InvalidArgumentException("Pillar with ID {$pillarId} not found");
+        }
+
+        $modules = $pillar->modulesForMethodology($methodologyId)->get();
+
+        $result = [];
+        foreach ($modules as $module) {
+            $questions = $this->getQuestionsByModule($module->id, $methodologyId, $pillarId);
+            $result[] = [
+                'module' => [
+                    'id' => $module->id,
+                    'name' => $module->name,
+                    'description' => $module->description,
+                ],
+                'questions' => $questions,
+            ];
+        }
+
+        return $result;
     }
 
     /**

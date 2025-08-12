@@ -35,4 +35,8 @@ return [
     'simple' => 'Simple',
     'complex' => 'Complex',
     'two_section' => 'Two Section',
+    //Status
+    'not_started' => 'Not Started',
+    'in_progress' => 'In Progress',
+    'completed' => 'Completed',
 ];

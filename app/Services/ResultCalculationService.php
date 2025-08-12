@@ -51,6 +51,9 @@ class ResultCalculationService
                     $result['pillars'][] = [
                         'id' => $pillar->id,
                         'name' => $pillar->name,
+                        'description' => $pillar->description,
+                        'definition' => $pillar->definition,
+                        'objectives' => $pillar->objectives,
                         'percentage' => $pillarResult['percentage'] ?? 0,
                         'summary' => $pillarResult['summary'] ?? []
                     ];
@@ -60,6 +63,9 @@ class ResultCalculationService
                     $result['pillars'][] = [
                         'id' => $pillar->id,
                         'name' => $pillar->name,
+                        'description' => $pillar->description,
+                        'definition' => $pillar->definition,
+                        'objectives' => $pillar->objectives,
                         'percentage' => 0,
                         'summary' => [
                             'overall_percentage' => 0,
@@ -79,6 +85,9 @@ class ResultCalculationService
                     $result['modules'][] = [
                         'id' => $module->id,
                         'name' => $module->name,
+                        'description' => $module->description,
+                        'definition' => $module->definition,
+                        'objectives' => $module->objectives,
                         'percentage' => $moduleResult['percentage'] ?? 0,
                         'summary' => $moduleResult['summary'] ?? []
                     ];
@@ -88,6 +97,9 @@ class ResultCalculationService
                     $result['modules'][] = [
                         'id' => $module->id,
                         'name' => $module->name,
+                        'description' => $module->description,
+                        'definition' => $module->definition,
+                        'objectives' => $module->objectives,
                         'percentage' => 0,
                         'summary' => [
                             'total_questions' => 0,
@@ -129,12 +141,24 @@ class ResultCalculationService
             return null;
         }
 
-        // Get total questions and answered questions for this pillar in this methodology
-        $totalQuestions = $pillar->questionsForMethodology($methodologyId)->count();
+        // New logic: pillar questions are the union of its modules' questions within this methodology
+        $modules = $pillar->modulesForMethodology($methodologyId)->get();
+        $moduleIds = $modules->pluck('id');
+
+        $questionIds = collect();
+        foreach ($modules as $module) {
+            $moduleQuestionIds = $module->questionsForPillarInMethodology($methodologyId, $pillarId)
+                ->pluck('questions.id');
+            $questionIds = $questionIds->merge($moduleQuestionIds);
+        }
+
+        $questionIds = $questionIds->unique()->values();
+        $totalQuestions = $questionIds->count();
+
         $answeredQuestions = UserAnswer::where('user_id', $userId)
-            ->where('context_type', 'pillar')
-            ->where('context_id', $pillarId)
-            ->whereIn('question_id', $pillar->questionsForMethodology($methodologyId)->pluck('questions.id'))
+            ->where('context_type', 'module')
+            ->whereIn('context_id', $moduleIds)
+            ->whereIn('question_id', $questionIds)
             ->distinct('question_id')
             ->count('question_id');
 
@@ -161,6 +185,9 @@ class ResultCalculationService
                 $result['modules'][] = [
                     'id' => $module->id,
                     'name' => $module->name,
+                    'description' => $module->description,
+                    'definition' => $module->definition,
+                    'objectives' => $module->objectives,
                     'percentage' => $moduleResult['percentage'] ?? 0,
                     'summary' => $moduleResult['summary'] ?? []
                 ];
@@ -170,6 +197,9 @@ class ResultCalculationService
                 $result['modules'][] = [
                     'id' => $module->id,
                     'name' => $module->name,
+                    'description' => $module->description,
+                    'definition' => $module->definition,
+                    'objectives' => $module->objectives,
                     'percentage' => 0,
                     'summary' => [
                         'total_questions' => 0,
@@ -231,7 +261,7 @@ class ResultCalculationService
         }
 
         // Calculate percentage (for now, using random values as placeholder)
-        $percentage = $answeredQuestions > 0 ? rand(60, 95) : 0; // Random percentage between 60-95 for demo
+        $percentage = $totalQuestions > 0 ? round(($answeredQuestions / $totalQuestions) * 100, 2) : 0; // Random percentage between 60-95 for demo
 
         return [
             'percentage' => $percentage,
@@ -254,16 +284,26 @@ class ResultCalculationService
             return 'not_started';
         }
 
-        $totalQuestions = $pillar->questionsForMethodology($methodologyId)->count();
+        // New logic: pillar completion is based on module questions within this methodology
+        $modules = $pillar->modulesForMethodology($methodologyId)->get();
+        $moduleIds = $modules->pluck('id');
+
+        $questionIds = collect();
+        foreach ($modules as $module) {
+            $moduleQuestionIds = $module->questionsForPillarInMethodology($methodologyId, $pillarId)
+                ->pluck('questions.id');
+            $questionIds = $questionIds->merge($moduleQuestionIds);
+        }
+
+        // $questionIds = $questionIds->unique()->values();
+        $totalQuestions = $questionIds->count();
         if ($totalQuestions === 0) {
             return 'not_started';
         }
 
-        $questionIds = $pillar->questionsForMethodology($methodologyId)->pluck('questions.id');
-
         $answeredQuestions = UserAnswer::where('user_id', $userId)
-            ->where('context_type', 'pillar')
-            ->where('context_id', $pillarId)
+            ->where('context_type', 'module')
+            ->whereIn('context_id', $moduleIds)
             ->whereIn('question_id', $questionIds)
             ->distinct('question_id')
             ->count('question_id');

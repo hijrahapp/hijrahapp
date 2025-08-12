@@ -39,8 +39,13 @@ class DemoArabicSeeder extends Seeder
      */
     private function clearExistingData(): void
     {
-        // Disable foreign key checks
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        // Disable foreign key checks (MySQL) or use SQLite-friendly approach
+        try {
+            \DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        } catch (\Throwable $e) {
+            // Likely SQLite; use pragma
+            \DB::statement('PRAGMA foreign_keys = OFF');
+        }
 
         // Clear pivot tables first (due to foreign key constraints)
         \DB::table('pillar_dependencies')->delete();
@@ -64,14 +69,22 @@ class DemoArabicSeeder extends Seeder
         \DB::table('methodology')->delete();
 
         // Re-enable foreign key checks
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        try {
+            \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        } catch (\Throwable $e) {
+            \DB::statement('PRAGMA foreign_keys = ON');
+        }
 
-        // Reset auto-increment counters
-        \DB::statement('ALTER TABLE methodology AUTO_INCREMENT = 1');
-        \DB::statement('ALTER TABLE pillars AUTO_INCREMENT = 1');
-        \DB::statement('ALTER TABLE modules AUTO_INCREMENT = 1');
-        \DB::statement('ALTER TABLE questions AUTO_INCREMENT = 1');
-        \DB::statement('ALTER TABLE answers AUTO_INCREMENT = 1');
+        // Reset auto-increment counters where supported
+        try {
+            \DB::statement('ALTER TABLE methodology AUTO_INCREMENT = 1');
+            \DB::statement('ALTER TABLE pillars AUTO_INCREMENT = 1');
+            \DB::statement('ALTER TABLE modules AUTO_INCREMENT = 1');
+            \DB::statement('ALTER TABLE questions AUTO_INCREMENT = 1');
+            \DB::statement('ALTER TABLE answers AUTO_INCREMENT = 1');
+        } catch (\Throwable $e) {
+            // SQLite does not support ALTER TABLE AUTO_INCREMENT; ignore.
+        }
 
         echo "تم مسح جميع البيانات الموجودة وإعادة تعيين العدادات بنجاح.\n";
     }
@@ -218,6 +231,7 @@ class DemoArabicSeeder extends Seeder
             'description' => 'منهجية مباشرة للتقييم والتقييم الأساسي.',
             'definition' => 'توفر هذه المنهجية إطار عمل بسيط لتقييم الكفاءات الأساسية.',
             'objectives' => 'تقييم المعرفة والمهارات الأساسية بطريقة منظمة.',
+            'img_url' => 'https://picsum.photos/seed/ar-methodology-simple/800/400',
             'type' => 'simple',
             'first_section_name' => 'الوحدات الأساسية',
             'second_section_name' => null,
@@ -227,7 +241,13 @@ class DemoArabicSeeder extends Seeder
             'questions_estimated_time' => '15-20 دقيقة',
             'questions_count' => 7,
             'first_section_description' => 'توفر الوحدات الأساسية تقييم المعرفة الأساسية.',
+            'first_section_definition' => 'تعريف قسم الوحدات الأساسية.',
+            'first_section_objectives' => 'أهداف قسم الوحدات الأساسية.',
+            'first_section_img_url' => 'https://picsum.photos/seed/ar-section1-simple/800/400',
             'second_section_description' => null,
+            'second_section_definition' => null,
+            'second_section_objectives' => null,
+            'second_section_img_url' => null,
             'tags' => ['simple', 'basic', 'assessment'],
         ]);
 
@@ -243,6 +263,7 @@ class DemoArabicSeeder extends Seeder
                 'description' => "توفر الوحدة $i المعرفة والمهارات الأساسية.",
                 'definition' => "تغطي الوحدة $i المفاهيم الأساسية والكفاءات الأساسية.",
                 'objectives' => "تقييم فهم المفاهيم الأساسية في الوحدة $i.",
+                'img_url' => 'https://picsum.photos/seed/ar-module-simple-'.$i.'/800/400',
                 'questions_description' => "تحتوي الوحدة $i على أسئلة تقيم المفاهيم الأساسية.",
                 'questions_estimated_time' => '5-7 دقائق',
                 'questions_count' => 7,
@@ -273,6 +294,7 @@ class DemoArabicSeeder extends Seeder
             'description' => 'منهجية شاملة للتقييم والتقييم المتقدم.',
             'definition' => 'توفر هذه المنهجية إطار عمل معقد لتقييم الكفاءات المتقدمة.',
             'objectives' => 'تقييم المعرفة والمهارات المتقدمة عبر مجالات متعددة.',
+            'img_url' => 'https://picsum.photos/seed/ar-methodology-complex/800/400',
             'type' => 'complex',
             'first_section_name' => 'الأركان المتقدمة',
             'second_section_name' => null,
@@ -282,7 +304,13 @@ class DemoArabicSeeder extends Seeder
             'questions_estimated_time' => '45-60 دقيقة',
             'questions_count' => 7,
             'first_section_description' => 'توفر الأركان المتقدمة تحليل متعمق وتقييم شامل.',
+            'first_section_definition' => 'تعريف قسم الأركان المتقدمة.',
+            'first_section_objectives' => 'أهداف قسم الأركان المتقدمة.',
+            'first_section_img_url' => 'https://picsum.photos/seed/ar-section1-complex/800/400',
             'second_section_description' => null,
+            'second_section_definition' => null,
+            'second_section_objectives' => null,
+            'second_section_img_url' => null,
             'tags' => ['complex', 'advanced', 'assessment'],
         ]);
 
@@ -322,6 +350,7 @@ class DemoArabicSeeder extends Seeder
                     'description' => "توفر الوحدة $j داخل الركن $i معرفة متخصصة.",
                     'definition' => "تغطي الوحدة $j كفاءات محددة داخل الركن $i.",
                     'objectives' => "تقييم المهارات المتخصصة في الوحدة $j من الركن $i.",
+                    'img_url' => 'https://picsum.photos/seed/ar-module-complex-'.$i.'-'.$j.'/800/400',
                     'questions_description' => "تحتوي هذه الوحدة على أسئلة للكفاءات المحددة.",
                     'questions_estimated_time' => '5-7 دقائق',
                     'questions_count' => 7,
@@ -357,6 +386,7 @@ class DemoArabicSeeder extends Seeder
             'description' => 'منهجية مع قسمين وتبعيات معقدة.',
             'definition' => 'توفر هذه المنهجية نهج منظم مع أقسام مترابطة.',
             'objectives' => 'تقييم المعرفة والمهارات مع مراعاة التبعيات.',
+            'img_url' => 'https://picsum.photos/seed/ar-methodology-two/800/400',
             'type' => 'twoSection',
             'first_section_name' => 'قسم الأساسيات',
             'second_section_name' => 'قسم المتقدم',
@@ -366,7 +396,13 @@ class DemoArabicSeeder extends Seeder
             'questions_estimated_time' => '60-90 دقيقة',
             'questions_count' => 7,
             'first_section_description' => 'يوفر القسم الأول تقييم أساسي.',
+            'first_section_definition' => 'تعريف قسم الأساسيات.',
+            'first_section_objectives' => 'أهداف قسم الأساسيات.',
+            'first_section_img_url' => 'https://picsum.photos/seed/ar-section1-two/800/400',
             'second_section_description' => 'يبني القسم الثاني على نتائج القسم الأول.',
+            'second_section_definition' => 'تعريف قسم المتقدم.',
+            'second_section_objectives' => 'أهداف قسم المتقدم.',
+            'second_section_img_url' => 'https://picsum.photos/seed/ar-section2-two/800/400',
             'tags' => ['two-section', 'dependent', 'assessment'],
         ]);
 
@@ -381,6 +417,7 @@ class DemoArabicSeeder extends Seeder
             'description' => 'يوفر الركن الأول من القسم الأول المعرفة الأساسية.',
             'definition' => 'يغطي هذا الركن المفاهيم الأساسية والمهارات الأساسية.',
             'objectives' => 'إرساء الفهم الأساسي.',
+            'img_url' => 'https://picsum.photos/seed/ar-pillar-s1-1/800/400',
             'questions_description' => 'أسئلة أساسية للتقييم الأساسي.',
             'questions_estimated_time' => '10-15 دقيقة',
             'questions_count' => 7,
@@ -392,6 +429,7 @@ class DemoArabicSeeder extends Seeder
             'description' => 'يبني الركن الثاني من القسم الأول على الركن الأول.',
             'definition' => 'يغطي هذا الركن المفاهيم المتوسطة المعتمدة على الركن الأول.',
             'objectives' => 'تقييم المهارات المتوسطة مع تبعية الركن الأول.',
+            'img_url' => 'https://picsum.photos/seed/ar-pillar-s1-2/800/400',
             'questions_description' => 'أسئلة متوسطة مع تبعية الركن الأول.',
             'questions_estimated_time' => '10-15 دقيقة',
             'questions_count' => 7,
@@ -404,6 +442,7 @@ class DemoArabicSeeder extends Seeder
             'description' => 'يعتمد الركن الأول من القسم الثاني على الركن الأول من القسم الأول.',
             'definition' => 'يغطي هذا الركن المفاهيم المتقدمة المعتمدة على الركن الأول من القسم الأول.',
             'objectives' => 'تقييم المهارات المتقدمة مع تبعية الركن الأول من القسم الأول.',
+            'img_url' => 'https://picsum.photos/seed/ar-pillar-s2-1/800/400',
             'questions_description' => 'أسئلة متقدمة مع تبعية الركن الأول من القسم الأول.',
             'questions_estimated_time' => '10-15 دقيقة',
             'questions_count' => 7,
@@ -415,6 +454,7 @@ class DemoArabicSeeder extends Seeder
             'description' => 'يعتمد الركن الثاني من القسم الثاني على الركن الثاني من القسم الأول.',
             'definition' => 'يغطي هذا الركن المفاهيم المتخصصة المعتمدة على الركن الثاني من القسم الأول.',
             'objectives' => 'تقييم المهارات المتخصصة مع تبعية الركن الثاني من القسم الأول.',
+            'img_url' => 'https://picsum.photos/seed/ar-pillar-s2-2/800/400',
             'questions_description' => 'أسئلة متخصصة مع تبعية الركن الثاني من القسم الأول.',
             'questions_estimated_time' => '10-15 دقيقة',
             'questions_count' => 7,
@@ -446,6 +486,7 @@ class DemoArabicSeeder extends Seeder
                     'description' => "توفر الوحدة $j داخل {$pillar->name} معرفة متخصصة.",
                     'definition' => "تغطي الوحدة $j كفاءات محددة داخل {$pillar->name}.",
                     'objectives' => "تقييم المهارات المتخصصة في الوحدة $j من {$pillar->name}.",
+                    'img_url' => 'https://picsum.photos/seed/ar-module-'.$pillarIndex.'-'.$j.'/800/400',
                     'questions_description' => "تحتوي هذه الوحدة على أسئلة للكفاءات المحددة.",
                     'questions_estimated_time' => '5-7 دقائق',
                     'questions_count' => 7,

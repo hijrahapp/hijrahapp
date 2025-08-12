@@ -113,7 +113,7 @@ class FirebaseService
                 'error' => __('messages.invalid_firebase_token'),
                 'message' => __('messages.invalid_or_expired_firebase_token'),
                 'details' => $e->getMessage()
-            ], 401);
+            ], 500);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => __('messages.authentication_failed'),

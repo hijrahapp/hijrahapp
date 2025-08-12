@@ -20,7 +20,7 @@ class AuthService
             return response()->json(['message' => __('messages.email_not_exists')], 404);
         }
         if (!Hash::check($password, $user->password)) {
-            return response()->json(['message' => __('messages.incorrect_password')], 401);
+            return response()->json(['message' => __('messages.incorrect_password')], 400);
         }
         if (!$user->active) {
             return response()->json(['message' => __('messages.inactive_user')], 403);
@@ -39,7 +39,7 @@ class AuthService
             return response()->json(['message' => __('messages.email_not_exists')], 404);
         }
         if (!Hash::check($password, $user->password)) {
-            return response()->json(['message' => __('messages.incorrect_password')], 401);
+            return response()->json(['message' => __('messages.incorrect_password')], 400);
         }
         if (!$user->active) {
             return response()->json(['message' => __('messages.inactive_user')], 403);
