@@ -25,6 +25,7 @@ class ModulesTable extends Component
     protected $listeners = [
         'refreshTable' => '$refresh',
         'deleteModule' => 'deleteModule',
+        'changeModuleStatus' => 'changeModuleStatus',
     ];
 
     #[Computed]
@@ -124,6 +125,49 @@ class ModulesTable extends Component
         ];
 
         $this->dispatch('openConfirmationModal', $modal);
+    }
+
+    public function openModuleStatusModal($request) {
+        $module = Module::findOrFail($request['id']);
+        
+        if($request['active']) {
+            $title = __('messages.activate_module_title');
+            $message = __('messages.activate_module_message');
+            $action = __('messages.activate_action');
+            $note = null;
+        } else {
+            // Check if module is in use
+            $isUsed = $module->methodologies()->exists() || $module->pillars()->exists() || $module->questions()->exists();
+            
+            if ($isUsed) {
+                $this->dispatch('show-toast', type: 'error', message: __('messages.cannot_deactivate_module_used'));
+                return;
+            }
+            
+            $title = __('messages.deactivate_module_title');
+            $message = __('messages.deactivate_module_message');
+            $action = __('messages.deactivate_action');
+            $note = __('messages.deactivate_module_note');
+        }
+        
+        $modal = [
+            'title' => $title,
+            'message' => $message,
+            'note' => $note,
+            'action' => $action,
+            'callback' => 'changeModuleStatus',
+            'object' => $request
+        ];
+        $this->dispatch('openConfirmationModal', $modal);
+    }
+
+    public function changeModuleStatus($request)
+    {
+        $module = Module::findOrFail($request['id']);
+        $module->active = $request['active'];
+        $module->save();
+        $this->dispatch('refreshTable');
+        $this->dispatch('show-toast', type: 'success', message: $request['active'] ? 'Module activated successfully!' : 'Module deactivated successfully!');
     }
 
     public function deleteModule($request)

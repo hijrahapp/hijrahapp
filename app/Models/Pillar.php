@@ -20,6 +20,7 @@ class Pillar extends Model
         'questions_estimated_time',
         'questions_count',
         'tags',
+        'active',
     ];
 
     protected $casts = [

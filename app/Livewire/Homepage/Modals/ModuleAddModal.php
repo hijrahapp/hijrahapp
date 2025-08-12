@@ -98,6 +98,7 @@ class ModuleAddModal extends Component
                     'definition' => $this->definition,
                     'objectives' => $this->objectives,
                     'tags' => $this->tags,
+                    'active' => true,
                 ]);
             }
             $this->dispatch('refreshTable');

@@ -25,6 +25,7 @@ class QuestionsTable extends Component
     protected $listeners = [
         'refreshTable' => '$refresh',
         'deleteQuestion' => 'deleteQuestion',
+        'changeQuestionStatus' => 'changeQuestionStatus',
     ];
 
     #[Computed]
@@ -123,6 +124,49 @@ class QuestionsTable extends Component
         ];
 
         $this->dispatch('openConfirmationModal', $modal);
+    }
+
+    public function openQuestionStatusModal($request) {
+        $question = Question::findOrFail($request['id']);
+        
+        if($request['active']) {
+            $title = __('messages.activate_question_title');
+            $message = __('messages.activate_question_message');
+            $action = __('messages.activate_action');
+            $note = null;
+        } else {
+            // Check if question is in use
+            $isUsed = $question->modules()->exists() || $question->pillars()->exists() || $question->methodologies()->exists();
+            
+            if ($isUsed) {
+                $this->dispatch('show-toast', type: 'error', message: __('messages.cannot_deactivate_question_used'));
+                return;
+            }
+            
+            $title = __('messages.deactivate_question_title');
+            $message = __('messages.deactivate_question_message');
+            $action = __('messages.deactivate_action');
+            $note = __('messages.deactivate_question_note');
+        }
+        
+        $modal = [
+            'title' => $title,
+            'message' => $message,
+            'note' => $note,
+            'action' => $action,
+            'callback' => 'changeQuestionStatus',
+            'object' => $request
+        ];
+        $this->dispatch('openConfirmationModal', $modal);
+    }
+
+    public function changeQuestionStatus($request)
+    {
+        $question = Question::findOrFail($request['id']);
+        $question->active = $request['active'];
+        $question->save();
+        $this->dispatch('refreshTable');
+        $this->dispatch('show-toast', type: 'success', message: $request['active'] ? 'Question activated successfully!' : 'Question deactivated successfully!');
     }
 
     public function deleteQuestion($request)

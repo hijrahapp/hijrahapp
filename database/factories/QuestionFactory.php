@@ -20,6 +20,7 @@ class QuestionFactory extends Factory
             'title' => $this->faker->sentence(),
             'type' => $this->faker->randomElement(['YesNo', 'TrueFalse', 'MCQSingle', 'MCQMultiple', 'Rating1to5', 'Rating1to10', 'ScaleAgreeDisagree']),
             'tags' => $this->faker->optional()->randomElements([1, 2, 3, 4, 5], $this->faker->numberBetween(1, 3)),
+            'active' => $this->faker->boolean(80), // 80% chance of being active
         ];
     }
 } 

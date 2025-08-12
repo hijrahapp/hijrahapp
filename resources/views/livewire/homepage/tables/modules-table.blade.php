@@ -42,6 +42,7 @@
                         <th class="">Description</th>
                         <th class="">Definition</th>
                         <th class="">Tags</th>
+                        <th class="text-center">Status</th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -81,6 +82,17 @@
                                     <span class="text-gray-400 text-sm">No tags</span>
                                 @endif
                             </td>
+                            <td class="text-center">
+                                @if($module->active)
+                                    <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" x-on:click="$wire.call('openModuleStatusModal', {{ Js::from(['id' => $module->id, 'active' => false]) }})" title="Deactivate Module">
+                                        Deactivate
+                                    </button>
+                                @else
+                                    <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-primary" x-on:click="$wire.call('openModuleStatusModal', {{ Js::from(['id' => $module->id, 'active' => true]) }})" title="Activate Module">
+                                        Activate
+                                    </button>
+                                @endif
+                            </td>
                             <td class="text-center flex gap-2 justify-center">
                                 <button
                                     class="kt-btn kt-btn-outline flex items-center justify-center"
@@ -98,7 +110,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-4">No Modules found.</td>
+                            <td colspan="7" class="text-center py-4">No Modules found.</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -26,6 +26,7 @@ class PillarFactory extends Factory
             'questions_estimated_time' => $this->faker->optional()->randomElement(['10-15 minutes']),
             'questions_count' => 0,
             'tags' => $this->faker->optional()->randomElements([1, 2, 3, 4, 5], $this->faker->numberBetween(1, 3)),
+            'active' => $this->faker->boolean(80), // 80% chance of being active
         ];
     }
 } 

@@ -145,6 +145,7 @@ class QuestionAddModal extends Component
                     'title' => $this->title,
                     'type' => $this->type,
                     'tags' => $this->tags,
+                    'active' => true,
                 ]);
             }
 

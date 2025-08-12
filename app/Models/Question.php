@@ -16,6 +16,7 @@ class Question extends Model
         'title',
         'type',
         'tags',
+        'active',
     ];
 
     protected $casts = [

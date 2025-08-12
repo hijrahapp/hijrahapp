@@ -121,6 +121,7 @@ class PillarAddModal extends Component
                     'description' => $this->description,
                     'definition' => $this->definition,
                     'objectives' => $this->objectives,
+                    'active' => true,
                     'tags' => $this->tags,
                 ]);
             }
