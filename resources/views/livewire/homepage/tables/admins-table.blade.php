@@ -1,4 +1,5 @@
-<div class="kt-card kt-card-grid kt-card-div h-full min-w-full">
+<div>
+    <div class="kt-card kt-card-grid kt-card-div h-full min-w-full">
     @php $role = session('user')["role"] ?? null; @endphp
     <div class="kt-card-header flex justify-between items-center">
         <h3 class="kt-card-title">Admins</h3>
@@ -116,9 +117,10 @@
             <span>
                 Showing {{ $users->firstItem() ?? 0 }} to {{ $users->lastItem() ?? 0 }} of {{ $users->total() ?? 0 }} users
             </span>
-            <div>
-                {{ $users->links() }}
-            </div>
         </div>
     </div>
+</div>
+
+    {{-- Pagination outside the table card --}}
+    <x-ktui-pagination :paginator="$users" />
 </div>

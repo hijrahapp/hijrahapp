@@ -1,4 +1,5 @@
-<div class="kt-card kt-card-grid kt-card-div h-full min-w-full">
+<div>
+    <div class="kt-card kt-card-grid kt-card-div h-full min-w-full">
     <div class="kt-card-header flex justify-between items-center">
         <h3 class="kt-card-title">Questions</h3>
         <div class="flex gap-2 items-center">
@@ -105,9 +106,10 @@
             <span>
                 Showing {{ $questions->firstItem() ?? 0 }} to {{ $questions->lastItem() ?? 0 }} of {{ $questions->total() ?? 0 }} Questions
             </span>
-            <div>
-                {{ $questions->links() }}
-            </div>
         </div>
     </div>
+</div>
+
+    {{-- Pagination outside the table card --}}
+    <x-ktui-pagination :paginator="$questions" />
 </div>

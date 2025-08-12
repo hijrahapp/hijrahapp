@@ -1,4 +1,5 @@
-<div class="kt-card kt-card-grid kt-card-div h-full min-w-full">
+<div>
+    <div class="kt-card kt-card-grid kt-card-div h-full min-w-full">
     <div class="kt-card-header flex justify-between items-center">
         <h3 class="kt-card-title">Pillars</h3>
         <div class="flex gap-2 items-center">
@@ -111,9 +112,10 @@
             <span>
                 Showing {{ $pillars->firstItem() ?? 0 }} to {{ $pillars->lastItem() ?? 0 }} of {{ $pillars->total() ?? 0 }} Pillars
             </span>
-            <div>
-                {{ $pillars->links() }}
-            </div>
         </div>
     </div>
+</div>
+
+    {{-- Pagination outside the table card --}}
+    <x-ktui-pagination :paginator="$pillars" />
 </div>
