@@ -20,6 +20,10 @@ class TagPicker extends Component
     public ?string $placeholder = 'Search or add tags';
     public ?string $addButtonText = 'Add';
 
+    protected $listeners = [
+        'reset-modal' => 'clearQuery',
+    ];
+
     public function mount(): void
     {
         if (!is_array($this->value)) {
@@ -90,7 +94,7 @@ class TagPicker extends Component
         }
     }
 
-    private function clearQuery(): void
+    public function clearQuery(): void
     {
         $this->query = '';
         $this->suggestions = [];

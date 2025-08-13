@@ -20,7 +20,7 @@
                 <!-- Question Type -->
                 <div>
                     <label class="block text-sm font-medium mb-1">Question Type <span class="text-destructive">*</span></label>
-                    <select class="kt-input w-full" wire:input="setTypeProperty($event.target.value)">
+                    <select class="kt-input w-full" wire:model.live="type">
                         <option value="">Select question type</option>
                         @foreach($questionTypes as $type)
                             <option value="{{ $type['value'] }}" {{ $this->type === $type['value'] ? 'selected' : '' }}>
@@ -67,7 +67,7 @@
                                 Add Answer
                             </button>
                         </div>
-                        
+
                         @if(count($customAnswers) > 0)
                             <div class="space-y-2">
                                 @foreach($customAnswers as $index => $answer)

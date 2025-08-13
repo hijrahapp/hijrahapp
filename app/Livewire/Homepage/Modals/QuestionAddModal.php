@@ -63,15 +63,8 @@ class QuestionAddModal extends Component
         $this->resetForm();
     }
 
-    #[Computed]
-    public function getTypeProperty()
+    public function updatedType()
     {
-        return $this->type;
-    }
-
-    public function setTypeProperty($value)
-    {
-        $this->type = $value;
         $this->customAnswers = [];
         if ($this->type && QuestionType::from($this->type)->requiresCustomAnswers()) {
             // Initialize with 2 empty answers for MCQ questions
@@ -85,15 +78,15 @@ class QuestionAddModal extends Component
     {
         $this->isEditMode = true;
         $this->questionId = $questionId;
-        
+
         $question = Question::findOrFail($questionId);
-        
+
         // Load question data
         $this->title = $question->title;
         $this->type = $question->type->value; // Convert enum to string
         // Tags are stored as an array of IDs on the model
         $this->tags = $question->tags ?? [];
-        
+
         // Load custom answers for MCQ questions
         if ($question->type->requiresCustomAnswers()) {
             $this->customAnswers = $question->answers->pluck('title')->toArray();
@@ -151,7 +144,7 @@ class QuestionAddModal extends Component
 
             // Handle answers based on question type
             $questionType = QuestionType::from($this->type);
-            
+
             if ($questionType->requiresCustomAnswers()) {
                 // For MCQ questions, create custom answers
                 foreach ($this->customAnswers as $answerTitle) {
@@ -206,7 +199,7 @@ class QuestionAddModal extends Component
     public function getPredefinedAnswers()
     {
         if (!$this->type) return [];
-        
+
         $questionType = QuestionType::from($this->type);
         return $questionType->getAnswers();
     }
