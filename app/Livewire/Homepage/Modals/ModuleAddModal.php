@@ -13,6 +13,7 @@ class ModuleAddModal extends Component
     public string $definition = '';
     public string $objectives = '';
     public array $tags = [];
+    public string $imgUrl = '';
     public string $error = '';
     // Tag logic moved to TagPicker shared component
     public bool $isEditMode = false;
@@ -26,7 +27,8 @@ class ModuleAddModal extends Component
             'definition' => 'required|string|min:3',
             'objectives' => 'required|string|min:3',
             'tags' => 'array',
-            'tags.*' => 'required|integer',
+            'tags.*' => 'integer',
+            'imgUrl' => 'nullable|string',
         ];
     }
 
@@ -54,6 +56,7 @@ class ModuleAddModal extends Component
         $this->objectives = $module->objectives ?? '';
         // Tags already stored as array of IDs
         $this->tags = $module->tags ?? [];
+        $this->imgUrl = $module->img_url ?? '';
 
         $this->dispatch('show-modal', selector: '#module_add_modal');
     }
@@ -71,6 +74,7 @@ class ModuleAddModal extends Component
         $this->definition = '';
         $this->objectives = '';
         $this->tags = [];
+        $this->imgUrl = '';
         $this->error = '';
         $this->isEditMode = false;
         $this->moduleId = null;
@@ -78,10 +82,15 @@ class ModuleAddModal extends Component
 
     public function save()
     {
-        // Tags are numeric IDs
-        $this->validate();
-
+        // Clear previous errors
+        $this->resetErrorBag();
+        
         try {
+            // Tags are numeric IDs
+            $this->validate();
+            
+            // Ensure imgUrl is properly handled (could be base64 or HTTP URL)
+            $imgUrlToSave = $this->imgUrl ?: null;
             if ($this->isEditMode) {
                 $module = Module::findOrFail($this->moduleId);
                 $module->update([
@@ -90,6 +99,7 @@ class ModuleAddModal extends Component
                     'definition' => $this->definition,
                     'objectives' => $this->objectives,
                     'tags' => $this->tags,
+                    'img_url' => $imgUrlToSave,
                 ]);
             } else {
                 Module::create([
@@ -98,15 +108,28 @@ class ModuleAddModal extends Component
                     'definition' => $this->definition,
                     'objectives' => $this->objectives,
                     'tags' => $this->tags,
+                    'img_url' => $imgUrlToSave,
                     'active' => true,
                 ]);
             }
             $this->dispatch('refreshTable');
             $this->dispatch('click');
             $this->dispatch('show-toast', type: 'success', message: $this->isEditMode ? 'Module updated successfully!' : 'Module created successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Re-throw validation exceptions so they show in the form
+            throw $e;
         } catch (\Exception $e) {
-            $this->error = 'An error occurred while saving the module. Please try again.';
-            logger()->error('Module save error: ' . $e->getMessage());
+            $this->error = 'An error occurred while saving the module: ' . $e->getMessage();
+            logger()->error('Module save error: ' . $e->getMessage(), [
+                'module_data' => [
+                    'name' => $this->name,
+                    'description' => $this->description,
+                    'definition' => $this->definition,
+                    'objectives' => $this->objectives,
+                    'tags' => $this->tags,
+                    'imgUrl' => $this->imgUrl ? substr($this->imgUrl, 0, 50) . '...' : null,
+                ]
+            ]);
         }
     }
 

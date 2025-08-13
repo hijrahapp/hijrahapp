@@ -16,6 +16,17 @@
                     </div>
                 @endif
 
+                @if ($errors->any())
+                    <div class="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg">
+                        <div class="font-medium">Please correct the following errors:</div>
+                        <ul class="mt-2 list-disc list-inside text-sm">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <!-- Pillar Name -->
                 <div>
                     <label class="block text-sm font-medium mb-1">Pillar Name <span class="text-destructive">*</span></label>
@@ -41,6 +52,14 @@
                 <label class="block text-sm font-medium mb-1">Objectives <span class="text-destructive">*</span></label>
                 <livewire:shared.rich-text :model="$objectives" wire:model="objectives" :placeholder="'Enter pillar objectives'" :editorId="'pillar_objectives_editor'" :minHeight="'150px'" />
                 @error('objectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+
+                <!-- Image -->
+                <livewire:shared.image-picker 
+                    wire:model="imgUrl"
+                    :label="'Pillar Image'" 
+                    :required="false" 
+                    key="{{ $pillarId ?: 'new' }}" />
+                @error('imgUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
 
                 <!-- Tags -->
                 <livewire:shared.tag-picker wire:model="tags" :label="'Tags'" :placeholder="'Search or add tags'" :addButtonText="'Add'" />

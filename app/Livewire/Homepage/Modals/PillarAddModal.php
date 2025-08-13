@@ -14,6 +14,7 @@ class PillarAddModal extends Component
     public $definition = '';
     public $objectives = '';
     public $tags = [];
+    public $imgUrl = '';
     public $error = '';
     public $isEditMode = false;
     public $pillarId = null;
@@ -26,7 +27,8 @@ class PillarAddModal extends Component
             'definition' => 'required|string|min:10',
             'objectives' => 'required|string|min:10',
             'tags' => 'array',
-            'tags.*' => 'required|integer',
+            'tags.*' => 'integer',
+            'imgUrl' => 'nullable|string',
         ];
     }
 
@@ -48,7 +50,7 @@ class PillarAddModal extends Component
 
     protected $listeners = [
         'reset-modal' => 'resetForm',
-        'edit-pillar' => 'editPillar'
+        'edit-pillar' => 'editPillar',
     ];
 
     public function mount()
@@ -72,6 +74,7 @@ class PillarAddModal extends Component
         $this->objectives = $pillar->objectives;
         // Tags are stored as an array of IDs on the model
         $this->tags = $pillar->tags ?? [];
+        $this->imgUrl = $pillar->img_url ?? '';
 
         $this->dispatch('show-modal', selector: '#pillar_add_modal');
     }
@@ -87,10 +90,8 @@ class PillarAddModal extends Component
         $this->definition = '';
         $this->objectives = '';
         $this->tags = [];
-        $this->newTag = '';
+        $this->imgUrl = '';
         $this->error = '';
-        $this->tagSuggestions = [];
-        $this->showTagSuggestions = false;
         $this->isEditMode = false;
         $this->pillarId = null;
 
@@ -100,10 +101,15 @@ class PillarAddModal extends Component
 
     public function save()
     {
-        // Tags are numeric IDs provided by TagPicker
-        $this->validate();
-
+        // Clear previous errors
+        $this->resetErrorBag();
+        
         try {
+            // Tags are numeric IDs provided by TagPicker
+            $this->validate();
+            
+            // Ensure imgUrl is properly handled (could be base64 or HTTP URL)
+            $imgUrlToSave = $this->imgUrl ?: null;
             if ($this->isEditMode) {
                 // Update existing pillar
                 $pillar = Pillar::findOrFail($this->pillarId);
@@ -113,6 +119,7 @@ class PillarAddModal extends Component
                     'definition' => $this->definition,
                     'objectives' => $this->objectives,
                     'tags' => $this->tags,
+                    'img_url' => $imgUrlToSave,
                 ]);
             } else {
                 // Create new pillar
@@ -123,6 +130,7 @@ class PillarAddModal extends Component
                     'objectives' => $this->objectives,
                     'active' => true,
                     'tags' => $this->tags,
+                    'img_url' => $imgUrlToSave,
                 ]);
             }
 
@@ -130,9 +138,21 @@ class PillarAddModal extends Component
             $this->closeModal();
             $this->dispatch('show-toast', type: 'success', message: $this->isEditMode ? 'Pillar updated successfully!' : 'Pillar created successfully!');
         
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Re-throw validation exceptions so they show in the form
+            throw $e;
         } catch (\Exception $e) {
-            $this->error = 'An error occurred while saving the pillar. Please try again.';
-            logger()->error('Pillar save error: ' . $e->getMessage());
+            $this->error = 'An error occurred while saving the pillar: ' . $e->getMessage();
+            logger()->error('Pillar save error: ' . $e->getMessage(), [
+                'pillar_data' => [
+                    'name' => $this->name,
+                    'description' => $this->description,
+                    'definition' => $this->definition,
+                    'objectives' => $this->objectives,
+                    'tags' => $this->tags,
+                    'imgUrl' => $this->imgUrl ? substr($this->imgUrl, 0, 50) . '...' : null,
+                ]
+            ]);
         }
     }
 
