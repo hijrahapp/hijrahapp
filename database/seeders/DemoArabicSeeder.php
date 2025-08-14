@@ -9,6 +9,7 @@ use App\Models\Module;
 use App\Models\Pillar;
 use App\Models\Question;
 use App\Models\QuestionAnswerWeight;
+use App\Models\Tag;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -160,7 +161,7 @@ class DemoArabicSeeder extends Seeder
             $question = Question::firstOrCreate([
                 'title' => $questionTitles[$index],
                 'type' => $type,
-                'tags' => ['demo', 'assessment', $type->value],
+                'tags' => $this->getTagIds(['demo', 'assessment', $type->value]),
             ]);
 
             // Attach answers based on question type
@@ -248,7 +249,7 @@ class DemoArabicSeeder extends Seeder
             'second_section_definition' => null,
             'second_section_objectives' => null,
             'second_section_img_url' => null,
-            'tags' => ['simple', 'basic', 'assessment'],
+            'tags' => $this->getTagIds(['simple', 'basic', 'assessment']),
         ]);
 
         // Attach all 7 questions to methodology
@@ -267,7 +268,7 @@ class DemoArabicSeeder extends Seeder
                 'questions_description' => "تحتوي الوحدة $i على أسئلة تقيم المفاهيم الأساسية.",
                 'questions_estimated_time' => '5-7 دقائق',
                 'questions_count' => 7,
-                'tags' => ['module', 'basic'],
+                'tags' => $this->getTagIds(['module', 'basic']),
             ]);
 
             // Attach module to methodology
@@ -311,7 +312,7 @@ class DemoArabicSeeder extends Seeder
             'second_section_definition' => null,
             'second_section_objectives' => null,
             'second_section_img_url' => null,
-            'tags' => ['complex', 'advanced', 'assessment'],
+            'tags' => $this->getTagIds(['complex', 'advanced', 'assessment']),
         ]);
 
         // Attach all 7 questions to methodology
@@ -329,7 +330,7 @@ class DemoArabicSeeder extends Seeder
                 'questions_description' => "يحتوي الركن $i على أسئلة تقيم الفهم المتقدم.",
                 'questions_estimated_time' => '10-15 دقيقة',
                 'questions_count' => 7,
-                'tags' => ['pillar', 'advanced'],
+                'tags' => $this->getTagIds(['pillar', 'advanced']),
             ]);
 
             // Attach pillar to methodology
@@ -354,7 +355,7 @@ class DemoArabicSeeder extends Seeder
                     'questions_description' => "تحتوي هذه الوحدة على أسئلة للكفاءات المحددة.",
                     'questions_estimated_time' => '5-7 دقائق',
                     'questions_count' => 7,
-                    'tags' => ['module', 'specialized'],
+                    'tags' => $this->getTagIds(['module', 'specialized']),
                 ]);
 
                 // Attach module to pillar with methodology context
@@ -403,7 +404,7 @@ class DemoArabicSeeder extends Seeder
             'second_section_definition' => 'تعريف قسم المتقدم.',
             'second_section_objectives' => 'أهداف قسم المتقدم.',
             'second_section_img_url' => 'https://picsum.photos/seed/ar-section2-two/800/400',
-            'tags' => ['two-section', 'dependent', 'assessment'],
+            'tags' => $this->getTagIds(['two-section', 'dependent', 'assessment']),
         ]);
 
         // Attach all 7 questions to methodology
@@ -421,7 +422,7 @@ class DemoArabicSeeder extends Seeder
             'questions_description' => 'أسئلة أساسية للتقييم الأساسي.',
             'questions_estimated_time' => '10-15 دقيقة',
             'questions_count' => 7,
-            'tags' => ['section1', 'foundational'],
+            'tags' => $this->getTagIds(['section1', 'foundational']),
         ]);
 
         $section1Pillar2 = Pillar::create([
@@ -433,7 +434,7 @@ class DemoArabicSeeder extends Seeder
             'questions_description' => 'أسئلة متوسطة مع تبعية الركن الأول.',
             'questions_estimated_time' => '10-15 دقيقة',
             'questions_count' => 7,
-            'tags' => ['section1', 'intermediate'],
+            'tags' => $this->getTagIds(['section1', 'intermediate']),
         ]);
 
         // Create section 2 pillars
@@ -446,7 +447,7 @@ class DemoArabicSeeder extends Seeder
             'questions_description' => 'أسئلة متقدمة مع تبعية الركن الأول من القسم الأول.',
             'questions_estimated_time' => '10-15 دقيقة',
             'questions_count' => 7,
-            'tags' => ['section2', 'advanced'],
+            'tags' => $this->getTagIds(['section2', 'advanced']),
         ]);
 
         $section2Pillar2 = Pillar::create([
@@ -458,7 +459,7 @@ class DemoArabicSeeder extends Seeder
             'questions_description' => 'أسئلة متخصصة مع تبعية الركن الثاني من القسم الأول.',
             'questions_estimated_time' => '10-15 دقيقة',
             'questions_count' => 7,
-            'tags' => ['section2', 'specialized'],
+            'tags' => $this->getTagIds(['section2', 'specialized']),
         ]);
 
         // Attach pillars to methodology with sections
@@ -490,7 +491,7 @@ class DemoArabicSeeder extends Seeder
                     'questions_description' => "تحتوي هذه الوحدة على أسئلة للكفاءات المحددة.",
                     'questions_estimated_time' => '5-7 دقائق',
                     'questions_count' => 7,
-                    'tags' => ['module', 'specialized'],
+                    'tags' => $this->getTagIds(['module', 'specialized']),
                 ]);
 
                 // Attach module to pillar with methodology context
@@ -532,5 +533,18 @@ class DemoArabicSeeder extends Seeder
             'pillar_id' => $pillar->id,
             'depends_on_pillar_id' => $dependsOn->id,
         ]);
+    }
+
+    /**
+     * Ensure tags exist and return their IDs
+     */
+    private function getTagIds(array $titles): array
+    {
+        return collect($titles)
+            ->map(function ($title) {
+                return Tag::firstOrCreate(['title' => $title], ['active' => true])->id;
+            })
+            ->values()
+            ->all();
     }
 } 

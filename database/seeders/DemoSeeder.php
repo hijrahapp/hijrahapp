@@ -9,6 +9,7 @@ use App\Models\Module;
 use App\Models\Pillar;
 use App\Models\Question;
 use App\Models\QuestionAnswerWeight;
+use App\Models\Tag;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -160,7 +161,7 @@ class DemoSeeder extends Seeder
             $question = Question::firstOrCreate([
                 'title' => $questionTitles[$index],
                 'type' => $type,
-                'tags' => ['demo', 'assessment', $type->value],
+                'tags' => $this->getTagIds(['demo', 'assessment', $type->value]),
             ]);
 
             // Attach answers based on question type
@@ -248,7 +249,7 @@ class DemoSeeder extends Seeder
             'second_section_definition' => null,
             'second_section_objectives' => null,
             'second_section_img_url' => null,
-            'tags' => ['simple', 'basic', 'assessment'],
+            'tags' => $this->getTagIds(['simple', 'basic', 'assessment']),
         ]);
 
         // Attach all 7 questions to methodology
@@ -267,7 +268,7 @@ class DemoSeeder extends Seeder
                 'questions_description' => "Module $i contains questions that assess fundamental concepts.",
                 'questions_estimated_time' => '5-7 minutes',
                 'questions_count' => 7,
-                'tags' => ['module', 'basic'],
+                'tags' => $this->getTagIds(['module', 'basic']),
             ]);
 
             // Attach module to methodology
@@ -311,7 +312,7 @@ class DemoSeeder extends Seeder
             'second_section_definition' => null,
             'second_section_objectives' => null,
             'second_section_img_url' => null,
-            'tags' => ['complex', 'advanced', 'assessment'],
+            'tags' => $this->getTagIds(['complex', 'advanced', 'assessment']),
         ]);
 
         // Attach all 7 questions to methodology
@@ -330,7 +331,7 @@ class DemoSeeder extends Seeder
                 'questions_description' => "Pillar $i contains questions that assess advanced understanding.",
                 'questions_estimated_time' => '10-15 minutes',
                 'questions_count' => 7,
-                'tags' => ['pillar', 'advanced'],
+                'tags' => $this->getTagIds(['pillar', 'advanced']),
             ]);
 
             // Attach pillar to methodology
@@ -355,7 +356,7 @@ class DemoSeeder extends Seeder
                     'questions_description' => "This module contains questions for specific competencies.",
                     'questions_estimated_time' => '5-7 minutes',
                     'questions_count' => 7,
-                    'tags' => ['module', 'specialized'],
+                    'tags' => $this->getTagIds(['module', 'specialized']),
                 ]);
 
                 // Attach module to pillar with methodology context
@@ -404,7 +405,7 @@ class DemoSeeder extends Seeder
             'second_section_definition' => 'Definition for advanced section.',
             'second_section_objectives' => 'Objectives for advanced section.',
             'second_section_img_url' => 'https://picsum.photos/seed/section2-two/800/400',
-            'tags' => ['two-section', 'dependent', 'assessment'],
+            'tags' => $this->getTagIds(['two-section', 'dependent', 'assessment']),
         ]);
 
         // Attach all 7 questions to methodology
@@ -422,7 +423,7 @@ class DemoSeeder extends Seeder
             'questions_description' => 'Basic questions for foundational assessment.',
             'questions_estimated_time' => '10-15 minutes',
             'questions_count' => 7,
-            'tags' => ['section1', 'foundational'],
+            'tags' => $this->getTagIds(['section1', 'foundational']),
         ]);
 
         $section1Pillar2 = Pillar::create([
@@ -434,7 +435,7 @@ class DemoSeeder extends Seeder
             'questions_description' => 'Intermediate questions with pillar 1 dependency.',
             'questions_estimated_time' => '10-15 minutes',
             'questions_count' => 7,
-            'tags' => ['section1', 'intermediate'],
+            'tags' => $this->getTagIds(['section1', 'intermediate']),
         ]);
 
         // Create section 2 pillars
@@ -447,7 +448,7 @@ class DemoSeeder extends Seeder
             'questions_description' => 'Advanced questions with section 1 pillar 1 dependency.',
             'questions_estimated_time' => '10-15 minutes',
             'questions_count' => 7,
-            'tags' => ['section2', 'advanced'],
+            'tags' => $this->getTagIds(['section2', 'advanced']),
         ]);
 
         $section2Pillar2 = Pillar::create([
@@ -459,7 +460,7 @@ class DemoSeeder extends Seeder
             'questions_description' => 'Specialized questions with section 1 pillar 2 dependency.',
             'questions_estimated_time' => '10-15 minutes',
             'questions_count' => 7,
-            'tags' => ['section2', 'specialized'],
+            'tags' => $this->getTagIds(['section2', 'specialized']),
         ]);
 
         // Attach pillars to methodology with sections
@@ -491,7 +492,7 @@ class DemoSeeder extends Seeder
                     'questions_description' => "This module contains questions for specific competencies.",
                     'questions_estimated_time' => '5-7 minutes',
                     'questions_count' => 7,
-                    'tags' => ['module', 'specialized'],
+                    'tags' => $this->getTagIds(['module', 'specialized']),
                 ]);
 
                 // Attach module to pillar with methodology context
@@ -533,5 +534,18 @@ class DemoSeeder extends Seeder
             'pillar_id' => $pillar->id,
             'depends_on_pillar_id' => $dependsOn->id,
         ]);
+    }
+
+    /**
+     * Ensure tags exist and return their IDs
+     */
+    private function getTagIds(array $titles): array
+    {
+        return collect($titles)
+            ->map(function ($title) {
+                return Tag::firstOrCreate(['title' => $title], ['active' => true])->id;
+            })
+            ->values()
+            ->all();
     }
 } 
