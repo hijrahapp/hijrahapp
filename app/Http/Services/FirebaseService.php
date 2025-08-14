@@ -83,6 +83,9 @@ class FirebaseService
 
                 $user = $this->userRepo->create($userData);
             } else {
+                if (!$user->active) {
+                    return response()->json(['message' => __('messages.inactive_user')], 403);
+                }
                 // Update existing user's Firebase UID and other details
                 $updateData = [
                     'firebase_uid' => $uid,

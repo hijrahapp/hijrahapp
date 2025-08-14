@@ -77,6 +77,9 @@ class GoogleService
                 $user = $this->userRepo->create($userData);
             } else {
                 // Update existing user's Firebase UID and other details
+                if (!$user->active) {
+                    return response()->json(['message' => __('messages.inactive_user')], 403);
+                }
                 $updateData = [
                     'firebase_uid' => $uid,
                     'email_verified_at' => now(),
