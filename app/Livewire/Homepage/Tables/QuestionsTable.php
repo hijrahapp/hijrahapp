@@ -4,14 +4,14 @@ namespace App\Livewire\Homepage\Tables;
 
 use App\Models\Question;
 use App\Models\Tag;
+use App\Traits\WithoutUrlPagination;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Livewire\WithPagination;
 
 class QuestionsTable extends Component
 {
-    use WithFileUploads, WithPagination;
+    use WithFileUploads, WithoutUrlPagination;
 
     public $search = '';
     public $perPage = 10;
@@ -19,8 +19,6 @@ class QuestionsTable extends Component
     public $tagSearch = '';
     public $tagSuggestions = [];
     public $showTagSuggestions = false;
-
-    protected $paginationTheme = 'tailwind';
 
     protected $listeners = [
         'refreshTable' => '$refresh',
@@ -37,7 +35,10 @@ class QuestionsTable extends Component
             })
             ->withCount(['modules', 'pillars', 'methodologies'])
             ->orderBy('id', 'asc');
-        return $query->paginate($this->perPage);
+        
+        // Use custom pagination without URL caching
+        $page = $this->getPage();
+        return $query->paginate($this->perPage, ['*'], 'page', $page);
     }
 
     public function getTagTitles($tagIds, $limit = 3)

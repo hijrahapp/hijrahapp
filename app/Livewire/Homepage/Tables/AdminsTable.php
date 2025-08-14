@@ -4,19 +4,17 @@ namespace App\Livewire\Homepage\Tables;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Traits\WithoutUrlPagination;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Livewire\WithPagination;
 
 class AdminsTable extends Component
 {
-    use WithFileUploads, WithPagination;
+    use WithFileUploads, WithoutUrlPagination;
 
     public $search = '';
     public $perPage = 10;
-
-    protected $paginationTheme = 'tailwind';
 
     protected $listeners = [
         'refreshTable' => '$refresh',
@@ -52,7 +50,10 @@ class AdminsTable extends Component
                     });
                 });
         }
-        return $query->paginate($this->perPage);
+        
+        // Use custom pagination without URL caching
+        $page = $this->getPage();
+        return $query->paginate($this->perPage, ['*'], 'page', $page);
     }
 
     public function handleUserEditOpen($user)

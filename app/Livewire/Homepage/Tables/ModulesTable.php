@@ -4,14 +4,14 @@ namespace App\Livewire\Homepage\Tables;
 
 use App\Models\Module;
 use App\Models\Tag;
+use App\Traits\WithoutUrlPagination;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Livewire\WithPagination;
 
 class ModulesTable extends Component
 {
-    use WithFileUploads, WithPagination;
+    use WithFileUploads, WithoutUrlPagination;
 
     public string $search = '';
     public int $perPage = 10;
@@ -19,8 +19,6 @@ class ModulesTable extends Component
     public string $tagSearch = '';
     public array $tagSuggestions = [];
     public bool $showTagSuggestions = false;
-
-    protected $paginationTheme = 'tailwind';
 
     protected $listeners = [
         'refreshTable' => '$refresh',
@@ -37,7 +35,10 @@ class ModulesTable extends Component
             })
             ->withCount(['methodologies', 'pillars', 'questions'])
             ->orderBy('id', 'asc');
-        return $query->paginate($this->perPage);
+        
+        // Use custom pagination without URL caching
+        $page = $this->getPage();
+        return $query->paginate($this->perPage, ['*'], 'page', $page);
     }
 
     public function updatedTagSearch()

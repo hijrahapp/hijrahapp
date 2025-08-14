@@ -7,19 +7,17 @@ use App\Models\Module;
 use App\Models\Pillar;
 use App\Models\Question;
 use App\Models\Tag;
+use App\Traits\WithoutUrlPagination;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Livewire\WithPagination;
 
 class TagsTable extends Component
 {
-    use WithFileUploads, WithPagination;
+    use WithFileUploads, WithoutUrlPagination;
 
     public $search = '';
     public $perPage = 10;
-
-    protected $paginationTheme = 'tailwind';
 
     protected $listeners = [
         'refreshTable' => '$refresh',
@@ -32,7 +30,10 @@ class TagsTable extends Component
     {
         $query = Tag::where('title', 'like', '%'.$this->search.'%')
             ->orderBy('id', 'asc');
-        return $query->paginate($this->perPage);
+        
+        // Use custom pagination without URL caching
+        $page = $this->getPage();
+        return $query->paginate($this->perPage, ['*'], 'page', $page);
     }
 
     public function openTagStatusModal($request) {
