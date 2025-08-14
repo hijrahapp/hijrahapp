@@ -9,16 +9,52 @@
             data-kt-drawer-class="kt-drawer kt-drawer-start fixed z-10 top-0 bottom-0 w-full me-5 max-w-[250px] p-5 lg:p-0 overflow-auto"
             id="mega_menu_wrapper">
             <!--Megamenu-->
-            <div class="kt-menu flex-col gap-5 lg:flex-row lg:gap-7.5" data-kt-menu="true" id="mega_menu">
+            <div class="kt-menu flex-col items-center gap-5 lg:flex-row lg:gap-7.5" data-kt-menu="true" id="mega_menu">
                 <!--Megamenu Item-->
                 <div class="kt-menu-item active">
-                    <h1 class="kt-menu-title font-medium text-xl text-secondary-foreground">
-                        @if($currentSubSection)
-                            {{ $currentSection }} > {{ $currentSubSection }}
+                    <ol class="kt-breadcrumb">
+                        <li class="kt-breadcrumb-item text-lg">
+                            <a class="kt-breadcrumb-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house" aria-hidden="true">
+                                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
+                                    <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                </svg>
+                            </a>
+                        </li>
+                        @if($currentSection !== 'Home')
+                            <li class="kt-breadcrumb-separator text-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true">
+                                    <path d="m9 18 6-6-6-6"></path>
+                                </svg>
+                            </li>
+                            <li class="kt-breadcrumb-item text-lg">
+                                @if($currentSubSection)
+                                    <a class="kt-breadcrumb-link">{{ $currentSection }}</a>
+                                @else
+                                    <span class="kt-breadcrumb-page">{{ $currentSection }}</span>
+                                @endif
+                            </li>
+                            @if($currentSubSection)
+                                <li class="kt-breadcrumb-separator text-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true">
+                                        <path d="m9 18 6-6-6-6"></path>
+                                    </svg>
+                                </li>
+                                <li class="kt-breadcrumb-item text-lg">
+                                    <span class="kt-breadcrumb-page">{{ $currentSubSection }}</span>
+                                </li>
+                            @endif
                         @else
-                            {{ $currentSection }}
+                            <li class="kt-breadcrumb-separator text-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true">
+                                    <path d="m9 18 6-6-6-6"></path>
+                                </svg>
+                            </li>
+                            <li class="kt-breadcrumb-item text-lg">
+                                <span class="kt-breadcrumb-page">{{ $currentSection }}</span>
+                            </li>
                         @endif
-                    </h1>
+                    </ol>
                 </div>
                 <!--End of Megamenu Item-->
                 <!--Megamenu Item-->
