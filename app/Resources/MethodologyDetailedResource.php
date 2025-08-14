@@ -112,7 +112,7 @@ class MethodologyDetailedResource extends JsonResource
 
         // Pillars block
         $pillarsList = $this->relationLoaded('pillars') && $this->pillars && $this->pillars->isNotEmpty()
-            ? PillarResource::collection($this->pillars->map(function ($pillar) {
+            ? PillarDetailedResource::collection($this->pillars->map(function ($pillar) {
                 $pillar->setAttribute('user_id', $this->user_id ?? null);
                 return $pillar;
             }))
@@ -127,7 +127,7 @@ class MethodologyDetailedResource extends JsonResource
 
         // Modules block
         $modulesList = $this->relationLoaded('modules') && $this->modules && $this->modules->isNotEmpty()
-            ? ModuleResource::collection($this->modules->map(function ($module) {
+            ? ModuleDetailedResource::collection($this->modules->map(function ($module) {
                 $module->setAttribute('user_id', $this->user_id ?? null);
                 // No pillar context when listing modules at methodology level
                 return $module;

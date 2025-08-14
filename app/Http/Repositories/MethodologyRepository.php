@@ -33,6 +33,68 @@ class MethodologyRepository
         return $methodology;
     }
 
+    /**
+     * Find a methodology with a specific pillar and its nested relations
+     */
+    public function findByIdWithSpecificPillar(int $methodologyId, int $pillarId): ?Methodology {
+        $methodology = Methodology::with([
+            'pillars' => function ($query) use ($pillarId) {
+                $query->where('pillars.id', $pillarId);
+            },
+            'pillars.modules.questions.answers',
+            'pillars.questions.answers',
+            'questions.answers',
+        ])->find($methodologyId);
+
+        if ($methodology) {
+            $this->loadWeightsForMethodology($methodology);
+        }
+
+        return $methodology;
+    }
+
+    /**
+     * Find a methodology with a specific direct module and its nested relations
+     */
+    public function findByIdWithSpecificModule(int $methodologyId, int $moduleId): ?Methodology {
+        $methodology = Methodology::with([
+            'modules' => function ($query) use ($moduleId) {
+                $query->where('modules.id', $moduleId);
+            },
+            'modules.questions.answers',
+            'questions.answers',
+        ])->find($methodologyId);
+
+        if ($methodology) {
+            $this->loadWeightsForMethodology($methodology);
+        }
+
+        return $methodology;
+    }
+
+    /**
+     * Find a methodology with a specific pillar and specific module under that pillar
+     */
+    public function findByIdWithSpecificPillarModule(int $methodologyId, int $pillarId, int $moduleId): ?Methodology {
+        $methodology = Methodology::with([
+            'pillars' => function ($query) use ($pillarId) {
+                $query->where('pillars.id', $pillarId);
+            },
+            'pillars.modules' => function ($query) use ($moduleId) {
+                $query->where('modules.id', $moduleId);
+            },
+            'pillars.modules.questions.answers',
+            'pillars.questions.answers',
+            'questions.answers',
+        ])->find($methodologyId);
+
+        if ($methodology) {
+            $this->loadWeightsForMethodology($methodology);
+        }
+
+        return $methodology;
+    }
+
     public function findByIdWithSectionPillars(int $methodologyId, int $sectionNumber): ?Methodology {
         $methodology = Methodology::with([
             'pillars' => function ($query) use ($sectionNumber) {

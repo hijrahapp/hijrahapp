@@ -33,9 +33,15 @@ Route::middleware('locale')->group(function () {
     });
 
     Route::prefix('methodology')->middleware(['auth.jwt','auth.user'])->group(function () {
+        // Methodology endpoints
         Route::get('all', [MethodologyController::class, 'all']);
         Route::get('{methodologyId}', [MethodologyController::class, 'get']);
         Route::get('{methodologyId}/section/{sectionNumber}', [MethodologyController::class, 'getBySection']);
+        Route::get('{methodologyId}/pillar/{pillarId}', [MethodologyController::class, 'getPillar']);
+        Route::get('{methodologyId}/module/{moduleId}', [MethodologyController::class, 'getModule']);
+        Route::get('{methodologyId}/pillar/{pillarId}/module/{moduleId}', [MethodologyController::class, 'getPillarModule']);
+
+        // Questions endpoints
         Route::get('{methodologyId}/questions', [QuestionController::class, 'getMethodologyQuestions']);
         Route::get('{methodologyId}/pillar/{pillarId}/questions', [QuestionController::class, 'getPillarQuestionsForMethodology']);
         Route::get('{methodologyId}/module/{moduleId}/questions', [QuestionController::class, 'getModuleQuestionsForMethodology']);
