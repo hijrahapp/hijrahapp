@@ -31,6 +31,19 @@ class MethodologyResource extends JsonResource
             'pillars_definition' => $this->pillars_definition,
             'modules_definition' => $this->modules_definition,
             'tags' => $this->getTagTitles($this->tags),
+            'pillars' => $this->whenLoaded('pillars', function () {
+                return PillarResource::collection($this->pillars);
+            }),
+            'modules' => $this->whenLoaded('modules', function () {
+                return ModuleResource::collection($this->modules->map(function ($module) {
+                    $module->setAttribute('user_id', $this->user_id ?? null);
+                    // No pillar context when listing modules at methodology level
+                    return $module;
+                }));
+            }),
+            'questions' => $this->whenLoaded('questions', function () {
+                return QuestionResource::collection($this->questions);
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
