@@ -64,6 +64,6 @@ class ModuleResource extends JsonResource
 
         $service = new ResultCalculationService();
         $status = $service->getModuleStatus($this->user_id, $this->id, (int) $methodologyId, $pillarId ? (int) $pillarId : null);
-        return $status ? __('lookups.'.$status) : null;
+        return $status ?? null;
     }
 }

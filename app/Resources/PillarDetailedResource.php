@@ -47,7 +47,7 @@ class PillarDetailedResource extends JsonResource
 
         // Modules under this pillar (if loaded)
         $modulesList = $this->relationLoaded('modules') && $this->modules && $this->modules->isNotEmpty()
-            ? ModuleDetailedResource::collection($this->modules->map(function ($module) {
+            ? ModuleResource::collection($this->modules->map(function ($module) {
                 $module->setAttribute('user_id', $this->user_id ?? null);
                 $module->setAttribute('pillar_id', $this->id);
                 return $module;

@@ -62,7 +62,7 @@ class PillarResource extends JsonResource
 
         $service = new ResultCalculationService();
         $status = $service->getPillarStatus($this->user_id, $this->id, (int) $methodologyId);
-        return $status ? __('lookups.'.$status) : null;
+        return $status ?? null;
     }
 
     /**

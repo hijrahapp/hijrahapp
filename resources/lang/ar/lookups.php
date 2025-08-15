@@ -37,6 +37,6 @@ return [
     'two_section' => 'قسمين',
     //Status
     'not_started' => 'لم يبدأ',
-    'in_progress' => 'قيد الاستكمال',
-    'completed' => 'مكتمل',
+    'in_progress' => 'قيد التنفيذ',
+    'completed' => 'تمّ',
 ]; 
