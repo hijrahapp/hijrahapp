@@ -99,6 +99,9 @@ trait WithoutUrlPagination
             return;
         }
         
-        parent::updated($property);
+        // Only call parent if it exists
+        if (method_exists(get_parent_class($this), 'updated')) {
+            parent::updated($property);
+        }
     }
 }

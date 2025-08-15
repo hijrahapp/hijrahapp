@@ -1,5 +1,5 @@
 <div class="kt-modal hidden" data-kt-modal="true" id="module_add_modal" wire:ignore.self>
-    <div class="kt-modal-content max-w-[800px] top-[5%]">
+    <div class="kt-modal-content max-w-[800px] top-[10%]">
         <div class="kt-modal-header py-4 px-5">
             <span class="kt-modal-title text-xl font-semibold">
                 {{ $isEditMode ? 'Edit Module' : 'Add Module' }}

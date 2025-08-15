@@ -16,7 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize modal functionality
     initModals();
 
-    // No rich text editors
+    // Initialize dropdown functionality
+    initDropdowns();
+
+    // Rich text editors are initialized by their own components
 });
 
 // Drawer functionality
@@ -105,9 +108,35 @@ function initModals() {
             if (modal) {
                 modal.classList.toggle('hidden');
                 modal.classList.toggle('flex');
-                // No rich text editors
+                // Rich text editors are initialized by their own components
             }
         });
+    });
+}
+
+// Dropdown functionality
+function initDropdowns() {
+    // Initialize KTUI dropdowns if available
+    if (window.KTDropdown) {
+        window.KTDropdown.init();
+    }
+
+    // Handle dropdown menu item clicks to close dropdown
+    document.addEventListener('click', function(e) {
+        const menuLink = e.target.closest('.kt-dropdown-menu-link');
+        if (menuLink && menuLink.hasAttribute('wire:click')) {
+            // Find the parent dropdown and close it
+            const dropdown = menuLink.closest('[data-kt-dropdown]');
+            if (dropdown && window.KTDropdown) {
+                const dropdownInstance = window.KTDropdown.getInstance(dropdown);
+                if (dropdownInstance) {
+                    // Close the dropdown after a short delay to allow Livewire to process the click
+                    setTimeout(() => {
+                        dropdownInstance.hide();
+                    }, 100);
+                }
+            }
+        }
     });
 }
 
@@ -137,6 +166,8 @@ document.addEventListener('livewire:init', () => {
         initMenus();
         initStickyHeaders();
         initModals();
+        initDropdowns();
+        // Rich text editors are initialized by their own components
     });
 
     // Global toast listener for Livewire
@@ -207,7 +238,7 @@ document.addEventListener('livewire:init', () => {
                 modal.classList.add('flex');
             }
         }
-        // No editors to initialize
+        // Rich text editors are initialized by their own components
     });
 });
 
@@ -216,7 +247,8 @@ window.MetronicCore = {
     initDrawers,
     initMenus,
     initStickyHeaders,
-    initModals
+    initModals,
+    initDropdowns
 };
 
 // Normalize toast type to KTUI `variant`
@@ -230,3 +262,5 @@ function mapToastVariant(rawType) {
     if (t === 'mono') return 'mono';
     return 'info';
 }
+
+// Rich text editor initialization is encapsulated within the Livewire component

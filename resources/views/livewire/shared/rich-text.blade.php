@@ -3,7 +3,7 @@
         {{ $slot ?? '' }}
     </div>
     <div wire:ignore>
-        <div id="{{ $editorId }}" class="border rounded bg-background" style="min-height: {{ $minHeight }}"></div>
+        <div id="{{ $editorId }}" data-richtext="quill" data-input-id="{{ $editorId }}_input" data-placeholder="{{ $placeholder }}" class="border rounded bg-background" style="min-height: {{ $minHeight }}"></div>
     </div>
     <textarea wire:model.defer="model" id="{{ $editorId }}_input" class="hidden">{!! $model !!}</textarea>
 
@@ -14,6 +14,7 @@
                 if (!container) return;
                 const input = document.getElementById(@json($editorId) + '_input');
                 if (!input) return;
+                if (!window.Quill) { setTimeout(setup, 50); return; }
 
                 const sanitize = (raw) => {
                     if (typeof raw !== 'string') return '';
@@ -67,17 +68,17 @@
                 });
             };
 
+            const trySetupNow = () => setTimeout(setup, 0);
+
             if (window.Livewire) {
-                setup();
-                // Rehydrate after DOM morphs
-                Livewire.hook('morph.updated', setup);
-                // Also handle modal show
-                Livewire.on('show-modal', () => setTimeout(setup, 0));
+                trySetupNow();
+                Livewire.hook('morph.updated', trySetupNow);
+                Livewire.on('show-modal', trySetupNow);
             } else {
                 document.addEventListener('livewire:init', () => {
-                    setup();
-                    Livewire.hook('morph.updated', setup);
-                    Livewire.on('show-modal', () => setTimeout(setup, 0));
+                    trySetupNow();
+                    Livewire.hook('morph.updated', trySetupNow);
+                    Livewire.on('show-modal', trySetupNow);
                 });
             }
         })();
