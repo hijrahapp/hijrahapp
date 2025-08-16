@@ -21,37 +21,28 @@
                                 </svg>
                             </a>
                         </li>
-                        @if($currentSection !== 'Home')
-                            <li class="kt-breadcrumb-separator text-lg">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true">
-                                    <path d="m9 18 6-6-6-6"></path>
-                                </svg>
-                            </li>
-                            <li class="kt-breadcrumb-item text-lg">
-                                @if($currentSubSection)
-                                    <a class="kt-breadcrumb-link">{{ $currentSection }}</a>
-                                @else
-                                    <span class="kt-breadcrumb-page">{{ $currentSection }}</span>
-                                @endif
-                            </li>
+                        @if($currentSection)
+                        <li class="kt-breadcrumb-separator text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true">
+                                <path d="m9 18 6-6-6-6"></path>
+                            </svg>
+                        </li>
+                        <li class="kt-breadcrumb-item text-lg">
                             @if($currentSubSection)
-                                <li class="kt-breadcrumb-separator text-lg">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true">
-                                        <path d="m9 18 6-6-6-6"></path>
-                                    </svg>
-                                </li>
-                                <li class="kt-breadcrumb-item text-lg">
-                                    <span class="kt-breadcrumb-page">{{ $currentSubSection }}</span>
-                                </li>
+                                <a class="kt-breadcrumb-link">{{ $currentSection }}</a>
+                            @else
+                                <span class="kt-breadcrumb-page">{{ $currentSection }}</span>
                             @endif
-                        @else
+                        </li>
+                        @endif
+                        @if($currentSubSection)
                             <li class="kt-breadcrumb-separator text-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true">
                                     <path d="m9 18 6-6-6-6"></path>
                                 </svg>
                             </li>
                             <li class="kt-breadcrumb-item text-lg">
-                                <span class="kt-breadcrumb-page">{{ $currentSection }}</span>
+                                <span class="kt-breadcrumb-page">{{ $currentSubSection }}</span>
                             </li>
                         @endif
                     </ol>

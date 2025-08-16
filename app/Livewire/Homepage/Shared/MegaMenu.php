@@ -2,24 +2,54 @@
 
 namespace App\Livewire\Homepage\Shared;
 
+use Illuminate\Support\Facades\Route;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
 class MegaMenu extends Component
 {
-    public $currentSection = 'Home';
-    public $currentSubSection = '';
+    public $currentSection;
+    public $currentSubSection;
 
     public function mount()
     {
-        // Set default section based on user role
-        $role = session('user')["role"] ?? null;
-        if ($role === 'Expert') {
-            $this->currentSection = 'Methodologies';
-            $this->currentSubSection = 'Methodologies Management';
-        } elseif ($role === 'SuperAdmin' || $role === 'Admin') {
-            $this->currentSection = 'Network';
-            $this->currentSubSection = 'Admins Management';
+        $routeName = Route::currentRouteName();
+
+        switch ($routeName) {
+            case 'admins':
+                $this->currentSection = 'Network';
+                $this->currentSubSection = 'Admins Management';
+                break;
+            case 'customers':
+                $this->currentSection = 'Network';
+                $this->currentSubSection = 'Customers Management';
+                break;
+            case 'experts':
+                $this->currentSection = 'Network';
+                $this->currentSubSection = 'Experts Management';
+                break;
+            case 'methodologies':
+                $this->currentSection = 'Methodologies';
+                $this->currentSubSection = 'Methodologies Management';
+                break;
+            case 'pillars':
+                $this->currentSection = 'Methodologies';
+                $this->currentSubSection = 'Pillars Management';
+                break;
+            case 'modules':
+                $this->currentSection = 'Methodologies';
+                $this->currentSubSection = 'Modules Management';
+                break;
+            case 'questions':
+                $this->currentSection = 'Methodologies';
+                $this->currentSubSection = 'Questions Management';
+                break;
+            case 'tags':
+                $this->currentSection = 'Methodologies';
+                $this->currentSubSection = 'Tags Management';
+                break;
+            default:
+                $this->currentSection = 'Home';
         }
     }
 

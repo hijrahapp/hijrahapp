@@ -20,6 +20,7 @@ class Methodology extends Model
         'img_url',
         'type',
         'pillars_definition',
+        'number_of_pillars',
         'modules_definition',
         'questions_description',
         'questions_estimated_time',
@@ -35,26 +36,15 @@ class Methodology extends Model
         'second_section_objectives',
         'second_section_img_url',
         'tags',
+        'active',
     ];
 
     protected $casts = [
         'tags' => 'array',
+        'active' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
-
-    /* -------------------------------------------------------------------------
-     | Accessors & Mutators
-     |------------------------------------------------------------------------*/
-    public function getTagsAttribute($value)
-    {
-        return json_decode($value, true) ?? [];
-    }
-
-    public function setTagsAttribute($value)
-    {
-        $this->attributes['tags'] = json_encode($value);
-    }
 
     /* -------------------------------------------------------------------------
      | Relationships
@@ -81,7 +71,7 @@ class Methodology extends Model
      */
     public function questions(): BelongsToMany
     {
-        return $this->belongsToMany(Question::class, 'methodology_question')->withPivot('weight');
+        return $this->belongsToMany(Question::class, 'methodology_question')->withPivot('weight', 'sequence');
     }
 
     /**

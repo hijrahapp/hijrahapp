@@ -124,4 +124,12 @@ return [
     'deactivate_question_message' => 'Are you sure you want to deactivate this question?',
     'deactivate_question_note' => 'This will prevent the question from being used in new methodologies, pillars or modules.',
     'cannot_deactivate_question_used' => 'Cannot deactivate this question because it is used in pillars, modules, or methodologies.',
+    'activate_methodology_title' => 'Activate Methodology',
+    'activate_methodology_message' => 'Are you sure you want to activate this methodology?',
+    'deactivate_methodology_title' => 'Deactivate Methodology',
+    'deactivate_methodology_message' => 'Are you sure you want to deactivate this methodology?',
+    'deactivate_methodology_note' => 'This will prevent the methodology from being used by customers.',
+    'delete_methodology_title' => 'Delete Methodology',
+    'delete_methodology_message' => 'Deleting this methodology will also delete all associated pillars and modules. Are you sure?',
+    'delete_methodology_note' => 'This action cannot be undone.',
 ];

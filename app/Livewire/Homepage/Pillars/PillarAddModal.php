@@ -1,0 +1,168 @@
+<?php
+
+namespace App\Livewire\Homepage\Pillars;
+
+use App\Models\Pillar;
+use Livewire\Component;
+
+class PillarAddModal extends Component
+{
+    public $name = '';
+    public $description = '';
+    public $definition = '';
+    public $objectives = '';
+    public $tags = [];
+    public $imgUrl = '';
+    public $error = '';
+    public $isEditMode = false;
+    public $pillarId = null;
+
+    protected function rules()
+    {
+        return [
+            'name' => 'required|string|min:3',
+            'description' => 'required|string|min:10',
+            'definition' => 'required|string|min:10',
+            'objectives' => 'required|string|min:10',
+            'tags' => 'array',
+            'tags.*' => 'integer',
+            'imgUrl' => 'nullable|string',
+        ];
+    }
+
+    protected function messages()
+    {
+        return [
+            'name.required' => 'Pillar name is required.',
+            'name.min' => 'Pillar name must be at least 3 characters.',
+            'description.required' => 'Description is required.',
+            'description.min' => 'Description must be at least 10 characters.',
+            'definition.required' => 'Definition is required.',
+            'definition.min' => 'Definition must be at least 10 characters.',
+            'objectives.required' => 'Objectives are required.',
+            'objectives.min' => 'Objectives must be at least 10 characters.',
+            'tags.*.required' => 'Tag is required.',
+            'tags.*.integer' => 'Tag must be a valid ID.',
+        ];
+    }
+
+    protected $listeners = [
+        'reset-modal' => 'resetForm',
+        'edit-pillar' => 'editPillar',
+    ];
+
+    public function mount()
+    {
+        $this->resetForm();
+    }
+
+    // Tag logic moved to shared TagPicker component
+
+    public function editPillar($pillarId)
+    {
+        $this->isEditMode = true;
+        $this->pillarId = $pillarId;
+
+        $pillar = Pillar::findOrFail($pillarId);
+
+        // Load pillar data
+        $this->name = $pillar->name;
+        $this->description = $pillar->description;
+        $this->definition = $pillar->definition;
+        $this->objectives = $pillar->objectives;
+        // Tags are stored as an array of IDs on the model
+        $this->tags = $pillar->tags ?? [];
+        $this->imgUrl = $pillar->img_url ?? '';
+
+        $this->dispatch('show-modal', selector: '#pillar_add_modal');
+    }
+
+    // Tag methods removed; component handles add/select/remove
+
+    // Normalization not needed; TagPicker ensures numeric IDs
+
+    public function resetForm()
+    {
+        $this->name = '';
+        $this->description = '';
+        $this->definition = '';
+        $this->objectives = '';
+        $this->tags = [];
+        $this->imgUrl = '';
+        $this->error = '';
+        $this->isEditMode = false;
+        $this->pillarId = null;
+
+        // Ensure frontend can re-hydrate editors with empty state
+        $this->dispatch('morph.updated');
+    }
+
+    public function save()
+    {
+        // Clear previous errors
+        $this->resetErrorBag();
+
+        try {
+            // Tags are numeric IDs provided by TagPicker
+            $this->validate();
+
+            // Ensure imgUrl is properly handled (could be base64 or HTTP URL)
+            $imgUrlToSave = $this->imgUrl ?: null;
+            if ($this->isEditMode) {
+                // Update existing pillar
+                $pillar = Pillar::findOrFail($this->pillarId);
+                $pillar->update([
+                    'name' => $this->name,
+                    'description' => $this->description,
+                    'definition' => $this->definition,
+                    'objectives' => $this->objectives,
+                    'tags' => $this->tags,
+                    'img_url' => $imgUrlToSave,
+                ]);
+            } else {
+                // Create new pillar
+                Pillar::create([
+                    'name' => $this->name,
+                    'description' => $this->description,
+                    'definition' => $this->definition,
+                    'objectives' => $this->objectives,
+                    'active' => true,
+                    'tags' => $this->tags,
+                    'img_url' => $imgUrlToSave,
+                ]);
+            }
+
+            $this->dispatch('refreshTable');
+            $this->closeModal();
+            $this->dispatch('show-toast', type: 'success', message: $this->isEditMode ? 'Pillar updated successfully!' : 'Pillar created successfully!');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Re-throw validation exceptions so they show in the form
+            throw $e;
+        } catch (\Exception $e) {
+            $this->error = 'An error occurred while saving the pillar: ' . $e->getMessage();
+            logger()->error('Pillar save error: ' . $e->getMessage(), [
+                'pillar_data' => [
+                    'name' => $this->name,
+                    'description' => $this->description,
+                    'definition' => $this->definition,
+                    'objectives' => $this->objectives,
+                    'tags' => $this->tags,
+                    'imgUrl' => $this->imgUrl ? substr($this->imgUrl, 0, 50) . '...' : null,
+                ]
+            ]);
+        }
+    }
+
+    public function closeModal()
+    {
+        $this->resetForm();
+        // Follow existing pattern used by other modals
+        $this->dispatch('click');
+    }
+
+    public function render()
+    {
+        return view('livewire.homepage.pillars.pillar-add-modal');
+    }
+}

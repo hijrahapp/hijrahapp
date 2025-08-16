@@ -65,7 +65,7 @@ trait WithoutUrlPagination
     // Disable pagination URL caching
     public function paginationView()
     {
-        return 'components.ktui-pagination';
+        return 'shared.components.ktui-pagination';
     }
 
     // Override to completely disable pagination URL caching
@@ -78,16 +78,16 @@ trait WithoutUrlPagination
     protected function getQueryString()
     {
         $queryString = [];
-        
+
         // Only include non-pagination properties
         $properties = $this->getPublicPropertiesDefinedBySubClass();
-        
+
         foreach ($properties as $property) {
             if (!in_array($property, ['page', 'paginators'])) {
                 $queryString[$property] = ['history' => true, 'keep' => false];
             }
         }
-        
+
         return $queryString;
     }
 
@@ -98,7 +98,7 @@ trait WithoutUrlPagination
         if (in_array($property, ['page', 'paginators'])) {
             return;
         }
-        
+
         // Only call parent if it exists
         if (method_exists(get_parent_class($this), 'updated')) {
             parent::updated($property);

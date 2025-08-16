@@ -5,7 +5,7 @@ namespace App\Livewire\Homepage;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.homepage')]
+#[Layout('layouts.index')]
 class Index extends Component
 {
     public function mount()
@@ -13,6 +13,13 @@ class Index extends Component
         // Check if user has a valid session token
         if (!session('jwt_token')) {
             return redirect()->route('login');
+        } else {
+            $role = session('user')["role"] ?? null;
+            if ($role === 'Expert') {
+                return redirect()->route('methodologies');
+            } elseif ($role === 'SuperAdmin' || $role === 'Admin') {
+                return redirect()->route('admins');
+            }
         }
     }
 

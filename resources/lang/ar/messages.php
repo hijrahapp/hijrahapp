@@ -124,4 +124,12 @@ return [
     'deactivate_question_message' => 'هل أنت متأكد من أنك تريد إلغاء تفعيل هذا السؤال؟',
     'deactivate_question_note' => 'سيؤدي ذلك إلى منع السؤال من الاستخدام في المنهجيات الجديدة.',
     'cannot_deactivate_question_used' => 'لا يمكن إلغاء تفعيل هذا السؤال لأنه مستخدم في ركائز أو وحدات أو منهجيات.',
+    'activate_methodology_title' => 'تفعيل المنهجية',
+    'activate_methodology_message' => 'هل أنت متأكد من أنك تريد تفعيل هذه المنهجية؟',
+    'deactivate_methodology_title' => 'إلغاء تفعيل المنهجية',
+    'deactivate_methodology_message' => 'هل أنت متأكد من أنك تريد إلغاء تفعيل هذه المنهجية؟',
+    'deactivate_methodology_note' => 'سيؤدي ذلك إلى منع المنهجية من الاستخدام في المنهجيات الجديدة.',
+    'delete_methodology_title' => 'حذف المنهجية',
+    'delete_methodology_message' => 'هل أنت متأكد من أنك تريد حذف هذه المنهجية؟',
+    'delete_methodology_note' => 'سيؤدي ذلك إلى حذف المنهجية من أي ركائز أو وحدات أو أسئلة مرتبطة.',
 ];
