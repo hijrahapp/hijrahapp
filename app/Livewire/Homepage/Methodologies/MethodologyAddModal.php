@@ -20,16 +20,7 @@ class MethodologyAddModal extends Component
 
     // Two-section fields
     public string $firstSectionName = '';
-    public string $firstSectionDescription = '';
-    public string $firstSectionDefinition = '';
-    public string $firstSectionObjectives = '';
-    public string $firstSectionImgUrl = '';
-
     public string $secondSectionName = '';
-    public string $secondSectionDescription = '';
-    public string $secondSectionDefinition = '';
-    public string $secondSectionObjectives = '';
-    public string $secondSectionImgUrl = '';
 
     public string $error = '';
     public bool $isEditMode = false;
@@ -55,16 +46,7 @@ class MethodologyAddModal extends Component
             $rules['numberOfPillars'] = 'nullable|string';
         } elseif ($this->type === 'twoSection') {
             $rules['firstSectionName'] = 'required|string|min:3';
-            $rules['firstSectionDescription'] = 'required|string|min:3';
-            $rules['firstSectionDefinition'] = 'required|string|min:3';
-            $rules['firstSectionObjectives'] = 'nullable|string';
-            $rules['firstSectionImgUrl'] = 'required|string';
-
             $rules['secondSectionName'] = 'required|string|min:3';
-            $rules['secondSectionDescription'] = 'required|string|min:3';
-            $rules['secondSectionDefinition'] = 'required|string|min:3';
-            $rules['secondSectionObjectives'] = 'nullable|string';
-            $rules['secondSectionImgUrl'] = 'required|string';
         }
 
         return $rules;
@@ -99,16 +81,7 @@ class MethodologyAddModal extends Component
 
         // Two-section fields
         $this->firstSectionName = $methodology->first_section_name ?? '';
-        $this->firstSectionDescription = $methodology->first_section_description ?? '';
-        $this->firstSectionDefinition = $methodology->first_section_definition ?? '';
-        $this->firstSectionObjectives = $methodology->first_section_objectives ?? '';
-        $this->firstSectionImgUrl = $methodology->first_section_img_url ?? '';
-
         $this->secondSectionName = $methodology->second_section_name ?? '';
-        $this->secondSectionDescription = $methodology->second_section_description ?? '';
-        $this->secondSectionDefinition = $methodology->second_section_definition ?? '';
-        $this->secondSectionObjectives = $methodology->second_section_objectives ?? '';
-        $this->secondSectionImgUrl = $methodology->second_section_img_url ?? '';
 
         $this->dispatch('show-modal', selector: '#methodology_add_modal');
     }
@@ -128,16 +101,7 @@ class MethodologyAddModal extends Component
 
         // Two-section fields
         $this->firstSectionName = '';
-        $this->firstSectionDescription = '';
-        $this->firstSectionDefinition = '';
-        $this->firstSectionObjectives = '';
-        $this->firstSectionImgUrl = '';
-
         $this->secondSectionName = '';
-        $this->secondSectionDescription = '';
-        $this->secondSectionDefinition = '';
-        $this->secondSectionObjectives = '';
-        $this->secondSectionImgUrl = '';
 
         $this->error = '';
         $this->isEditMode = false;
@@ -176,15 +140,7 @@ class MethodologyAddModal extends Component
             if ($this->type === 'twoSection') {
                 $data = array_merge($data, [
                     'first_section_name' => $this->firstSectionName,
-                    'first_section_description' => $this->firstSectionDescription,
-                    'first_section_definition' => $this->firstSectionDefinition,
-                    'first_section_objectives' => $this->firstSectionObjectives,
-                    'first_section_img_url' => $this->firstSectionImgUrl ?: null,
                     'second_section_name' => $this->secondSectionName,
-                    'second_section_description' => $this->secondSectionDescription,
-                    'second_section_definition' => $this->secondSectionDefinition,
-                    'second_section_objectives' => $this->secondSectionObjectives,
-                    'second_section_img_url' => $this->secondSectionImgUrl ?: null,
                 ]);
             }
 
@@ -195,14 +151,6 @@ class MethodologyAddModal extends Component
                 $updateData = $data;
                 if ($this->imgUrl === '') {
                     unset($updateData['img_url']);
-                }
-                if ($this->type === 'twoSection') {
-                    if ($this->firstSectionImgUrl === '') {
-                        unset($updateData['first_section_img_url']);
-                    }
-                    if ($this->secondSectionImgUrl === '') {
-                        unset($updateData['second_section_img_url']);
-                    }
                 }
 
                 $methodology->update($updateData);

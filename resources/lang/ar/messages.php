@@ -132,4 +132,5 @@ return [
     'delete_methodology_title' => 'حذف المنهجية',
     'delete_methodology_message' => 'هل أنت متأكد من أنك تريد حذف هذه المنهجية؟',
     'delete_methodology_note' => 'سيؤدي ذلك إلى حذف المنهجية من أي ركائز أو وحدات أو أسئلة مرتبطة.',
+    'sections_updated_successfully' => 'تم تحديث الأقسام بنجاح!',
 ];

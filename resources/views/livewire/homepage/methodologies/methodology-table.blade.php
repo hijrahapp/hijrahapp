@@ -98,7 +98,14 @@
                                     </button>
                                     <div class="kt-dropdown-menu w-52" data-kt-dropdown-menu="true">
                                         <ul class="kt-dropdown-menu-sub">
-                                            @if($methodology->type !== 'simple')
+                                            @if($methodology->type === 'twoSection')
+                                                <li>
+                                                    <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="manageSections({{ $methodology->id }})">
+                                                        <i class="ki-filled ki-slider-vertical"></i>
+                                                        Manage Sections
+                                                    </a>
+                                                </li>
+                                            @elseif($methodology->type !== 'simple')
                                                 <li>
                                                     <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="managePillars({{ $methodology->id }})">
                                                         <i class="ki-filled ki-category"></i>

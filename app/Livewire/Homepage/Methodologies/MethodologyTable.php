@@ -180,6 +180,11 @@ class MethodologyTable extends Component
         $this->dispatch('manage-modules', $methodologyId);
     }
 
+    public function manageSections($methodologyId)
+    {
+        $this->dispatch('manage-sections', $methodologyId);
+    }
+
     public function manageGeneralQuestions($methodologyId)
     {
         return redirect()->route('methodology.questions', ['methodologyId' => $methodologyId]);

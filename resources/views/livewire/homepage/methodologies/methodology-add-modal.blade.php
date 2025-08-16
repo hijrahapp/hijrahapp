@@ -122,74 +122,20 @@
                             <h4 class="text-md font-medium mb-3 text-primary">Section 1</h4>
 
                             <div class="mt-4">
-                                    <label class="block text-sm font-medium mb-1">Name <span class="text-destructive">*</span></label>
-                                    <input type="text" class="kt-input w-full" wire:model.defer="firstSectionName" placeholder="Enter section 1 name" />
-                                    @error('firstSectionName')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                            </div>
-
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
-                                <textarea class="kt-textarea w-full" rows="2" wire:model.defer="firstSectionDescription" placeholder="Enter section 1 description"></textarea>
-                                @error('firstSectionDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                            </div>
-
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Definition <span class="text-destructive">*</span></label>
-                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="firstSectionDefinition" placeholder="Enter section 1 definition"></textarea>
-                                @error('firstSectionDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                            </div>
-
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Objectives</label>
-                                <livewire:shared.components.rich-text :model="$firstSectionObjectives" wire:model="firstSectionObjectives" :placeholder="'Enter section 1 objectives'" :editorId="'section1_objectives_editor'" :minHeight="'120px'" />
-                                @error('firstSectionObjectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                            </div>
-
-                            <div class="mt-4">
-                                <livewire:shared.components.image-picker
-                                    wire:model="firstSectionImgUrl"
-                                    :label="'Section 1 Image'"
-                                    :required="true"
-                                    key="{{ $methodologyId ? 'edit_section1' : 'new_section1' }}" />
-                                @error('firstSectionImgUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                                <label class="block text-sm font-medium mb-1">Name <span class="text-destructive">*</span></label>
+                                <input type="text" class="kt-input w-full" wire:model.defer="firstSectionName" placeholder="Enter section 1 name" />
+                                @error('firstSectionName')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
                         </div>
 
                         <!-- Section 2 -->
-                        <div class="border-l-4 border-secondary pl-4">
-                            <h4 class="text-md font-medium mb-3 text-secondary">Section 2</h4>
+                        <div class="border-l-4 border-primary pl-4">
+                            <h4 class="text-md font-medium mb-3 text-primary">Section 2</h4>
 
                             <div class="mt-4">
                                 <label class="block text-sm font-medium mb-1">Name <span class="text-destructive">*</span></label>
                                 <input type="text" class="kt-input w-full" wire:model.defer="secondSectionName" placeholder="Enter section 2 name" />
                                 @error('secondSectionName')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                            </div>
-
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
-                                <textarea class="kt-textarea w-full" rows="2" wire:model.defer="secondSectionDescription" placeholder="Enter section 2 description"></textarea>
-                                @error('secondSectionDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                            </div>
-
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Definition <span class="text-destructive">*</span></label>
-                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="secondSectionDefinition" placeholder="Enter section 2 definition"></textarea>
-                                @error('secondSectionDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                            </div>
-
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Objectives</label>
-                                <livewire:shared.components.rich-text :model="$secondSectionObjectives" wire:model="secondSectionObjectives" :placeholder="'Enter section 2 objectives'" :editorId="'section2_objectives_editor'" :minHeight="'120px'" />
-                                @error('secondSectionObjectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                            </div>
-
-                            <div class="mt-4">
-                                <livewire:shared.components.image-picker
-                                    wire:model="secondSectionImgUrl"
-                                    :label="'Section 2 Image'"
-                                    :required="true"
-                                    key="{{ $methodologyId ? 'edit_section2' : 'new_section2' }}" />
-                                @error('secondSectionImgUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
                         </div>
                     </div>

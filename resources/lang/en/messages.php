@@ -132,4 +132,5 @@ return [
     'delete_methodology_title' => 'Delete Methodology',
     'delete_methodology_message' => 'Deleting this methodology will also delete all associated pillars and modules. Are you sure?',
     'delete_methodology_note' => 'This action cannot be undone.',
+    'sections_updated_successfully' => 'Sections updated successfully!',
 ];
