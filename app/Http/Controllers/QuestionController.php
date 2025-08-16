@@ -13,7 +13,7 @@ class QuestionController
 
     /**
      * Get questions and answers for a methodology
-     * 
+     *
      * @param int $contextId
      * @return JsonResponse
      */
@@ -25,7 +25,7 @@ class QuestionController
 
     /**
      * Get questions and answers for a pillar within a specific methodology
-     * 
+     *
      * @param int $methodologyId
      * @param int $pillarId
      * @return JsonResponse
@@ -34,19 +34,7 @@ class QuestionController
     {
         try {
             // Return questions grouped by modules under this pillar for the methodology
-            $groups = $this->questionRepo->getPillarModuleQuestionsGrouped($methodologyId, $pillarId);
-
-            $response = collect($groups)->map(function ($group) {
-                return [
-                    'module' => [
-                        'id' => $group['module']['id'],
-                        'name' => $group['module']['name'],
-                        'description' => $group['module']['description'],
-                    ],
-                    'questions' => QuestionResource::collection($group['questions'])
-                ];
-            });
-
+            $response = $this->questionRepo->getPillarModuleQuestionsGrouped($methodologyId, $pillarId);
             return response()->json($response);
         } catch (\Exception $e) {
             return response()->json([
@@ -59,7 +47,7 @@ class QuestionController
 
     /**
      * Get questions and answers for a module within a specific methodology
-     * 
+     *
      * @param int $methodologyId
      * @param int $moduleId
      * @return JsonResponse
@@ -80,7 +68,7 @@ class QuestionController
 
     /**
      * Get questions and answers for a module within a specific pillar of a specific methodology
-     * 
+     *
      * @param int $methodologyId
      * @param int $pillarId
      * @param int $moduleId
@@ -120,4 +108,4 @@ class QuestionController
             ], 500);
         }
     }
-} 
+}

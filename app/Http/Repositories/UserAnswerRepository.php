@@ -9,12 +9,13 @@ use App\Models\Answer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UserAnswerRepository
 {
     /**
      * Submit user answers for methodology questions
-     * 
+     *
      * @param int $userId
      * @param int $methodologyId
      * @param array $answers
@@ -28,7 +29,7 @@ class UserAnswerRepository
 
     /**
      * Submit user answers for pillar questions within a methodology
-     * 
+     *
      * @param int $userId
      * @param int $methodologyId
      * @param int $pillarId
@@ -43,7 +44,7 @@ class UserAnswerRepository
 
     /**
      * Submit user answers for module questions within a methodology
-     * 
+     *
      * @param int $userId
      * @param int $methodologyId
      * @param int $moduleId
@@ -58,7 +59,7 @@ class UserAnswerRepository
 
     /**
      * Submit user answers for module questions within a pillar of a methodology
-     * 
+     *
      * @param int $userId
      * @param int $methodologyId
      * @param int $pillarId
@@ -74,7 +75,7 @@ class UserAnswerRepository
 
     /**
      * Generic method to submit user answers
-     * 
+     *
      * @param int $userId
      * @param string $contextType
      * @param int $contextId
@@ -106,7 +107,7 @@ class UserAnswerRepository
             // Create new answers
             foreach ($answers as $answerData) {
                 $questionId = $answerData['question_id'];
-                
+
                 // Create UserAnswer record for each answer ID
                 foreach ($answerData['answerIds'] as $answerId) {
                     $userAnswer = UserAnswer::create([
@@ -127,7 +128,7 @@ class UserAnswerRepository
 
     /**
      * Validate the context exists
-     * 
+     *
      * @param string $contextType
      * @param int $contextId
      * @param int|null $methodologyId
@@ -174,7 +175,7 @@ class UserAnswerRepository
 
     /**
      * Validate answers data
-     * 
+     *
      * @param array $answers
      * @return void
      */
@@ -229,7 +230,7 @@ class UserAnswerRepository
 
     /**
      * Delete existing answers for the given context
-     * 
+     *
      * @param int $userId
      * @param string $contextType
      * @param int $contextId
@@ -279,7 +280,7 @@ class UserAnswerRepository
 
     /**
      * Get user answers for a specific context
-     * 
+     *
      * @param int $userId
      * @param string $contextType
      * @param int $contextId
@@ -308,11 +309,31 @@ class UserAnswerRepository
 
             $query->whereIn('question_id', $questionIds);
         } elseif ($contextType === 'pillar' && $methodologyId) {
-            $questionIds = \App\Models\Pillar::find($contextId)
-                ->questionsForMethodology($methodologyId)
-                ->pluck('questions.id');
+            $userAnswers = new Collection();
 
-            $query->whereIn('question_id', $questionIds);
+            $pillar = \App\Models\Pillar::find($contextId);
+            $modules = $pillar->modulesForMethodology($methodologyId)->get();
+            foreach ($modules as $module) {
+                $moduleQuestionIds = $module->questionsForPillarInMethodology($methodologyId, $contextId)
+                    ->pluck('questions.id');
+
+                Log::info($module->id);
+
+                $newQuery = UserAnswer::with(['question', 'answer'])
+                ->where('user_id', $userId)
+                ->where('context_type', 'module')
+                ->where('context_id', $module->id)
+                ->whereIn('question_id', $moduleQuestionIds);
+                $queryResult = $newQuery->get();
+
+                foreach ($queryResult as $result) {
+                    $result->setAttribute('module_id', $module->id);
+                    $result->setAttribute('module_name', $module->name);
+                    $userAnswers->push($result);
+                }
+            }
+
+            return $userAnswers;
         } elseif ($contextType === 'methodology') {
             $questionIds = \App\Models\Methodology::find($contextId)
                 ->questions()
@@ -326,7 +347,7 @@ class UserAnswerRepository
 
     /**
      * Get user answers grouped by question for a specific context
-     * 
+     *
      * @param int $userId
      * @param string $contextType
      * @param int $contextId
@@ -334,11 +355,13 @@ class UserAnswerRepository
      * @param int|null $pillarId
      * @return Collection
      */
-    public function getUserAnswersGrouped(int $userId, string $contextType, int $contextId, ?int $methodologyId = null, ?int $pillarId = null): Collection
+    public function getUserAnswersGrouped(int $userId, string $contextType, int $contextId, ?int $methodologyId = null, ?int $pillarId = null)
     {
         $answers = $this->getUserAnswers($userId, $contextType, $contextId, $methodologyId, $pillarId);
-        
+
         // Group answers by question_id
-        return $answers->groupBy('question_id');
+        return $answers->groupBy(function ($item) {
+            return $item->question_id . '_' . $item->context_id;
+        });
     }
-} 
+}

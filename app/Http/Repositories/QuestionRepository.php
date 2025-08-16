@@ -6,13 +6,14 @@ use App\Models\Question;
 use App\Models\Methodology;
 use App\Models\Pillar;
 use App\Models\Module;
+use App\Resources\QuestionResource;
 use Illuminate\Database\Eloquent\Collection;
 
 class QuestionRepository
 {
     /**
      * Get questions by context type and context ID
-     * 
+     *
      * @param string $context
      * @param int $contextId
      * @param int|null $methodologyId
@@ -35,34 +36,34 @@ class QuestionRepository
 
     /**
      * Get questions for a specific methodology with weights
-     * 
+     *
      * @param int $methodologyId
      * @return Collection
      */
     private function getQuestionsByMethodology(int $methodologyId): Collection
     {
         $methodology = Methodology::with(['questions.answers'])->find($methodologyId);
-        
+
         if (!$methodology) {
             throw new \InvalidArgumentException("Methodology with ID {$methodologyId} not found");
         }
 
         // Get questions with their weights for this methodology
         $questions = $methodology->questions;
-        
+
         // Load weights for each question in this methodology context
         foreach ($questions as $question) {
             $pivotId = \DB::table('methodology_question')
                 ->where('methodology_id', $methodologyId)
                 ->where('question_id', $question->id)
                 ->value('id');
-                
+
             if ($pivotId) {
                 $weights = \App\Models\QuestionAnswerWeight::where('context_type', 'methodology_question')
                     ->where('context_id', $pivotId)
                     ->get()
                     ->keyBy('answer_id');
-                    
+
                 $question->setAttribute('answer_weights', $weights);
             }
         }
@@ -72,7 +73,7 @@ class QuestionRepository
 
     /**
      * Get questions for a specific pillar with weights
-     * 
+     *
      * @param int $pillarId
      * @param int|null $methodologyId
      * @return Collection
@@ -80,7 +81,7 @@ class QuestionRepository
     private function getQuestionsByPillar(int $pillarId, ?int $methodologyId = null): Collection
     {
         $pillar = Pillar::with(['questions.answers'])->find($pillarId);
-        
+
         if (!$pillar) {
             throw new \InvalidArgumentException("Pillar with ID {$pillarId} not found");
         }
@@ -144,14 +145,11 @@ class QuestionRepository
         $result = [];
         foreach ($modules as $module) {
             $questions = $this->getQuestionsByModule($module->id, $methodologyId, $pillarId);
-            $result[] = [
-                'module' => [
-                    'id' => $module->id,
-                    'name' => $module->name,
-                    'description' => $module->description,
-                ],
-                'questions' => $questions,
-            ];
+            foreach ($questions as $question) {
+                $question->setAttribute('module_id', $module->id);
+                $question->setAttribute('module_name', $module->name);
+                $result[] = new QuestionResource($question);
+            }
         }
 
         return $result;
@@ -159,7 +157,7 @@ class QuestionRepository
 
     /**
      * Get questions for a specific module with weights
-     * 
+     *
      * @param int $moduleId
      * @param int|null $methodologyId
      * @param int|null $pillarId
@@ -168,7 +166,7 @@ class QuestionRepository
     private function getQuestionsByModule(int $moduleId, ?int $methodologyId = null, ?int $pillarId = null): Collection
     {
         $module = Module::with(['questions.answers'])->find($moduleId);
-        
+
         if (!$module) {
             throw new \InvalidArgumentException("Module with ID {$moduleId} not found");
         }
@@ -181,7 +179,7 @@ class QuestionRepository
         } else {
             $questions = $module->questions;
         }
-        
+
         // Load weights for each question in this module context
         foreach ($questions as $question) {
             $pivotId = \DB::table('module_question')
@@ -194,13 +192,13 @@ class QuestionRepository
                     return $query->where('pillar_id', $pillarId);
                 })
                 ->value('id');
-                
+
             if ($pivotId) {
                 $weights = \App\Models\QuestionAnswerWeight::where('context_type', 'module_question')
                     ->where('context_id', $pivotId)
                     ->get()
                     ->keyBy('answer_id');
-                    
+
                 $question->setAttribute('answer_weights', $weights);
             }
         }
@@ -210,7 +208,7 @@ class QuestionRepository
 
     /**
      * Get all questions with their answers
-     * 
+     *
      * @return Collection
      */
     public function getAllWithAnswers(): Collection
@@ -220,7 +218,7 @@ class QuestionRepository
 
     /**
      * Get a specific question with its answers
-     * 
+     *
      * @param int $questionId
      * @return Question|null
      */
@@ -228,4 +226,4 @@ class QuestionRepository
     {
         return Question::with('answers')->find($questionId);
     }
-} 
+}

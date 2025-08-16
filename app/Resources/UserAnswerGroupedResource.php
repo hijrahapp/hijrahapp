@@ -14,10 +14,10 @@ class UserAnswerGroupedResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-            'user_id' => $this->first()->user_id,
-            'context_type' => $this->first()->context_type,
-            'context_id' => $this->first()->context_id,
+        $data = [
+//            'user_id' => $this->first()->user_id,
+//            'context_type' => $this->first()->context_type,
+//            'context_id' => $this->first()->context_id,
             'question' => new QuestionResource($this->first()->question),
             'userAnswers' => $this->map(function ($userAnswer) {
                 return [
@@ -28,5 +28,12 @@ class UserAnswerGroupedResource extends JsonResource
             'created_at' => $this->first()->created_at,
             'updated_at' => $this->first()->updated_at,
         ];
+
+        if ($this->first()->module_id) {
+            $data['module_id'] = $this->first()->module_id;
+            $data['module_name'] = $this->first()->module_name;
+        }
+
+        return $data;
     }
-} 
+}
