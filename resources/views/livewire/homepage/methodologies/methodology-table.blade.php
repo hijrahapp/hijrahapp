@@ -98,6 +98,12 @@
                                     </button>
                                     <div class="kt-dropdown-menu w-52" data-kt-dropdown-menu="true">
                                         <ul class="kt-dropdown-menu-sub">
+                                            <li>
+                                                <a href="{{ route('methodology.manage', ['methodologyId' => $methodology->id]) }}" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true">
+                                                    <i class="ki-filled ki-setting-2"></i>
+                                                    Manage
+                                                </a>
+                                            </li>
                                             @if($methodology->type === 'twoSection')
                                                 <li>
                                                     <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="manageSections({{ $methodology->id }})">

@@ -7,6 +7,7 @@ use App\Livewire\Auth\ResetPasswordChangePassword;
 use App\Livewire\Auth\ResetPasswordEnterEmail;
 use App\Livewire\Homepage\Index as HomepageIndex;
 use App\Livewire\Homepage\Methodologies\Methodologies;
+use App\Livewire\Homepage\Methodologies\MethodologyManage;
 use App\Livewire\Homepage\Methodologies\MethodologyQuestions\MethodologyQuestions;
 use App\Livewire\Homepage\Modules\Modules;
 use App\Livewire\Homepage\Pillars\Pillars;
@@ -36,6 +37,7 @@ Route::prefix('app')->get('/customers', Customers::class)->name('customers');
 
 // Methodology Management
 Route::prefix('app')->get('/methodologies', Methodologies::class)->name('methodologies');
+Route::prefix('app')->get('/methodology/{methodologyId}', MethodologyManage::class)->name('methodology.manage');
 Route::prefix('app')->get('/methodology/{methodologyId}/questions', MethodologyQuestions::class)->name('methodology.questions');
 
 // Banks
