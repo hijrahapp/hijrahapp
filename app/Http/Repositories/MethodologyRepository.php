@@ -7,7 +7,7 @@ use App\Models\Methodology;
 class MethodologyRepository
 {
     public function getAllBasic() {
-        return Methodology::all();
+        return Methodology::where('active', true)->get();
     }
 
     public function getAll() {
