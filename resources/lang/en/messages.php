@@ -133,4 +133,5 @@ return [
     'delete_methodology_message' => 'Deleting this methodology will also delete all associated pillars and modules. Are you sure?',
     'delete_methodology_note' => 'This action cannot be undone.',
     'sections_updated_successfully' => 'Sections updated successfully!',
+    'lorem_ipsum' => 'Lorem ipsum dolor sit amet, ludus animal moderatius his ea, et nostrud intellegam sed. Eam cu nostrud invenire. Ius no legere discere, in vidit imperdiet comprehensam nec. Tation latine omittam ne nec, eos ex placerat suscipiantur, sea saperet torquatos ea. Eos oratio denique tincidunt in, id duo erat iusto oblique.',
 ];

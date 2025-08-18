@@ -37,6 +37,7 @@ class ResultCalculationService
             'pillars' => [],
             'modules' => [],
             'summary' => [
+                'text' => __('messages.lorem_ipsum'),
                 'overall_percentage' => 0,
                 'total_questions' => 0,
                 'answered_questions' => 0,
@@ -68,6 +69,7 @@ class ResultCalculationService
                         'objectives' => $pillar->objectives,
                         'percentage' => 0,
                         'summary' => [
+                            'text' => __('messages.lorem_ipsum'),
                             'overall_percentage' => 0,
                             'total_questions' => 0,
                             'answered_questions' => 0,
@@ -102,6 +104,7 @@ class ResultCalculationService
                         'objectives' => $module->objectives,
                         'percentage' => 0,
                         'summary' => [
+                            'text' => __('messages.lorem_ipsum'),
                             'total_questions' => 0,
                             'answered_questions' => 0,
                             'completion_rate' => 0,
@@ -169,6 +172,7 @@ class ResultCalculationService
         $result = [
             'modules' => [],
             'summary' => [
+                'text' => __('messages.lorem_ipsum'),
                 'overall_percentage' => 0,
                 'total_questions' => 0,
                 'answered_questions' => 0,
@@ -202,6 +206,7 @@ class ResultCalculationService
                     'objectives' => $module->objectives,
                     'percentage' => 0,
                     'summary' => [
+                        'text' => __('messages.lorem_ipsum'),
                         'total_questions' => 0,
                         'answered_questions' => 0,
                         'completion_rate' => 0,
@@ -266,6 +271,7 @@ class ResultCalculationService
         return [
             'percentage' => $percentage,
             'summary' => [
+                'text' => __('messages.lorem_ipsum'),
                 'total_questions' => $totalQuestions,
                 'answered_questions' => $answeredQuestions,
                 'completion_rate' => $totalQuestions > 0 ? round(($answeredQuestions / $totalQuestions) * 100, 2) : 0,
