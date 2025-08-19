@@ -35,13 +35,43 @@ class ModuleDetailedResource extends JsonResource
         $questionsList = $this->relationLoaded('questions') && $this->questions && $this->questions->isNotEmpty()
             ? QuestionResource::collection($this->questions)
             : null;
+
+        // Prefer pivot meta when methodologyId (and optionally pillarId) are provided
+        $methodologyId = request()->route('methodologyId');
+        $pillarId = $this->pillar_id ?? request()->route('pillarId');
+        $pivotDescription = null;
+        $pivotEstimatedTime = null;
+        if ($methodologyId) {
+            if ($pillarId) {
+                $pm = \DB::table('pillar_module')
+                    ->where('methodology_id', (int) $methodologyId)
+                    ->where('pillar_id', (int) $pillarId)
+                    ->where('module_id', $this->id)
+                    ->first();
+                if ($pm) {
+                    $pivotDescription = property_exists($pm, 'questions_description') ? $pm->questions_description : null;
+                    $pivotEstimatedTime = property_exists($pm, 'questions_estimated_time') ? $pm->questions_estimated_time : null;
+                }
+            } else {
+                $mm = \DB::table('methodology_module')
+                    ->where('methodology_id', (int) $methodologyId)
+                    ->where('module_id', $this->id)
+                    ->first();
+                if ($mm) {
+                    $pivotDescription = property_exists($mm, 'questions_description') ? $mm->questions_description : null;
+                    $pivotEstimatedTime = property_exists($mm, 'questions_estimated_time') ? $mm->questions_estimated_time : null;
+                }
+            }
+        }
+
         $questions = $this->filterArray([
-            'description' => $this->questions_description,
-            'estimatedTime' => $this->questions_estimated_time,
-            'size' => $this->questions_count,
+            // Todo: add 'type', if any answer of a question leads to any other question then value is dynamic, else simple
+            'description' => $pivotDescription !== null ? $pivotDescription : ($this->questions_description ?? null),
+            'estimatedTime' => $pivotEstimatedTime !== null ? $pivotEstimatedTime : ($this->questions_estimated_time ?? null),
+            'size' => count($questionsList),
             'list' => $questionsList,
         ]);
-        if ($questionsList) {
+        if ($questionsList && count($questionsList) > 0) {
             $payload['questions'] = $questions;
         }
 

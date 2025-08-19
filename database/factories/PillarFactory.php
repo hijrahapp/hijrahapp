@@ -22,9 +22,7 @@ class PillarFactory extends Factory
             'definition' => $this->faker->sentence(),
             'objectives' => $this->faker->optional()->paragraphs(3, true),
             'img_url' => $this->faker->optional()->imageUrl(),
-            'questions_description' => $this->faker->optional()->paragraph(),
-            'questions_estimated_time' => $this->faker->optional()->randomElement(['10-15 minutes']),
-            'questions_count' => 0,
+            // questions meta moved to methodology_pillar pivot
             'tags' => $this->faker->optional()->randomElements([1, 2, 3, 4, 5], $this->faker->numberBetween(1, 3)),
             'active' => $this->faker->boolean(80), // 80% chance of being active
         ];

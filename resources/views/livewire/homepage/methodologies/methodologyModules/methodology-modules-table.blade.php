@@ -45,7 +45,6 @@
                             @endif
                             <th class="">Dependencies</th>
                             <th class="w-28 text-center">Number of Questions</th>
-                            <th class="w-20 text-center">Minutes</th>
                             <th class="w-20 text-center">Weight</th>
                             <th class="w-20 text-center">Actions</th>
                         </tr>
@@ -80,7 +79,6 @@
                                     @endif
                                 </td>
                                 <td class="text-center">{{ $module->mm_number_of_questions ?? 0 }}</td>
-                                <td class="text-center">{{ $module->mm_minutes ?? 0 }}</td>
                                 <td class="text-center">{{ $module->mm_weight !== null ? (int) $module->mm_weight : '-' }}%</td>
                                 <td class="text-center" wire:ignore>
                                     <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">

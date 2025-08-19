@@ -55,13 +55,11 @@ class MethodologyModulesTable extends Component
         if ($hasPillars) {
             $hasNoq = \Schema::hasColumn('pillar_module', 'number_of_questions');
             $hasWeight = \Schema::hasColumn('pillar_module', 'weight');
-            $hasMinutes = \Schema::hasColumn('pillar_module', 'minutes');
             $hasReport = \Schema::hasColumn('pillar_module', 'report');
 
             $selectPieces = [];
             $selectPieces[] = ($hasWeight ? 'pm.weight' : 'NULL') . ' as mm_weight';
             $selectPieces[] = ($hasNoq ? 'pm.number_of_questions' : 'NULL') . ' as mm_number_of_questions';
-            $selectPieces[] = ($hasMinutes ? 'pm.minutes' : 'NULL') . ' as mm_minutes';
             $selectPieces[] = ($hasReport ? 'pm.report' : 'NULL') . ' as mm_reports';
             $selectPieces[] = 'pm.pillar_id as pm_pillar_id';
             $selectPieces[] = 'p.name as pillar_name';
@@ -82,6 +80,17 @@ class MethodologyModulesTable extends Component
                 ->select('modules.*')
                 ->selectRaw($selectRaw);
         } else {
+            $hasNoq = \Schema::hasColumn('methodology_module', 'number_of_questions');
+            $hasWeight = \Schema::hasColumn('methodology_module', 'weight');
+            $hasReport = \Schema::hasColumn('methodology_module', 'report');
+
+            $selectPieces = [];
+            $selectPieces[] = ($hasWeight ? 'mm.weight' : 'NULL') . ' as mm_weight';
+            $selectPieces[] = ($hasNoq ? 'mm.number_of_questions' : 'NULL') . ' as mm_number_of_questions';
+            // minutes removed column safely
+            $selectPieces[] = ($hasReport ? 'mm.report' : 'NULL') . ' as mm_reports';
+            $selectRaw = implode(', ', $selectPieces);
+
             $query = Module::query()
                 ->where('modules.name', 'like', '%'.$this->search.'%')
                 ->whereHas('methodologies', function ($q) {
@@ -97,7 +106,7 @@ class MethodologyModulesTable extends Component
                 ->withCount(['questions'])
                 ->orderBy('mm.created_at', 'asc')
                 ->select('modules.*')
-                ->selectRaw('mm.weight as mm_weight, mm.number_of_questions as mm_number_of_questions, mm.minutes as mm_minutes, mm.report as mm_reports');
+                ->selectRaw($selectRaw);
         }
 
         $page = $this->getPage();

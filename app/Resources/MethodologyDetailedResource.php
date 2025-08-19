@@ -23,12 +23,6 @@ class MethodologyDetailedResource extends JsonResource
         $payload = [
             'id' => $this->id,
             'type' => $this->type,
-            // 'details' => $details,
-            // sections handled below
-            // 'questions' => !empty($questions) ? $questions : null,
-            // 'pillars' => !empty($pillars) ? $pillars : null,
-            // 'modules' => !empty($modules) ? $modules : null,
-            // 'result' => $this->calculateResult(),
         ];
 
         $sectionNumber = $this->section_number ?? null;
@@ -97,17 +91,20 @@ class MethodologyDetailedResource extends JsonResource
         $payload['details'] = $this->filterArray($details);
 
         // Questions block (include list only when loaded and non-empty)
-        $questionsList = $this->relationLoaded('questions') && $this->questions && $this->questions->isNotEmpty()
-            ? QuestionResource::collection($this->questions)
-            : null;
-        $questions = $this->filterArray([
-            'description' => $this->questions_description,
-            'estimatedTime' => $this->questions_estimated_time,
-            'size' => $this->questions_count,
-            'list' => $questionsList,
-        ]);
-        if ($questionsList && $questionsList->count() > 0) {
-            $payload['questions'] = $this->filterArray($questions);
+        if ($sectionNumber == null ||$sectionNumber !== 2) {
+            $questionsList = $this->relationLoaded('questions') && $this->questions && $this->questions->isNotEmpty()
+                ? QuestionResource::collection($this->questions)
+                : null;
+            $questions = $this->filterArray([
+                'type' => 'simple',
+                'description' => $this->questions_description,
+                'estimatedTime' => $this->questions_estimated_time,
+                'size' => $questionsList->count(),
+                'list' => $questionsList,
+            ]);
+            if ($questionsList && $questionsList->count() > 0) {
+                $payload['questions'] = $this->filterArray($questions);
+            }
         }
 
         // Pillars block

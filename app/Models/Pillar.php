@@ -16,9 +16,7 @@ class Pillar extends Model
         'definition',
         'objectives',
         'img_url',
-        'questions_description',
-        'questions_estimated_time',
-        'questions_count',
+        // questions meta moved to methodology_pillar pivot
         'tags',
         'active',
     ];

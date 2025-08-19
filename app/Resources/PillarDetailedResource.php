@@ -33,15 +33,30 @@ class PillarDetailedResource extends JsonResource
         ];
         $payload['details'] = $this->filterArray($details);
 
-        // Pillar-level questions meta + list (if loaded)
+        // Questions meta + list (prefer methodology-specific pivot data when methodologyId is provided)
         $questionsList = $this->getGroupedModuleQuestions();
+        $methodologyId = request()->route('methodologyId');
+        $pivotDescription = null;
+        $pivotEstimatedTime = null;
+        if ($methodologyId) {
+            $pivot = \DB::table('methodology_pillar')
+                ->where('methodology_id', (int) $methodologyId)
+                ->where('pillar_id', $this->id)
+                ->first();
+            if ($pivot) {
+                $pivotDescription = property_exists($pivot, 'questions_description') ? $pivot->questions_description : null;
+                $pivotEstimatedTime = property_exists($pivot, 'questions_estimated_time') ? $pivot->questions_estimated_time : null;
+            }
+        }
+
         $questions = $this->filterArray([
-            'description' => $this->questions_description,
-            'estimatedTime' => $this->questions_estimated_time,
-            'size' => $this->questions_count,
+            // Todo: add 'type', if any answer of a question leads to any other question then value is dynamic, else simple
+            'description' => $pivotDescription !== null ? $pivotDescription : ($this->questions_description ?? null),
+            'estimatedTime' => $pivotEstimatedTime !== null ? $pivotEstimatedTime : ($this->questions_estimated_time ?? null),
+            'size' => count($questionsList),
             'list' => $questionsList,
         ]);
-        if ($questionsList) {
+        if ($questionsList && count($questionsList) > 0) {
             $payload['questions'] = $questions;
         }
 
@@ -107,18 +122,7 @@ class PillarDetailedResource extends JsonResource
         }
 
         $questionRepo = new QuestionRepository();
-
-        return $modules->map(function ($module) use ($methodologyId, $questionRepo) {
-            $questions = $questionRepo->getQuestionsByContext('module', $module->id, (int) $methodologyId, $this->id);
-            return [
-                'module' => [
-                    'id' => $module->id,
-                    'name' => $module->name,
-                    'description' => $module->description,
-                ],
-                'questions' => QuestionResource::collection($questions),
-            ];
-        })->values()->all();
+        return $questionRepo->getPillarModuleQuestionsGrouped($methodologyId, $this->id);
     }
 }
 

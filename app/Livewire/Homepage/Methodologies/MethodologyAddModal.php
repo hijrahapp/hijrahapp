@@ -18,6 +18,10 @@ class MethodologyAddModal extends Component
     public string $pillarsDefinition = '';
     public string $numberOfPillars = '';
 
+    // General questions meta
+    public string $questionsDescription = '';
+    public string $questionsEstimatedTime = '';
+
     // Two-section fields
     public string $firstSectionName = '';
     public string $secondSectionName = '';
@@ -33,6 +37,8 @@ class MethodologyAddModal extends Component
             'description' => 'required|string|min:3',
             'definition' => 'required|string|min:3',
             'objectives' => 'nullable|string',
+            'questionsDescription' => 'nullable|string',
+            'questionsEstimatedTime' => 'nullable|integer|min:0',
             'tags' => 'array',
             'tags.*' => 'integer',
             'imgUrl' => 'required|string',
@@ -79,6 +85,12 @@ class MethodologyAddModal extends Component
         $this->pillarsDefinition = $methodology->pillars_definition ?? '';
         $this->numberOfPillars = $methodology->number_of_pillars ?? '';
 
+        // General questions meta
+        $this->questionsDescription = $methodology->questions_description ?? '';
+        $this->questionsEstimatedTime = is_numeric($methodology->questions_estimated_time ?? null)
+            ? (string) ((int) $methodology->questions_estimated_time)
+            : '';
+
         // Two-section fields
         $this->firstSectionName = $methodology->first_section_name ?? '';
         $this->secondSectionName = $methodology->second_section_name ?? '';
@@ -98,6 +110,10 @@ class MethodologyAddModal extends Component
         $this->modulesDefinition = '';
         $this->pillarsDefinition = '';
         $this->numberOfPillars = '';
+
+        // General questions meta
+        $this->questionsDescription = '';
+        $this->questionsEstimatedTime = '';
 
         // Two-section fields
         $this->firstSectionName = '';
@@ -127,6 +143,10 @@ class MethodologyAddModal extends Component
                 'description' => $this->description,
                 'definition' => $this->definition,
                 'objectives' => $this->objectives,
+                'questions_description' => $this->questionsDescription ?: null,
+                'questions_estimated_time' => is_numeric($this->questionsEstimatedTime)
+                    ? (int) $this->questionsEstimatedTime
+                    : null,
                 'tags' => $this->tags,
                 'img_url' => $this->imgUrl ?: null,
                 'type' => $this->type,

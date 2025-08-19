@@ -25,6 +25,10 @@ class MethodologyPillarAddModal extends Component
 	public string $sectionNumber = '1';
 	public string $methodologyType = '';
 
+	// General questions meta for the pillar
+	public string $questionsDescription = '';
+	public string $questionsEstimatedTime = '';
+
 	public array $dependencyIds = [];
 	public array $dependencySuggestions = [];
 	public string $dependencySearch = '';
@@ -51,6 +55,8 @@ class MethodologyPillarAddModal extends Component
 			'selectedPillarId' => 'required|integer|exists:pillars,id',
 			'numberOfModules' => 'required|integer|min:0',
 			'weight' => 'nullable|numeric',
+			'questionsDescription' => 'nullable|string',
+			'questionsEstimatedTime' => 'nullable|integer|min:0',
 			'dependencyIds' => 'array',
 			'dependencyIds.*' => 'integer|exists:pillars,id',
 			'sectionNumber' => 'nullable|in:1,2',
@@ -86,6 +92,10 @@ class MethodologyPillarAddModal extends Component
 		$this->pillarSuggestions = [];
 		$this->showPillarSuggestions = false;
 		$this->dependencyIds = array_values(array_diff($this->dependencyIds, [$pillarId]));
+
+		// Clear questions meta; will be set explicitly for this methodology-pillar link
+		$this->questionsDescription = '';
+		$this->questionsEstimatedTime = '';
 	}
 
 	public function updatedDependencySearch(): void
@@ -131,6 +141,8 @@ class MethodologyPillarAddModal extends Component
 		if ($this->isEditMode) {
 			$this->validate([
 				'weight' => 'nullable|numeric',
+				'questionsDescription' => 'nullable|string',
+				'questionsEstimatedTime' => 'nullable|integer|min:0',
 			]);
 		} else {
 			$rules = $this->rules();
@@ -199,6 +211,10 @@ class MethodologyPillarAddModal extends Component
 				[
 					'number_of_modules' => (int) $this->numberOfModules,
 					'weight' => $this->weight,
+					'questions_description' => $this->questionsDescription !== '' ? $this->questionsDescription : null,
+					'questions_estimated_time' => is_numeric($this->questionsEstimatedTime)
+						? (int) $this->questionsEstimatedTime
+						: null,
 					'sequence' => $maxSequence + 1,
 					'section' => $this->methodologyType === 'twoSection'
 						? ($this->sectionNumber === '2' ? 'second' : 'first')
@@ -207,6 +223,7 @@ class MethodologyPillarAddModal extends Component
 					'created_at' => now(),
 				]
 			);
+
 
 			if ($this->selectedPillarId) {
 				\DB::table('pillar_dependencies')
@@ -247,6 +264,8 @@ class MethodologyPillarAddModal extends Component
 		$this->showPillarSuggestions = false;
 		$this->numberOfModules = '';
 		$this->weight = '';
+		$this->questionsDescription = '';
+		$this->questionsEstimatedTime = '';
 		$this->dependencyIds = [];
 		$this->dependencySuggestions = [];
 		$this->dependencySearch = '';
@@ -290,6 +309,12 @@ class MethodologyPillarAddModal extends Component
 		$this->selectedPillarId = $pillarId;
 		$this->pillarSearch = $pillar->name;
 
+		// Prefill questions meta
+		$this->questionsDescription = $pillar->questions_description ?? '';
+		$this->questionsEstimatedTime = is_numeric($pillar->questions_estimated_time ?? null)
+			? (string) ((int) $pillar->questions_estimated_time)
+			: '';
+
 		$pivot = \DB::table('methodology_pillar')
 			->where('methodology_id', $methodologyId)
 			->where('pillar_id', $pillarId)
@@ -299,6 +324,16 @@ class MethodologyPillarAddModal extends Component
 		$this->weight = $pivot && $pivot->weight !== null ? (int)$pivot->weight : 0;
 		if ($pivot && property_exists($pivot, 'section')) {
 			$this->sectionNumber = $pivot->section === 'second' ? '2' : '1';
+		}
+
+		// Prefill questions meta from pivot
+		if ($pivot) {
+			$this->questionsDescription = property_exists($pivot, 'questions_description') && $pivot->questions_description !== null
+				? (string) $pivot->questions_description
+				: '';
+			$this->questionsEstimatedTime = property_exists($pivot, 'questions_estimated_time') && is_numeric($pivot->questions_estimated_time)
+				? (string) ((int) $pivot->questions_estimated_time)
+				: '';
 		}
 
 		$this->dependencyIds = \DB::table('pillar_dependencies')

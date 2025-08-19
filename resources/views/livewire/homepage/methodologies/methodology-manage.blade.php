@@ -47,6 +47,18 @@
                         </div>
 
                         <div class="mt-4">
+                            <label class="block text-sm font-medium mb-1">Questions Description</label>
+                            <textarea class="kt-textarea w-full" rows="3" wire:model.defer="questionsDescription" placeholder="Enter a general description of the methodology questions"></textarea>
+                            @error('questionsDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium mb-1">Estimated Questions Time (minutes)</label>
+                            <input type="number" min="0" class="kt-input w-full" wire:model.defer="questionsEstimatedTime" placeholder="Enter estimated time in minutes" />
+                            @error('questionsEstimatedTime')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                        </div>
+
+                        <div class="mt-4">
                             <label class="block text-sm font-medium mb-1">Objectives</label>
                             <livewire:shared.components.rich-text :model="$objectives" wire:model="objectives" :placeholder="'Enter methodology objectives'" :editorId="'methodology_objectives_editor'" :minHeight="'150px'" />
                             @error('objectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror

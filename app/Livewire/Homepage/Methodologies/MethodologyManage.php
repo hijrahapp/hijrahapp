@@ -19,6 +19,10 @@ class MethodologyManage extends Component
     public string $imgUrl = '';
     public string $type = '';
 
+    // General questions meta
+    public string $questionsDescription = '';
+    public string $questionsEstimatedTime = '';
+
     public string $error = '';
 
     // Extra details (by type)
@@ -57,6 +61,8 @@ class MethodologyManage extends Component
             'description' => 'required|string|min:3',
             'definition' => 'required|string|min:3',
             'objectives' => 'nullable|string',
+            'questionsDescription' => 'nullable|string',
+            'questionsEstimatedTime' => 'nullable|integer|min:0',
             'tags' => 'array',
             'tags.*' => 'integer',
             'imgUrl' => 'nullable|string',
@@ -80,6 +86,12 @@ class MethodologyManage extends Component
         $this->tags = $methodology->tags ?? [];
         $this->imgUrl = $methodology->img_url ?? '';
         $this->type = $methodology->type;
+
+        // Prefill general questions meta
+        $this->questionsDescription = $methodology->questions_description ?? '';
+        $this->questionsEstimatedTime = is_numeric($methodology->questions_estimated_time ?? null)
+            ? (string) ((int) $methodology->questions_estimated_time)
+            : '';
 
         // Prefill extra details by type
         $this->modulesDefinition = $methodology->modules_definition ?? '';
@@ -123,6 +135,10 @@ class MethodologyManage extends Component
                 'description' => $this->description,
                 'definition' => $this->definition,
                 'objectives' => $this->objectives,
+                'questions_description' => $this->questionsDescription ?: null,
+                'questions_estimated_time' => is_numeric($this->questionsEstimatedTime)
+                    ? (int)$this->questionsEstimatedTime
+                    : null,
                 'tags' => $this->tags,
                 'img_url' => $this->imgUrl ?: null,
                 'type' => $this->type, // not editable, preserved
