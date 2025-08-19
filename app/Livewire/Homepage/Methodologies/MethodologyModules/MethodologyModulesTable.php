@@ -28,6 +28,23 @@ class MethodologyModulesTable extends Component
         'confirm-delete-methodology-module' => 'deleteMethodologyModule',
     ];
 
+    /**
+     * Get names of modules that the given module depends on within the current methodology.
+     *
+     * @param int $moduleId
+     * @return array<int, string>
+     */
+    public function getDependencyNames(int $moduleId): array
+    {
+        return \DB::table('module_dependencies as md')
+            ->join('modules as m', 'm.id', '=', 'md.depends_on_module_id')
+            ->where('md.methodology_id', $this->methodologyId)
+            ->where('md.module_id', $moduleId)
+            ->orderBy('md.id')
+            ->pluck('m.name')
+            ->toArray();
+    }
+
     #[Computed]
     public function modules(): LengthAwarePaginator
     {
@@ -45,7 +62,8 @@ class MethodologyModulesTable extends Component
             })
             ->withCount(['questions'])
             ->orderBy('mm.created_at', 'asc')
-            ->select('modules.*');
+            ->select('modules.*')
+            ->selectRaw('mm.weight as mm_weight, mm.number_of_questions as mm_number_of_questions, mm.minutes as mm_minutes, mm.report as mm_reports');
 
         $page = $this->getPage();
         return $query->paginate($this->perPage, ['*'], 'page', $page);

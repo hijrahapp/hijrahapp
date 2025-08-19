@@ -77,7 +77,7 @@ class MethodologyModuleQuestionsModal extends Component
             // Methodology (general) context
             $existing = \DB::table('methodology_question')
                 ->where('methodology_id', $methodologyId)
-                ->orderBy('id')
+                ->orderBy('sequence')
                 ->get();
             $this->selectedQuestionIds = $existing->pluck('question_id')->toArray();
             foreach ($existing as $row) {
@@ -256,6 +256,7 @@ class MethodologyModuleQuestionsModal extends Component
                     'methodology_id' => $this->methodologyId,
                     'question_id' => $questionId,
                     'weight' => (float)($this->questionWeights[$questionId] ?? 0),
+                    'sequence' => (int)($this->sequences[$questionId] ?? 0),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -279,6 +280,7 @@ class MethodologyModuleQuestionsModal extends Component
         }
 
         $this->dispatch('show-toast', type: 'success', message: 'Questions updated successfully');
+        $this->dispatch('refreshTable');
         $this->dispatch('click');
     }
 

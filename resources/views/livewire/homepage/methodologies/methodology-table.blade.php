@@ -111,65 +111,21 @@
                                                         Manage Sections
                                                     </a>
                                                 </li>
-                                            @elseif($methodology->type !== 'simple')
-                                                <li>
-                                                    <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="managePillars({{ $methodology->id }})">
-                                                        <i class="ki-filled ki-category"></i>
-                                                        Manage Pillars
-                                                    </a>
-                                                </li>
-                                            @else
-                                                <li>
-                                                    <span class="kt-dropdown-menu-link opacity-50 cursor-not-allowed">
-                                                        <i class="ki-filled ki-category"></i>
-                                                        Manage Pillars
-                                                    </span>
-                                                </li>
                                             @endif
-                                            
-                                            @if($methodology->type === 'simple')
-                                                <li>
-                                                    <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="manageModules({{ $methodology->id }})">
-                                                        <i class="ki-filled ki-element-7"></i>
-                                                        Manage Modules
-                                                    </a>
-                                                </li>
-                                            @else
-                                                <li>
-                                                    <span class="kt-dropdown-menu-link opacity-50 cursor-not-allowed">
-                                                        <i class="ki-filled ki-element-7"></i>
-                                                        Manage Modules
-                                                    </span>
-                                                </li>
-                                            @endif
-                                            
-                                            <li>
-                                                <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="manageGeneralQuestions({{ $methodology->id }})">
-                                                    <i class="ki-filled ki-questionnaire-tablet"></i>
-                                                    Manage General Questions
-                                                </a>
-                                            </li>
-                                            
-                                            <li>
-                                                <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="manageModuleQuestions({{ $methodology->id }})">
-                                                    <i class="ki-filled ki-question-2"></i>
-                                                    Manage Module Questions
-                                                </a>
-                                            </li>
                                             
                                             <li class="kt-dropdown-menu-separator"></li>
                                             
                                             <li>
                                                 <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="editMethodology({{ $methodology->id }})">
                                                     <i class="ki-filled ki-pencil"></i>
-                                                    Edit Methodology
+                                                    Edit
                                                 </a>
                                             </li>
                                             
                                             <li>
                                                 <a href="#" class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="openDeleteMethodologyModal({{ Js::from(['id' => $methodology->id]) }})">
                                                     <i class="ki-filled ki-trash"></i>
-                                                    Delete Methodology
+                                                    Delete
                                                 </a>
                                             </li>
                                             

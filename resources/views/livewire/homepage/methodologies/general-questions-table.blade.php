@@ -37,12 +37,10 @@
                 <table class="kt-table kt-table-border table-fixed w-full">
                     <thead>
                         <tr>
-                            <th class="w-20 text-center">#</th>
                             <th class="w-20 text-center">Order</th>
                             <th class="">Name</th>
-                            <th class="w-32 text-center">Type</th>
+                            <th class="">Type</th>
                             <th class="w-24 text-center">Weight</th>
-                            <th class="">Tags</th>
                             <th class="w-20 text-center">Remove</th>
                         </tr>
                     </thead>
@@ -50,28 +48,15 @@
                         @forelse($questions as $index => $question)
                             <tr>
                                 <td class="text-center">{{ $index + 1 }}</td>
-                                <td class="text-center">{{ $index + 1 }}</td>
                                 <td>{{ $question->title }}</td>
-                                <td class="text-center">{{ $question->type instanceof \App\Enums\QuestionType ? $question->type->getLabel() : ucfirst((string)$question->type) }}</td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        {{ __('lookups.'.$question->type->value) }}
+                                    </span>
+                                </td>
                                 <td class="text-center">
                                     @php $pivot = \DB::table('methodology_question')->where('methodology_id', $methodologyId)->where('question_id', $question->id)->first(); @endphp
                                     <span class="font-medium">{{ (int)($pivot->weight ?? 0) }}%</span>
-                                </td>
-                                <td>
-                                    @php
-                                        $tagTitles = $this->getTagTitles($question->tags);
-                                    @endphp
-                                    @if(count($tagTitles) > 0)
-                                        <div class="flex flex-wrap gap-1 items-center">
-                                            @foreach($tagTitles as $tagTitle)
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-                                                    {{ $tagTitle }}
-                                                </span>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <span class="text-gray-400 text-sm">No tags</span>
-                                    @endif
                                 </td>
                                 <td class="text-center">
                                     <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" wire:click="remove({{ $question->id }})" title="Remove">
@@ -81,7 +66,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4">No general questions configured.</td>
+                                <td colspan="5" class="text-center py-4">No general questions configured.</td>
                             </tr>
                         @endforelse
                     </tbody>

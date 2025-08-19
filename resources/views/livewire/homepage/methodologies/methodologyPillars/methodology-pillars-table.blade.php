@@ -1,11 +1,11 @@
 <div>
     <div class="kt-card kt-card-grid kt-card-div h-full min-w-full">
         <div class="kt-card-header flex justify-between items-center">
-            <h3 class="kt-card-title">Modules</h3>
+            <h3 class="kt-card-title">Pillars</h3>
             <div class="flex gap-2 items-center">
                 <div class="kt-input max-w-48">
                     <i class="ki-filled ki-magnifier"></i>
-                    <input type="text" class="kt-input" placeholder="Search Modules" wire:model.live="search" />
+                    <input type="text" class="kt-input" placeholder="Search Pillars" wire:model.live="search" />
                 </div>
                 <div class="relative max-w-64 min-w-56">
                     <div class="kt-input">
@@ -27,7 +27,7 @@
                         </div>
                     @endif
                 </div>
-                <button class="kt-btn kt-btn-outline flex items-center justify-center" title="Add Module" wire:click="openAddModal">
+                <button class="kt-btn kt-btn-outline flex items-center justify-center" title="Add Pillar" wire:click="openAddModal">
                     <i class="ki-filled ki-plus"></i>
                 </button>
             </div>
@@ -39,27 +39,20 @@
                         <tr>
                             <th class="w-20 text-center">#</th>
                             <th class="">Name</th>
-                            <th class="">Report</th>
                             <th class="">Dependencies</th>
-                            <th class="w-28 text-center">Number of Questions</th>
-                            <th class="w-20 text-center">Minutes</th>
+                            <th class="w-28 text-center">Number of Modules</th>
                             <th class="w-20 text-center">Weight</th>
                             <th class="w-20 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($modules as $index => $module)
+                        @forelse($pillars as $index => $pillar)
                             <tr>
-                                <td class="text-center">{{ $modules->firstItem() + $index }}</td>
-                                <td class="">{{ $module->name }}</td>
-                                <td>
-                                    <div class="max-w-xs truncate" title="{{ $module->mm_reports }}">
-                                        {{ Str::limit($module->mm_reports, 50) }}
-                                    </div>
-                                </td>
+                                <td class="text-center">{{ $pillars->firstItem() + $index }}</td>
+                                <td>{{ $pillar->name }}</td>
                                 <td>
                                     @php
-                                        $dependencyNames = $this->getDependencyNames($module->id);
+                                        $dependencyNames = $this->getDependencyNames($pillar->id);
                                     @endphp
                                     @if(count($dependencyNames) > 0)
                                         <div class="flex flex-wrap gap-1 items-center">
@@ -73,9 +66,8 @@
                                         <span class="text-gray-400 text-sm">No dependencies</span>
                                     @endif
                                 </td>
-                                <td class="text-center">{{ $module->mm_number_of_questions ?? 0 }}</td>
-                                <td class="text-center">{{ $module->mm_minutes ?? 0 }}</td>
-                                <td class="text-center">{{ $module->mm_weight !== null ? (int) $module->mm_weight : '-' }}%</td>
+                                <td class="text-center">{{ $pillar->mp_number_of_modules ?? 0 }}</td>
+                                <td class="text-center">{{ $pillar->mp_weight !== null ? (int) $pillar->mp_weight : '-' }}%</td>
                                 <td class="text-center" wire:ignore>
                                     <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">
                                         <button class="kt-btn kt-btn-outline" data-kt-dropdown-toggle="true">
@@ -84,19 +76,13 @@
                                         <div class="kt-dropdown-menu w-52" data-kt-dropdown-menu="true">
                                             <ul class="kt-dropdown-menu-sub">
                                                 <li>
-                                                    <a class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="manageQuestions({{ $module->id }})">
-                                                        <i class="ki-filled ki-question-2"></i>
-                                                        Manage Questions
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="openEditModal({{ $module->id }})">
+                                                    <a class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="openEditModal({{ $pillar->id }})">
                                                         <i class="ki-filled ki-pencil"></i>
                                                         Edit
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="openDeleteModal({{ $module->id }})">
+                                                    <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="openDeleteModal({{ $pillar->id }})">
                                                         <i class="ki-filled ki-trash"></i>
                                                         Remove
                                                     </a>
@@ -108,7 +94,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4">No Modules found.</td>
+                                <td colspan="5" class="text-center py-4">No Pillars found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -116,17 +102,17 @@
             </div>
         </div>
         <div class="kt-card-footer flex-col justify-center gap-5 text-sm font-medium text-secondary-foreground md:flex-row md:justify-between">
-            <div class="order-2 flex items-center gap-2 md:order-1"></div>
+            <div class="order-2 flex items-center gap-2 md:order-1">
+            </div>
             <div class="order-1 flex items-center gap-4 md:order-2">
                 <span>
-                    Showing {{ $modules->firstItem() ?? 0 }} to {{ $modules->lastItem() ?? 0 }} of {{ $modules->total() ?? 0 }} Modules
+                    Showing {{ $pillars->firstItem() ?? 0 }} to {{ $pillars->lastItem() ?? 0 }} of {{ $pillars->total() ?? 0 }} Pillars
                 </span>
             </div>
         </div>
     </div>
 
-    {{-- Pagination outside the table card --}}
-    <x-ktui-pagination :paginator="$modules" />
+    <x-ktui-pagination :paginator="$pillars" />
 </div>
 
 

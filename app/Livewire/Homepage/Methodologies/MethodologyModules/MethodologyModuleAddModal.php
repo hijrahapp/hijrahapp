@@ -170,7 +170,7 @@ class MethodologyModuleAddModal extends Component
                 ],
                 [
                     'number_of_questions' => $this->numberOfQuestions !== '' ? (int)$this->numberOfQuestions : null,
-                    'weight' => $this->weight !== '' ? (float)$this->weight : null,
+                    'weight' => $this->weight !== '' ? (int)$this->weight : null,
                     'minutes' => (int)$this->minutes,
                     'report' => $this->report !== '' ? $this->report : null,
                     'updated_at' => now(),
@@ -269,7 +269,7 @@ class MethodologyModuleAddModal extends Component
 
         $this->numberOfQuestions = $pivot && $pivot->number_of_questions !== null ? (string)$pivot->number_of_questions : '';
         $this->minutes = $pivot && $pivot->minutes !== null ? (string)$pivot->minutes : '';
-        $this->weight = $pivot && $pivot->weight !== null ? (string)$pivot->weight : '';
+        $this->weight = $pivot && $pivot->weight !== null ? (int)$pivot->weight : 0;
         $this->report = $pivot && $pivot->report ? (string)$pivot->report : '';
 
         $this->dependencyIds = \DB::table('module_dependencies')

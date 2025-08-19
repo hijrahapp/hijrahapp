@@ -19,7 +19,7 @@ class GeneralQuestionsTable extends Component
     public bool $showTagSuggestions = false;
 
     protected $listeners = [
-        'refresh-general-questions' => '$refresh',
+        'refreshTable' => '$refresh',
     ];
 
     public function updatedTagSearch(): void
@@ -63,6 +63,7 @@ class GeneralQuestionsTable extends Component
         \DB::table('methodology_question')
             ->where('methodology_id', $this->methodologyId)
             ->where('question_id', $questionId)
+            ->orderBy('sequence')
             ->delete();
         $this->dispatch('refresh-general-questions');
         $this->dispatch('show-toast', type: 'success', message: 'Removed successfully');
@@ -72,12 +73,21 @@ class GeneralQuestionsTable extends Component
     {
         $ids = \DB::table('methodology_question')
             ->where('methodology_id', $this->methodologyId)
-            ->pluck('question_id');
+            ->orderBy('sequence')
+            ->pluck('question_id')
+            ->toArray();
+
+        if (empty($ids)) {
+            return collect();
+        }
+
+        $ids = array_map('intval', $ids);
 
         $q = Question::query()
             ->whereIn('id', $ids)
             ->when($this->search, fn($qq) => $qq->where('title', 'like', '%'.$this->search.'%'))
             ->when($this->tagFilter, fn($qq) => $qq->whereJsonContains('tags', (int)$this->tagFilter))
+            ->orderByRaw('FIELD(id, '.implode(',', $ids).')')
             ->get();
 
         return $q;

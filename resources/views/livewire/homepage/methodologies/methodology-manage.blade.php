@@ -192,10 +192,8 @@
                     </button>
                     <div class="kt-accordion-content" aria-labelledby="pillars_toggle" id="pillars_content">
                         <div class="kt-card-body p-5">
-                            <div class="text-sm text-secondary-foreground">Placeholder for Pillars management (Complex).</div>
-                        </div>
-                        <div class="kt-card-footer flex items-center justify-end gap-2">
-                            <button class="kt-btn kt-btn-primary" wire:click="savePillars">Save</button>
+                            <livewire:homepage.methodologies.methodology-pillars.methodology-pillars-table :methodologyId="$methodologyId" />
+                            <livewire:homepage.methodologies.methodology-pillars.methodology-pillar-add-modal />
                         </div>
                     </div>
                 </div>
