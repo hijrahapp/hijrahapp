@@ -30,6 +30,13 @@ class MethodologyModuleAddModal extends Component
     public string $dependencySearch = '';
     public bool $showDependencySuggestions = false;
 
+    // Pillar selection (for complex methodologies)
+    public string $pillarSearch = '';
+    public ?int $selectedPillarId = null;
+    public array $pillarSuggestions = [];
+    public bool $showPillarSuggestions = false;
+    public bool $enablePillarSelection = false;
+
     protected $listeners = [
         'reset-modal' => 'resetForm',
         'open-add-methodology-module' => 'open',
@@ -42,6 +49,11 @@ class MethodologyModuleAddModal extends Component
         $this->methodologyId = $methodologyId;
         $methodology = Methodology::findOrFail($methodologyId);
         $this->isActiveMethodology = (bool) $methodology->active;
+
+        // Enable pillar selection if methodology has linked pillars
+        $this->enablePillarSelection = \DB::table('methodology_pillar')
+            ->where('methodology_id', $this->methodologyId)
+            ->exists();
     }
 
     protected function rules(): array
@@ -55,6 +67,7 @@ class MethodologyModuleAddModal extends Component
             'report' => 'nullable|string',
             'dependencyIds' => 'array',
             'dependencyIds.*' => 'integer|exists:modules,id',
+            'selectedPillarId' => 'nullable|integer|exists:pillars,id',
         ];
     }
 
@@ -90,6 +103,40 @@ class MethodologyModuleAddModal extends Component
         $this->dependencyIds = array_values(array_diff($this->dependencyIds, [$moduleId]));
     }
 
+    public function updatedPillarSearch(): void
+    {
+        if (!$this->enablePillarSelection) {
+            $this->pillarSuggestions = [];
+            $this->showPillarSuggestions = false;
+            return;
+        }
+        if (strlen($this->pillarSearch) < 1) {
+            $this->pillarSuggestions = [];
+            $this->showPillarSuggestions = false;
+            return;
+        }
+
+        $linkedPillarIds = \DB::table('methodology_pillar')
+            ->where('methodology_id', $this->methodologyId)
+            ->pluck('pillar_id')
+            ->toArray();
+
+        $this->pillarSuggestions = \App\Models\Pillar::whereIn('id', $linkedPillarIds)
+            ->where('name', 'like', "%{$this->pillarSearch}%")
+            ->limit(7)
+            ->get(['id', 'name'])
+            ->toArray();
+        $this->showPillarSuggestions = true;
+    }
+
+    public function selectPillar(int $pillarId, string $pillarName): void
+    {
+        $this->selectedPillarId = $pillarId;
+        $this->pillarSearch = $pillarName;
+        $this->pillarSuggestions = [];
+        $this->showPillarSuggestions = false;
+    }
+
     public function updatedDependencySearch(): void
     {
         if (strlen($this->dependencySearch) < 1) {
@@ -98,12 +145,25 @@ class MethodologyModuleAddModal extends Component
             return;
         }
 
-        $linkedModuleIds = \DB::table('methodology_module')
-            ->where('methodology_id', $this->methodologyId)
-            ->pluck('module_id')
-            ->toArray();
+        // In complex methodologies, dependencies should list modules linked to ANY pillar under this methodology.
+        if ($this->enablePillarSelection) {
+            $linkedModuleIds = \DB::table('pillar_module')
+                ->where('methodology_id', $this->methodologyId)
+                ->pluck('module_id')
+                ->unique()
+                ->toArray();
+        } else {
+            $linkedModuleIds = \DB::table('methodology_module')
+                ->where('methodology_id', $this->methodologyId)
+                ->pluck('module_id')
+                ->unique()
+                ->toArray();
+        }
 
         $this->dependencySuggestions = Module::whereIn('id', $linkedModuleIds)
+            ->when($this->selectedModuleId, function ($q) {
+                $q->where('id', '!=', $this->selectedModuleId);
+            })
             ->where('name', 'like', "%{$this->dependencySearch}%")
             ->limit(7)
             ->get(['id', 'name'])
@@ -135,9 +195,14 @@ class MethodologyModuleAddModal extends Component
             $this->validate([
                 'weight' => 'nullable|numeric',
                 'report' => 'nullable|string',
+                'selectedPillarId' => $this->enablePillarSelection ? 'required|integer|exists:pillars,id' : 'nullable|integer|exists:pillars,id',
             ]);
         } else {
             $this->validate($this->rules());
+            if ($this->enablePillarSelection && !$this->selectedPillarId) {
+                $this->dispatch('show-toast', type: 'error', message: 'Please select a pillar.');
+                return;
+            }
         }
 
         // Prevent circular dependencies
@@ -152,31 +217,61 @@ class MethodologyModuleAddModal extends Component
                 $this->dispatch('show-toast', type: 'error', message: 'This module exists in an active methodology');
                 return;
             }
-            \DB::table('methodology_module')
-                ->where('methodology_id', $this->methodologyId)
-                ->where('module_id', $this->editingModuleId)
-                ->update([
-                    'weight' => $this->weight !== '' ? (float)$this->weight : null,
-                    'report' => $this->report !== '' ? $this->report : null,
-                    'updated_at' => now(),
-                ]);
+            if ($this->enablePillarSelection) {
+                // Store edits on pillar_module for complex
+                \DB::table('pillar_module')
+                    ->where('methodology_id', $this->methodologyId)
+                    ->where('module_id', $this->editingModuleId)
+                    ->update([
+                        'pillar_id' => $this->selectedPillarId,
+                        'weight' => $this->weight !== '' ? (float)$this->weight : null,
+                        'report' => $this->report !== '' ? $this->report : null,
+                        'updated_at' => now(),
+                    ]);
+            } else {
+                \DB::table('methodology_module')
+                    ->where('methodology_id', $this->methodologyId)
+                    ->where('module_id', $this->editingModuleId)
+                    ->update([
+                        'weight' => $this->weight !== '' ? (float)$this->weight : null,
+                        'report' => $this->report !== '' ? $this->report : null,
+                        'updated_at' => now(),
+                    ]);
+            }
             $this->dispatch('show-toast', type: 'success', message: 'Updated successfully');
         } else {
             // Attach module to methodology with pivot data
-            \DB::table('methodology_module')->updateOrInsert(
-                [
+            if ($this->enablePillarSelection) {
+                // Only link to pillar with all fields stored in pillar_module
+                \DB::table('pillar_module')->updateOrInsert([
                     'methodology_id' => $this->methodologyId,
+                    'pillar_id' => $this->selectedPillarId,
                     'module_id' => $this->selectedModuleId,
-                ],
-                [
+                ], [
                     'number_of_questions' => $this->numberOfQuestions !== '' ? (int)$this->numberOfQuestions : null,
-                    'weight' => $this->weight !== '' ? (int)$this->weight : null,
-                    'minutes' => (int)$this->minutes,
+                    'weight' => $this->weight !== '' ? (float)$this->weight : null,
+                    'minutes' => $this->minutes !== '' ? (int)$this->minutes : null,
                     'report' => $this->report !== '' ? $this->report : null,
                     'updated_at' => now(),
                     'created_at' => now(),
-                ]
-            );
+                ]);
+            } else {
+                // Simple methodology: store in methodology_module as before
+                \DB::table('methodology_module')->updateOrInsert(
+                    [
+                        'methodology_id' => $this->methodologyId,
+                        'module_id' => $this->selectedModuleId,
+                    ],
+                    [
+                        'number_of_questions' => $this->numberOfQuestions !== '' ? (int)$this->numberOfQuestions : null,
+                        'weight' => $this->weight !== '' ? (int)$this->weight : null,
+                        'minutes' => (int)$this->minutes,
+                        'report' => $this->report !== '' ? $this->report : null,
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]
+                );
+            }
 
             // Save dependencies
             if ($this->selectedModuleId) {
@@ -225,6 +320,11 @@ class MethodologyModuleAddModal extends Component
         $this->dependencySuggestions = [];
         $this->dependencySearch = '';
         $this->showDependencySuggestions = false;
+        $this->pillarSearch = '';
+        $this->selectedPillarId = null;
+        $this->pillarSuggestions = [];
+        $this->showPillarSuggestions = false;
+        $this->enablePillarSelection = false;
     }
 
     public function closeModal(): void
@@ -257,6 +357,11 @@ class MethodologyModuleAddModal extends Component
         $methodology = Methodology::findOrFail($methodologyId);
         $this->isActiveMethodology = (bool) $methodology->active;
 
+        // Enable pillar selection if methodology has linked pillars
+        $this->enablePillarSelection = \DB::table('methodology_pillar')
+            ->where('methodology_id', $this->methodologyId)
+            ->exists();
+
         $module = Module::findOrFail($moduleId);
         $this->moduleName = $module->name;
         $this->selectedModuleId = $moduleId;
@@ -267,16 +372,40 @@ class MethodologyModuleAddModal extends Component
             ->where('module_id', $moduleId)
             ->first();
 
-        $this->numberOfQuestions = $pivot && $pivot->number_of_questions !== null ? (string)$pivot->number_of_questions : '';
-        $this->minutes = $pivot && $pivot->minutes !== null ? (string)$pivot->minutes : '';
-        $this->weight = $pivot && $pivot->weight !== null ? (int)$pivot->weight : 0;
-        $this->report = $pivot && $pivot->report ? (string)$pivot->report : '';
+        if ($this->enablePillarSelection) {
+            $pm = \DB::table('pillar_module')
+                ->where('methodology_id', $this->methodologyId)
+                ->where('module_id', $this->editingModuleId)
+                ->first();
+            $this->numberOfQuestions = $pm && $pm->number_of_questions !== null ? (string)$pm->number_of_questions : '';
+            $this->minutes = $pm && $pm->minutes !== null ? (string)$pm->minutes : '';
+            $this->weight = $pm && $pm->weight !== null ? (float)$pm->weight : 0;
+            $this->report = $pm && $pm->report ? (string)$pm->report : '';
+        } else {
+            $this->numberOfQuestions = $pivot && $pivot->number_of_questions !== null ? (string)$pivot->number_of_questions : '';
+            $this->minutes = $pivot && $pivot->minutes !== null ? (string)$pivot->minutes : '';
+            $this->weight = $pivot && $pivot->weight !== null ? (int)$pivot->weight : 0;
+            $this->report = $pivot && $pivot->report ? (string)$pivot->report : '';
+        }
 
         $this->dependencyIds = \DB::table('module_dependencies')
             ->where('methodology_id', $this->methodologyId)
             ->where('module_id', $this->editingModuleId)
             ->pluck('depends_on_module_id')
             ->toArray();
+
+        // Load existing pillar link if any
+        if ($this->enablePillarSelection) {
+            $pm = \DB::table('pillar_module')
+                ->where('methodology_id', $this->methodologyId)
+                ->where('module_id', $this->editingModuleId)
+                ->first();
+            if ($pm) {
+                $this->selectedPillarId = (int) $pm->pillar_id;
+                $pillar = \App\Models\Pillar::find($this->selectedPillarId);
+                $this->pillarSearch = $pillar?->name ?? '';
+            }
+        }
     }
 }
 

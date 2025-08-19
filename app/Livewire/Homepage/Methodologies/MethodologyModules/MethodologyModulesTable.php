@@ -48,22 +48,57 @@ class MethodologyModulesTable extends Component
     #[Computed]
     public function modules(): LengthAwarePaginator
     {
-        $query = Module::query()
-            ->where('modules.name', 'like', '%'.$this->search.'%')
-            ->whereHas('methodologies', function ($q) {
-                $q->where('methodology_id', $this->methodologyId);
-            })
-            ->when($this->tagFilter, function ($q) {
-                $q->whereJsonContains('modules.tags', (int) $this->tagFilter);
-            })
-            ->join('methodology_module as mm', function ($join) {
-                $join->on('mm.module_id', '=', 'modules.id')
-                    ->where('mm.methodology_id', '=', $this->methodologyId);
-            })
-            ->withCount(['questions'])
-            ->orderBy('mm.created_at', 'asc')
-            ->select('modules.*')
-            ->selectRaw('mm.weight as mm_weight, mm.number_of_questions as mm_number_of_questions, mm.minutes as mm_minutes, mm.report as mm_reports');
+        $hasPillars = \DB::table('methodology_pillar')
+            ->where('methodology_id', $this->methodologyId)
+            ->exists();
+
+        if ($hasPillars) {
+            $hasNoq = \Schema::hasColumn('pillar_module', 'number_of_questions');
+            $hasWeight = \Schema::hasColumn('pillar_module', 'weight');
+            $hasMinutes = \Schema::hasColumn('pillar_module', 'minutes');
+            $hasReport = \Schema::hasColumn('pillar_module', 'report');
+
+            $selectPieces = [];
+            $selectPieces[] = ($hasWeight ? 'pm.weight' : 'NULL') . ' as mm_weight';
+            $selectPieces[] = ($hasNoq ? 'pm.number_of_questions' : 'NULL') . ' as mm_number_of_questions';
+            $selectPieces[] = ($hasMinutes ? 'pm.minutes' : 'NULL') . ' as mm_minutes';
+            $selectPieces[] = ($hasReport ? 'pm.report' : 'NULL') . ' as mm_reports';
+            $selectPieces[] = 'pm.pillar_id as pm_pillar_id';
+            $selectPieces[] = 'p.name as pillar_name';
+            $selectRaw = implode(', ', $selectPieces);
+
+            $query = Module::query()
+                ->where('modules.name', 'like', '%'.$this->search.'%')
+                ->when($this->tagFilter, function ($q) {
+                    $q->whereJsonContains('modules.tags', (int) $this->tagFilter);
+                })
+                ->join('pillar_module as pm', function ($join) {
+                    $join->on('pm.module_id', '=', 'modules.id')
+                        ->where('pm.methodology_id', '=', $this->methodologyId);
+                })
+                ->leftJoin('pillars as p', 'p.id', '=', 'pm.pillar_id')
+                ->withCount(['questions'])
+                ->orderBy('pm.created_at', 'asc')
+                ->select('modules.*')
+                ->selectRaw($selectRaw);
+        } else {
+            $query = Module::query()
+                ->where('modules.name', 'like', '%'.$this->search.'%')
+                ->whereHas('methodologies', function ($q) {
+                    $q->where('methodology_id', $this->methodologyId);
+                })
+                ->when($this->tagFilter, function ($q) {
+                    $q->whereJsonContains('modules.tags', (int) $this->tagFilter);
+                })
+                ->join('methodology_module as mm', function ($join) {
+                    $join->on('mm.module_id', '=', 'modules.id')
+                        ->where('mm.methodology_id', '=', $this->methodologyId);
+                })
+                ->withCount(['questions'])
+                ->orderBy('mm.created_at', 'asc')
+                ->select('modules.*')
+                ->selectRaw('mm.weight as mm_weight, mm.number_of_questions as mm_number_of_questions, mm.minutes as mm_minutes, mm.report as mm_reports');
+        }
 
         $page = $this->getPage();
         return $query->paginate($this->perPage, ['*'], 'page', $page);
@@ -113,7 +148,17 @@ class MethodologyModulesTable extends Component
 
     public function manageQuestions(int $moduleId): void
     {
-        $this->dispatch('open-manage-methodology-module-questions', methodologyId: $this->methodologyId, moduleId: $moduleId);
+        $pillarId = null;
+        $hasPillars = \DB::table('methodology_pillar')
+            ->where('methodology_id', $this->methodologyId)
+            ->exists();
+        if ($hasPillars) {
+            $pillarId = \DB::table('pillar_module')
+                ->where('methodology_id', $this->methodologyId)
+                ->where('module_id', $moduleId)
+                ->value('pillar_id');
+        }
+        $this->dispatch('open-manage-methodology-module-questions', methodologyId: $this->methodologyId, moduleId: $moduleId, pillarId: $pillarId);
         $this->dispatch('show-modal', selector: '#methodology_questions_modal');
     }
 
@@ -180,6 +225,14 @@ class MethodologyModulesTable extends Component
             ->where('methodology_id', $methodologyId)
             ->where('module_id', $moduleId)
             ->delete();
+
+        // Remove pillar linkage if exists for this module under this methodology
+        if (\Schema::hasTable('pillar_module')) {
+            \DB::table('pillar_module')
+                ->where('methodology_id', $methodologyId)
+                ->where('module_id', $moduleId)
+                ->delete();
+        }
 
         $this->dispatch('refreshTable');
         $this->dispatch('show-toast', type: 'success', message: 'Removed successfully');

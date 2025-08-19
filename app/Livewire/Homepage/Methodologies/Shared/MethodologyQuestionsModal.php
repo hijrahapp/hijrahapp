@@ -14,6 +14,7 @@ class MethodologyQuestionsModal extends Component
 {
     public ?int $methodologyId = null;
     public ?int $moduleId = null;
+    public ?int $pillarId = null;
 
     public string $search = '';
     public string $tagSearch = '';
@@ -33,17 +34,23 @@ class MethodologyQuestionsModal extends Component
         'open-questions-config' => 'open',
     ];
 
-    public function open(int $methodologyId, ?int $moduleId = null): void
+    public function open(int $methodologyId, ?int $moduleId = null, ?int $pillarId = null): void
     {
         $this->resetState();
         $this->methodologyId = $methodologyId;
         $this->moduleId = $moduleId;
+        $this->pillarId = $pillarId;
 
         if ($this->moduleId !== null) {
             // Module context
             $existing = \DB::table('module_question')
                 ->where('methodology_id', $methodologyId)
                 ->where('module_id', $moduleId)
+                ->when(!is_null($this->pillarId), function ($q) {
+                    $q->where('pillar_id', $this->pillarId);
+                }, function ($q) {
+                    $q->whereNull('pillar_id');
+                })
                 ->orderBy('sequence')
                 ->get();
             $this->selectedQuestionIds = $existing->pluck('question_id')->toArray();
@@ -55,6 +62,11 @@ class MethodologyQuestionsModal extends Component
             $mqIds = \DB::table('module_question')
                 ->where('methodology_id', $methodologyId)
                 ->where('module_id', $moduleId)
+                ->when(!is_null($this->pillarId), function ($q) {
+                    $q->where('pillar_id', $this->pillarId);
+                }, function ($q) {
+                    $q->whereNull('pillar_id');
+                })
                 ->pluck('id');
             if ($mqIds->count() > 0) {
                 $answerWeights = \DB::table('question_answer_weights')
@@ -200,13 +212,18 @@ class MethodologyQuestionsModal extends Component
             \DB::table('module_question')
                 ->where('methodology_id', $this->methodologyId)
                 ->where('module_id', $this->moduleId)
+                ->when(!is_null($this->pillarId), function ($q) {
+                    $q->where('pillar_id', $this->pillarId);
+                }, function ($q) {
+                    $q->whereNull('pillar_id');
+                })
                 ->delete();
 
             foreach ($this->selectedQuestionIds as $questionId) {
                 $mqId = \DB::table('module_question')->insertGetId([
                     'methodology_id' => $this->methodologyId,
                     'module_id' => $this->moduleId,
-                    'pillar_id' => null,
+                    'pillar_id' => $this->pillarId,
                     'question_id' => $questionId,
                     'weight' => (float)($this->questionWeights[$questionId] ?? 0),
                     'sequence' => (int)($this->sequences[$questionId] ?? 0),
@@ -349,29 +366,10 @@ class MethodologyQuestionsModal extends Component
         $questionSuggestions = collect();
 
         if ($this->methodologyId !== null) {
-            // Suggestions list for active/filterable questions
+            // Suggestions list for active/filterable questions (search across ALL active questions)
             $query = Question::query()->where('active', true)
-                ->when(is_null($this->moduleId), function ($q) {
-                    // Limit to questions present in any module or pillar module under this methodology
-                    $moduleQIds = \DB::table('module_question')
-                        ->where('methodology_id', $this->methodologyId)
-                        ->pluck('question_id');
-                    $pillarQIds = collect();
-                    if (\Schema::hasTable('pillar_question')) {
-                        $pillarQIds = \DB::table('pillar_question')
-                            ->where('methodology_id', $this->methodologyId)
-                            ->pluck('question_id');
-                    }
-                    $ids = $moduleQIds->merge($pillarQIds)->unique();
-                    if ($ids->count() > 0) {
-                        $q->whereIn('id', $ids);
-                    } else {
-                        $q->whereRaw('1 = 0');
-                    }
-                })
                 ->when($this->search, fn($q) => $q->where('title', 'like', '%'.$this->search.'%'))
                 ->when($this->typeFilter, function ($q) {
-                    // Ensure filtering by enum string value; casting is handled on model but DB stores string
                     $q->where('type', '=', (string)$this->typeFilter);
                 })
                 ->when($this->tagSearch, function ($q) {

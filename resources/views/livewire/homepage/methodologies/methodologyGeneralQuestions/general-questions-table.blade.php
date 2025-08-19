@@ -28,7 +28,7 @@
                     @endif
                 </div>
                 <button class="kt-btn kt-btn-outline flex items-center justify-center" title="Configure" wire:click="openConfig">
-                    <i class="ki-filled ki-slider-vertical"></i>
+                    <i class="ki-filled ki-setting-4"></i>
                 </button>
             </div>
         </div>

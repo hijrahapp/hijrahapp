@@ -116,30 +116,6 @@
                 </div>
             </div>
 
-            <div data-kt-accordion="true" class="kt-accordion">
-                <div class="kt-card kt-accordion-item active" data-kt-accordion-item="true">
-                    <button
-                        id="modules_toggle"
-                        data-kt-accordion-toggle="true"
-                        aria-controls="modules_content"
-                        class="kt-accordion-toggle kt-card-header"
-                    >
-                        <h3 class="kt-card-title">Modules</h3>
-                        <span aria-hidden="true" class="kt-accordion-indicator">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus kt-accordion-indicator-on" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus kt-accordion-indicator-off" aria-hidden="true"><path d="M5 12h14"></path></svg>
-                        </span>
-                    </button>
-                    <div class="kt-accordion-content" aria-labelledby="modules_toggle" id="modules_content">
-                        <div class="kt-card-body p-5">
-                            <livewire:homepage.methodologies.methodology-modules.methodology-modules-table :methodologyId="$methodologyId" />
-                            <livewire:homepage.methodologies.methodology-modules.methodology-module-add-modal />
-                            <livewire:homepage.methodologies.shared.methodology-questions-modal />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         @elseif($type === 'complex')
 
             <div data-kt-accordion="true" class="kt-accordion">
@@ -260,6 +236,30 @@
             </div>
 
         @endif
+
+        <div data-kt-accordion="true" class="kt-accordion">
+            <div class="kt-card kt-accordion-item active" data-kt-accordion-item="true">
+                <button
+                    id="modules_toggle"
+                    data-kt-accordion-toggle="true"
+                    aria-controls="modules_content"
+                    class="kt-accordion-toggle kt-card-header"
+                >
+                    <h3 class="kt-card-title">Modules</h3>
+                    <span aria-hidden="true" class="kt-accordion-indicator">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus kt-accordion-indicator-on" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus kt-accordion-indicator-off" aria-hidden="true"><path d="M5 12h14"></path></svg>
+                    </span>
+                </button>
+                <div class="kt-accordion-content" aria-labelledby="modules_toggle" id="modules_content">
+                    <div class="kt-card-body p-5">
+                        <livewire:homepage.methodologies.methodology-modules.methodology-modules-table :methodologyId="$methodologyId" />
+                        <livewire:homepage.methodologies.methodology-modules.methodology-module-add-modal />
+                        <livewire:homepage.methodologies.shared.methodology-questions-modal />
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- General Questions (always visible) -->
         <div data-kt-accordion="true" class="kt-accordion">

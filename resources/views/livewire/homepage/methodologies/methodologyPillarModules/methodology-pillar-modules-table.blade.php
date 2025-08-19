@@ -1,7 +1,7 @@
 <div>
     <div class="kt-card kt-card-grid kt-card-div h-full min-w-full">
         <div class="kt-card-header flex justify-between items-center">
-            <h3 class="kt-card-title">Modules</h3>
+            <h3 class="kt-card-title">Modules in Pillars</h3>
             <div class="flex gap-2 items-center">
                 <div class="kt-input max-w-48">
                     <i class="ki-filled ki-magnifier"></i>
@@ -27,7 +27,7 @@
                         </div>
                     @endif
                 </div>
-                <button class="kt-btn kt-btn-outline flex items-center justify-center" title="Add Module" wire:click="openAddModal">
+                <button class="kt-btn kt-btn-outline flex items-center justify-center" title="Link Module" wire:click="openAddModal">
                     <i class="ki-filled ki-plus"></i>
                 </button>
             </div>
@@ -39,14 +39,9 @@
                         <tr>
                             <th class="w-20 text-center">#</th>
                             <th class="">Name</th>
-                            <th class="">Report</th>
-                            @if(\DB::table('methodology_pillar')->where('methodology_id', $methodology->id)->exists())
-                                <th class="">Pillar</th>
-                            @endif
+                            <th class="">Pillar</th>
                             <th class="">Dependencies</th>
-                            <th class="w-28 text-center">Number of Questions</th>
-                            <th class="w-20 text-center">Minutes</th>
-                            <th class="w-20 text-center">Weight</th>
+                            <th class="w-28 text-center">Module Questions</th>
                             <th class="w-20 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -55,14 +50,7 @@
                             <tr>
                                 <td class="text-center">{{ $modules->firstItem() + $index }}</td>
                                 <td class="">{{ $module->name }}</td>
-                                <td>
-                                    <div class="max-w-xs truncate" title="{{ $module->mm_reports }}">
-                                        {{ Str::limit($module->mm_reports, 50) }}
-                                    </div>
-                                </td>
-                                @if(\DB::table('methodology_pillar')->where('methodology_id', $methodology->id)->exists())
-                                    <td>{{ $module->pillar_name ?? '-' }}</td>
-                                @endif
+                                <td class="">{{ $module->pillar_name ?? '-' }}</td>
                                 <td>
                                     @php
                                         $dependencyNames = $this->getDependencyNames($module->id);
@@ -79,9 +67,7 @@
                                         <span class="text-gray-400 text-sm">No dependencies</span>
                                     @endif
                                 </td>
-                                <td class="text-center">{{ $module->mm_number_of_questions ?? 0 }}</td>
-                                <td class="text-center">{{ $module->mm_minutes ?? 0 }}</td>
-                                <td class="text-center">{{ $module->mm_weight !== null ? (int) $module->mm_weight : '-' }}%</td>
+                                <td class="text-center">{{ (int)($module->mq_count ?? 0) }}</td>
                                 <td class="text-center" wire:ignore>
                                     <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">
                                         <button class="kt-btn kt-btn-outline" data-kt-dropdown-toggle="true">
@@ -90,21 +76,21 @@
                                         <div class="kt-dropdown-menu w-52" data-kt-dropdown-menu="true">
                                             <ul class="kt-dropdown-menu-sub">
                                                 <li>
-                                                    <a class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="manageQuestions({{ $module->id }})">
+                                                    <a class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="manageQuestions({{ $module->id }}, {{ $module->pm_pillar_id }})">
                                                         <i class="ki-filled ki-question-2"></i>
                                                         Manage Questions
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="openEditModal({{ $module->id }})">
+                                                    <a class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="openEditModal({{ $module->id }}, {{ $module->pm_pillar_id }})">
                                                         <i class="ki-filled ki-pencil"></i>
                                                         Edit
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="openDeleteModal({{ $module->id }})">
+                                                    <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="openDeleteModal({{ $module->id }}, {{ $module->pm_pillar_id }})">
                                                         <i class="ki-filled ki-trash"></i>
-                                                        Remove
+                                                        Unlink
                                                     </a>
                                                 </li>
                                             </ul>
@@ -114,7 +100,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4">No Modules found.</td>
+                                <td colspan="6" class="text-center py-4">No Modules found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -131,8 +117,9 @@
         </div>
     </div>
 
-    {{-- Pagination outside the table card --}}
     <x-ktui-pagination :paginator="$modules" />
 </div>
+
+
 
 

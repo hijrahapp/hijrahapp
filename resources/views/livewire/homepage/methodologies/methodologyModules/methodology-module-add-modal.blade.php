@@ -32,6 +32,28 @@
                     @endif
                 </div>
 
+                @if($enablePillarSelection)
+                <div>
+                    <label class="block text-sm font-medium mb-1">Pillar <span class="text-destructive">*</span></label>
+                    <div class="relative">
+                        <div class="kt-input">
+                            <i class="ki-filled ki-signpost"></i>
+                            <input type="text" class="kt-input" placeholder="Search methodology pillars" wire:model.live="pillarSearch" />
+                        </div>
+                        @if($showPillarSuggestions && count($pillarSuggestions) > 0)
+                            <div class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                                @foreach($pillarSuggestions as $suggestion)
+                                    <button type="button" class="w-full text-left px-4 py-2 hover:bg-gray-100" wire:click="selectPillar({{ $suggestion['id'] }}, '{{ $suggestion['name'] }}')">
+                                        {{ $suggestion['name'] }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                    @error('selectedPillarId')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                </div>
+                @endif
+
                 <div class="{{ $isEditMode ? 'opacity-60' : '' }}">
                     <label class="block text-sm font-medium mb-1">Number of Questions</label>
                     @if($isEditMode)
