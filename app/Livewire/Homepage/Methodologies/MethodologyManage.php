@@ -28,6 +28,28 @@ class MethodologyManage extends Component
     public string $firstSectionName = '';
     public string $secondSectionName = '';
 
+    // Section 1 fields
+    public string $firstSectionDescription = '';
+    public string $firstSectionDefinition = '';
+    public string $firstSectionObjectives = '';
+    public string $firstSectionNumberOfPillars = '';
+    public string $firstSectionPillarsDefinition = '';
+    public string $firstSectionImgUrl = '';
+    public string $firstSectionNumberOfQuestions = '';
+    public string $firstSectionMinutes = '';
+    public string $firstSectionBrief = '';
+
+    // Section 2 fields
+    public string $secondSectionDescription = '';
+    public string $secondSectionDefinition = '';
+    public string $secondSectionObjectives = '';
+    public string $secondSectionNumberOfPillars = '';
+    public string $secondSectionPillarsDefinition = '';
+    public string $secondSectionImgUrl = '';
+    public string $secondSectionNumberOfQuestions = '';
+    public string $secondSectionMinutes = '';
+    public string $secondSectionBrief = '';
+
     protected function rules(): array
     {
         return [
@@ -65,6 +87,28 @@ class MethodologyManage extends Component
         $this->numberOfPillars = (string)($methodology->number_of_pillars ?? '');
         $this->firstSectionName = $methodology->first_section_name ?? '';
         $this->secondSectionName = $methodology->second_section_name ?? '';
+
+        // Prefill section 1 details
+        $this->firstSectionDescription = $methodology->first_section_description ?? '';
+        $this->firstSectionDefinition = $methodology->first_section_definition ?? '';
+        $this->firstSectionObjectives = $methodology->first_section_objectives ?? '';
+        $this->firstSectionNumberOfPillars = (string)($methodology->first_section_number_of_pillars ?? '');
+        $this->firstSectionPillarsDefinition = $methodology->first_section_pillars_definition ?? '';
+        $this->firstSectionImgUrl = $methodology->first_section_img_url ?? '';
+        $this->firstSectionNumberOfQuestions = (string)($methodology->first_section_number_of_questions ?? '');
+        $this->firstSectionMinutes = (string)($methodology->first_section_minutes ?? '');
+        $this->firstSectionBrief = $methodology->first_section_brief ?? '';
+
+        // Prefill section 2 details
+        $this->secondSectionDescription = $methodology->second_section_description ?? '';
+        $this->secondSectionDefinition = $methodology->second_section_definition ?? '';
+        $this->secondSectionObjectives = $methodology->second_section_objectives ?? '';
+        $this->secondSectionNumberOfPillars = (string)($methodology->second_section_number_of_pillars ?? '');
+        $this->secondSectionPillarsDefinition = $methodology->second_section_pillars_definition ?? '';
+        $this->secondSectionImgUrl = $methodology->second_section_img_url ?? '';
+        $this->secondSectionNumberOfQuestions = (string)($methodology->second_section_number_of_questions ?? '');
+        $this->secondSectionMinutes = (string)($methodology->second_section_minutes ?? '');
+        $this->secondSectionBrief = $methodology->second_section_brief ?? '';
     }
 
     public function saveBasicDetails()
@@ -160,11 +204,29 @@ class MethodologyManage extends Component
 
             $this->validate([
                 'firstSectionName' => 'required|string|min:3',
+                'firstSectionDescription' => 'required|string|min:3',
+                'firstSectionDefinition' => 'required|string|min:3',
+                'firstSectionObjectives' => 'nullable|string',
+                'firstSectionNumberOfPillars' => 'nullable|string',
+                'firstSectionPillarsDefinition' => 'nullable|string',
+                'firstSectionImgUrl' => 'required|string',
+                'firstSectionNumberOfQuestions' => 'nullable|string',
+                'firstSectionMinutes' => 'nullable|string',
+                'firstSectionBrief' => 'nullable|string',
             ]);
 
             $methodology = Methodology::findOrFail($this->methodologyId);
             $methodology->update([
                 'first_section_name' => $this->firstSectionName,
+                'first_section_description' => $this->firstSectionDescription,
+                'first_section_definition' => $this->firstSectionDefinition,
+                'first_section_objectives' => $this->firstSectionObjectives,
+                'first_section_number_of_pillars' => $this->firstSectionNumberOfPillars,
+                'first_section_pillars_definition' => $this->firstSectionPillarsDefinition,
+                'first_section_img_url' => $this->firstSectionImgUrl ?: null,
+                'first_section_number_of_questions' => $this->firstSectionNumberOfQuestions,
+                'first_section_minutes' => $this->firstSectionMinutes,
+                'first_section_brief' => $this->firstSectionBrief,
             ]);
 
             $this->dispatch('show-toast', type: 'success', message: 'Section 1 details saved.');
@@ -189,11 +251,29 @@ class MethodologyManage extends Component
 
             $this->validate([
                 'secondSectionName' => 'required|string|min:3',
+                'secondSectionDescription' => 'required|string|min:3',
+                'secondSectionDefinition' => 'required|string|min:3',
+                'secondSectionObjectives' => 'nullable|string',
+                'secondSectionNumberOfPillars' => 'nullable|string',
+                'secondSectionPillarsDefinition' => 'nullable|string',
+                'secondSectionImgUrl' => 'required|string',
+                'secondSectionNumberOfQuestions' => 'nullable|string',
+                'secondSectionMinutes' => 'nullable|string',
+                'secondSectionBrief' => 'nullable|string',
             ]);
 
             $methodology = Methodology::findOrFail($this->methodologyId);
             $methodology->update([
                 'second_section_name' => $this->secondSectionName,
+                'second_section_description' => $this->secondSectionDescription,
+                'second_section_definition' => $this->secondSectionDefinition,
+                'second_section_objectives' => $this->secondSectionObjectives,
+                'second_section_number_of_pillars' => $this->secondSectionNumberOfPillars,
+                'second_section_pillars_definition' => $this->secondSectionPillarsDefinition,
+                'second_section_img_url' => $this->secondSectionImgUrl ?: null,
+                'second_section_number_of_questions' => $this->secondSectionNumberOfQuestions,
+                'second_section_minutes' => $this->secondSectionMinutes,
+                'second_section_brief' => $this->secondSectionBrief,
             ]);
 
             $this->dispatch('show-toast', type: 'success', message: 'Section 2 details saved.');

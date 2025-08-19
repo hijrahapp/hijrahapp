@@ -22,6 +22,8 @@ class MethodologyPillarAddModal extends Component
 
 	public string $numberOfModules = '';
 	public string $weight = '';
+	public string $sectionNumber = '1';
+	public string $methodologyType = '';
 
 	public array $dependencyIds = [];
 	public array $dependencySuggestions = [];
@@ -40,6 +42,7 @@ class MethodologyPillarAddModal extends Component
 		$this->methodologyId = $methodologyId;
 		$methodology = Methodology::findOrFail($methodologyId);
 		$this->isActiveMethodology = (bool) $methodology->active;
+		$this->methodologyType = $methodology->type;
 	}
 
 	protected function rules(): array
@@ -50,6 +53,7 @@ class MethodologyPillarAddModal extends Component
 			'weight' => 'nullable|numeric',
 			'dependencyIds' => 'array',
 			'dependencyIds.*' => 'integer|exists:pillars,id',
+			'sectionNumber' => 'nullable|in:1,2',
 		];
 	}
 
@@ -129,7 +133,12 @@ class MethodologyPillarAddModal extends Component
 				'weight' => 'nullable|numeric',
 			]);
 		} else {
-			$this->validate($this->rules());
+			$rules = $this->rules();
+			if ($this->methodologyType === 'twoSection' && $this->sectionNumber === '2') {
+				$rules['dependencyIds'] = 'required|array|min:1';
+				$rules['dependencyIds.*'] = 'integer|exists:pillars,id';
+			}
+			$this->validate($rules);
 		}
 
 		if ($this->selectedPillarId && in_array($this->selectedPillarId, $this->dependencyIds, true)) {
@@ -167,6 +176,9 @@ class MethodologyPillarAddModal extends Component
 						'number_of_modules' => $existing->number_of_modules ?? null,
 						'weight' => $this->weight !== '' ? (float)$this->weight : ($existing->weight ?? null),
 						'sequence' => $sequence,
+						'section' => $this->methodologyType === 'twoSection'
+							? ($this->sectionNumber === '2' ? 'second' : 'first')
+							: ($existing->section ?? 'first'),
 						'updated_at' => now(),
 						'created_at' => $existing->created_at ?? now(),
 					]
@@ -188,6 +200,9 @@ class MethodologyPillarAddModal extends Component
 					'number_of_modules' => (int) $this->numberOfModules,
 					'weight' => $this->weight,
 					'sequence' => $maxSequence + 1,
+					'section' => $this->methodologyType === 'twoSection'
+						? ($this->sectionNumber === '2' ? 'second' : 'first')
+						: 'first',
 					'updated_at' => now(),
 					'created_at' => now(),
 				]
@@ -236,6 +251,7 @@ class MethodologyPillarAddModal extends Component
 		$this->dependencySuggestions = [];
 		$this->dependencySearch = '';
 		$this->showDependencySuggestions = false;
+		$this->sectionNumber = '1';
 	}
 
 	public function closeModal(): void
@@ -267,6 +283,7 @@ class MethodologyPillarAddModal extends Component
 		$this->editingPillarId = $pillarId;
 		$methodology = Methodology::findOrFail($methodologyId);
 		$this->isActiveMethodology = (bool) $methodology->active;
+		$this->methodologyType = $methodology->type;
 
 		$pillar = Pillar::findOrFail($pillarId);
 		$this->pillarName = $pillar->name;
@@ -280,6 +297,9 @@ class MethodologyPillarAddModal extends Component
 
 		$this->numberOfModules = $pivot && $pivot->number_of_modules !== null ? (string)$pivot->number_of_modules : '';
 		$this->weight = $pivot && $pivot->weight !== null ? (int)$pivot->weight : 0;
+		if ($pivot && property_exists($pivot, 'section')) {
+			$this->sectionNumber = $pivot->section === 'second' ? '2' : '1';
+		}
 
 		$this->dependencyIds = \DB::table('pillar_dependencies')
 			->where('methodology_id', $this->methodologyId)

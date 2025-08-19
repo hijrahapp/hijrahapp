@@ -79,10 +79,17 @@ class MethodologyModuleAddModal extends Component
             return;
         }
 
-        $excludedIds = \DB::table('methodology_module')
+        $excludedDirect = \DB::table('methodology_module')
             ->where('methodology_id', $this->methodologyId)
             ->pluck('module_id')
             ->toArray();
+
+        $excludedViaPillar = \DB::table('pillar_module')
+            ->where('methodology_id', $this->methodologyId)
+            ->pluck('module_id')
+            ->toArray();
+
+        $excludedIds = array_values(array_unique(array_merge($excludedDirect, $excludedViaPillar)));
 
         $this->moduleSuggestions = Module::where('name', 'like', "%{$this->moduleSearch}%")
             ->where('active', true)

@@ -152,29 +152,6 @@
                 </div>
             </div>
 
-            <div data-kt-accordion="true" class="kt-accordion">
-                <div class="kt-card kt-accordion-item active" data-kt-accordion-item="true">
-                    <button
-                        id="pillars_toggle"
-                        data-kt-accordion-toggle="true"
-                        aria-controls="pillars_content"
-                        class="kt-accordion-toggle kt-card-header"
-                    >
-                        <h3 class="kt-card-title">Pillars</h3>
-                        <span aria-hidden="true" class="kt-accordion-indicator">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus kt-accordion-indicator-on" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus kt-accordion-indicator-off" aria-hidden="true"><path d="M5 12h14"></path></svg>
-                        </span>
-                    </button>
-                    <div class="kt-accordion-content" aria-labelledby="pillars_toggle" id="pillars_content">
-                        <div class="kt-card-body p-5">
-                            <livewire:homepage.methodologies.methodology-pillars.methodology-pillars-table :methodologyId="$methodologyId" />
-                            <livewire:homepage.methodologies.methodology-pillars.methodology-pillar-add-modal />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         @elseif($type === 'twoSection')
 
             <div data-kt-accordion="true" class="kt-accordion">
@@ -197,6 +174,68 @@
                                 <label class="block text-sm font-medium mb-1">Name <span class="text-destructive">*</span></label>
                                 <input type="text" class="kt-input w-full" wire:model.defer="firstSectionName" placeholder="Enter section 1 name" />
                                 @error('firstSectionName')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
+                                <textarea class="kt-textarea w-full" rows="2" wire:model.defer="firstSectionDescription" placeholder="Enter section 1 description"></textarea>
+                                @error('firstSectionDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium mb-1">Definition <span class="text-destructive">*</span></label>
+                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="firstSectionDefinition" placeholder="Enter section 1 definition"></textarea>
+                                @error('firstSectionDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium mb-1">Objectives</label>
+                                <livewire:shared.components.rich-text :model="$firstSectionObjectives" wire:model="firstSectionObjectives" :placeholder="'Enter section 1 objectives'" :editorId="'manage_section1_objectives_editor'" :minHeight="'120px'" />
+                                @error('firstSectionObjectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium mb-1">Number of Pillars</label>
+                                <input type="text" class="kt-input w-full" wire:model.defer="firstSectionNumberOfPillars" placeholder="Enter number of pillars" />
+                                @error('firstSectionNumberOfPillars')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium mb-1">Pillars Definition</label>
+                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="firstSectionPillarsDefinition" placeholder="Enter pillars definition"></textarea>
+                                @error('firstSectionPillarsDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-4">
+                                <livewire:shared.components.image-picker
+                                    wire:model="firstSectionImgUrl"
+                                    :label="'Section 1 Image'"
+                                    :required="true"
+                                    key="{{ $methodologyId ? 'manage_edit_section1' : 'manage_new_section1' }}" />
+                                @error('firstSectionImgUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-6">
+                                <h4 class="text-md font-medium mb-3">General Questions Details</h4>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Number of Questions</label>
+                                        <input type="text" class="kt-input w-full" wire:model.defer="firstSectionNumberOfQuestions" placeholder="Enter number of questions" />
+                                        @error('firstSectionNumberOfQuestions')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Minutes</label>
+                                        <input type="text" class="kt-input w-full" wire:model.defer="firstSectionMinutes" placeholder="Enter minutes" />
+                                        @error('firstSectionMinutes')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium mb-1">Brief</label>
+                                    <textarea class="kt-textarea w-full" rows="3" wire:model.defer="firstSectionBrief" placeholder="Enter brief description"></textarea>
+                                    @error('firstSectionBrief')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                                </div>
                             </div>
                         </div>
                         <div class="kt-card-footer flex items-center justify-end gap-2">
@@ -227,6 +266,68 @@
                                 <input type="text" class="kt-input w-full" wire:model.defer="secondSectionName" placeholder="Enter section 2 name" />
                                 @error('secondSectionName')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
+                                <textarea class="kt-textarea w-full" rows="2" wire:model.defer="secondSectionDescription" placeholder="Enter section 2 description"></textarea>
+                                @error('secondSectionDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium mb-1">Definition <span class="text-destructive">*</span></label>
+                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="secondSectionDefinition" placeholder="Enter section 2 definition"></textarea>
+                                @error('secondSectionDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium mb-1">Objectives</label>
+                                <livewire:shared.components.rich-text :model="$secondSectionObjectives" wire:model="secondSectionObjectives" :placeholder="'Enter section 2 objectives'" :editorId="'manage_section2_objectives_editor'" :minHeight="'120px'" />
+                                @error('secondSectionObjectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium mb-1">Number of Pillars</label>
+                                <input type="text" class="kt-input w-full" wire:model.defer="secondSectionNumberOfPillars" placeholder="Enter number of pillars" />
+                                @error('secondSectionNumberOfPillars')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium mb-1">Pillars Definition</label>
+                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="secondSectionPillarsDefinition" placeholder="Enter pillars definition"></textarea>
+                                @error('secondSectionPillarsDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-4">
+                                <livewire:shared.components.image-picker
+                                    wire:model="secondSectionImgUrl"
+                                    :label="'Section 2 Image'"
+                                    :required="true"
+                                    key="{{ $methodologyId ? 'manage_edit_section2' : 'manage_new_section2' }}" />
+                                @error('secondSectionImgUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="mt-6">
+                                <h4 class="text-md font-medium mb-3">General Questions Details</h4>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Number of Questions</label>
+                                        <input type="text" class="kt-input w-full" wire:model.defer="secondSectionNumberOfQuestions" placeholder="Enter number of questions" />
+                                        @error('secondSectionNumberOfQuestions')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Minutes</label>
+                                        <input type="text" class="kt-input w-full" wire:model.defer="secondSectionMinutes" placeholder="Enter minutes" />
+                                        @error('secondSectionMinutes')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium mb-1">Brief</label>
+                                    <textarea class="kt-textarea w-full" rows="3" wire:model.defer="secondSectionBrief" placeholder="Enter brief description"></textarea>
+                                    @error('secondSectionBrief')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                                </div>
+                            </div>
                         </div>
                         <div class="kt-card-footer flex items-center justify-end gap-2">
                             <button class="kt-btn kt-btn-primary" wire:click="saveSection2Details">Save</button>
@@ -235,6 +336,31 @@
                 </div>
             </div>
 
+        @endif
+
+        @if($type === 'complex' || $type === 'twoSection')
+        <div data-kt-accordion="true" class="kt-accordion">
+            <div class="kt-card kt-accordion-item active" data-kt-accordion-item="true">
+                <button
+                    id="pillars_toggle"
+                    data-kt-accordion-toggle="true"
+                    aria-controls="pillars_content"
+                    class="kt-accordion-toggle kt-card-header"
+                >
+                    <h3 class="kt-card-title">Pillars</h3>
+                    <span aria-hidden="true" class="kt-accordion-indicator">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus kt-accordion-indicator-on" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus kt-accordion-indicator-off" aria-hidden="true"><path d="M5 12h14"></path></svg>
+                    </span>
+                </button>
+                <div class="kt-accordion-content" aria-labelledby="pillars_toggle" id="pillars_content">
+                    <div class="kt-card-body p-5">
+                        <livewire:homepage.methodologies.methodology-pillars.methodology-pillars-table :methodologyId="$methodologyId" />
+                        <livewire:homepage.methodologies.methodology-pillars.methodology-pillar-add-modal />
+                    </div>
+                </div>
+            </div>
+        </div>
         @endif
 
         <div data-kt-accordion="true" class="kt-accordion">

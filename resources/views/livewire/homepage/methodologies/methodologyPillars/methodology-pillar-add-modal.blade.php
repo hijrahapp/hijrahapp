@@ -62,8 +62,33 @@
                     @error('weight')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
 
+                @if($methodologyType === 'twoSection')
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Section</label>
+                        <div class="flex items-center gap-6">
+                            <label class="inline-flex items-center gap-2">
+                                <input type="radio" class="kt-radio" name="section_number" value="1" wire:model.live="sectionNumber" @if($isEditMode) disabled @endif />
+                                <span>Section 1</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2">
+                                <input type="radio" class="kt-radio" name="section_number" value="2" wire:model.live="sectionNumber" @if($isEditMode) disabled @endif />
+                                <span>Section 2</span>
+                            </label>
+                        </div>
+                        @error('sectionNumber')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                    </div>
+                @endif
+
                 <div class="{{ $isEditMode ? 'opacity-60 pointer-events-none' : '' }}">
-                    <label class="block text-sm font-medium mb-1">Dependency (optional)</label>
+                    <label class="block text-sm font-medium mb-1">
+                        Dependency
+                        @if($methodologyType === 'twoSection' && $sectionNumber === '2')
+                            <span class="text-destructive">*</span>
+                            <span class="text-xs text-destructive ml-1">(required for Section 2)</span>
+                        @else
+                            <span class="text-xs text-secondary-foreground/70 ml-1">(optional)</span>
+                        @endif
+                    </label>
                     <p class="text-xs text-secondary-foreground/70 mb-2">Select existing linked pillars this pillar depends on.</p>
                     <div class="relative">
                         <div class="kt-input">
@@ -90,6 +115,7 @@
                             @endforeach
                         </ul>
                     @endif
+                    @error('dependencyIds')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
             </div>
             <div class="kt-modal-footer flex gap-2 justify-end p-5">

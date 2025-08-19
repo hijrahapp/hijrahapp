@@ -40,6 +40,9 @@
                             <th class="w-20 text-center">#</th>
                             <th class="">Name</th>
                             <th class="">Dependencies</th>
+                            @if(($methodology->type ?? null) === 'twoSection')
+                                <th class="w-28 text-center">Section</th>
+                            @endif
                             <th class="w-28 text-center">Number of Modules</th>
                             <th class="w-20 text-center">Weight</th>
                             <th class="w-20 text-center">Actions</th>
@@ -66,6 +69,15 @@
                                         <span class="text-gray-400 text-sm">No dependencies</span>
                                     @endif
                                 </td>
+                                @if(($methodology->type ?? null) === 'twoSection')
+                                    @php
+                                        $section = \DB::table('methodology_pillar')
+                                            ->where('methodology_id', $this->methodologyId)
+                                            ->where('pillar_id', $pillar->id)
+                                            ->value('section');
+                                    @endphp
+                                    <td class="text-center">{{ $section === 'second' ? '2' : '1' }}</td>
+                                @endif
                                 <td class="text-center">{{ $pillar->mp_number_of_modules ?? 0 }}</td>
                                 <td class="text-center">{{ $pillar->mp_weight !== null ? (int) $pillar->mp_weight : '-' }}%</td>
                                 <td class="text-center" wire:ignore>
