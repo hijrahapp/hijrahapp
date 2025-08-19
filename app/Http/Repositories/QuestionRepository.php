@@ -148,6 +148,7 @@ class QuestionRepository
             foreach ($questions as $question) {
                 $question->setAttribute('module_id', $module->id);
                 $question->setAttribute('module_name', $module->name);
+                $question->setAttribute('questionId_moduleId', $question->id . '_' . $module->id);
                 $result[] = new QuestionResource($question);
             }
         }

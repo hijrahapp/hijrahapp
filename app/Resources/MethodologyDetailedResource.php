@@ -106,7 +106,7 @@ class MethodologyDetailedResource extends JsonResource
             'size' => $this->questions_count,
             'list' => $questionsList,
         ]);
-        if ($questionsList->count() > 0) {
+        if ($questionsList && $questionsList->count() > 0) {
             $payload['questions'] = $this->filterArray($questions);
         }
 

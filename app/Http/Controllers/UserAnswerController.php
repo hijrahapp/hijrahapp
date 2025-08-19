@@ -73,16 +73,26 @@ class UserAnswerController
     public function submitPillarAnswers(Request $request, int $methodologyId, int $pillarId): JsonResponse
     {
         try {
-            // Accept grouped answers by module for pillar submissions
-            $validator = Validator::make($request->all(), [
-                'answers' => 'required|array|min:1',
-                'answers.*' => 'required|array|min:1',
-                'answers.*.module_id' => 'required|integer|exists:modules,id',
-                'answers.*.question_id' => 'required|integer|exists:questions,id',
-                'answers.*.answerIds' => 'required|array|min:1',
-                'answers.*.answerIds.*' => 'integer|exists:answers,id',
-            ]);
+            $userId = $request->authUser->id;
 
+            $answers = $request->input('answers');
+            $answers = collect($answers)->map(function ($answer) {
+                if (str_contains($answer['question_id'], '_')) {
+                    $parts = explode('_', $answer['question_id']);
+                    $answer['question_id'] = $parts[0];
+                    $answer['module_id'] = $parts[1];
+                }
+                return $answer;
+            })->all();
+
+            // Accept grouped answers by module for pillar submissions
+            $validator = Validator::make($answers, [
+                '*' => 'required|array|min:1',
+                '*.module_id' => 'required|integer|exists:modules,id',
+                '*.question_id' => 'required|exists:questions,id',
+                '*.answerIds' => 'required|array|min:1',
+                '*.answerIds.*' => 'integer|exists:answers,id',
+            ]);
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
@@ -91,9 +101,6 @@ class UserAnswerController
                 ], 422);
             }
 
-            $userId = $request->authUser->id;
-            // Flatten grouped payload into the repository's expected format per module
-            $answers = $request->input('answers');
             // Group answers by module_id
             $groupedAnswers = collect($answers)->groupBy('module_id');
             foreach ($groupedAnswers as $moduleId => $moduleGroup) {

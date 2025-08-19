@@ -33,12 +33,17 @@ class QuestionResource extends JsonResource
         }
 
         $data = [
-            'id' => $this->id,
+            'id' => $this->questionId_moduleId ?? $this->id,
+//            'id' => $this->id,
             'title' => $this->title,
             'type' => $type,
             'tags' => $this->getTagTitles($this->tags),
             'answers' => $answers,
         ];
+
+        if ($this->questionId_moduleId) {
+            $data['question_id'] = $this->id;
+        }
 
         if($this->module_id) {
             $data['module_id'] = $this->module_id;
