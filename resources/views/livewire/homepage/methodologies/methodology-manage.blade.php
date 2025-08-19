@@ -133,8 +133,8 @@
                     <div class="kt-accordion-content" aria-labelledby="modules_toggle" id="modules_content">
                         <div class="kt-card-body p-5">
                             <livewire:homepage.methodologies.methodology-modules.methodology-modules-table :methodologyId="$methodologyId" />
-                            <livewire:homepage.methodologies.methodology-modules.methodology-module-questions-modal />
                             <livewire:homepage.methodologies.methodology-modules.methodology-module-add-modal />
+                            <livewire:homepage.methodologies.shared.methodology-questions-modal />
                         </div>
                     </div>
                 </div>
@@ -278,8 +278,8 @@
                 </button>
                 <div class="kt-accordion-content" aria-labelledby="general_questions_toggle" id="general_questions_content">
                     <div class="kt-card-body p-5">
-                        <livewire:homepage.methodologies.general-questions-table :methodologyId="$methodologyId" />
-                        <livewire:homepage.methodologies.methodology-modules.methodology-module-questions-modal />
+                        <livewire:homepage.methodologies.methodology-general-questions.general-questions-table :methodologyId="$methodologyId" />
+                        <livewire:homepage.methodologies.shared.methodology-questions-modal />
                     </div>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-<div class="kt-modal hidden" data-kt-modal="true" id="methodology_module_questions_modal" wire:ignore.self>
+<div class="kt-modal hidden" data-kt-modal="true" id="methodology_questions_modal" wire:ignore.self>
     <div class="kt-modal-content max-w-[800px] top-[10%] max-h-[96vh] overflow-y-auto">
         <div class="kt-modal-header py-4 px-5">
             <span class="kt-modal-title text-xl font-semibold">Configure Questions</span>

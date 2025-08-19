@@ -114,7 +114,7 @@ class MethodologyModulesTable extends Component
     public function manageQuestions(int $moduleId): void
     {
         $this->dispatch('open-manage-methodology-module-questions', methodologyId: $this->methodologyId, moduleId: $moduleId);
-        $this->dispatch('show-modal', selector: '#methodology_module_questions_modal');
+        $this->dispatch('show-modal', selector: '#methodology_questions_modal');
     }
 
     public function openDeleteModal(int $moduleId): void

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Homepage\Methodologies\MethodologyModules;
+namespace App\Livewire\Homepage\Methodologies\Shared;
 
 use App\Enums\QuestionType;
 use App\Models\Answer;
@@ -10,7 +10,7 @@ use App\Models\Question;
 use App\Models\Tag;
 use Livewire\Component;
 
-class MethodologyModuleQuestionsModal extends Component
+class MethodologyQuestionsModal extends Component
 {
     public ?int $methodologyId = null;
     public ?int $moduleId = null;
@@ -394,7 +394,7 @@ class MethodologyModuleQuestionsModal extends Component
             ];
         }, QuestionType::cases());
 
-        return view('livewire.homepage.methodologies.methodologyModules.methodology-module-questions-modal', [
+        return view('livewire.homepage.methodologies.shared.methodology-questions-modal', [
             'questionSuggestions' => $questionSuggestions,
             'questionTypes' => $questionTypes,
         ]);

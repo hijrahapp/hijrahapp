@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Homepage\Methodologies;
+namespace App\Livewire\Homepage\Methodologies\MethodologyGeneralQuestions;
 
 use App\Models\Question;
 use App\Models\Tag;
@@ -55,7 +55,7 @@ class GeneralQuestionsTable extends Component
     public function openConfig(): void
     {
         $this->dispatch('open-manage-methodology-module-questions', methodologyId: $this->methodologyId, moduleId: null);
-        $this->dispatch('show-modal', selector: '#methodology_module_questions_modal');
+        $this->dispatch('show-modal', selector: '#methodology_questions_modal');
     }
 
     public function remove(int $questionId): void
@@ -96,7 +96,7 @@ class GeneralQuestionsTable extends Component
     public function render()
     {
         $questions = $this->getQuestions();
-        return view('livewire.homepage.methodologies.general-questions-table', compact('questions'));
+        return view('livewire.homepage.methodologies.methodologyGeneralQuestions.general-questions-table', compact('questions'));
     }
 }
 
