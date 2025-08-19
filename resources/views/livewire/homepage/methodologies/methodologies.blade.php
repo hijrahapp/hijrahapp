@@ -8,5 +8,4 @@
     </div>
     <livewire:homepage.methodologies.methodology-table />
     <livewire:homepage.methodologies.methodology-add-modal />
-    <livewire:homepage.methodologies.methodology-sections-modal />
 </div>

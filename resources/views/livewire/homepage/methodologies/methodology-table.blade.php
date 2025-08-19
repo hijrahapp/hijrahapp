@@ -104,23 +104,8 @@
                                                     Manage
                                                 </a>
                                             </li>
-                                            @if($methodology->type === 'twoSection')
-                                                <li>
-                                                    <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="manageSections({{ $methodology->id }})">
-                                                        <i class="ki-filled ki-slider-vertical"></i>
-                                                        Manage Sections
-                                                    </a>
-                                                </li>
-                                            @endif
                                             
                                             <li class="kt-dropdown-menu-separator"></li>
-                                            
-                                            <li>
-                                                <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="editMethodology({{ $methodology->id }})">
-                                                    <i class="ki-filled ki-pencil"></i>
-                                                    Edit
-                                                </a>
-                                            </li>
                                             
                                             <li>
                                                 <a href="#" class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="openDeleteMethodologyModal({{ Js::from(['id' => $methodology->id]) }})">
