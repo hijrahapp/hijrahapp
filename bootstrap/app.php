@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.role' => \App\Http\Middleware\RoleMiddleware::class,
             'locale' => \App\Http\Middleware\LocaleMiddleware::class
         ]);
+
+        // Register global request logging middleware
+        $middleware->append(\App\Http\Middleware\LogRequestMiddleware::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
