@@ -74,9 +74,7 @@ class ModuleDetailedResource extends JsonResource
         $questions['estimatedTime'] = $pivotEstimatedTime;
         $questions['size'] = count($questions['list']);
         $questions = $this->filterArray($questions);
-        if ($questions['list'] && count($questions['list']) > 0) {
-            $payload['questions'] = $questions;
-        }
+        $payload['questions'] = $questions;
 
         $result = $this->calculateResult();
         if ($result) {

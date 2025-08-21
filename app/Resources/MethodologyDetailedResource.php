@@ -93,16 +93,13 @@ class MethodologyDetailedResource extends JsonResource
 
         // Questions block (include list only when loaded and non-empty)
         if ($sectionNumber == null ||$sectionNumber !== 2) {
-
             $questionsRepo = new QuestionRepository();
             $questions = $questionsRepo->getQuestionsByContext('methodology', $this->id);
             $questions['description'] = $this->questions_description;
             $questions['estimatedTime'] = $this->questions_estimated_time;
             $questions['size'] = count($questions['list']);
             $questions = $this->filterArray($questions);
-            if ($questions['list'] && count($questions['list']) > 0) {
-                $payload['questions'] = $questions;
-            }
+            $payload['questions'] = $questions;
         }
 
         // Pillars block
