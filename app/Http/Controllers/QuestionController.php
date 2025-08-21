@@ -19,8 +19,18 @@ class QuestionController
      */
     public function getMethodologyQuestions(int $contextId): JsonResponse
     {
-        $context = 'methodology';
-        return $this->getContextQuestions($context, $contextId);
+        try{
+            $questions = $this->questionRepo->getQuestionsByContext('methodology', $contextId);
+
+            return response()->json($questions);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.error_fetching_questions'),
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -34,8 +44,8 @@ class QuestionController
     {
         try {
             // Return questions grouped by modules under this pillar for the methodology
-            $response = $this->questionRepo->getPillarModuleQuestionsGrouped($methodologyId, $pillarId);
-            return response()->json($response);
+            $questions = $this->questionRepo->getQuestionsByContext('pillar', $pillarId, $methodologyId);
+            return response()->json($questions);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -56,7 +66,7 @@ class QuestionController
     {
         try {
             $questions = $this->questionRepo->getQuestionsByContext('module', $moduleId, $methodologyId);
-            return response()->json(QuestionResource::collection($questions));
+            return response()->json($questions);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -78,32 +88,11 @@ class QuestionController
     {
         try {
             $questions = $this->questionRepo->getQuestionsByContext('module', $moduleId, $methodologyId, $pillarId);
-            return response()->json(QuestionResource::collection($questions));
+            return response()->json($questions);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.error_fetching_module_questions_for_pillar'),
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function getContextQuestions(string $context, int $contextId): JsonResponse {
-        try{
-            $questions = $this->questionRepo->getQuestionsByContext($context, $contextId);
-
-            return response()->json(QuestionResource::collection($questions));
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => __('messages.validation_failed'),
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => __('messages.error_fetching_questions'),
                 'error' => $e->getMessage()
             ], 500);
         }

@@ -8,7 +8,7 @@ use App\Models\Methodology;
 use App\Models\Module;
 use App\Models\Pillar;
 use App\Models\Question;
-use App\Models\QuestionAnswerWeight;
+use App\Models\AnswerContext;
 use App\Models\Tag;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -59,9 +59,9 @@ class DemoSeeder extends Seeder
         \DB::table('questions_answers')->delete();
 
         // Clear main tables
-        \DB::table('question_answer_weights')->delete();
+        \DB::table('answer_contexts')->delete();
         \DB::table('user_answers')->delete();
-        
+
         // Clear core tables
         \DB::table('modules')->delete();
         \DB::table('pillars')->delete();
@@ -99,25 +99,25 @@ class DemoSeeder extends Seeder
             // Yes/No answers
             'Yes',
             'No',
-            
+
             // True/False answers
             'True',
             'False',
-            
+
             // Rating scale 1-5
             '1',
             '2',
             '3',
             '4',
             '5',
-            
+
             // Rating scale 1-10
             '6',
             '7',
             '8',
             '9',
             '10',
-            
+
             // Agree/Disagree scale
             'Strongly Agree',
             'Agree',
@@ -166,7 +166,7 @@ class DemoSeeder extends Seeder
 
             // Attach answers based on question type
             $this->attachAnswersToQuestion($question, $type);
-            
+
             $questions[$type->value] = $question;
         }
 
@@ -179,7 +179,7 @@ class DemoSeeder extends Seeder
     private function attachAnswersToQuestion(Question $question, QuestionType $type): void
     {
         $answers = collect();
-        
+
         switch ($type) {
             case QuestionType::YesNo:
                 $answers = Answer::whereIn('title', ['Yes', 'No'])->get();
@@ -211,7 +211,7 @@ class DemoSeeder extends Seeder
                     'Option C - Advanced expertise',
                     'Option D - Expert level',
                 ];
-                
+
                 foreach ($customAnswers as $answerTitle) {
                     $answer = Answer::firstOrCreate(['title' => $answerTitle]);
                     $answers->push($answer);
@@ -516,10 +516,10 @@ class DemoSeeder extends Seeder
         // Set up dependencies
         // Section 1 Pillar 2 depends on Section 1 Pillar 1
         $this->addDependency($methodology, $section1Pillar2, $section1Pillar1);
-        
+
         // Section 2 Pillar 1 depends on Section 1 Pillar 1
         $this->addDependency($methodology, $section2Pillar1, $section1Pillar1);
-        
+
         // Section 2 Pillar 2 depends on Section 1 Pillar 2
         $this->addDependency($methodology, $section2Pillar2, $section1Pillar2);
     }
@@ -548,4 +548,4 @@ class DemoSeeder extends Seeder
             ->values()
             ->all();
     }
-} 
+}

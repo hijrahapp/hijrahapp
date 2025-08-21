@@ -23,12 +23,6 @@ class PillarResource extends JsonResource
             'imgUrl' => $this->img_url,
             'tags' => $this->getTagTitles($this->tags),
             'section' => $this->pivot->section ?? null,
-            'modules' => ModuleResource::collection($this->modules->map(function ($module) {
-                $module->setAttribute('user_id', $this->user_id ?? null);
-                $module->setAttribute('pillar_id', $this->id);
-                return $module;
-            })),
-            'questions' => $this->getGroupedModuleQuestions(),
             'status' => $this->calculateStatus(),
             'result' => $this->calculateResult(),
         ];

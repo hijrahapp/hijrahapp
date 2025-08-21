@@ -18,29 +18,50 @@ class QuestionRepository
      * @param int $contextId
      * @param int|null $methodologyId
      * @param int|null $pillarId
-     * @return Collection
      */
-    public function getQuestionsByContext(string $context, int $contextId, ?int $methodologyId = null, ?int $pillarId = null): Collection
+    public function getQuestionsByContext(string $context, int $contextId, ?int $methodologyId = null, ?int $pillarId = null)
     {
+        $questions = null;
+
         switch ($context) {
             case 'methodology':
-                return $this->getQuestionsByMethodology($contextId);
+                $questions = $this->getQuestionsByMethodology($contextId);
+                break;
             case 'pillar':
-                return $this->getQuestionsByPillar($contextId, $methodologyId);
+                $questions = $this->getQuestionsByPillar($contextId, $methodologyId);
+                break;
             case 'module':
-                return $this->getQuestionsByModule($contextId, $methodologyId, $pillarId);
+                $questions = $this->getQuestionsByModule($contextId, $methodologyId, $pillarId);
+                break;
             default:
                 throw new \InvalidArgumentException("Invalid context type: {$context}");
         }
+
+        // Enrich answers with next_question_id when dependencies are configured
+        $this->attachNextQuestionDependencies($questions, $context, $contextId, $methodologyId, $pillarId);
+
+        $type = 'simple';
+        foreach ($questions as $question) {
+            foreach ($question->answers as $answer) {
+                if ($answer->next_question_id) {
+                    $type = 'dynamic';
+                    break 2;
+                }
+            }
+        }
+
+        return [
+            'type' => $type,
+            'list' => QuestionResource::collection($questions)
+        ];
     }
 
     /**
      * Get questions for a specific methodology with weights
      *
      * @param int $methodologyId
-     * @return Collection
      */
-    private function getQuestionsByMethodology(int $methodologyId): Collection
+    private function getQuestionsByMethodology(int $methodologyId)
     {
         $methodology = Methodology::with(['questions.answers'])->find($methodologyId);
 
@@ -59,7 +80,7 @@ class QuestionRepository
                 ->value('id');
 
             if ($pivotId) {
-                $weights = \App\Models\QuestionAnswerWeight::where('context_type', 'methodology_question')
+                $weights = \App\Models\AnswerContext::where('context_type', 'methodology_question')
                     ->where('context_id', $pivotId)
                     ->get()
                     ->keyBy('answer_id');
@@ -76,64 +97,8 @@ class QuestionRepository
      *
      * @param int $pillarId
      * @param int|null $methodologyId
-     * @return Collection
      */
-    private function getQuestionsByPillar(int $pillarId, ?int $methodologyId = null): Collection
-    {
-        $pillar = Pillar::with(['questions.answers'])->find($pillarId);
-
-        if (!$pillar) {
-            throw new \InvalidArgumentException("Pillar with ID {$pillarId} not found");
-        }
-
-        // LEGACY: previously returned pillar-level questions. Now we return
-        // module-level questions grouped by modules for this pillar within the methodology.
-        // If no methodology is provided, fallback to empty collection.
-        if (!$methodologyId) {
-            return collect();
-        }
-
-        $modules = $pillar->modulesForMethodology($methodologyId)->get();
-
-        // Attach questions with weights for each module
-        $grouped = collect();
-        foreach ($modules as $module) {
-            $questions = $module->questionsForPillarInMethodology($methodologyId, $pillarId)->get();
-
-            foreach ($questions as $question) {
-                $pivotId = \DB::table('module_question')
-                    ->where('module_id', $module->id)
-                    ->where('question_id', $question->id)
-                    ->where('methodology_id', $methodologyId)
-                    ->where('pillar_id', $pillarId)
-                    ->value('id');
-
-                if ($pivotId) {
-                    $weights = \App\Models\QuestionAnswerWeight::where('context_type', 'module_question')
-                        ->where('context_id', $pivotId)
-                        ->get()
-                        ->keyBy('answer_id');
-
-                    $question->setAttribute('answer_weights', $weights);
-                }
-            }
-
-            $grouped->push((object) [
-                'module_id' => $module->id,
-                'module_name' => $module->name,
-                'questions' => $questions,
-            ]);
-        }
-
-        // Flatten questions into a collection to preserve return type for compatibility.
-        // Note: Controller for pillar questions will now build grouped response explicitly.
-        return $grouped->flatMap(function ($group) { return $group->questions; });
-    }
-
-    /**
-     * New helper to fetch pillar questions grouped by modules.
-     */
-    public function getPillarModuleQuestionsGrouped(int $methodologyId, int $pillarId): array
+    private function getQuestionsByPillar(int $pillarId, ?int $methodologyId = null)
     {
         $pillar = Pillar::find($pillarId);
         if (!$pillar) {
@@ -149,7 +114,7 @@ class QuestionRepository
                 $question->setAttribute('module_id', $module->id);
                 $question->setAttribute('module_name', $module->name);
                 $question->setAttribute('questionId_moduleId', $question->id . '_' . $module->id);
-                $result[] = new QuestionResource($question);
+                $result[] = $question;
             }
         }
 
@@ -162,9 +127,8 @@ class QuestionRepository
      * @param int $moduleId
      * @param int|null $methodologyId
      * @param int|null $pillarId
-     * @return Collection
      */
-    private function getQuestionsByModule(int $moduleId, ?int $methodologyId = null, ?int $pillarId = null): Collection
+    private function getQuestionsByModule(int $moduleId, ?int $methodologyId = null, ?int $pillarId = null)
     {
         $module = Module::with(['questions.answers'])->find($moduleId);
 
@@ -195,7 +159,7 @@ class QuestionRepository
                 ->value('id');
 
             if ($pivotId) {
-                $weights = \App\Models\QuestionAnswerWeight::where('context_type', 'module_question')
+                $weights = \App\Models\AnswerContext::where('context_type', 'module_question')
                     ->where('context_id', $pivotId)
                     ->get()
                     ->keyBy('answer_id');
@@ -208,23 +172,112 @@ class QuestionRepository
     }
 
     /**
-     * Get all questions with their answers
+     * Attach next_question_id to each answer on the provided questions list based on dependencies
+     * stored in answer_contexts. When pillar context flattens module questions and a
+     * questionId_moduleId exists, use that composite id for next_question_id.
      *
-     * @return Collection
+     * @param \Illuminate\Support\Collection|array $questions
+     * @param string $context One of: methodology|pillar|module
+     * @param int $contextId MethodologyId for methodology, PillarId for pillar, ModuleId for module
+     * @param int|null $methodologyId Optional methodology filter for pillar/module
+     * @param int|null $pillarId Optional pillar filter for module
      */
-    public function getAllWithAnswers(): Collection
+    private function attachNextQuestionDependencies($questions, string $context, int $contextId, ?int $methodologyId, ?int $pillarId): void
     {
-        return Question::with('answers')->get();
-    }
+        if (!$questions) {
+            return;
+        }
 
-    /**
-     * Get a specific question with its answers
-     *
-     * @param int $questionId
-     * @return Question|null
-     */
-    public function findByIdWithAnswers(int $questionId): ?Question
-    {
-        return Question::with('answers')->find($questionId);
+        $isPillarContext = ($context === 'pillar');
+        $effectivePillarId = $pillarId;
+        if ($isPillarContext) {
+            // In pillar context, $contextId is the pillar id
+            $effectivePillarId = $contextId;
+        }
+
+        foreach ($questions as $question) {
+            // Determine pivot row and context type
+            if ($context === 'methodology') {
+                $pivotTable = 'methodology_question';
+                $contextType = 'methodology_question';
+                $pivotId = \DB::table($pivotTable)
+                    ->where('methodology_id', $contextId)
+                    ->where('question_id', $question->id)
+                    ->value('id');
+            } else {
+                // module or pillar contexts use module_question
+                $pivotTable = 'module_question';
+                $contextType = 'module_question';
+                $effectiveModuleId = ($context === 'module') ? $contextId : ($question->module_id ?? null);
+                if (!$effectiveModuleId) {
+                    continue;
+                }
+                $pivotQuery = \DB::table($pivotTable)
+                    ->where('module_id', $effectiveModuleId)
+                    ->where('question_id', $question->id);
+                if ($methodologyId) {
+                    $pivotQuery->where('methodology_id', $methodologyId);
+                }
+                if ($effectivePillarId) {
+                    $pivotQuery->where('pillar_id', $effectivePillarId);
+                }
+                $pivotId = $pivotQuery->value('id');
+            }
+
+            if (!$pivotId) {
+                continue;
+            }
+
+            // Fetch dependencies for this question's answers in the current context
+            $deps = \DB::table('answer_contexts')
+                ->where('context_type', $contextType)
+                ->where('context_id', $pivotId)
+                ->whereNotNull('dependent_context_type')
+                ->whereNotNull('dependent_context_id')
+                ->get(['answer_id', 'dependent_context_type', 'dependent_context_id']);
+
+            if ($deps->isEmpty()) {
+                continue;
+            }
+
+            // Build mapping answer_id => next_question_identifier
+            $answerToNext = [];
+            foreach ($deps as $dep) {
+                $nextId = null;
+                if ($dep->dependent_context_type === 'module_question') {
+                    $target = \DB::table('module_question')
+                        ->where('id', $dep->dependent_context_id)
+                        ->first(['question_id', 'module_id']);
+                    if ($target) {
+                        $nextId = $isPillarContext
+                            ? ($target->question_id . '_' . $target->module_id)
+                            : $target->question_id;
+                    }
+                } elseif ($dep->dependent_context_type === 'methodology_question') {
+                    $target = \DB::table('methodology_question')
+                        ->where('id', $dep->dependent_context_id)
+                        ->first(['question_id']);
+                    if ($target) {
+                        $nextId = $target->question_id;
+                    }
+                }
+
+                if ($nextId !== null) {
+                    $answerToNext[(int)$dep->answer_id] = $nextId;
+                }
+            }
+
+            if (empty($answerToNext)) {
+                continue;
+            }
+
+            // Attach next_question_id onto each answer model in the relation
+            foreach ($question->answers as $ans) {
+                $aid = (int)$ans->id;
+                if (array_key_exists($aid, $answerToNext)) {
+                    $ans->setAttribute('next_question_id', $answerToNext[$aid]);
+                }
+            }
+        }
     }
 }

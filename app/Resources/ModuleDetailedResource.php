@@ -2,10 +2,12 @@
 
 namespace App\Resources;
 
+use App\Http\Repositories\QuestionRepository;
 use App\Traits\HasTagTitles;
 use App\Services\ResultCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
 class ModuleDetailedResource extends JsonResource
 {
@@ -32,13 +34,10 @@ class ModuleDetailedResource extends JsonResource
         ];
         $payload['details'] = $this->filterArray($details);
 
-        $questionsList = $this->relationLoaded('questions') && $this->questions && $this->questions->isNotEmpty()
-            ? QuestionResource::collection($this->questions)
-            : null;
-
-        // Prefer pivot meta when methodologyId (and optionally pillarId) are provided
         $methodologyId = request()->route('methodologyId');
         $pillarId = $this->pillar_id ?? request()->route('pillarId');
+
+        // Prefer pivot meta when methodologyId (and optionally pillarId) are provided
         $pivotDescription = null;
         $pivotEstimatedTime = null;
         if ($methodologyId) {
@@ -64,14 +63,18 @@ class ModuleDetailedResource extends JsonResource
             }
         }
 
-        $questions = $this->filterArray([
-            // Todo: add 'type', if any answer of a question leads to any other question then value is dynamic, else simple
-            'description' => $pivotDescription !== null ? $pivotDescription : ($this->questions_description ?? null),
-            'estimatedTime' => $pivotEstimatedTime !== null ? $pivotEstimatedTime : ($this->questions_estimated_time ?? null),
-            'size' => count($questionsList),
-            'list' => $questionsList,
-        ]);
-        if ($questionsList && count($questionsList) > 0) {
+        $questionsRepo = new QuestionRepository();
+        $questions = [];
+        if ($pillarId && $methodologyId) {
+            $questions = $questionsRepo->getQuestionsByContext('module', $this->id, $methodologyId, $pillarId);
+        } elseif ($methodologyId) {
+            $questions = $questionsRepo->getQuestionsByContext('module', $this->id, $methodologyId);
+        }
+        $questions['description'] = $pivotDescription;
+        $questions['estimatedTime'] = $pivotEstimatedTime;
+        $questions['size'] = count($questions['list']);
+        $questions = $this->filterArray($questions);
+        if ($questions['list'] && count($questions['list']) > 0) {
             $payload['questions'] = $questions;
         }
 

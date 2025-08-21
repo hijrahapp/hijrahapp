@@ -24,6 +24,11 @@ class QuestionResource extends JsonResource
                 $answerData['weight'] = $this->answer_weights->get($answer->id)->weight;
             }
 
+            // Add next question id if dependency exists for this answer
+            if (isset($answer->next_question_id)) {
+                $answerData['next_question_id'] = $answer->next_question_id;
+            }
+
             return $answerData;
         });
 

@@ -21,7 +21,6 @@ class ModuleResource extends JsonResource
             'objectives' => $this->objectives,
             'imgUrl' => $this->img_url,
             'tags' => $this->getTagTitles($this->tags),
-            'questions' => QuestionResource::collection($this->questions),
             'status' => $this->calculateStatus(),
             'result' => $this->calculateResult(),
         ];

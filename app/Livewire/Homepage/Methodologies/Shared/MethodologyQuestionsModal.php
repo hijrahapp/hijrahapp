@@ -69,7 +69,7 @@ class MethodologyQuestionsModal extends Component
                 })
                 ->pluck('id');
             if ($mqIds->count() > 0) {
-                $answerWeights = \DB::table('question_answer_weights')
+                $answerWeights = \DB::table('answer_contexts')
                     ->where('context_type', 'module_question')
                     ->whereIn('context_id', $mqIds)
                     ->get();
@@ -77,13 +77,30 @@ class MethodologyQuestionsModal extends Component
                     $this->answerWeights[$aw->answer_id] = $this->formatDisplayNumber($aw->weight);
                 }
             }
-
-            $deps = \DB::table('module_answer_dependencies')
+            // Load dependencies from answer_contexts by mapping dependent context id back to question id
+            $moduleQuestionRows = \DB::table('module_question')
                 ->where('methodology_id', $methodologyId)
                 ->where('module_id', $moduleId)
-                ->get();
+                ->when(!is_null($this->pillarId), function ($q) {
+                    $q->where('pillar_id', $this->pillarId);
+                }, function ($q) {
+                    $q->whereNull('pillar_id');
+                })
+                ->get(['id', 'question_id'])
+                ->keyBy('id');
+            $deps = \DB::table('answer_contexts')
+                ->where('context_type', 'module_question')
+                ->whereIn('context_id', $mqIds)
+                ->whereNotNull('dependent_context_type')
+                ->whereNotNull('dependent_context_id')
+                ->get(['answer_id', 'dependent_context_type', 'dependent_context_id']);
             foreach ($deps as $dep) {
-                $this->answerDependencies[$dep->answer_id] = $dep->dependent_question_id;
+                if ($dep->dependent_context_type === 'module_question') {
+                    $target = $moduleQuestionRows->get($dep->dependent_context_id);
+                    if ($target) {
+                        $this->answerDependencies[$dep->answer_id] = $target->question_id;
+                    }
+                }
             }
         } else {
             // Methodology (general) context
@@ -103,7 +120,7 @@ class MethodologyQuestionsModal extends Component
                 ->where('methodology_id', $methodologyId)
                 ->pluck('id');
             if ($mqIds->count() > 0) {
-                $answerWeights = \DB::table('question_answer_weights')
+                $answerWeights = \DB::table('answer_contexts')
                     ->where('context_type', 'methodology_question')
                     ->whereIn('context_id', $mqIds)
                     ->get();
@@ -111,12 +128,24 @@ class MethodologyQuestionsModal extends Component
                     $this->answerWeights[$aw->answer_id] = $this->formatDisplayNumber($aw->weight);
                 }
             }
-            $deps = \DB::table('module_answer_dependencies')
+            // Load methodology-level dependencies from answer_contexts
+            $methodologyQuestionRows = \DB::table('methodology_question')
                 ->where('methodology_id', $methodologyId)
-                ->whereNull('module_id')
-                ->get();
+                ->get(['id', 'question_id'])
+                ->keyBy('id');
+            $deps = \DB::table('answer_contexts')
+                ->where('context_type', 'methodology_question')
+                ->whereIn('context_id', $mqIds)
+                ->whereNotNull('dependent_context_type')
+                ->whereNotNull('dependent_context_id')
+                ->get(['answer_id', 'dependent_context_type', 'dependent_context_id']);
             foreach ($deps as $dep) {
-                $this->answerDependencies[$dep->answer_id] = $dep->dependent_question_id;
+                if ($dep->dependent_context_type === 'methodology_question') {
+                    $target = $methodologyQuestionRows->get($dep->dependent_context_id);
+                    if ($target) {
+                        $this->answerDependencies[$dep->answer_id] = $target->question_id;
+                    }
+                }
             }
         }
     }
@@ -209,6 +238,22 @@ class MethodologyQuestionsModal extends Component
 
         if ($this->moduleId !== null) {
             // Persist module context
+            // Clean up old answer contexts tied to this module-question set
+            $oldMqIds = \DB::table('module_question')
+                ->where('methodology_id', $this->methodologyId)
+                ->where('module_id', $this->moduleId)
+                ->when(!is_null($this->pillarId), function ($q) {
+                    $q->where('pillar_id', $this->pillarId);
+                }, function ($q) {
+                    $q->whereNull('pillar_id');
+                })
+                ->pluck('id');
+            if ($oldMqIds->count() > 0) {
+                \DB::table('answer_contexts')
+                    ->where('context_type', 'module_question')
+                    ->whereIn('context_id', $oldMqIds)
+                    ->delete();
+            }
             \DB::table('module_question')
                 ->where('methodology_id', $this->methodologyId)
                 ->where('module_id', $this->moduleId)
@@ -219,6 +264,8 @@ class MethodologyQuestionsModal extends Component
                 })
                 ->delete();
 
+            $questionIdToContextId = [];
+            // Pass 1: create all context rows
             foreach ($this->selectedQuestionIds as $questionId) {
                 $mqId = \DB::table('module_question')->insertGetId([
                     'methodology_id' => $this->methodologyId,
@@ -230,44 +277,46 @@ class MethodologyQuestionsModal extends Component
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-
+                $questionIdToContextId[$questionId] = $mqId;
+            }
+            // Pass 2: upsert answer contexts with dependencies
+            foreach ($this->selectedQuestionIds as $questionId) {
+                $mqId = $questionIdToContextId[$questionId];
                 $question = Question::with('answers:id')->find($questionId);
                 $answerIds = $question ? $question->answers->pluck('id') : collect();
                 foreach ($answerIds as $aid) {
-                    \DB::table('question_answer_weights')->updateOrInsert([
+                    $dependentQuestionId = $this->answerDependencies[$aid] ?? null;
+                    $dependentContextId = $dependentQuestionId ? ($questionIdToContextId[$dependentQuestionId] ?? null) : null;
+                    \DB::table('answer_contexts')->updateOrInsert([
                         'context_type' => 'module_question',
                         'context_id' => $mqId,
                         'answer_id' => $aid,
                     ], [
                         'weight' => (float)($this->answerWeights[$aid] ?? 0),
+                        'dependent_context_type' => $dependentContextId ? 'module_question' : null,
+                        'dependent_context_id' => $dependentContextId,
                         'updated_at' => now(),
                         'created_at' => now(),
-                    ]);
-                }
-            }
-
-            \DB::table('module_answer_dependencies')
-                ->where('methodology_id', $this->methodologyId)
-                ->where('module_id', $this->moduleId)
-                ->delete();
-            foreach ($this->answerDependencies as $answerId => $dependentQuestionId) {
-                if ($dependentQuestionId) {
-                    \DB::table('module_answer_dependencies')->insert([
-                        'methodology_id' => $this->methodologyId,
-                        'module_id' => $this->moduleId,
-                        'answer_id' => (int)$answerId,
-                        'dependent_question_id' => (int)$dependentQuestionId,
-                        'created_at' => now(),
-                        'updated_at' => now(),
                     ]);
                 }
             }
         } else {
             // Persist methodology (general) context
+            $oldMqIds = \DB::table('methodology_question')
+                ->where('methodology_id', $this->methodologyId)
+                ->pluck('id');
+            if ($oldMqIds->count() > 0) {
+                \DB::table('answer_contexts')
+                    ->where('context_type', 'methodology_question')
+                    ->whereIn('context_id', $oldMqIds)
+                    ->delete();
+            }
             \DB::table('methodology_question')
                 ->where('methodology_id', $this->methodologyId)
                 ->delete();
 
+            $questionIdToContextId = [];
+            // Pass 1: create all context rows
             foreach ($this->selectedQuestionIds as $questionId) {
                 $mqId = \DB::table('methodology_question')->insertGetId([
                     'methodology_id' => $this->methodologyId,
@@ -277,23 +326,31 @@ class MethodologyQuestionsModal extends Component
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-
+                $questionIdToContextId[$questionId] = $mqId;
+            }
+            // Pass 2: upsert answer contexts with dependencies
+            foreach ($this->selectedQuestionIds as $questionId) {
+                $mqId = $questionIdToContextId[$questionId];
                 $question = Question::with('answers:id')->find($questionId);
                 $answerIds = $question ? $question->answers->pluck('id') : collect();
                 foreach ($answerIds as $aid) {
-                    \DB::table('question_answer_weights')->updateOrInsert([
+                    $dependentQuestionId = $this->answerDependencies[$aid] ?? null;
+                    $dependentContextId = $dependentQuestionId ? ($questionIdToContextId[$dependentQuestionId] ?? null) : null;
+                    \DB::table('answer_contexts')->updateOrInsert([
                         'context_type' => 'methodology_question',
                         'context_id' => $mqId,
                         'answer_id' => $aid,
                     ], [
                         'weight' => (float)($this->answerWeights[$aid] ?? 0),
+                        'dependent_context_type' => $dependentContextId ? 'methodology_question' : null,
+                        'dependent_context_id' => $dependentContextId,
                         'updated_at' => now(),
                         'created_at' => now(),
                     ]);
                 }
             }
 
-            // Skip methodology-level dependencies persistence for now (DB schema may not support NULL module_id)
+            // Dependencies are persisted within answer_contexts for methodology context
         }
 
         $this->dispatch('show-toast', type: 'success', message: 'Questions updated successfully');

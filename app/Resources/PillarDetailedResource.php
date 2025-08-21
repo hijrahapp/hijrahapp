@@ -7,6 +7,7 @@ use App\Traits\HasTagTitles;
 use App\Services\ResultCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
 class PillarDetailedResource extends JsonResource
 {
@@ -33,8 +34,6 @@ class PillarDetailedResource extends JsonResource
         ];
         $payload['details'] = $this->filterArray($details);
 
-        // Questions meta + list (prefer methodology-specific pivot data when methodologyId is provided)
-        $questionsList = $this->getGroupedModuleQuestions();
         $methodologyId = request()->route('methodologyId');
         $pivotDescription = null;
         $pivotEstimatedTime = null;
@@ -49,14 +48,17 @@ class PillarDetailedResource extends JsonResource
             }
         }
 
-        $questions = $this->filterArray([
-            // Todo: add 'type', if any answer of a question leads to any other question then value is dynamic, else simple
-            'description' => $pivotDescription !== null ? $pivotDescription : ($this->questions_description ?? null),
-            'estimatedTime' => $pivotEstimatedTime !== null ? $pivotEstimatedTime : ($this->questions_estimated_time ?? null),
-            'size' => count($questionsList),
-            'list' => $questionsList,
-        ]);
-        if ($questionsList && count($questionsList) > 0) {
+
+        $questionsRepo = new QuestionRepository();
+        $questions = [];
+        if ($methodologyId) {
+            $questions = $questionsRepo->getQuestionsByContext('pillar', $this->id, $methodologyId);
+        }
+        $questions['description'] = $pivotDescription;
+        $questions['estimatedTime'] = $pivotEstimatedTime;
+        $questions['size'] = count($questions['list']);
+        $questions = $this->filterArray($questions);
+        if ($questions['list'] && count($questions['list']) > 0) {
             $payload['questions'] = $questions;
         }
 

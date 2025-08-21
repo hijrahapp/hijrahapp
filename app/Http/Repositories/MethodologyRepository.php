@@ -173,7 +173,7 @@ class MethodologyRepository
             ->value('id');
 
         if ($pivotId) {
-            $weights = \App\Models\QuestionAnswerWeight::where('context_type', $contextType)
+            $weights = \App\Models\AnswerContext::where('context_type', $contextType)
                 ->where('context_id', $pivotId)
                 ->get()
                 ->keyBy('answer_id');
@@ -194,4 +194,4 @@ class MethodologyRepository
             default => throw new \InvalidArgumentException("Invalid context type: {$contextType}")
         };
     }
-} 
+}

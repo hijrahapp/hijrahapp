@@ -7,15 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class QuestionAnswerWeight extends Model
+class AnswerContext extends Model
 {
     use HasFactory;
+
+    protected $table = 'answer_contexts';
 
     protected $fillable = [
         'context_type',
         'context_id',
         'answer_id',
         'weight',
+        'dependent_context_type',
+        'dependent_context_id',
     ];
 
     /* -------------------------------------------------------------------------

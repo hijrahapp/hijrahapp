@@ -58,7 +58,7 @@ class Question extends Model
      */
     public function answerWeights(): HasMany
     {
-        return $this->hasMany(QuestionAnswerWeight::class);
+        return $this->hasMany(AnswerContext::class);
     }
 
     /* -------------------------------------------------------------------------

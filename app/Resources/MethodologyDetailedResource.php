@@ -2,6 +2,7 @@
 
 namespace App\Resources;
 
+use App\Http\Repositories\QuestionRepository;
 use App\Services\ResultCalculationService;
 use App\Traits\HasTagTitles;
 use Illuminate\Http\Request;
@@ -92,18 +93,15 @@ class MethodologyDetailedResource extends JsonResource
 
         // Questions block (include list only when loaded and non-empty)
         if ($sectionNumber == null ||$sectionNumber !== 2) {
-            $questionsList = $this->relationLoaded('questions') && $this->questions && $this->questions->isNotEmpty()
-                ? QuestionResource::collection($this->questions)
-                : null;
-            $questions = $this->filterArray([
-                'type' => 'simple',
-                'description' => $this->questions_description,
-                'estimatedTime' => $this->questions_estimated_time,
-                'size' => $questionsList->count(),
-                'list' => $questionsList,
-            ]);
-            if ($questionsList && $questionsList->count() > 0) {
-                $payload['questions'] = $this->filterArray($questions);
+
+            $questionsRepo = new QuestionRepository();
+            $questions = $questionsRepo->getQuestionsByContext('methodology', $this->id);
+            $questions['description'] = $this->questions_description;
+            $questions['estimatedTime'] = $this->questions_estimated_time;
+            $questions['size'] = count($questions['list']);
+            $questions = $this->filterArray($questions);
+            if ($questions['list'] && count($questions['list']) > 0) {
+                $payload['questions'] = $questions;
             }
         }
 
