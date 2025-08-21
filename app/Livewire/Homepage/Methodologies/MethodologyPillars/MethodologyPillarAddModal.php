@@ -159,10 +159,10 @@ class MethodologyPillarAddModal extends Component
 		}
 
 		if ($this->isEditMode && $this->editingPillarId) {
-			if ($this->isActiveMethodology) {
-				$this->dispatch('show-toast', type: 'error', message: 'This pillar exists in an active methodology');
-				return;
-			}
+//			if ($this->isActiveMethodology) {
+//				$this->dispatch('show-toast', type: 'error', message: 'This pillar exists in an active methodology');
+//				return;
+//			}
 
 			// If pillar changed, re-attach and move dependencies accordingly
 			$targetPillarId = $this->selectedPillarId ?: $this->editingPillarId;

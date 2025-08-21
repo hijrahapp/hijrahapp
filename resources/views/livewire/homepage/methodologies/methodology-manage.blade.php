@@ -35,6 +35,17 @@
                         </div>
 
                         <div class="mt-4">
+                            <label class="block text-sm font-medium mb-1">Type <span class="text-destructive">*</span></label>
+                            <select class="kt-select w-full" wire:model="type" disabled>
+                                <option value="">Select Type</option>
+                                <option value="simple">Simple</option>
+                                <option value="complex">Complex</option>
+                                <option value="twoSection">2-Section</option>
+                            </select>
+                            @error('type')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                        </div>
+
+                        <div class="mt-4">
                             <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
                             <textarea class="kt-textarea w-full" rows="3" wire:model.defer="description" placeholder="Enter methodology description"></textarea>
                             @error('description')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
@@ -78,16 +89,6 @@
                             @error('imgUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                         </div>
 
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium mb-1">Type <span class="text-destructive">*</span></label>
-                            <select class="kt-select w-full" wire:model="type" disabled>
-                                <option value="">Select Type</option>
-                                <option value="simple">Simple</option>
-                                <option value="complex">Complex</option>
-                                <option value="twoSection">2-Section</option>
-                            </select>
-                            @error('type')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                        </div>
                     </div>
                     <div class="kt-card-footer flex items-center justify-end gap-2">
                         <button class="kt-btn kt-btn-primary" wire:click="saveBasicDetails">Save</button>

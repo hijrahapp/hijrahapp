@@ -228,10 +228,10 @@ class MethodologyModuleAddModal extends Component
 
         if ($this->isEditMode && $this->editingModuleId) {
             // Update only allowed fields on edit
-            if ($this->isActiveMethodology) {
-                $this->dispatch('show-toast', type: 'error', message: 'This module exists in an active methodology');
-                return;
-            }
+//            if ($this->isActiveMethodology) {
+//                $this->dispatch('show-toast', type: 'error', message: 'This module exists in an active methodology');
+//                return;
+//            }
             if ($this->enablePillarSelection) {
                 // Store edits on pillar_module for complex
                 \DB::table('pillar_module')

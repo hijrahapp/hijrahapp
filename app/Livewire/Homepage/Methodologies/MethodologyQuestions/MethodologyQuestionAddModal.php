@@ -27,8 +27,6 @@ class MethodologyQuestionAddModal extends Component
         'reset-modal' => 'resetForm',
     ];
 
-
-
     public function mount($methodologyId, $editingQuestionId = 0)
     {
         $this->methodologyId = $methodologyId;

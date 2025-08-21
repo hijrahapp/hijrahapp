@@ -14,17 +14,17 @@ class MethodologyAddModal extends Component
     public array $tags = [];
     public string $imgUrl = '';
     public string $type = '';
-    public string $modulesDefinition = '';
-    public string $pillarsDefinition = '';
-    public string $numberOfPillars = '';
+//    public string $modulesDefinition = '';
+//    public string $pillarsDefinition = '';
+//    public string $numberOfPillars = '';
 
     // General questions meta
     public string $questionsDescription = '';
     public string $questionsEstimatedTime = '';
 
     // Two-section fields
-    public string $firstSectionName = '';
-    public string $secondSectionName = '';
+//    public string $firstSectionName = '';
+//    public string $secondSectionName = '';
 
     public string $error = '';
     public bool $isEditMode = false;
@@ -45,15 +45,15 @@ class MethodologyAddModal extends Component
             'type' => 'required|in:simple,complex,twoSection',
         ];
 
-        if ($this->type === 'simple') {
-            $rules['modulesDefinition'] = 'nullable|string';
-        } elseif ($this->type === 'complex') {
-            $rules['pillarsDefinition'] = 'nullable|string';
-            $rules['numberOfPillars'] = 'nullable|string';
-        } elseif ($this->type === 'twoSection') {
-            $rules['firstSectionName'] = 'required|string|min:3';
-            $rules['secondSectionName'] = 'required|string|min:3';
-        }
+//        if ($this->type === 'simple') {
+//            $rules['modulesDefinition'] = 'nullable|string';
+//        } elseif ($this->type === 'complex') {
+//            $rules['pillarsDefinition'] = 'nullable|string';
+//            $rules['numberOfPillars'] = 'nullable|string';
+//        } elseif ($this->type === 'twoSection') {
+//            $rules['firstSectionName'] = 'required|string|min:3';
+//            $rules['secondSectionName'] = 'required|string|min:3';
+//        }
 
         return $rules;
     }
@@ -81,9 +81,9 @@ class MethodologyAddModal extends Component
         $this->tags = $methodology->tags ?? [];
         $this->imgUrl = $methodology->img_url ?? '';
         $this->type = $methodology->type;
-        $this->modulesDefinition = $methodology->modules_definition ?? '';
-        $this->pillarsDefinition = $methodology->pillars_definition ?? '';
-        $this->numberOfPillars = $methodology->number_of_pillars ?? '';
+//        $this->modulesDefinition = $methodology->modules_definition ?? '';
+//        $this->pillarsDefinition = $methodology->pillars_definition ?? '';
+//        $this->numberOfPillars = $methodology->number_of_pillars ?? '';
 
         // General questions meta
         $this->questionsDescription = $methodology->questions_description ?? '';
@@ -92,8 +92,8 @@ class MethodologyAddModal extends Component
             : '';
 
         // Two-section fields
-        $this->firstSectionName = $methodology->first_section_name ?? '';
-        $this->secondSectionName = $methodology->second_section_name ?? '';
+//        $this->firstSectionName = $methodology->first_section_name ?? '';
+//        $this->secondSectionName = $methodology->second_section_name ?? '';
 
         $this->dispatch('show-modal', selector: '#methodology_add_modal');
     }
@@ -107,17 +107,17 @@ class MethodologyAddModal extends Component
         $this->tags = [];
         $this->imgUrl = '';
         $this->type = '';
-        $this->modulesDefinition = '';
-        $this->pillarsDefinition = '';
-        $this->numberOfPillars = '';
+//        $this->modulesDefinition = '';
+//        $this->pillarsDefinition = '';
+//        $this->numberOfPillars = '';
 
         // General questions meta
         $this->questionsDescription = '';
         $this->questionsEstimatedTime = '';
 
         // Two-section fields
-        $this->firstSectionName = '';
-        $this->secondSectionName = '';
+//        $this->firstSectionName = '';
+//        $this->secondSectionName = '';
 
         $this->error = '';
         $this->isEditMode = false;
@@ -150,19 +150,19 @@ class MethodologyAddModal extends Component
                 'tags' => $this->tags,
                 'img_url' => $this->imgUrl ?: null,
                 'type' => $this->type,
-                'modules_definition' => $this->type === 'simple' ? $this->modulesDefinition : null,
-                'pillars_definition' => $this->type === 'complex' ? $this->pillarsDefinition : null,
-                'number_of_pillars' => $this->type === 'complex'
-                    ? (is_numeric($this->numberOfPillars) ? (int) $this->numberOfPillars : null)
-                    : null,
+//                'modules_definition' => $this->type === 'simple' ? $this->modulesDefinition : null,
+//                'pillars_definition' => $this->type === 'complex' ? $this->pillarsDefinition : null,
+//                'number_of_pillars' => $this->type === 'complex'
+//                    ? (is_numeric($this->numberOfPillars) ? (int) $this->numberOfPillars : null)
+//                    : null,
             ];
 
-            if ($this->type === 'twoSection') {
-                $data = array_merge($data, [
-                    'first_section_name' => $this->firstSectionName,
-                    'second_section_name' => $this->secondSectionName,
-                ]);
-            }
+//            if ($this->type === 'twoSection') {
+//                $data = array_merge($data, [
+//                    'first_section_name' => $this->firstSectionName,
+//                    'second_section_name' => $this->secondSectionName,
+//                ]);
+//            }
 
             if ($this->isEditMode) {
                 $methodology = Methodology::findOrFail($this->methodologyId);
