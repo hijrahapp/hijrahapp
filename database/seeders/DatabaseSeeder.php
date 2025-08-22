@@ -10,14 +10,14 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Roles
-        collect(['SuperAdmin', 'Admin', 'Expert', 'Customer'])->each(fn ($roleName) => Role::factory()->create(['name' => $roleName]));
+        // collect(['SuperAdmin', 'Admin', 'Expert', 'Customer'])->each(fn ($roleName) => Role::factory()->create(['name' => $roleName]));
 
         // Seed answers and demo methodologies
         $this->call([
             AnswerSeeder::class,
-            // Choose one of the following seeders:
-            DemoSeeder::class,        // English demo data
-            // DemoArabicSeeder::class, // Arabic demo data
+            // Choose one of the following seeders (comment out the one you don't need):
+            DemoArabicSeeder::class, // Arabic demo data
+            // DemoSeeder::class,        // English demo data
         ]);
     }
 }

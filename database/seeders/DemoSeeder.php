@@ -8,544 +8,462 @@ use App\Models\Methodology;
 use App\Models\Module;
 use App\Models\Pillar;
 use App\Models\Question;
-use App\Models\AnswerContext;
 use App\Models\Tag;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DemoSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Clear existing data
-        $this->clearExistingData();
+        Schema::disableForeignKeyConstraints();
 
-        // Ensure base answers exist
-        $this->seedBaseAnswers();
+        // Helper to truncate if table exists
+        $safeTruncate = function (string $table): void {
+            if (Schema::hasTable($table)) {
+                DB::table($table)->truncate();
+            }
+        };
 
-        // Create questions for each type
-        $questions = $this->createQuestions();
+        // Clear data and reset autoincrement counters
+        $safeTruncate('module_answer_dependencies');
+        $safeTruncate('module_dependencies');
+        $safeTruncate('pillar_dependencies');
+        $safeTruncate('pillar_module');
+        $safeTruncate('methodology_module');
+        $safeTruncate('methodology_pillar');
+        $safeTruncate('module_question');
+        $safeTruncate('pillar_question');
+        $safeTruncate('methodology_question');
+        $safeTruncate('question_answer_weights');
+        $safeTruncate('answer_contexts');
+        $safeTruncate('questions_answers');
+        $safeTruncate('questions');
+        $safeTruncate('pillars');
+        $safeTruncate('modules');
+        $safeTruncate('methodology');
+        $safeTruncate('tags');
 
-        // Create methodologies
-        $this->createMethodology1($questions);
-        $this->createMethodology2($questions);
-        $this->createMethodology3($questions);
-    }
+        Schema::enableForeignKeyConstraints();
 
-    /**
-     * Clear existing data from all related tables
-     */
-    private function clearExistingData(): void
-    {
-        // Disable foreign key checks (MySQL) or use SQLite-friendly approach
-        try {
-            \DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        } catch (\Throwable $e) {
-            // Likely SQLite; use pragma
-            \DB::statement('PRAGMA foreign_keys = OFF');
+        // Tags
+        $tagSimple = Tag::create(['title' => 'Simple', 'active' => true]);
+        $tagComplex = Tag::create(['title' => 'Complex', 'active' => true]);
+        $tagTwoSection = Tag::create(['title' => 'TwoSection', 'active' => true]);
+        $allTagIds = [$tagSimple->id, $tagComplex->id, $tagTwoSection->id];
+
+        // Dummy image generator
+        $img = function (string $seed): string {
+            return 'https://picsum.photos/seed/' . urlencode($seed) . '/600/400';
+        };
+
+        // Helper to fetch or create answers
+        $findAnswerIds = function (array $titles): array {
+            return Answer::whereIn('title', $titles)->pluck('id', 'title')->all();
+        };
+
+        // Ensure MCQ options exist
+        $mcqOptions = ['Option A', 'Option B', 'Option C', 'Option D'];
+        $existingMcq = Answer::whereIn('title', $mcqOptions)->pluck('title')->all();
+        foreach (array_diff($mcqOptions, $existingMcq) as $opt) {
+            Answer::create(['title' => $opt]);
         }
 
-        // Clear pivot tables first (due to foreign key constraints)
-        \DB::table('pillar_dependencies')->delete();
-        \DB::table('module_question')->delete();
-        \DB::table('pillar_question')->delete();
-        \DB::table('methodology_question')->delete();
-        \DB::table('pillar_module')->delete();
-        \DB::table('methodology_module')->delete();
-        \DB::table('methodology_pillar')->delete();
-        \DB::table('questions_answers')->delete();
+        // Determine answer-context table name
+        $answerContextTable = Schema::hasTable('answer_contexts') ? 'answer_contexts' : 'question_answer_weights';
 
-        // Clear main tables
-        \DB::table('answer_contexts')->delete();
-        \DB::table('user_answers')->delete();
-
-        // Clear core tables
-        \DB::table('modules')->delete();
-        \DB::table('pillars')->delete();
-        \DB::table('questions')->delete();
-        \DB::table('answers')->delete();
-        \DB::table('methodology')->delete();
-
-        // Re-enable foreign key checks
-        try {
-            \DB::statement('SET FOREIGN_KEY_CHECKS=1');
-        } catch (\Throwable $e) {
-            \DB::statement('PRAGMA foreign_keys = ON');
-        }
-
-        // Reset auto-increment counters where supported
-        try {
-            \DB::statement('ALTER TABLE methodology AUTO_INCREMENT = 1');
-            \DB::statement('ALTER TABLE pillars AUTO_INCREMENT = 1');
-            \DB::statement('ALTER TABLE modules AUTO_INCREMENT = 1');
-            \DB::statement('ALTER TABLE questions AUTO_INCREMENT = 1');
-            \DB::statement('ALTER TABLE answers AUTO_INCREMENT = 1');
-        } catch (\Throwable $e) {
-            // SQLite does not support ALTER TABLE AUTO_INCREMENT; ignore.
-        }
-
-        echo "All existing data cleared successfully and counters reset.\n";
-    }
-
-    /**
-     * Seed base answers for all question types
-     */
-    private function seedBaseAnswers(): void
-    {
-        $answers = [
-            // Yes/No answers
-            'Yes',
-            'No',
-
-            // True/False answers
-            'True',
-            'False',
-
-            // Rating scale 1-5
-            '1',
-            '2',
-            '3',
-            '4',
-            '5',
-
-            // Rating scale 1-10
-            '6',
-            '7',
-            '8',
-            '9',
-            '10',
-
-            // Agree/Disagree scale
-            'Strongly Agree',
-            'Agree',
-            'Neutral',
-            'Disagree',
-            'Strongly Disagree',
-        ];
-
-        foreach ($answers as $answer) {
-            Answer::firstOrCreate(['title' => $answer]);
-        }
-    }
-
-    /**
-     * Create questions for each question type
-     */
-    private function createQuestions(): array
-    {
-        $questionTypes = [
-            QuestionType::YesNo,
-            QuestionType::TrueFalse,
-            QuestionType::Rating1to5,
-            QuestionType::Rating1to10,
-            QuestionType::ScaleAgreeDisagree,
-            QuestionType::MCQSingle,
-            QuestionType::MCQMultiple,
-        ];
-
-        $questions = [];
-        $questionTitles = [
-            'Do you understand the basic concepts?',
-            'Is this statement correct?',
-            'How would you rate your knowledge level?',
-            'Rate your confidence level from 1 to 10',
-            'Do you agree with this approach?',
-            'Which option best describes your experience?',
-            'Select all that apply to your situation',
-        ];
-
-        foreach ($questionTypes as $index => $type) {
-            $question = Question::firstOrCreate([
-                'title' => $questionTitles[$index],
+        // Questions: one per type
+        $questionsByType = [];
+        foreach (QuestionType::cases() as $type) {
+            $questionsByType[$type->value] = Question::create([
+                'title' => $type->getLabel() . ' question',
                 'type' => $type,
-                'tags' => $this->getTagIds(['demo', 'assessment', $type->value]),
+                'tags' => $allTagIds,
+                'active' => true,
             ]);
 
-            // Attach answers based on question type
-            $this->attachAnswersToQuestion($question, $type);
-
-            $questions[$type->value] = $question;
+            // Attach base answers
+            $answersToAttach = [];
+            if ($type->requiresCustomAnswers()) {
+                $answersToAttach = $findAnswerIds($mcqOptions);
+            } else {
+                $answersToAttach = $findAnswerIds($type->getAnswers());
+            }
+            if (!empty($answersToAttach)) {
+                $questionsByType[$type->value]->answers()->sync(array_values($answersToAttach));
+            }
         }
 
-        return $questions;
-    }
+        // Modules
+        $makeModule = function (string $name, array $tags) use ($img) {
+            $data = [
+                'name' => $name,
+                'description' => $name . ' description',
+                'definition' => $name . ' definition',
+                'objectives' => $name . ' objectives',
+                'tags' => $tags,
+            ];
+            if (Schema::hasColumn('modules', 'img_url')) $data['img_url'] = $img($name);
+            if (Schema::hasColumn('modules', 'questions_description')) $data['questions_description'] = 'Answer these module questions.';
+            if (Schema::hasColumn('modules', 'questions_estimated_time')) $data['questions_estimated_time'] = '15m';
+            if (Schema::hasColumn('modules', 'questions_count')) $data['questions_count'] = 0;
+            if (Schema::hasColumn('modules', 'active')) $data['active'] = true;
+            return Module::create($data);
+        };
 
-    /**
-     * Attach appropriate answers to a question based on its type
-     */
-    private function attachAnswersToQuestion(Question $question, QuestionType $type): void
-    {
-        $answers = collect();
+        $simpleModule1 = $makeModule('Simple Module 1', [$tagSimple->id]);
+        $simpleModule2 = $makeModule('Simple Module 2', [$tagSimple->id]);
+        $complexP1M1 = $makeModule('Complex Pillar 1 Module 1', [$tagComplex->id]);
+        $complexP1M2 = $makeModule('Complex Pillar 1 Module 2', [$tagComplex->id]);
+        $complexP2M1 = $makeModule('Complex Pillar 2 Module 1', [$tagComplex->id]);
+        $complexP2M2 = $makeModule('Complex Pillar 2 Module 2', [$tagComplex->id]);
+        $twoS1P1M1 = $makeModule('TwoSection Section 1 Pillar 1 Module 1', [$tagTwoSection->id]);
+        $twoS1P1M2 = $makeModule('TwoSection Section 1 Pillar 1 Module 2', [$tagTwoSection->id]);
+        $twoS1P2M1 = $makeModule('TwoSection Section 1 Pillar 2 Module 1', [$tagTwoSection->id]);
+        $twoS1P2M2 = $makeModule('TwoSection Section 1 Pillar 2 Module 2', [$tagTwoSection->id]);
+        $twoS2P1M1 = $makeModule('TwoSection Section 2 Pillar 1 Module 1', [$tagTwoSection->id]);
+        $twoS2P1M2 = $makeModule('TwoSection Section 2 Pillar 1 Module 2', [$tagTwoSection->id]);
+        $twoS2P2M1 = $makeModule('TwoSection Section 2 Pillar 2 Module 1', [$tagTwoSection->id]);
+        $twoS2P2M2 = $makeModule('TwoSection Section 2 Pillar 2 Module 2', [$tagTwoSection->id]);
 
-        switch ($type) {
-            case QuestionType::YesNo:
-                $answers = Answer::whereIn('title', ['Yes', 'No'])->get();
-                break;
-            case QuestionType::TrueFalse:
-                $answers = Answer::whereIn('title', ['True', 'False'])->get();
-                break;
-            case QuestionType::Rating1to5:
-                $answers = Answer::whereIn('title', ['1', '2', '3', '4', '5'])->get();
-                break;
-            case QuestionType::Rating1to10:
-                $answers = Answer::whereIn('title', ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'])->get();
-                break;
-            case QuestionType::ScaleAgreeDisagree:
-                $answers = Answer::whereIn('title', [
-                    'Strongly Agree',
-                    'Agree',
-                    'Neutral',
-                    'Disagree',
-                    'Strongly Disagree'
-                ])->get();
-                break;
-            case QuestionType::MCQSingle:
-            case QuestionType::MCQMultiple:
-                // Create custom answers for MCQ questions
-                $customAnswers = [
-                    'Option A - Basic understanding',
-                    'Option B - Intermediate knowledge',
-                    'Option C - Advanced expertise',
-                    'Option D - Expert level',
-                ];
+        // Pillars
+        $makePillar = function (string $name, array $tags) use ($img) {
+            $data = [
+                'name' => $name,
+                'description' => $name . ' description',
+                'definition' => $name . ' definition',
+                'objectives' => $name . ' objectives',
+                'tags' => $tags,
+            ];
+            if (Schema::hasColumn('pillars', 'img_url')) $data['img_url'] = $img($name);
+            if (Schema::hasColumn('pillars', 'questions_description')) $data['questions_description'] = 'Answer these pillar questions.';
+            if (Schema::hasColumn('pillars', 'questions_estimated_time')) $data['questions_estimated_time'] = '20m';
+            if (Schema::hasColumn('pillars', 'questions_count')) $data['questions_count'] = 0;
+            if (Schema::hasColumn('pillars', 'active')) $data['active'] = true;
+            return Pillar::create($data);
+        };
 
-                foreach ($customAnswers as $answerTitle) {
-                    $answer = Answer::firstOrCreate(['title' => $answerTitle]);
-                    $answers->push($answer);
-                }
-                break;
-        }
+        $complexPillar1 = $makePillar('Complex Pillar 1', [$tagComplex->id]);
+        $complexPillar2 = $makePillar('Complex Pillar 2', [$tagComplex->id]);
+        $twoS1Pillar1 = $makePillar('TwoSection Section 1 Pillar 1', [$tagTwoSection->id]);
+        $twoS1Pillar2 = $makePillar('TwoSection Section 1 Pillar 2', [$tagTwoSection->id]);
+        $twoS2Pillar1 = $makePillar('TwoSection Section 2 Pillar 1', [$tagTwoSection->id]);
+        $twoS2Pillar2 = $makePillar('TwoSection Section 2 Pillar 2', [$tagTwoSection->id]);
 
-        $question->answers()->sync($answers->pluck('id'));
-    }
-
-    /**
-     * Create Methodology 1 (Simple type)
-     */
-    private function createMethodology1(array $questions): void
-    {
-        $methodology = Methodology::create([
-            'name' => 'Simple Assessment Methodology',
-            'description' => 'A straightforward methodology for basic assessment and evaluation.',
-            'definition' => 'This methodology provides a simple framework for evaluating basic competencies.',
-            'objectives' => 'To assess fundamental knowledge and skills in a structured manner.',
-            'img_url' => 'https://picsum.photos/seed/methodology-simple/800/400',
+        // Methodologies
+        $simpleMethodData = [
+            'name' => 'Simple Methodology',
+            'description' => 'Simple Methodology description',
+            'definition' => 'Simple Methodology definition',
+            'objectives' => 'Simple Methodology objectives',
             'type' => 'simple',
-            'first_section_name' => 'Core Modules',
-            'second_section_name' => null,
-            'pillars_definition' => 'Not applicable for simple methodology.',
-            'modules_definition' => 'Core modules provide foundational knowledge and basic assessment capabilities.',
-            'questions_description' => 'Basic questions covering essential concepts and skills.',
-            'questions_estimated_time' => '15-20 minutes',
-            'questions_count' => 7,
-            'first_section_description' => 'Core modules provide foundational knowledge assessment.',
-            'first_section_definition' => 'Definition for core modules section.',
-            'first_section_objectives' => 'Objectives for core modules section.',
-            'first_section_img_url' => 'https://picsum.photos/seed/section1-simple/800/400',
-            'second_section_description' => null,
-            'second_section_definition' => null,
-            'second_section_objectives' => null,
-            'second_section_img_url' => null,
-            'tags' => $this->getTagIds(['simple', 'basic', 'assessment']),
-        ]);
+            'tags' => [$tagSimple->id],
+        ];
+        if (Schema::hasColumn('methodology', 'img_url')) $simpleMethodData['img_url'] = $img('Simple Methodology');
+        if (Schema::hasColumn('methodology', 'questions_description')) $simpleMethodData['questions_description'] = 'Answer the following questions for the methodology.';
+        if (Schema::hasColumn('methodology', 'questions_estimated_time')) $simpleMethodData['questions_estimated_time'] = 30;
+        if (Schema::hasColumn('methodology', 'questions_count')) $simpleMethodData['questions_count'] = 0;
+        if (Schema::hasColumn('methodology', 'modules_definition')) $simpleMethodData['modules_definition'] = 'This simple methodology comprises 2 modules.';
+        $simpleMethod = Methodology::create($simpleMethodData);
 
-        // Attach all 7 questions to methodology
-        foreach ($questions as $question) {
-            $methodology->questions()->attach($question->id, ['weight' => 1]);
-        }
-
-        // Create 2 modules
-        for ($i = 1; $i <= 2; $i++) {
-            $module = Module::create([
-                'name' => "Module $i",
-                'description' => "Module $i provides essential knowledge and skills.",
-                'definition' => "Module $i covers fundamental concepts and basic competencies.",
-                'objectives' => "To assess understanding of core concepts in module $i.",
-                'img_url' => 'https://picsum.photos/seed/module-simple-'.$i.'/800/400',
-                'questions_description' => "Module $i contains questions that assess fundamental concepts.",
-                'questions_estimated_time' => '5-7 minutes',
-                'questions_count' => 7,
-                'tags' => $this->getTagIds(['module', 'basic']),
-            ]);
-
-            // Attach module to methodology
-            $methodology->modules()->attach($module->id);
-
-            // Attach all 7 questions to module
-            foreach ($questions as $question) {
-                $module->questions()->attach($question->id, [
-                    'methodology_id' => $methodology->id,
-                    'pillar_id' => null,
-                    'weight' => 1
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Create Methodology 2 (Complex type)
-     */
-    private function createMethodology2(array $questions): void
-    {
-        $methodology = Methodology::create([
-            'name' => 'Complex Assessment Methodology',
-            'description' => 'A comprehensive methodology for advanced assessment and evaluation.',
-            'definition' => 'This methodology provides a complex framework for evaluating advanced competencies.',
-            'objectives' => 'To assess advanced knowledge and skills across multiple domains.',
-            'img_url' => 'https://picsum.photos/seed/methodology-complex/800/400',
+        $complexMethodData = [
+            'name' => 'Complex Methodology',
+            'description' => 'Complex Methodology description',
+            'definition' => 'Complex Methodology definition',
+            'objectives' => 'Complex Methodology objectives',
             'type' => 'complex',
-            'first_section_name' => 'Advanced Pillars',
-            'second_section_name' => null,
-            'pillars_definition' => 'Advanced pillars represent core areas of knowledge and expertise that require comprehensive assessment.',
-            'modules_definition' => 'Specialized modules within pillars provide focused assessment of specific competencies.',
-            'questions_description' => 'Advanced questions covering comprehensive concepts and skills.',
-            'questions_estimated_time' => '45-60 minutes',
-            'questions_count' => 7,
-            'first_section_description' => 'Advanced pillars provide in-depth analysis and assessment.',
-            'first_section_definition' => 'Definition for advanced pillars section.',
-            'first_section_objectives' => 'Objectives for advanced pillars section.',
-            'first_section_img_url' => 'https://picsum.photos/seed/section1-complex/800/400',
-            'second_section_description' => null,
-            'second_section_definition' => null,
-            'second_section_objectives' => null,
-            'second_section_img_url' => null,
-            'tags' => $this->getTagIds(['complex', 'advanced', 'assessment']),
-        ]);
+            'tags' => [$tagComplex->id],
+        ];
+        if (Schema::hasColumn('methodology', 'img_url')) $complexMethodData['img_url'] = $img('Complex Methodology');
+        if (Schema::hasColumn('methodology', 'questions_description')) $complexMethodData['questions_description'] = 'Answer the following questions for the methodology.';
+        if (Schema::hasColumn('methodology', 'questions_estimated_time')) $complexMethodData['questions_estimated_time'] = 45;
+        if (Schema::hasColumn('methodology', 'questions_count')) $complexMethodData['questions_count'] = 0;
+        if (Schema::hasColumn('methodology', 'pillars_definition')) $complexMethodData['pillars_definition'] = 'This complex methodology contains thematic pillars.';
+        if (Schema::hasColumn('methodology', 'number_of_pillars')) $complexMethodData['number_of_pillars'] = '2';
+        $complexMethod = Methodology::create($complexMethodData);
 
-        // Attach all 7 questions to methodology
-        foreach ($questions as $question) {
-            $methodology->questions()->attach($question->id, ['weight' => 1]);
-        }
-
-        // Create 2 pillars
-        for ($i = 1; $i <= 2; $i++) {
-            $pillar = Pillar::create([
-                'name' => "Pillar $i",
-                'description' => "Pillar $i represents a core area of knowledge and expertise.",
-                'definition' => "Pillar $i covers advanced concepts and specialized competencies.",
-                'objectives' => "To assess comprehensive understanding of pillar $i domain.",
-                'img_url' => 'https://picsum.photos/seed/pillar-complex-'.$i.'/800/400',
-                'questions_description' => "Pillar $i contains questions that assess advanced understanding.",
-                'questions_estimated_time' => '10-15 minutes',
-                'questions_count' => 7,
-                'tags' => $this->getTagIds(['pillar', 'advanced']),
-            ]);
-
-            // Attach pillar to methodology
-            $methodology->pillars()->attach($pillar->id, ['section' => 'first']);
-
-            // Attach all 7 questions to pillar
-            foreach ($questions as $question) {
-                $pillar->questions()->attach($question->id, [
-                    'methodology_id' => $methodology->id,
-                    'weight' => 1
-                ]);
-            }
-
-            // Create 2 modules for each pillar
-            for ($j = 1; $j <= 2; $j++) {
-                $module = Module::create([
-                    'name' => "Pillar{$i}-Module{$j}",
-                    'description' => "Module $j within Pillar $i provides specialized knowledge.",
-                    'definition' => "Module $j covers specific competencies within Pillar $i.",
-                    'objectives' => "To assess specialized skills in module $j of pillar $i.",
-                    'img_url' => 'https://picsum.photos/seed/module-complex-'.$i.'-'.$j.'/800/400',
-                    'questions_description' => "This module contains questions for specific competencies.",
-                    'questions_estimated_time' => '5-7 minutes',
-                    'questions_count' => 7,
-                    'tags' => $this->getTagIds(['module', 'specialized']),
-                ]);
-
-                // Attach module to pillar with methodology context
-                \DB::table('pillar_module')->insert([
-                    'methodology_id' => $methodology->id,
-                    'pillar_id' => $pillar->id,
-                    'module_id' => $module->id,
-                ]);
-
-                // Attach all 7 questions to module
-                foreach ($questions as $question) {
-                    $module->questions()->attach($question->id, [
-                        'methodology_id' => $methodology->id,
-                        'pillar_id' => $pillar->id,
-                        'weight' => 1
-                    ]);
-                }
-            }
-        }
-    }
-
-    /**
-     * Create Methodology 3 (Two section type with dependencies)
-     */
-    private function createMethodology3(array $questions): void
-    {
-        $methodology = Methodology::create([
-            'name' => 'Two-Section Assessment Methodology',
-            'description' => 'A methodology with two sections and complex dependencies.',
-            'definition' => 'This methodology provides a structured approach with interdependent sections.',
-            'objectives' => 'To assess knowledge and skills with consideration of dependencies.',
-            'img_url' => 'https://picsum.photos/seed/methodology-two/800/400',
+        $twoSectionMethodData = [
+            'name' => 'TwoSection Methodology',
+            'description' => 'TwoSection Methodology description',
+            'definition' => 'TwoSection Methodology definition',
+            'objectives' => 'TwoSection Methodology objectives',
             'type' => 'twoSection',
-            'first_section_name' => 'Foundation Section',
-            'second_section_name' => 'Advanced Section',
-            'pillars_definition' => 'Pillars represent interdependent knowledge domains where later sections depend on earlier ones.',
-            'modules_definition' => 'Modules within pillars provide specialized assessment with consideration of dependencies.',
-            'questions_description' => 'Structured questions with section-based dependencies.',
-            'questions_estimated_time' => '60-90 minutes',
-            'questions_count' => 7,
-            'first_section_description' => 'First section provides foundational assessment.',
-            'first_section_definition' => 'Definition for foundation section.',
-            'first_section_objectives' => 'Objectives for foundation section.',
-            'first_section_img_url' => 'https://picsum.photos/seed/section1-two/800/400',
-            'second_section_description' => 'Second section builds upon first section results.',
-            'second_section_definition' => 'Definition for advanced section.',
-            'second_section_objectives' => 'Objectives for advanced section.',
-            'second_section_img_url' => 'https://picsum.photos/seed/section2-two/800/400',
-            'tags' => $this->getTagIds(['two-section', 'dependent', 'assessment']),
-        ]);
+            'first_section_name' => 'Section 1',
+            'second_section_name' => 'Section 2',
+            'tags' => [$tagTwoSection->id],
+        ];
+        if (Schema::hasColumn('methodology', 'img_url')) $twoSectionMethodData['img_url'] = $img('TwoSection Methodology');
+        if (Schema::hasColumn('methodology', 'questions_description')) $twoSectionMethodData['questions_description'] = 'Answer the following questions for the methodology.';
+        if (Schema::hasColumn('methodology', 'questions_estimated_time')) $twoSectionMethodData['questions_estimated_time'] = 60;
+        if (Schema::hasColumn('methodology', 'questions_count')) $twoSectionMethodData['questions_count'] = 0;
+        if (Schema::hasColumn('methodology', 'first_section_description')) $twoSectionMethodData['first_section_description'] = 'Overview of section 1.';
+        if (Schema::hasColumn('methodology', 'first_section_definition')) $twoSectionMethodData['first_section_definition'] = 'Definition of section 1.';
+        if (Schema::hasColumn('methodology', 'first_section_objectives')) $twoSectionMethodData['first_section_objectives'] = 'Objectives of section 1.';
+        if (Schema::hasColumn('methodology', 'first_section_img_url')) $twoSectionMethodData['first_section_img_url'] = $img('TwoSection Section 1');
+        if (Schema::hasColumn('methodology', 'first_section_number_of_pillars')) $twoSectionMethodData['first_section_number_of_pillars'] = '2';
+        if (Schema::hasColumn('methodology', 'first_section_pillars_definition')) $twoSectionMethodData['first_section_pillars_definition'] = 'Two pillars in section one.';
+        if (Schema::hasColumn('methodology', 'first_section_number_of_questions')) $twoSectionMethodData['first_section_number_of_questions'] = '12';
+        if (Schema::hasColumn('methodology', 'first_section_minutes')) $twoSectionMethodData['first_section_minutes'] = 30;
+        if (Schema::hasColumn('methodology', 'second_section_description')) $twoSectionMethodData['second_section_description'] = 'Overview of section 2.';
+        if (Schema::hasColumn('methodology', 'second_section_definition')) $twoSectionMethodData['second_section_definition'] = 'Definition of section 2.';
+        if (Schema::hasColumn('methodology', 'second_section_objectives')) $twoSectionMethodData['second_section_objectives'] = 'Objectives of section 2.';
+        if (Schema::hasColumn('methodology', 'second_section_img_url')) $twoSectionMethodData['second_section_img_url'] = $img('TwoSection Section 2');
+        if (Schema::hasColumn('methodology', 'second_section_number_of_pillars')) $twoSectionMethodData['second_section_number_of_pillars'] = '2';
+        if (Schema::hasColumn('methodology', 'second_section_pillars_definition')) $twoSectionMethodData['second_section_pillars_definition'] = 'Two pillars in section two.';
+        if (Schema::hasColumn('methodology', 'second_section_number_of_questions')) $twoSectionMethodData['second_section_number_of_questions'] = '12';
+        if (Schema::hasColumn('methodology', 'second_section_minutes')) $twoSectionMethodData['second_section_minutes'] = 30;
+        $twoSectionMethod = Methodology::create($twoSectionMethodData);
 
-        // Attach all 7 questions to methodology
-        foreach ($questions as $question) {
-            $methodology->questions()->attach($question->id, ['weight' => 1]);
+        // Relate: Simple methodology -> modules
+        foreach ([[$simpleModule1, 1], [$simpleModule2, 2]] as [$module, $seq]) {
+            $row = [
+                'methodology_id' => $simpleMethod->id,
+                'module_id' => $module->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            if (Schema::hasColumn('methodology_module', 'number_of_questions')) $row['number_of_questions'] = 3;
+            if (Schema::hasColumn('methodology_module', 'weight')) $row['weight'] = 50.00;
+            if (Schema::hasColumn('methodology_module', 'minutes')) $row['minutes'] = 15;
+            if (Schema::hasColumn('methodology_module', 'report')) $row['report'] = $module->name . ' report';
+            if (Schema::hasColumn('methodology_module', 'questions_description')) $row['questions_description'] = 'Module questions';
+            if (Schema::hasColumn('methodology_module', 'questions_estimated_time')) $row['questions_estimated_time'] = 15;
+            DB::table('methodology_module')->insert($row);
         }
 
-        // Create section 1 pillars
-        $section1Pillar1 = Pillar::create([
-            'name' => 'Section 1 - Pillar 1',
-            'description' => 'First pillar of section 1 provides foundational knowledge.',
-            'definition' => 'This pillar covers basic concepts and fundamental skills.',
-            'objectives' => 'To establish foundational understanding.',
-            'img_url' => 'https://picsum.photos/seed/pillar-s1-1/800/400',
-            'questions_description' => 'Basic questions for foundational assessment.',
-            'questions_estimated_time' => '10-15 minutes',
-            'questions_count' => 7,
-            'tags' => $this->getTagIds(['section1', 'foundational']),
-        ]);
-
-        $section1Pillar2 = Pillar::create([
-            'name' => 'Section 1 - Pillar 2',
-            'description' => 'Second pillar of section 1 builds on pillar 1.',
-            'definition' => 'This pillar covers intermediate concepts dependent on pillar 1.',
-            'objectives' => 'To assess intermediate skills with pillar 1 dependency.',
-            'img_url' => 'https://picsum.photos/seed/pillar-s1-2/800/400',
-            'questions_description' => 'Intermediate questions with pillar 1 dependency.',
-            'questions_estimated_time' => '10-15 minutes',
-            'questions_count' => 7,
-            'tags' => $this->getTagIds(['section1', 'intermediate']),
-        ]);
-
-        // Create section 2 pillars
-        $section2Pillar1 = Pillar::create([
-            'name' => 'Section 2 - Pillar 1',
-            'description' => 'First pillar of section 2 depends on section 1 pillar 1.',
-            'definition' => 'This pillar covers advanced concepts dependent on section 1 pillar 1.',
-            'objectives' => 'To assess advanced skills with section 1 pillar 1 dependency.',
-            'img_url' => 'https://picsum.photos/seed/pillar-s2-1/800/400',
-            'questions_description' => 'Advanced questions with section 1 pillar 1 dependency.',
-            'questions_estimated_time' => '10-15 minutes',
-            'questions_count' => 7,
-            'tags' => $this->getTagIds(['section2', 'advanced']),
-        ]);
-
-        $section2Pillar2 = Pillar::create([
-            'name' => 'Section 2 - Pillar 2',
-            'description' => 'Second pillar of section 2 depends on section 1 pillar 2.',
-            'definition' => 'This pillar covers specialized concepts dependent on section 1 pillar 2.',
-            'objectives' => 'To assess specialized skills with section 1 pillar 2 dependency.',
-            'img_url' => 'https://picsum.photos/seed/pillar-s2-2/800/400',
-            'questions_description' => 'Specialized questions with section 1 pillar 2 dependency.',
-            'questions_estimated_time' => '10-15 minutes',
-            'questions_count' => 7,
-            'tags' => $this->getTagIds(['section2', 'specialized']),
-        ]);
-
-        // Attach pillars to methodology with sections
-        $methodology->pillars()->attach($section1Pillar1->id, ['section' => 'first']);
-        $methodology->pillars()->attach($section1Pillar2->id, ['section' => 'first']);
-        $methodology->pillars()->attach($section2Pillar1->id, ['section' => 'second']);
-        $methodology->pillars()->attach($section2Pillar2->id, ['section' => 'second']);
-
-        // Attach questions to all pillars
-        $allPillars = [$section1Pillar1, $section1Pillar2, $section2Pillar1, $section2Pillar2];
-        foreach ($allPillars as $pillar) {
-            foreach ($questions as $question) {
-                $pillar->questions()->attach($question->id, [
-                    'methodology_id' => $methodology->id,
-                    'weight' => 1
-                ]);
-            }
-        }
-
-        // Create modules for each pillar
-        foreach ($allPillars as $pillarIndex => $pillar) {
-            for ($j = 1; $j <= 2; $j++) {
-                $module = Module::create([
-                    'name' => "{$pillar->name}-Module{$j}",
-                    'description' => "Module $j within {$pillar->name} provides specialized knowledge.",
-                    'definition' => "Module $j covers specific competencies within {$pillar->name}.",
-                    'objectives' => "To assess specialized skills in module $j of {$pillar->name}.",
-                    'img_url' => 'https://picsum.photos/seed/module-'.$pillarIndex.'-'.$j.'/800/400',
-                    'questions_description' => "This module contains questions for specific competencies.",
-                    'questions_estimated_time' => '5-7 minutes',
-                    'questions_count' => 7,
-                    'tags' => $this->getTagIds(['module', 'specialized']),
-                ]);
-
-                // Attach module to pillar with methodology context
-                \DB::table('pillar_module')->insert([
-                    'methodology_id' => $methodology->id,
+        // Relate: Complex methodology -> pillars and modules under pillars
+        $modulePillarMap = [];
+        $cmpPillars = [[$complexPillar1, 'first', 1, [[$complexP1M1, 1], [$complexP1M2, 2]]], [$complexPillar2, 'first', 2, [[$complexP2M1, 1], [$complexP2M2, 2]]]];
+        foreach ($cmpPillars as [$pillar, $section, $seq, $mods]) {
+            $mpRow = [
+                'methodology_id' => $complexMethod->id,
+                'pillar_id' => $pillar->id,
+                'section' => $section,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            if (Schema::hasColumn('methodology_pillar', 'sequence')) $mpRow['sequence'] = $seq;
+            if (Schema::hasColumn('methodology_pillar', 'number_of_modules')) $mpRow['number_of_modules'] = count($mods);
+            if (Schema::hasColumn('methodology_pillar', 'weight')) $mpRow['weight'] = 50.00;
+            if (Schema::hasColumn('methodology_pillar', 'questions_description')) $mpRow['questions_description'] = 'Pillar questions';
+            if (Schema::hasColumn('methodology_pillar', 'questions_estimated_time')) $mpRow['questions_estimated_time'] = 20;
+            DB::table('methodology_pillar')->insert($mpRow);
+            foreach ($mods as [$mod, $modSeq]) {
+                $pmRow = [
+                    'methodology_id' => $complexMethod->id,
                     'pillar_id' => $pillar->id,
-                    'module_id' => $module->id,
-                ]);
+                    'module_id' => $mod->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+                if (Schema::hasColumn('pillar_module', 'number_of_questions')) $pmRow['number_of_questions'] = 3;
+                if (Schema::hasColumn('pillar_module', 'weight')) $pmRow['weight'] = 50.00;
+                if (Schema::hasColumn('pillar_module', 'minutes')) $pmRow['minutes'] = 15;
+                if (Schema::hasColumn('pillar_module', 'report')) $pmRow['report'] = $mod->name . ' report';
+                if (Schema::hasColumn('pillar_module', 'questions_description')) $pmRow['questions_description'] = 'Module questions';
+                if (Schema::hasColumn('pillar_module', 'questions_estimated_time')) $pmRow['questions_estimated_time'] = 15;
+                DB::table('pillar_module')->insert($pmRow);
 
-                // Attach all 7 questions to module
-                foreach ($questions as $question) {
-                    $module->questions()->attach($question->id, [
-                        'methodology_id' => $methodology->id,
-                        'pillar_id' => $pillar->id,
-                        'weight' => 1
-                    ]);
-                }
+                // Map module to pillar for complex methodology
+                $modulePillarMap[$complexMethod->id][$mod->id] = $pillar->id;
             }
         }
 
-        // Set up dependencies
-        // Section 1 Pillar 2 depends on Section 1 Pillar 1
-        $this->addDependency($methodology, $section1Pillar2, $section1Pillar1);
+        // Relate: TwoSection methodology -> pillars and modules under pillars
+        $twoSPillars = [
+            [$twoS1Pillar1, 'first', 1, [[$twoS1P1M1, 1], [$twoS1P1M2, 2]]],
+            [$twoS1Pillar2, 'first', 2, [[$twoS1P2M1, 1], [$twoS1P2M2, 2]]],
+            [$twoS2Pillar1, 'second', 1, [[$twoS2P1M1, 1], [$twoS2P1M2, 2]]],
+            [$twoS2Pillar2, 'second', 2, [[$twoS2P2M1, 1], [$twoS2P2M2, 2]]],
+        ];
+        foreach ($twoSPillars as [$pillar, $section, $seq, $mods]) {
+            $mpRow = [
+                'methodology_id' => $twoSectionMethod->id,
+                'pillar_id' => $pillar->id,
+                'section' => $section,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            if (Schema::hasColumn('methodology_pillar', 'sequence')) $mpRow['sequence'] = $seq;
+            if (Schema::hasColumn('methodology_pillar', 'number_of_modules')) $mpRow['number_of_modules'] = count($mods);
+            if (Schema::hasColumn('methodology_pillar', 'weight')) $mpRow['weight'] = 25.00;
+            if (Schema::hasColumn('methodology_pillar', 'questions_description')) $mpRow['questions_description'] = 'Pillar questions';
+            if (Schema::hasColumn('methodology_pillar', 'questions_estimated_time')) $mpRow['questions_estimated_time'] = 20;
+            DB::table('methodology_pillar')->insert($mpRow);
+            foreach ($mods as [$mod, $modSeq]) {
+                $pmRow = [
+                    'methodology_id' => $twoSectionMethod->id,
+                    'pillar_id' => $pillar->id,
+                    'module_id' => $mod->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+                if (Schema::hasColumn('pillar_module', 'number_of_questions')) $pmRow['number_of_questions'] = 3;
+                if (Schema::hasColumn('pillar_module', 'weight')) $pmRow['weight'] = 50.00;
+                if (Schema::hasColumn('pillar_module', 'minutes')) $pmRow['minutes'] = 15;
+                if (Schema::hasColumn('pillar_module', 'report')) $pmRow['report'] = $mod->name . ' report';
+                if (Schema::hasColumn('pillar_module', 'questions_description')) $pmRow['questions_description'] = 'Module questions';
+                if (Schema::hasColumn('pillar_module', 'questions_estimated_time')) $pmRow['questions_estimated_time'] = 15;
+                DB::table('pillar_module')->insert($pmRow);
 
-        // Section 2 Pillar 1 depends on Section 1 Pillar 1
-        $this->addDependency($methodology, $section2Pillar1, $section1Pillar1);
+                // Map module to pillar for two-section methodology
+                $modulePillarMap[$twoSectionMethod->id][$mod->id] = $pillar->id;
+            }
+        }
 
-        // Section 2 Pillar 2 depends on Section 1 Pillar 2
-        $this->addDependency($methodology, $section2Pillar2, $section1Pillar2);
-    }
+        // Helper: evenly weight answers for a given context row
+        $weightAnswersEvenly = function (string $contextType, int $contextId, Question $question) use ($answerContextTable): void {
+            $answerIds = $question->answers()->pluck('answers.id')->all();
+            if (empty($answerIds)) {
+                return;
+            }
+            $count = count($answerIds);
+            $weight = round(100.0 / max(1, $count), 2);
+            $rows = [];
+            foreach ($answerIds as $aid) {
+                $rows[] = [
+                    'context_type' => $contextType,
+                    'context_id' => $contextId,
+                    'answer_id' => $aid,
+                    'weight' => $weight,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            DB::table($answerContextTable)->upsert(
+                $rows,
+                ['context_type', 'context_id', 'answer_id'],
+                ['weight', 'updated_at']
+            );
+        };
 
-    /**
-     * Add dependency between pillars
-     */
-    private function addDependency(Methodology $methodology, Pillar $pillar, Pillar $dependsOn): void
-    {
-        \DB::table('pillar_dependencies')->insert([
-            'methodology_id' => $methodology->id,
-            'pillar_id' => $pillar->id,
-            'depends_on_pillar_id' => $dependsOn->id,
+        // Methodology-level questions: add 4 mixed questions per methodology
+        $allQuestions = array_values($questionsByType);
+        $methodologies = [
+            [$simpleMethod, [0, 1, 2, 3]], // YesNo, TrueFalse, MCQSingle, MCQMultiple
+            [$complexMethod, [4, 5, 6, 0]], // Rating1to5, Rating1to10, Scale, YesNo
+            [$twoSectionMethod, [1, 2, 6, 4]], // TrueFalse, MCQSingle, Scale, Rating1to5
+        ];
+        foreach ($methodologies as [$methodology, $idxs]) {
+            $sequence = 1;
+            foreach ($idxs as $i) {
+                $q = $allQuestions[$i];
+                $mqRow = [
+                    'methodology_id' => $methodology->id,
+                    'question_id' => $q->id,
+                    'weight' => round(100.0 / 4, 2),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+                if (Schema::hasColumn('methodology_question', 'sequence')) $mqRow['sequence'] = $sequence;
+                $pivotId = DB::table('methodology_question')->insertGetId($mqRow);
+                $weightAnswersEvenly('methodology_question', $pivotId, $q);
+                $sequence++;
+            }
+            // update methodology questions_count
+            $methodology->update(['questions_count' => 4]);
+        }
+
+        // Module-level questions: add 3 mixed questions per module in sequence and set dependencies
+        $moduleSets = [
+            $simpleMethod->id => [
+                $simpleModule1,
+                $simpleModule2,
+            ],
+            $complexMethod->id => [
+                $complexP1M1,
+                $complexP1M2,
+                $complexP2M1,
+                $complexP2M2,
+            ],
+            $twoSectionMethod->id => [
+                $twoS1P1M1,
+                $twoS1P1M2,
+                $twoS1P2M1,
+                $twoS1P2M2,
+                $twoS2P1M1,
+                $twoS2P1M2,
+                $twoS2P2M1,
+                $twoS2P2M2,
+            ],
+        ];
+
+        $moduleQuestionIndices = [0, 2, 4]; // pick a stable set: YesNo, MCQSingle, Rating1to5
+
+        foreach ($moduleSets as $methodologyId => $mods) {
+            foreach ($mods as $mod) {
+                $sequence = 1;
+                $modulePivotIds = [];
+                $chosen = array_map(fn ($idx) => $allQuestions[$idx], $moduleQuestionIndices);
+                foreach ($chosen as $q) {
+                    $pillarId = $modulePillarMap[$methodologyId][$mod->id] ?? null;
+                    $modQRow = [
+                        'methodology_id' => $methodologyId,
+                        'module_id' => $mod->id,
+                        'pillar_id' => $pillarId,
+                        'question_id' => $q->id,
+                        'weight' => round(100.0 / 3, 2),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                    if (Schema::hasColumn('module_question', 'sequence')) $modQRow['sequence'] = $sequence;
+                    $pivotId = DB::table('module_question')->insertGetId($modQRow);
+                    $modulePivotIds[] = ['id' => $pivotId, 'question' => $q];
+                    $weightAnswersEvenly('module_question', $pivotId, $q);
+                    $sequence++;
+                }
+
+                // Dependencies: q1 -> q2, q2 -> q3 (for all answers)
+                if (count($modulePivotIds) === 3 && Schema::hasTable($answerContextTable)) {
+                    [$mq1, $mq2, $mq3] = $modulePivotIds;
+                    // For all answers in question 1 context, set dependency to question 2 context
+                    DB::table($answerContextTable)
+                        ->where('context_type', 'module_question')
+                        ->where('context_id', $mq1['id'])
+                        ->update([
+                            'dependent_context_type' => 'module_question',
+                            'dependent_context_id' => $mq2['id'],
+                            'updated_at' => now(),
+                        ]);
+                    // For all answers in question 2 context, set dependency to question 3 context
+                    DB::table($answerContextTable)
+                        ->where('context_type', 'module_question')
+                        ->where('context_id', $mq2['id'])
+                        ->update([
+                            'dependent_context_type' => 'module_question',
+                            'dependent_context_id' => $mq3['id'],
+                            'updated_at' => now(),
+                        ]);
+                }
+
+                // Update module counters
+                $mod->update(['questions_count' => 3]);
+            }
+        }
+
+        // Module dependencies
+        if (Schema::hasTable('module_dependencies')) {
+            DB::table('module_dependencies')->insert([
+                ['methodology_id' => $simpleMethod->id, 'module_id' => $simpleModule2->id, 'depends_on_module_id' => $simpleModule1->id, 'created_at' => now(), 'updated_at' => now()],
+                ['methodology_id' => $complexMethod->id, 'module_id' => $complexP1M2->id, 'depends_on_module_id' => $complexP1M1->id, 'created_at' => now(), 'updated_at' => now()],
+                ['methodology_id' => $complexMethod->id, 'module_id' => $complexP2M2->id, 'depends_on_module_id' => $complexP2M1->id, 'created_at' => now(), 'updated_at' => now()],
+                ['methodology_id' => $twoSectionMethod->id, 'module_id' => $twoS1P1M2->id, 'depends_on_module_id' => $twoS1P1M1->id, 'created_at' => now(), 'updated_at' => now()],
+                ['methodology_id' => $twoSectionMethod->id, 'module_id' => $twoS1P2M2->id, 'depends_on_module_id' => $twoS1P2M1->id, 'created_at' => now(), 'updated_at' => now()],
+                ['methodology_id' => $twoSectionMethod->id, 'module_id' => $twoS2P1M2->id, 'depends_on_module_id' => $twoS2P1M1->id, 'created_at' => now(), 'updated_at' => now()],
+                ['methodology_id' => $twoSectionMethod->id, 'module_id' => $twoS2P2M2->id, 'depends_on_module_id' => $twoS2P2M1->id, 'created_at' => now(), 'updated_at' => now()],
+            ]);
+        }
+
+        // Pillar dependencies
+        DB::table('pillar_dependencies')->insert([
+            ['methodology_id' => $complexMethod->id, 'pillar_id' => $complexPillar2->id, 'depends_on_pillar_id' => $complexPillar1->id, 'created_at' => now(), 'updated_at' => now()],
+            ['methodology_id' => $twoSectionMethod->id, 'pillar_id' => $twoS1Pillar2->id, 'depends_on_pillar_id' => $twoS1Pillar1->id, 'created_at' => now(), 'updated_at' => now()],
+            ['methodology_id' => $twoSectionMethod->id, 'pillar_id' => $twoS2Pillar1->id, 'depends_on_pillar_id' => $twoS1Pillar1->id, 'created_at' => now(), 'updated_at' => now()],
+            // Assuming intended: Section 2 Pillar 2 depends on Section 2 Pillar 1
+            ['methodology_id' => $twoSectionMethod->id, 'pillar_id' => $twoS2Pillar2->id, 'depends_on_pillar_id' => $twoS2Pillar1->id, 'created_at' => now(), 'updated_at' => now()],
         ]);
-    }
-
-    /**
-     * Ensure tags exist and return their IDs
-     */
-    private function getTagIds(array $titles): array
-    {
-        return collect($titles)
-            ->map(function ($title) {
-                return Tag::firstOrCreate(['title' => $title], ['active' => true])->id;
-            })
-            ->values()
-            ->all();
     }
 }
+
+
