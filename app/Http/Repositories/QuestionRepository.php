@@ -21,6 +21,7 @@ class QuestionRepository
      */
     public function getQuestionsByContext(string $context, int $contextId, ?int $methodologyId = null, ?int $pillarId = null)
     {
+        $data = [];
         $questions = null;
 
         switch ($context) {
@@ -37,23 +38,25 @@ class QuestionRepository
                 throw new \InvalidArgumentException("Invalid context type: {$context}");
         }
 
-        // Enrich answers with next_question_id when dependencies are configured
-        $this->attachNextQuestionDependencies($questions, $context, $contextId, $methodologyId, $pillarId);
+        if (config('app.features.dynamic_questions')) {
+            // Enrich answers with next_question_id when dependencies are configured
+            $this->attachNextQuestionDependencies($questions, $context, $contextId, $methodologyId, $pillarId);
 
-        $type = 'simple';
-        foreach ($questions as $question) {
-            foreach ($question->answers as $answer) {
-                if ($answer->next_question_id) {
-                    $type = 'dynamic';
-                    break 2;
+            $type = 'simple';
+            foreach ($questions as $question) {
+                foreach ($question->answers as $answer) {
+                    if ($answer->next_question_id) {
+                        $type = 'dynamic';
+                        break 2;
+                    }
                 }
             }
+
+            $data['type'] = $type;
         }
 
-        return [
-            'type' => $type,
-            'list' => QuestionResource::collection($questions)
-        ];
+        $data['list'] = QuestionResource::collection($questions);
+        return $data;
     }
 
     /**
