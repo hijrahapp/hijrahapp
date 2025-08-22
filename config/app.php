@@ -17,5 +17,7 @@ return [
     'jwt_secret' => env('JWT_SECRET'),
     'features' => [
         'email_verification' => env('EMAIL_VERIFICATION', false),
+        'result_calculation' => env('RESULT_CALCULATION', false),
+        'dynamic_questions' => env('DYNAMIC_QUESTIONS', false),
     ],
 ];

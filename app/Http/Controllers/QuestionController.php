@@ -21,8 +21,10 @@ class QuestionController
     {
         try{
             $questions = $this->questionRepo->getQuestionsByContext('methodology', $contextId);
-
-            return response()->json($questions);
+            if (config('app.features.dynamic_questions')) {
+                return response()->json($questions);
+            }
+            return response()->json($questions['list']);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -45,7 +47,10 @@ class QuestionController
         try {
             // Return questions grouped by modules under this pillar for the methodology
             $questions = $this->questionRepo->getQuestionsByContext('pillar', $pillarId, $methodologyId);
-            return response()->json($questions);
+            if (config('app.features.dynamic_questions')) {
+                return response()->json($questions);
+            }
+            return response()->json($questions['list']);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -66,7 +71,10 @@ class QuestionController
     {
         try {
             $questions = $this->questionRepo->getQuestionsByContext('module', $moduleId, $methodologyId);
-            return response()->json($questions);
+            if (config('app.features.dynamic_questions')) {
+                return response()->json($questions);
+            }
+            return response()->json($questions['list']);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -88,7 +96,10 @@ class QuestionController
     {
         try {
             $questions = $this->questionRepo->getQuestionsByContext('module', $moduleId, $methodologyId, $pillarId);
-            return response()->json($questions);
+            if (config('app.features.dynamic_questions')) {
+                return response()->json($questions);
+            }
+            return response()->json($questions['list']);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

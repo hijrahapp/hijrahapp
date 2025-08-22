@@ -25,7 +25,7 @@ class QuestionResource extends JsonResource
             }
 
             // Add next question id if dependency exists for this answer
-            if (isset($answer->next_question_id)) {
+            if (config('app.features.dynamic_questions') && isset($answer->next_question_id)) {
                 $answerData['next_question_id'] = $answer->next_question_id;
             }
 

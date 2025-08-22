@@ -76,9 +76,11 @@ class ModuleDetailedResource extends JsonResource
         $questions = $this->filterArray($questions);
         $payload['questions'] = $questions;
 
-        $result = $this->calculateResult();
-        if ($result) {
-            $payload['result'] = $result;
+        if (config('app.features.result_calculation')) {
+            $result = $this->calculateResult();
+            if ($result) {
+                $payload['result'] = $result;
+            }
         }
 
         return $payload;

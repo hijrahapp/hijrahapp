@@ -74,9 +74,11 @@ class PillarDetailedResource extends JsonResource
             ];
         }
 
-        $result = $this->calculateResult();
-        if ($result) {
-            $payload['result'] = $result;
+        if (config('app.features.result_calculation')) {
+            $result = $this->calculateResult();
+            if ($result) {
+                $payload['result'] = $result;
+            }
         }
 
         return $payload;
