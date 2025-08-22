@@ -28,6 +28,9 @@ class MethodologyQuestionsModal extends Component
     public array $answerDependencies = []; // answer_id => dependent_question_id
     public array $sequences = []; // question_id => sequence
     public bool $suppressTagSuggestionsOnce = false;
+    public array $questionItemIds = []; // question_id => module_id/pillar_id (general context)
+    public string $generalItemKind = ''; // 'module' or 'pillar' for general context
+    public array $generalItems = []; // [{id, name}]
 
     protected $listeners = [
         'open-manage-methodology-module-questions' => 'open',
@@ -73,8 +76,23 @@ class MethodologyQuestionsModal extends Component
                     ->where('context_type', 'module_question')
                     ->whereIn('context_id', $mqIds)
                     ->get();
+                // Map module_question id -> question_id to scope weights per question
+                $mqMap = \DB::table('module_question')
+                    ->where('methodology_id', $methodologyId)
+                    ->where('module_id', $moduleId)
+                    ->when(!is_null($this->pillarId), function ($q) {
+                        $q->where('pillar_id', $this->pillarId);
+                    }, function ($q) {
+                        $q->whereNull('pillar_id');
+                    })
+                    ->get(['id', 'question_id'])
+                    ->keyBy('id');
                 foreach ($answerWeights as $aw) {
-                    $this->answerWeights[$aw->answer_id] = $this->formatDisplayNumber($aw->weight);
+                    $row = $mqMap->get($aw->context_id);
+                    if ($row) {
+                        $qid = (int)$row->question_id;
+                        $this->answerWeights[$qid][$aw->answer_id] = $this->formatDisplayNumber($aw->weight);
+                    }
                 }
             }
             // Load dependencies from answer_contexts by mapping dependent context id back to question id
@@ -111,6 +129,7 @@ class MethodologyQuestionsModal extends Component
             $this->selectedQuestionIds = $existing->pluck('question_id')->toArray();
             foreach ($existing as $row) {
                 $this->questionWeights[$row->question_id] = $this->formatDisplayNumber($row->weight);
+                $this->questionItemIds[$row->question_id] = $row->item_id ?? null;
             }
             // Initialize sequences based on current selection order
             foreach ($this->selectedQuestionIds as $index => $qid) {
@@ -124,8 +143,16 @@ class MethodologyQuestionsModal extends Component
                     ->where('context_type', 'methodology_question')
                     ->whereIn('context_id', $mqIds)
                     ->get();
+                $methodologyQuestionRows = \DB::table('methodology_question')
+                    ->where('methodology_id', $methodologyId)
+                    ->get(['id', 'question_id'])
+                    ->keyBy('id');
                 foreach ($answerWeights as $aw) {
-                    $this->answerWeights[$aw->answer_id] = $this->formatDisplayNumber($aw->weight);
+                    $row = $methodologyQuestionRows->get($aw->context_id);
+                    if ($row) {
+                        $qid = (int)$row->question_id;
+                        $this->answerWeights[$qid][$aw->answer_id] = $this->formatDisplayNumber($aw->weight);
+                    }
                 }
             }
             // Load methodology-level dependencies from answer_contexts
@@ -146,6 +173,26 @@ class MethodologyQuestionsModal extends Component
                         $this->answerDependencies[$dep->answer_id] = $target->question_id;
                     }
                 }
+            }
+
+            // Load general-context item options (modules for simple; pillars for complex/twoSection)
+            $methodology = Methodology::find($methodologyId);
+            if ($methodology) {
+                $type = (string)$methodology->type;
+                if ($type === 'simple') {
+                    $this->generalItemKind = 'module';
+                    $items = $methodology->modules()->get(['modules.id', 'modules.name']);
+                } else {
+                    $this->generalItemKind = 'pillar';
+                    $pillarsQuery = $methodology->pillars();
+                    if ($type === 'twoSection') {
+                        $pillarsQuery->wherePivot('section', 'first');
+                    }
+                    $items = $pillarsQuery->get(['pillars.id', 'pillars.name']);
+                }
+                $this->generalItems = $items->map(function ($it) {
+                    return ['id' => $it->id, 'name' => $it->name];
+                })->toArray();
             }
         }
     }
@@ -205,6 +252,10 @@ class MethodologyQuestionsModal extends Component
             if (!isset($this->questionWeights[$questionId])) {
                 $this->questionWeights[$questionId] = '0';
             }
+            // Initialize general item selection to empty if in general context
+            if ($this->moduleId === null && !isset($this->questionItemIds[$questionId])) {
+                $this->questionItemIds[$questionId] = '';
+            }
         }
     }
 
@@ -222,13 +273,28 @@ class MethodologyQuestionsModal extends Component
             return;
         }
 
+        // Validate general context item selections (required for methodology questions)
+        if ($this->moduleId === null && $this->methodologyId !== null) {
+            $methodology = Methodology::find($this->methodologyId);
+            if ($methodology) {
+                $type = (string)$methodology->type;
+                foreach ($this->selectedQuestionIds as $qid) {
+                    $val = $this->questionItemIds[$qid] ?? '';
+                    if ($val === '' || $val === null) {
+                        $this->dispatch('show-toast', type: 'error', message: 'Please select a '.($type === 'simple' ? 'module' : 'pillar').' for each question.');
+                        return;
+                    }
+                }
+            }
+        }
+
         // Validate per-question answers sum to 100%
         foreach ($this->selectedQuestionIds as $questionId) {
             $question = Question::with('answers:id')->find($questionId);
             $answerIds = $question ? $question->answers->pluck('id') : collect();
             $sum = 0;
             foreach ($answerIds as $aid) {
-                $sum += (float)($this->answerWeights[$aid] ?? 0);
+                $sum += (float)($this->answerWeights[$questionId][$aid] ?? 0);
             }
             if (abs($sum - 100) > 0.001) {
                 $this->dispatch('show-toast', type: 'error', message: 'Each question’s answers must sum to 100%.');
@@ -292,7 +358,7 @@ class MethodologyQuestionsModal extends Component
                         'context_id' => $mqId,
                         'answer_id' => $aid,
                     ], [
-                        'weight' => (float)($this->answerWeights[$aid] ?? 0),
+                        'weight' => (float)($this->answerWeights[$questionId][$aid] ?? 0),
                         'dependent_context_type' => $dependentContextId ? 'module_question' : null,
                         'dependent_context_id' => $dependentContextId,
                         'updated_at' => now(),
@@ -323,6 +389,7 @@ class MethodologyQuestionsModal extends Component
                     'question_id' => $questionId,
                     'weight' => (float)($this->questionWeights[$questionId] ?? 0),
                     'sequence' => (int)($this->sequences[$questionId] ?? 0),
+                    'item_id' => (int)($this->questionItemIds[$questionId] ?? 0),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -341,7 +408,7 @@ class MethodologyQuestionsModal extends Component
                         'context_id' => $mqId,
                         'answer_id' => $aid,
                     ], [
-                        'weight' => (float)($this->answerWeights[$aid] ?? 0),
+                        'weight' => (float)($this->answerWeights[$questionId][$aid] ?? 0),
                         'dependent_context_type' => $dependentContextId ? 'methodology_question' : null,
                         'dependent_context_id' => $dependentContextId,
                         'updated_at' => now(),
@@ -416,6 +483,9 @@ class MethodologyQuestionsModal extends Component
         $this->answerWeights = [];
         $this->answerDependencies = [];
         $this->sequences = [];
+        $this->questionItemIds = [];
+        $this->generalItemKind = '';
+        $this->generalItems = [];
     }
 
     public function render()

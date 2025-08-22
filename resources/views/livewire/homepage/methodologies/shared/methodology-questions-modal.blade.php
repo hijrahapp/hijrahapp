@@ -88,10 +88,23 @@
                                 <div class="kt-accordion-content hidden p-3" aria-labelledby="q_toggle_{{ $qid }}" id="q_content_{{ $qid }}">
                                     <div class="kt-card-body space-y-3">
                                         <div class="flex gap-2 items-center justify-end mb-0.5">
-                                            <span class="text-xs text-secondary-foreground/70">Weight:</span>
-                                            <div class="kt-input w-20">
-                                                <input type="text" class="kt-input" placeholder="Weight %" wire:model.defer="questionWeights.{{ $qid }}" />
-                                                <i class="ki-filled ki-percentage"></i>
+                                            @if(!$moduleId && $generalItemKind)
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-xs text-secondary-foreground/70">{{ ucfirst($generalItemKind) }}:</span>
+                                                    <select class="kt-select w-56" wire:model="questionItemIds.{{ $qid }}" required>
+                                                        <option value="">Select {{ $generalItemKind }}</option>
+                                                        @foreach($generalItems as $it)
+                                                            <option value="{{ $it['id'] }}">{{ $it['name'] }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            @endif
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs text-secondary-foreground/70">Weight:</span>
+                                                <div class="kt-input w-24">
+                                                    <input type="text" class="kt-input" placeholder="Weight %" wire:model.defer="questionWeights.{{ $qid }}" />
+                                                    <i class="ki-filled ki-percentage"></i>
+                                                </div>
                                             </div>
                                         </div>
                                         @foreach($answers as $ans)
@@ -102,8 +115,8 @@
                                                 <div class="md:col-span-1">
                                                     <span class="text-xs text-secondary-foreground/70">Weight:</span>
                                                     <div class="kt-input">
-                                                        <i class="ki-filled ki-graph"></i>
-                                                        <input type="text" class="kt-input" placeholder="Answer weight %" wire:model.defer="answerWeights.{{ $ans->id }}" />
+                                                        <input type="text" class="kt-input" placeholder="Answer weight %" wire:model.defer="answerWeights.{{ $qid }}.{{ $ans->id }}" />
+                                                        <i class="ki-filled ki-percentage"></i>
                                                     </div>
                                                 </div>
                                                 @if($moduleId)
