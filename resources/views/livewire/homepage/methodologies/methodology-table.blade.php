@@ -41,6 +41,7 @@
                         <th class="w-20 text-center">Image</th>
                         <th class="">Name</th>
                         <th class="text-center">Type</th>
+                        <th class="">Tags</th>
                         <th class="text-center">Status</th>
                         <th class="w-20 text-center">Actions</th>
                     </tr>
@@ -69,16 +70,37 @@
                                 </div>
                             </td>
                             <td class="text-center">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
-                                    @if($methodology->type == 'simple') 
-                                    bg-green-50 text-green-600 
-                                    @elseif($methodology->type == 'complex') 
-                                    bg-blue-50 text-blue-600 
-                                    @else 
-                                    bg-violet-50 text-violet-600 
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                    @if($methodology->type == 'simple')
+                                    bg-green-50 text-green-600
+                                    @elseif($methodology->type == 'complex')
+                                    bg-blue-50 text-blue-600
+                                    @else
+                                    bg-violet-50 text-violet-600
                                     @endif">
-                                    {{ ucfirst($methodology->type) }}
+                                    {{ __('lookups.'.$methodology->type) }}
                                 </span>
+                            </td>
+                            <td>
+                                @php
+                                    $tagData = $this->getTagTitles($methodology->tags);
+                                @endphp
+                                @if(count($tagData['tags']) > 0)
+                                    <div class="flex flex-wrap gap-1 items-center">
+                                        @foreach($tagData['tags'] as $tagTitle)
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                                                {{ $tagTitle }}
+                                            </span>
+                                        @endforeach
+                                        @if($tagData['hasMore'])
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200" title="+{{ $tagData['remainingCount'] }} more tags">
+                                                +{{ $tagData['remainingCount'] }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="text-gray-400 text-sm">No tags</span>
+                                @endif
                             </td>
                             <td class="text-center">
                                 @if($methodology->active)
@@ -104,18 +126,18 @@
                                                     Manage
                                                 </a>
                                             </li>
-                                            
+
                                             <li class="kt-dropdown-menu-separator"></li>
-                                            
+
                                             <li>
                                                 <a href="#" class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="openDeleteMethodologyModal({{ Js::from(['id' => $methodology->id]) }})">
                                                     <i class="ki-filled ki-trash"></i>
                                                     Delete
                                                 </a>
                                             </li>
-                                            
+
                                             <li class="kt-dropdown-menu-separator"></li>
-                                            
+
                                             <li>
                                                 <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="viewUsers({{ $methodology->id }})">
                                                     <i class="ki-filled ki-users"></i>
@@ -129,7 +151,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-4">No Methodologies found.</td>
+                            <td colspan="7" class="text-center py-4">No Methodologies found.</td>
                         </tr>
                     @endforelse
                 </tbody>

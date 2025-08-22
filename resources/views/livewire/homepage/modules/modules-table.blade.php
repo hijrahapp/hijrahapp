@@ -94,12 +94,12 @@
                                 @endif
                             </td>
                             <td class="text-center flex gap-2 justify-center">
-                                <button
-                                    class="kt-btn kt-btn-outline flex items-center justify-center"
-                                    wire:click="editModule({{ $module->id }})"
-                                    title="Edit Module">
-                                    <i class="ki-filled ki-pencil text-secondary-foreground"></i>
-                                </button>
+{{--                                <button--}}
+{{--                                    class="kt-btn kt-btn-outline flex items-center justify-center"--}}
+{{--                                    wire:click="editModule({{ $module->id }})"--}}
+{{--                                    title="Edit Module">--}}
+{{--                                    <i class="ki-filled ki-pencil text-secondary-foreground"></i>--}}
+{{--                                </button>--}}
                                 <button
                                     class="kt-btn kt-btn-outline flex items-center justify-center"
                                     wire:click="openDeleteModuleModal({{ Js::from(['id' => $module->id]) }})"

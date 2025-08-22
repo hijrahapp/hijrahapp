@@ -3,7 +3,7 @@
     <div class="kt-card-header flex justify-between items-center">
         <h3 class="kt-card-title">Questions</h3>
         <div class="flex gap-2 items-center">
-            <div class="kt-input max-w-48">
+            <div class="kt-input w-150">
                 <i class="ki-filled ki-magnifier"></i>
                 <input type="text" class="kt-input" placeholder="Search Questions" wire:model.live="search" />
             </div>
@@ -88,12 +88,12 @@
                                 @endif
                             </td>
                             <td class="text-center flex gap-2 justify-center">
-                                <button
-                                    class="kt-btn kt-btn-outline flex items-center justify-center"
-                                    wire:click="editQuestion({{ $question->id }})"
-                                    title="Edit Question">
-                                    <i class="ki-filled ki-pencil text-secondary-foreground"></i>
-                                </button>
+{{--                                <button--}}
+{{--                                    class="kt-btn kt-btn-outline flex items-center justify-center"--}}
+{{--                                    wire:click="editQuestion({{ $question->id }})"--}}
+{{--                                    title="Edit Question">--}}
+{{--                                    <i class="ki-filled ki-pencil text-secondary-foreground"></i>--}}
+{{--                                </button>--}}
                                 <button
                                     class="kt-btn kt-btn-outline flex items-center justify-center"
                                     wire:click="openDeleteQuestionModal({{ Js::from(['id' => $question->id]) }})"

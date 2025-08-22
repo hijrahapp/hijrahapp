@@ -2,10 +2,10 @@
 
 return [
     //Answers
-    'yes' => 'نعم',
-    'no' => 'لا',
-    'true' => 'صحيح',
-    'false' => 'خطأ',
+    'Yes' => 'نعم',
+    'No' => 'لا',
+    'True' => 'صح',
+    'False' => 'خطأ',
     //Rating
     '1' => '١',
     '2' => '٢',
@@ -18,14 +18,14 @@ return [
     '9' => '٩',
     '10' => '١٠',
     //Scale
-    'strongly_agree' => 'أوافق بشدة',
-    'agree' => 'أوافق',
-    'neutral' => 'محايد',
-    'disagree' => 'لا أوافق',
-    'strongly_disagree' => 'لا أوافق بشدة',
+    'Strongly Agree' => 'أوافق بشدة',
+    'Agree' => 'أوافق',
+    'Neutral' => 'محايد',
+    'Disagree' => 'لا أوافق',
+    'Strongly Disagree' => 'لا أوافق بشدة',
     //Question Types
     'YesNo' => 'نعم/لا',
-    'TrueFalse' => 'صحيح/خطأ',
+    'TrueFalse' => 'صح/خطأ',
     'MCQSingle' => 'اختيار من متعدد - إجابة واحدة',
     'MCQMultiple' => 'اختيار من متعدد - إجابات متعددة',
     'Rating1to5' => 'تقييم من ١ إلى ٥',
@@ -35,8 +35,9 @@ return [
     'simple' => 'بسيط',
     'complex' => 'معقد',
     'two_section' => 'قسمين',
+    'twoSection' => 'قسمين',
     //Status
     'not_started' => 'لم يبدأ',
     'in_progress' => 'قيد التنفيذ',
     'completed' => 'تمّ',
-]; 
+];

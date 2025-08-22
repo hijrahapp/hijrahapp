@@ -54,6 +54,7 @@ class TagAddModal extends Component
         if (isset($this->titles[$index])) {
             unset($this->titles[$index]);
             $this->titles = array_values($this->titles);
+            $this->error = '';
         }
     }
 

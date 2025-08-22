@@ -1243,6 +1243,9 @@
   .w-80 {
     width: calc(var(--spacing) * 80);
   }
+  .w-150 {
+    width: calc(var(--spacing) * 150);
+  }
   .w-\[1\.875rem\] {
     width: 1.875rem;
   }

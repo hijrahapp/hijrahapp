@@ -2,10 +2,10 @@
 
 return [
     //Answers
-    'yes' => 'Yes',
-    'no' => 'No',
-    'true' => 'True',
-    'false' => 'False',
+    'Yes' => 'Yes',
+    'No' => 'No',
+    'True' => 'True',
+    'False' => 'False',
     //Rating
     '1' => '1',
     '2' => '2',
@@ -18,11 +18,11 @@ return [
     '9' => '9',
     '10' => '10',
     //Scale
-    'strongly_agree' => 'Strongly Agree',
-    'agree' => 'Agree',
-    'neutral' => 'Neutral',
-    'disagree' => 'Disagree',
-    'strongly_disagree' => 'Strongly Disagree',
+    'Strongly Agree' => 'Strongly Agree',
+    'Agree' => 'Agree',
+    'Neutral' => 'Neutral',
+    'Disagree' => 'Disagree',
+    'Strongly Disagree' => 'Strongly Disagree',
     //Question Types
     'YesNo' => 'Yes/No',
     'TrueFalse' => 'True/False',
@@ -35,6 +35,7 @@ return [
     'simple' => 'Simple',
     'complex' => 'Complex',
     'two_section' => 'Two Section',
+    'twoSection' => 'Two Section',
     //Status
     'not_started' => 'Not Started',
     'in_progress' => 'In Progress',

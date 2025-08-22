@@ -6,6 +6,7 @@ use App\Enums\QuestionType;
 use App\Traits\HasTagTitles;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Lang;
 
 class QuestionResource extends JsonResource
 {
@@ -14,9 +15,12 @@ class QuestionResource extends JsonResource
     public function toArray(Request $request): array
     {
         $answers = $this->answers->map(function ($answer) {
+            $lookupKey = 'lookups.' . $answer->title;
+            $translatedTitle = Lang::has($lookupKey) ? __($lookupKey) : $answer->title;
+
             $answerData = [
                 'id' => $answer->id,
-                'title' => $answer->title,
+                'title' => $translatedTitle,
             ];
 
             // Add weight if available for this answer in this context
