@@ -41,7 +41,8 @@ class MethodologyAddModal extends Component
             'questionsEstimatedTime' => 'nullable|integer|min:0',
             'tags' => 'array',
             'tags.*' => 'integer',
-            'imgUrl' => 'required|string',
+            // Required on create, nullable on edit
+            'imgUrl' => $this->isEditMode ? 'nullable|string' : 'required|string',
             'type' => 'required|in:simple,complex,twoSection',
         ];
 
@@ -166,14 +167,7 @@ class MethodologyAddModal extends Component
 
             if ($this->isEditMode) {
                 $methodology = Methodology::findOrFail($this->methodologyId);
-
-                // Preserve existing images if user didn't change them in edit mode
-                $updateData = $data;
-                if ($this->imgUrl === '') {
-                    unset($updateData['img_url']);
-                }
-
-                $methodology->update($updateData);
+                $methodology->update($data);
             } else {
                 $data['active'] = false; // Default status is deactivated
                 $methodology = Methodology::create($data);

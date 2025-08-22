@@ -14,7 +14,7 @@
             type="file" 
             accept="image/*" 
             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-            onchange="handleImageSelect(this, '{{ $this->getId() }}')"
+            wire:model="file"
         >
 
         <!-- Image Display -->
@@ -78,62 +78,7 @@
     </p>
 
     <!-- Error Display -->
-    @error('image')
+    @error('file')
         <p class="text-xs text-red-500">{{ $message }}</p>
     @enderror
 </div>
-
-<script>
-function handleImageSelect(input, componentId) {
-    const file = input.files[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-        showToast('Please select a valid image file', 'error');
-        input.value = '';
-        return;
-    }
-
-    // Validate file size (2MB)
-    if (file.size > 2 * 1024 * 1024) {
-        showToast('File size must be less than 2MB', 'error');
-        input.value = '';
-        return;
-    }
-
-    // Convert to base64
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        // Update Livewire component
-        Livewire.find(componentId).set('value', e.target.result);
-        
-        // Update preview immediately
-        updatePreview(componentId, e.target.result);
-    };
-    
-    reader.onerror = function() {
-        showToast('Error reading file', 'error');
-        input.value = '';
-    };
-    
-    reader.readAsDataURL(file);
-}
-
-function updatePreview(componentId, imageSrc) {
-    const preview = document.getElementById('preview-' + componentId);
-    const placeholder = document.getElementById('placeholder-' + componentId);
-    
-    if (preview) {
-        preview.src = imageSrc;
-    }
-}
-
-function showToast(message, type = 'info') {
-    // Use Livewire's global dispatch to show toast
-    Livewire.dispatch('show-toast', { 
-        type: type, 
-        message: message 
-    });
-}
-</script>

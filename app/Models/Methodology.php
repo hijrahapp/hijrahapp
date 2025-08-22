@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Traits\DeletesStoredImages;
 
 class Methodology extends Model
 {
-    use HasFactory;
+    use HasFactory, DeletesStoredImages;
 
     protected $table = 'methodology';
 
@@ -55,6 +56,15 @@ class Methodology extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    protected function imageUrlAttributes(): array
+    {
+        return [
+            'img_url',
+            'first_section_img_url',
+            'second_section_img_url',
+        ];
+    }
 
     /* -------------------------------------------------------------------------
      | Relationships

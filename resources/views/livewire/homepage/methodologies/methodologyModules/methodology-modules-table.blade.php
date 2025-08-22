@@ -112,7 +112,13 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4">No Modules found.</td>
+                                <td 
+                                @if(\DB::table('methodology_pillar')->where('methodology_id', $methodology->id)->exists()) 
+                                colspan="8" 
+                                @else 
+                                colspan="7" 
+                                @endif 
+                                class="text-center py-4">No Modules found.</td>
                             </tr>
                         @endforelse
                     </tbody>

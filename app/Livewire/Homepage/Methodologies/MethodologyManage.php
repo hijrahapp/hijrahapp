@@ -145,13 +145,7 @@ class MethodologyManage extends Component
             ];
 
             $methodology = Methodology::findOrFail($this->methodologyId);
-
-            $updateData = $data;
-            if ($this->imgUrl === '') {
-                unset($updateData['img_url']);
-            }
-
-            $methodology->update($updateData);
+            $methodology->update($data);
 
             $this->dispatch('show-toast', type: 'success', message: 'Methodology details saved successfully!');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -225,7 +219,7 @@ class MethodologyManage extends Component
                 'firstSectionObjectives' => 'nullable|string',
                 'firstSectionNumberOfPillars' => 'nullable|string',
                 'firstSectionPillarsDefinition' => 'nullable|string',
-                'firstSectionImgUrl' => 'required|string',
+                'firstSectionImgUrl' => 'nullable|string',
                 'firstSectionNumberOfQuestions' => 'nullable|string',
                 'firstSectionMinutes' => 'nullable|string',
                 'firstSectionBrief' => 'nullable|string',
@@ -272,7 +266,7 @@ class MethodologyManage extends Component
                 'secondSectionObjectives' => 'nullable|string',
                 'secondSectionNumberOfPillars' => 'nullable|string',
                 'secondSectionPillarsDefinition' => 'nullable|string',
-                'secondSectionImgUrl' => 'required|string',
+                'secondSectionImgUrl' => 'nullable|string',
                 'secondSectionNumberOfQuestions' => 'nullable|string',
                 'secondSectionMinutes' => 'nullable|string',
                 'secondSectionBrief' => 'nullable|string',

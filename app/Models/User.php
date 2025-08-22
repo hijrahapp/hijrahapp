@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use App\Traits\DeletesStoredImages;
 
 class User extends Model
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, DeletesStoredImages;
 
     protected $table = 'users';
 
@@ -44,6 +45,11 @@ class User extends Model
         'active' => 'boolean',
         'password' => 'hashed',
     ];
+
+    protected function imageUrlAttributes(): array
+    {
+        return ['profile_picture'];
+    }
 
     public function role() {
         return $this->belongsTo(Role::class, 'roleId');

@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Traits\DeletesStoredImages;
 
 class Module extends Model
 {
-    use HasFactory;
+    use HasFactory, DeletesStoredImages;
 
     protected $fillable = [
         'name',
@@ -28,6 +29,11 @@ class Module extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    protected function imageUrlAttributes(): array
+    {
+        return ['img_url'];
+    }
 
     /* -------------------------------------------------------------------------
      | Accessors & Mutators
