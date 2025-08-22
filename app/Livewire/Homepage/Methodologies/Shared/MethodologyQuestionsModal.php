@@ -31,6 +31,9 @@ class MethodologyQuestionsModal extends Component
     public array $questionItemIds = []; // question_id => module_id/pillar_id (general context)
     public string $generalItemKind = ''; // 'module' or 'pillar' for general context
     public array $generalItems = []; // [{id, name}]
+    public int $suggestionsPage = 1;
+    public int $suggestionsPerPage = 5;
+    public int $suggestionsTotal = 0;
 
     protected $listeners = [
         'open-manage-methodology-module-questions' => 'open',
@@ -256,6 +259,40 @@ class MethodologyQuestionsModal extends Component
             if ($this->moduleId === null && !isset($this->questionItemIds[$questionId])) {
                 $this->questionItemIds[$questionId] = '';
             }
+        }
+    }
+
+    public function addQuestion(int $questionId): void
+    {
+        if (in_array($questionId, $this->selectedQuestionIds, true)) {
+            return;
+        }
+        $this->selectedQuestionIds[] = $questionId;
+        $this->sequences[$questionId] = count($this->selectedQuestionIds);
+        if (!isset($this->questionWeights[$questionId])) {
+            $this->questionWeights[$questionId] = '0';
+        }
+        if ($this->moduleId === null && !isset($this->questionItemIds[$questionId])) {
+            $this->questionItemIds[$questionId] = '';
+        }
+    }
+
+    public function removeQuestion(int $questionId): void
+    {
+        if (!in_array($questionId, $this->selectedQuestionIds, true)) {
+            return;
+        }
+        // Prevent removing if any answer depends on this question
+        $dependentAnswer = collect($this->answerDependencies)
+            ->first(fn($qId) => (int)$qId === $questionId);
+        if ($dependentAnswer) {
+            $this->dispatch('show-toast', type: 'error', message: 'Remove the dependency before removing this question.');
+            return;
+        }
+        $this->selectedQuestionIds = array_values(array_diff($this->selectedQuestionIds, [$questionId]));
+        unset($this->questionWeights[$questionId], $this->sequences[$questionId], $this->answerWeights[$questionId], $this->questionItemIds[$questionId]);
+        foreach ($this->selectedQuestionIds as $index => $qid) {
+            $this->sequences[$qid] = $index + 1;
         }
     }
 
@@ -486,6 +523,8 @@ class MethodologyQuestionsModal extends Component
         $this->questionItemIds = [];
         $this->generalItemKind = '';
         $this->generalItems = [];
+        $this->suggestionsPage = 1;
+        $this->suggestionsTotal = 0;
     }
 
     public function render()
@@ -507,9 +546,24 @@ class MethodologyQuestionsModal extends Component
                         }
                     });
                 })
-                ->limit(6)
+                ->when(count($this->selectedQuestionIds) > 0, function ($q) {
+                    $q->whereNotIn('id', $this->selectedQuestionIds);
+                });
+
+            // Pagination for suggestions
+            $this->suggestionsTotal = (clone $query)->count('id');
+            $perPage = max(1, (int)$this->suggestionsPerPage);
+            $maxPage = (int) max(1, (int) ceil($this->suggestionsTotal / $perPage));
+            if ($this->suggestionsPage > $maxPage) {
+                $this->suggestionsPage = $maxPage;
+            }
+            $offset = ($this->suggestionsPage - 1) * $perPage;
+
+            $questionSuggestions = $query
+                ->orderBy('id')
+                ->skip($offset)
+                ->take($perPage)
                 ->get(['id', 'title', 'type']);
-            $questionSuggestions = $query;
         }
 
         $questionTypes = array_map(function (QuestionType $type) {
@@ -548,6 +602,11 @@ class MethodologyQuestionsModal extends Component
                 $this->answerDependencies[$answerId] = '';
                 $this->dispatch('show-toast', type: 'error', message: 'Circular dependency detected. Selection reverted.');
             }
+        }
+
+        // Reset suggestions pagination when filters change
+        if (in_array($name, ['search', 'tagSearch', 'typeFilter'], true)) {
+            $this->suggestionsPage = 1;
         }
     }
 
@@ -626,6 +685,22 @@ class MethodologyQuestionsModal extends Component
             $str = rtrim(rtrim($str, '0'), '.');
         }
         return $str;
+    }
+
+    public function prevSuggestionsPage(): void
+    {
+        if ($this->suggestionsPage > 1) {
+            $this->suggestionsPage--;
+        }
+    }
+
+    public function nextSuggestionsPage(): void
+    {
+        $perPage = max(1, (int)$this->suggestionsPerPage);
+        $maxPage = (int) max(1, (int) ceil($this->suggestionsTotal / $perPage));
+        if ($this->suggestionsPage < $maxPage) {
+            $this->suggestionsPage++;
+        }
     }
 }
 

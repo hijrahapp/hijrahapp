@@ -35,17 +35,12 @@
                 </select>
             </div>
 
-            <div class="border rounded p-4">
+            <div class="kt-card p-4">
                 <div class="font-medium mb-2">Select Questions</div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div class="grid gap-2">
                     @foreach($questionSuggestions as $q)
-                        <label class="flex items-start gap-2">
-                            <input type="checkbox" class="kt-checkbox"
-                                   x-data="{ id: {{ $q->id }} }"
-                                   x-init="window.addEventListener('revert-question-selection', e => { if (e.detail.id === id) { $el.checked = true; } })"
-                                   wire:click="toggleQuestion({{ $q->id }})"
-                                   @checked(in_array($q->id, $selectedQuestionIds, true)) />
-                            <span>
+                        <div class="flex items-start gap-2">
+                            <div class="flex-1 min-w-0">
                                 <div class="font-medium">{{ $q->title }}</div>
                                 <div class="text-xs text-secondary-foreground/70">
                                     Type:
@@ -55,9 +50,28 @@
                                         {{ ucfirst((string)$q->type) }}
                                     @endif
                                 </div>
-                            </span>
-                        </label>
+                            </div>
+                            <button type="button" class="kt-btn kt-btn-outline kt-btn-sm" wire:click="addQuestion({{ $q->id }})" title="Add">
+                                <i class="ki-filled ki-plus"></i>
+                            </button>
+                        </div>
+                        <div class="kt-dropdown-menu-separator">
+                        </div>
                     @endforeach
+                </div>
+                <div class="flex items-center justify-end gap-5 mt-3">
+                    <button type="button" class="kt-btn kt-btn-outline kt-btn-sm"
+                            wire:click="prevSuggestionsPage" @disabled($suggestionsPage <= 1)>
+                            <i class="ki-filled ki-arrow-left"></i>
+                    </button>
+                    <div class="text-xs text-secondary-foreground/70">
+                        Page {{ $suggestionsPage }}
+                    </div>
+                    <button type="button" class="kt-btn kt-btn-outline kt-btn-sm"
+                            wire:click="nextSuggestionsPage"
+                            @disabled(($suggestionsPage * $suggestionsPerPage) >= $suggestionsTotal)>
+                            <i class="ki-filled ki-arrow-right"></i>
+                    </button>
                 </div>
             </div>
 
@@ -78,6 +92,9 @@
                                         </button>
                                         <button type="button" class="kt-btn kt-btn-outline kt-btn-sm" wire:click.stop="moveQuestionDown({{ $qid }})" title="Move down">
                                             <i class="ki-filled ki-arrow-down"></i>
+                                        </button>
+                                        <button type="button" class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" wire:click.stop="removeQuestion({{ $qid }})" title="Remove">
+                                            <i class="ki-filled ki-trash"></i>
                                         </button>
                                     </div>
                                     <span aria-hidden="true" class="kt-accordion-indicator">
