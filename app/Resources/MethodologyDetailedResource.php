@@ -161,7 +161,7 @@ class MethodologyDetailedResource extends JsonResource
         }
 
         // Result block
-        if (config('app.features.result_calculation') && $this->type !== 'twoSection') {
+        if (config('app.features.result_calculation') && ($this->type !== 'twoSection' || $sectionNumber === 1)) {
             $result = $this->calculateResult();
             if ($result) {
                 $payload['result'] = $result;

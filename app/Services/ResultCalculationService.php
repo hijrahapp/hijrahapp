@@ -54,9 +54,11 @@ class ResultCalculationService
                 : $methodology->pillars;
 
             $pillarScores = [];
+            $pillarNumerators = [];
             $pillarTotals = [];
             foreach ($pillars as $pillar) {
                 $pillarScores[$pillar->id] = 0.0;
+                $pillarNumerators[$pillar->id] = 0.0;
                 $pillarTotals[$pillar->id] = [
                     'total_questions' => 0,
                     'answered_questions' => 0,
@@ -119,7 +121,7 @@ class ResultCalculationService
                     }
                 }
 
-                $overallScore = 0.0;
+                $overallNumerator = 0.0;
                 foreach ($aggRows as $row) {
                     $questionId = (int)$row->question_id;
                     $questionWeight = $questionGlobalWeight[$questionId] ?? (float)$row->weight;
@@ -129,16 +131,11 @@ class ResultCalculationService
                     if ($answerPercent < 0) $answerPercent = 0.0;
                     if ($answerPercent > 100) $answerPercent = 100.0;
 
-                    // Contribution to overall methodology (global weights)
-                    $overallContribution = ($questionWeight * $answerPercent) / 100.0;
-                    $overallScore += $overallContribution;
+                    // Numerators for overall and pillar scores (denominator is sum of weights)
+                    $overallNumerator += ($questionWeight * $answerPercent);
 
-                    // Contribution to pillar (normalized weights per pillar sum to 100)
-                    if ($pillarId !== null && array_key_exists($pillarId, $pillarScores)) {
-                        $sumW = $pillarSumWeight[$pillarId] ?? 0.0;
-                        $normalizedQuestionWeight = $sumW > 0 ? ($questionWeight * (100.0 / $sumW)) : 0.0;
-                        $pillarContribution = ($normalizedQuestionWeight * $answerPercent) / 100.0;
-                        $pillarScores[$pillarId] += $pillarContribution;
+                    if ($pillarId !== null && array_key_exists($pillarId, $pillarNumerators)) {
+                        $pillarNumerators[$pillarId] += ($questionWeight * $answerPercent);
                     }
                 }
 
@@ -177,7 +174,9 @@ class ResultCalculationService
 
                 // Build pillars list with computed percentages
                 foreach ($pillars as $pillar) {
-                    $score = isset($pillarScores[$pillar->id]) ? round($pillarScores[$pillar->id], 2) : 0.0;
+                    $denom = (float)($pillarSumWeight[$pillar->id] ?? 0.0);
+                    $pillarScore = $denom > 0.0 ? ($pillarNumerators[$pillar->id] / $denom) : 0.0;
+                    $score = round($pillarScore, 2);
                     $totals = [
                         'total_questions' => (int)($pillarQuestionCounts[$pillar->id] ?? 0),
                         'answered_questions' => (int)($pillarAnsweredCounts[$pillar->id] ?? 0),
@@ -201,16 +200,21 @@ class ResultCalculationService
                     ];
                 }
 
-                // Set overall percentage directly from weighted sum across all methodology questions
+                // Overall score normalized by total weight across all methodology questions in scope
+                $totalWeight = 0.0;
+                foreach ($pillarSumWeight as $w) { $totalWeight += (float)$w; }
+                $overallScore = $totalWeight > 0.0 ? ($overallNumerator / $totalWeight) : 0.0;
                 $result['summary']['overall_percentage'] = round($overallScore, 2);
             }
         } else {
             // Simple methodology: questions are attached at methodology level with weights (methodology_question)
             // and each question is linked to a module via item_id. Compute module scores by grouping.
             $moduleScores = [];
+            $moduleNumerators = [];
             $moduleTotals = [];
             foreach ($methodology->modules as $module) {
                 $moduleScores[$module->id] = 0.0;
+                $moduleNumerators[$module->id] = 0.0;
                 $moduleTotals[$module->id] = [
                     'total_questions' => 0,
                     'answered_questions' => 0,
@@ -259,7 +263,7 @@ class ResultCalculationService
                     }
                 }
 
-                $overallScore = 0.0;
+                $overallNumerator = 0.0;
                 foreach ($aggRows as $row) {
                     $questionId = (int)$row->question_id;
                     $questionWeight = $questionGlobalWeight[$questionId] ?? (float)$row->weight;
@@ -269,16 +273,11 @@ class ResultCalculationService
                     if ($answerPercent < 0) $answerPercent = 0.0;
                     if ($answerPercent > 100) $answerPercent = 100.0;
 
-                    // Contribution to overall methodology (global weights)
-                    $overallContribution = ($questionWeight * $answerPercent) / 100.0;
-                    $overallScore += $overallContribution;
+                    // Numerators for overall and per-module scores (denominator is sum of weights)
+                    $overallNumerator += ($questionWeight * $answerPercent);
 
-                    // Contribution to module (normalized weights per module sum to 100)
-                    if ($moduleId !== null && array_key_exists($moduleId, $moduleScores)) {
-                        $sumW = $moduleSumWeight[$moduleId] ?? 0.0;
-                        $normalizedQuestionWeight = $sumW > 0 ? ($questionWeight * (100.0 / $sumW)) : 0.0;
-                        $moduleContribution = ($normalizedQuestionWeight * $answerPercent) / 100.0;
-                        $moduleScores[$moduleId] += $moduleContribution;
+                    if ($moduleId !== null && array_key_exists($moduleId, $moduleNumerators)) {
+                        $moduleNumerators[$moduleId] += ($questionWeight * $answerPercent);
                     }
                 }
 
@@ -303,7 +302,9 @@ class ResultCalculationService
 
                 // Build modules list with computed percentages
                 foreach ($methodology->modules as $module) {
-                    $score = isset($moduleScores[$module->id]) ? round($moduleScores[$module->id], 2) : 0.0;
+                    $denom = (float)($moduleSumWeight[$module->id] ?? 0.0);
+                    $moduleScore = $denom > 0.0 ? ($moduleNumerators[$module->id] / $denom) : 0.0;
+                    $score = round($moduleScore, 2);
                     $totals = [
                         'total_questions' => (int)($moduleQuestionCounts[$module->id] ?? 0),
                         'answered_questions' => (int)($moduleAnsweredCounts[$module->id] ?? 0),
@@ -327,7 +328,10 @@ class ResultCalculationService
                     ];
                 }
 
-                // Set overall percentage directly from weighted sum across all methodology questions
+                // Overall score normalized by total weight across methodology questions
+                $totalWeight = 0.0;
+                foreach ($moduleSumWeight as $w) { $totalWeight += (float)$w; }
+                $overallScore = $totalWeight > 0.0 ? ($overallNumerator / $totalWeight) : 0.0;
                 $result['summary']['overall_percentage'] = round($overallScore, 2);
             }
         }
@@ -586,16 +590,25 @@ class ResultCalculationService
             ->distinct()
             ->count('mq.question_id');
 
-        // Compute weighted percentage across all questions (unanswered contribute 0)
-        $overallScore = 0.0;
+        // Compute total weight for all questions in this module context
+        $totalWeightQuery = DB::table('module_question as mq')
+            ->where('mq.methodology_id', $methodologyId)
+            ->where('mq.module_id', $moduleId);
+        $totalWeightQuery = $pillarId !== null
+            ? $totalWeightQuery->where('mq.pillar_id', $pillarId)
+            : $totalWeightQuery->whereNull('mq.pillar_id');
+        $totalWeight = (float)$totalWeightQuery->sum('mq.weight');
+
+        // Compute weighted percentage normalized by total weight (unanswered contribute 0 in numerator)
+        $overallNumerator = 0.0;
         foreach ($aggRows as $row) {
             $answerPercent = (float)$row->answer_percent;
             if ($answerPercent < 0) $answerPercent = 0.0;
             if ($answerPercent > 100) $answerPercent = 100.0;
-            $overallScore += ((float)$row->weight * $answerPercent) / 100.0;
+            $overallNumerator += ((float)$row->weight * $answerPercent);
         }
 
-        $percentage = round($overallScore, 2);
+        $percentage = $totalWeight > 0.0 ? round($overallNumerator / $totalWeight, 2) : 0.0;
         $completionRate = $totalQuestions > 0 ? round(($answeredQuestions / $totalQuestions) * 100, 2) : 0.0;
 
         return [
