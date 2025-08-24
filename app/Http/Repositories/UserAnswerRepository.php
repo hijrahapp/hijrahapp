@@ -3,6 +3,7 @@
 namespace App\Http\Repositories;
 
 use App\Models\UserAnswer;
+use App\Models\UserContextStatus;
 use App\Models\User;
 use App\Models\Question;
 use App\Models\Answer;
@@ -71,6 +72,28 @@ class UserAnswerRepository
     {
         $submittedAnswers = $this->submitAnswers($userId, 'module', $moduleId, $answers, $methodologyId, $pillarId);
         return $submittedAnswers->groupBy('question_id');
+    }
+
+    /**
+     * Upsert user context status record
+     */
+    public function upsertContextStatus(int $userId, string $contextType, int $contextId, ?int $methodologyId, ?int $pillarId, string $status): void
+    {
+        $methodologyKey = $methodologyId ?? 0;
+        $pillarKey = $pillarId ?? 0;
+
+        UserContextStatus::updateOrCreate(
+            [
+                'user_id' => $userId,
+                'context_type' => $contextType,
+                'context_id' => $contextId,
+                'methodology_id' => $methodologyKey,
+                'pillar_id' => $pillarKey,
+            ],
+            [
+                'status' => $status,
+            ]
+        );
     }
 
     /**

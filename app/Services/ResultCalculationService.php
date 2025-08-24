@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\UserAnswer;
+use App\Models\UserContextStatus;
 use App\Models\Methodology;
 use App\Models\Pillar;
 use App\Models\Module;
@@ -354,6 +355,90 @@ class ResultCalculationService
     }
 
     /**
+     * Calculate section results for a two-section methodology by aggregating pillar module results
+     */
+    public function calculateSectionResult(int $userId, int $methodologyId, int $sectionNumber)
+    {
+        $methodology = Methodology::with(['pillars'])->find($methodologyId);
+
+        if (!$methodology || $methodology->type !== 'twoSection') {
+            return null;
+        }
+
+        $section = $sectionNumber === 2 ? 'second' : 'first';
+
+        $pillars = $methodology->pillars()
+            ->wherePivot('section', $section)
+            ->get();
+
+        if ($pillars->isEmpty()) {
+            return null;
+        }
+
+        $result = [
+            'pillars' => [],
+            'summary' => [
+                'text' => __('messages.lorem_ipsum'),
+                'overall_percentage' => 0,
+                'total_questions' => 0,
+                'answered_questions' => 0,
+            ]
+        ];
+
+        $pillarPercentages = [];
+        $totalQuestions = 0;
+        $answeredQuestions = 0;
+
+        foreach ($pillars as $pillar) {
+            try {
+                $pillarResult = $this->calculatePillarResult($userId, $pillar->id, $methodologyId);
+                $pillarPercentage = $pillarResult['percentage'] ?? 0;
+                $pillarPercentages[] = $pillarPercentage;
+                $totalQuestions += $pillarResult['summary']['total_questions'] ?? 0;
+                $answeredQuestions += $pillarResult['summary']['answered_questions'] ?? 0;
+
+                $result['pillars'][] = [
+                    'id' => $pillar->id,
+                    'name' => $pillar->name,
+                    'description' => $pillar->description,
+                    'definition' => $pillar->definition,
+                    'objectives' => $pillar->objectives,
+                    'percentage' => $pillarPercentage,
+                    'summary' => $pillarResult['summary'] ?? []
+                ];
+            } catch (\Exception $e) {
+                \Log::error('Error calculating pillar result in section: ' . $e->getMessage());
+                $result['pillars'][] = [
+                    'id' => $pillar->id,
+                    'name' => $pillar->name,
+                    'description' => $pillar->description,
+                    'definition' => $pillar->definition,
+                    'objectives' => $pillar->objectives,
+                    'percentage' => 0,
+                    'summary' => [
+                        'text' => __('messages.lorem_ipsum'),
+                        'total_questions' => 0,
+                        'answered_questions' => 0,
+                        'completion_rate' => 0,
+                    ]
+                ];
+            }
+        }
+
+        if (!empty($pillarPercentages)) {
+            $result['summary']['overall_percentage'] = round(array_sum($pillarPercentages) / count($pillarPercentages), 2);
+        }
+
+        $result['summary']['total_questions'] = $totalQuestions;
+        $result['summary']['answered_questions'] = $answeredQuestions;
+
+        // For convenience on the consumer side
+        $result['percentage'] = $result['summary']['overall_percentage'];
+
+        return $result;
+    }
+
+    /**
      * Calculate pillar results based on user answers
      */
     public function calculatePillarResult(int $userId, int $pillarId, int $methodologyId)
@@ -535,38 +620,37 @@ class ResultCalculationService
             return 'not_started';
         }
 
-        // New logic: pillar completion is based on module questions within this methodology
+        // Get all modules associated with this pillar in the given methodology
         $modules = $pillar->modulesForMethodology($methodologyId)->get();
-        $moduleIds = $modules->pluck('id');
-
-        $questionIds = collect();
-        foreach ($modules as $module) {
-            $moduleQuestionIds = $module->questionsForPillarInMethodology($methodologyId, $pillarId)
-                ->pluck('questions.id');
-            $questionIds = $questionIds->merge($moduleQuestionIds);
-        }
-
-        // $questionIds = $questionIds->unique()->values();
-        $totalQuestions = $questionIds->count();
-        if ($totalQuestions === 0) {
+        if ($modules->isEmpty()) {
             return 'not_started';
         }
 
-        $answeredQuestions = UserAnswer::where('user_id', $userId)
+        $moduleIds = $modules->pluck('id')->all();
+
+        // Fetch statuses for all module contexts scoped by methodology and pillar
+        $statuses = UserContextStatus::where('user_id', $userId)
             ->where('context_type', 'module')
             ->whereIn('context_id', $moduleIds)
-            ->whereIn('question_id', $questionIds)
-            ->distinct('question_id')
-            ->count('question_id');
+            ->where('methodology_id', $methodologyId)
+            ->where('pillar_id', $pillarId)
+            ->pluck('status', 'context_id');
 
-        if ($answeredQuestions === 0) {
+        if ($statuses->isEmpty()) {
             return 'not_started';
         }
 
-        if ($answeredQuestions < $totalQuestions) {
+        // If any module is in progress → pillar is in progress
+        if ($statuses->contains('in_progress')) {
             return 'in_progress';
         }
 
+        // If some modules are missing statuses or not all are completed → still in progress
+        if ($statuses->count() < count($moduleIds)) {
+            return 'in_progress';
+        }
+
+        // All module statuses are completed
         return 'completed';
     }
 
@@ -576,37 +660,24 @@ class ResultCalculationService
      */
     public function getModuleStatus(int $userId, int $moduleId, int $methodologyId, ?int $pillarId = null): string
     {
-        $module = Module::find($moduleId);
-        if (!$module) {
-            return 'not_started';
-        }
-
-        $questions = $pillarId
-            ? $module->questionsForPillarInMethodology($methodologyId, $pillarId)
-            : $module->questionsForMethodology($methodologyId);
-
-        $totalQuestions = $questions->count();
-        if ($totalQuestions === 0) {
-            return 'not_started';
-        }
-
-        $questionIds = $questions->pluck('questions.id');
-
-        $answeredQuestions = UserAnswer::where('user_id', $userId)
+        // Read status from user_context_statuses
+        $statusQuery = UserContextStatus::where('user_id', $userId)
             ->where('context_type', 'module')
             ->where('context_id', $moduleId)
-            ->whereIn('question_id', $questionIds)
-            ->distinct('question_id')
-            ->count('question_id');
+            ->where('methodology_id', $methodologyId);
 
-        if ($answeredQuestions === 0) {
+        if ($pillarId) {
+            $statusQuery->where('pillar_id', $pillarId);
+        } else {
+            $statusQuery->where('pillar_id', 0);
+        }
+
+        $status = $statusQuery->value('status');
+
+        if (!$status) {
             return 'not_started';
         }
 
-        if ($answeredQuestions < $totalQuestions) {
-            return 'in_progress';
-        }
-
-        return 'completed';
+        return $status;
     }
 }

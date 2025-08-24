@@ -3,7 +3,7 @@
         <div class="kt-card-header flex justify-between items-center">
             <h3 class="kt-card-title">General Questions</h3>
             <div class="flex gap-2 items-center">
-                <div class="kt-input max-w-48">
+                <div class="kt-input w-150">
                     <i class="ki-filled ki-magnifier"></i>
                     <input type="text" class="kt-input" placeholder="Search Questions" wire:model.live="search" />
                 </div>

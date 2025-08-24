@@ -41,6 +41,7 @@ class MethodologyDetailedResource extends JsonResource
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
             ];
+
         } elseif ($sectionNumber === 2) {
             $payload['sectionNumber'] = $sectionNumber;
 
@@ -67,6 +68,27 @@ class MethodologyDetailedResource extends JsonResource
             ];
 
             if($this->type === 'twoSection'){
+                $sectionResults = null;
+                if (config('app.features.result_calculation')) {
+                    $service = new ResultCalculationService();
+                    if ($this->user_id) {
+                        $sectionResults = [
+                            1 => $service->calculateSectionResult($this->user_id, $this->id, 1),
+                            2 => $service->calculateSectionResult($this->user_id, $this->id, 2),
+                        ];
+                    }
+                }
+
+                // Gate results visibility: if user hasn't answered any question in BOTH sections,
+                // set results of both sections to null; otherwise return both results
+                $answered1 = is_array($sectionResults[1] ?? null)
+                    ? (int)($sectionResults[1]['summary']['answered_questions'] ?? 0)
+                    : 0;
+                $answered2 = is_array($sectionResults[2] ?? null)
+                    ? (int)($sectionResults[2]['summary']['answered_questions'] ?? 0)
+                    : 0;
+                $hideBothResults = ($answered1 + $answered2) === 0;
+
                 $payload['sections'] = [
                     [
                         'id' => 1,
@@ -85,6 +107,11 @@ class MethodologyDetailedResource extends JsonResource
                         'imgUrl' => $this->second_section_img_url,
                     ]
                 ];
+
+                if(!$hideBothResults) {
+                    $payload['sections'][0]['result'] = $sectionResults[1];
+                    $payload['sections'][1]['result'] = $sectionResults[2];
+                }
             }
         }
 
@@ -134,7 +161,7 @@ class MethodologyDetailedResource extends JsonResource
         }
 
         // Result block
-        if (config('app.features.result_calculation')) {
+        if (config('app.features.result_calculation') && $this->type !== 'twoSection') {
             $result = $this->calculateResult();
             if ($result) {
                 $payload['result'] = $result;

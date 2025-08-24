@@ -28,6 +28,7 @@ class UserAnswerController
                 'answers.*.question_id' => 'required|integer|exists:questions,id',
                 'answers.*.answerIds' => 'required|array|min:1',
                 'answers.*.answerIds.*' => 'integer|exists:answers,id',
+                'endQuestions' => 'sometimes|boolean',
             ]);
 
             if ($validator->fails()) {
@@ -40,8 +41,19 @@ class UserAnswerController
 
             $userId = $request->authUser->id;
             $answers = $request->input('answers');
+            $end = (bool)($request->input('endQuestions', false));
 
             $submittedAnswers = $this->userAnswerRepo->submitMethodologyAnswers($userId, $methodologyId, $answers);
+
+            // Update context status
+            $this->userAnswerRepo->upsertContextStatus(
+                $userId,
+                'methodology',
+                $methodologyId,
+                null,
+                null,
+                $end ? 'completed' : 'in_progress'
+            );
 
             return response()->json([
                 'success' => true,
@@ -75,6 +87,18 @@ class UserAnswerController
         try {
             $userId = $request->authUser->id;
 
+            // Validate optional endQuestions flag at top-level
+            $endValidator = Validator::make($request->all(), [
+                'endQuestions' => 'sometimes|boolean',
+            ]);
+            if ($endValidator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.validation_failed'),
+                    'errors' => $endValidator->errors()
+                ], 422);
+            }
+
             $answers = $request->input('answers');
             $answers = collect($answers)->map(function ($answer) {
                 if (str_contains($answer['question_id'], '_')) {
@@ -103,6 +127,7 @@ class UserAnswerController
 
             // Group answers by module_id
             $groupedAnswers = collect($answers)->groupBy('module_id');
+            $end = (bool)($request->input('endQuestions', false));
             foreach ($groupedAnswers as $moduleId => $moduleGroup) {
                 $flat = collect($moduleGroup)->map(function ($item) {
                     return [
@@ -113,6 +138,16 @@ class UserAnswerController
 
                 // Submit as module answers tied to pillar context
                 $this->userAnswerRepo->submitPillarModuleAnswers($userId, $methodologyId, $pillarId, $moduleId, $flat);
+
+                // Upsert status per module within this pillar
+                $this->userAnswerRepo->upsertContextStatus(
+                    $userId,
+                    'module',
+                    (int)$moduleId,
+                    $methodologyId,
+                    $pillarId,
+                    $end ? 'completed' : 'in_progress'
+                );
             }
 //            foreach ($groupedAnswers as $moduleGroup) {
 //                $moduleId = $moduleGroup['module_id'];
@@ -162,6 +197,7 @@ class UserAnswerController
                 'answers.*.question_id' => 'required|integer|exists:questions,id',
                 'answers.*.answerIds' => 'required|array|min:1',
                 'answers.*.answerIds.*' => 'integer|exists:answers,id',
+                'endQuestions' => 'sometimes|boolean',
             ]);
 
             if ($validator->fails()) {
@@ -174,8 +210,19 @@ class UserAnswerController
 
             $userId = $request->authUser->id;
             $answers = $request->input('answers');
+            $end = (bool)($request->input('endQuestions', false));
 
             $submittedAnswers = $this->userAnswerRepo->submitModuleAnswers($userId, $methodologyId, $moduleId, $answers);
+
+            // Update context status for module
+            $this->userAnswerRepo->upsertContextStatus(
+                $userId,
+                'module',
+                $moduleId,
+                $methodologyId,
+                null,
+                $end ? 'completed' : 'in_progress'
+            );
 
             return response()->json([
                 'success' => true,
@@ -213,6 +260,7 @@ class UserAnswerController
                 'answers.*.question_id' => 'required|integer|exists:questions,id',
                 'answers.*.answerIds' => 'required|array|min:1',
                 'answers.*.answerIds.*' => 'integer|exists:answers,id',
+                'endQuestions' => 'sometimes|boolean',
             ]);
 
             if ($validator->fails()) {
@@ -225,8 +273,19 @@ class UserAnswerController
 
             $userId = $request->authUser->id;
             $answers = $request->input('answers');
+            $end = (bool)($request->input('endQuestions', false));
 
             $submittedAnswers = $this->userAnswerRepo->submitPillarModuleAnswers($userId, $methodologyId, $pillarId, $moduleId, $answers);
+
+            // Update context status for pillar-module pair as module context
+            $this->userAnswerRepo->upsertContextStatus(
+                $userId,
+                'module',
+                $moduleId,
+                $methodologyId,
+                $pillarId,
+                $end ? 'completed' : 'in_progress'
+            );
 
             return response()->json([
                 'success' => true,
