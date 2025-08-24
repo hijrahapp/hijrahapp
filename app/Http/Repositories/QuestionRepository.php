@@ -239,10 +239,6 @@ class QuestionRepository
                 ->whereNotNull('dependent_context_id')
                 ->get(['answer_id', 'dependent_context_type', 'dependent_context_id']);
 
-            if ($deps->isEmpty()) {
-                continue;
-            }
-
             // Build mapping answer_id => next_question_identifier
             $answerToNext = [];
             foreach ($deps as $dep) {
@@ -270,8 +266,43 @@ class QuestionRepository
                 }
             }
 
-            if (empty($answerToNext)) {
-                continue;
+            // Pillar context fallback: if an answer has no explicit next, point to
+            // the first question of the next module in the same pillar (unless last module)
+            $fallbackCompositeNextId = null;
+            if ($isPillarContext && $methodologyId && $effectivePillarId) {
+                $currentModuleId = $effectiveModuleId ?? null;
+                if ($currentModuleId) {
+                    $orderedModuleIds = \DB::table('pillar_module')
+                        ->where('methodology_id', $methodologyId)
+                        ->where('pillar_id', $effectivePillarId)
+                        ->orderBy('created_at', 'asc')
+                        ->pluck('module_id')
+                        ->toArray();
+
+                    $index = array_search($currentModuleId, $orderedModuleIds, true);
+                    if ($index !== false && isset($orderedModuleIds[$index + 1])) {
+                        $nextModuleId = (int)$orderedModuleIds[$index + 1];
+
+                        $q = \DB::table('module_question')
+                            ->where('module_id', $nextModuleId);
+                        if ($methodologyId) {
+                            $q->where('methodology_id', $methodologyId);
+                        }
+                        if ($effectivePillarId) {
+                            $q->where('pillar_id', $effectivePillarId);
+                        }
+
+                        // Prefer sequence if available, then id as tie-breaker
+                        if (\Schema::hasColumn('module_question', 'sequence')) {
+                            $q->orderBy('sequence', 'asc');
+                        }
+                        $firstQuestionId = $q->orderBy('id', 'asc')->value('question_id');
+
+                        if ($firstQuestionId) {
+                            $fallbackCompositeNextId = ((int)$firstQuestionId) . '_' . $nextModuleId;
+                        }
+                    }
+                }
             }
 
             // Attach next_question_id onto each answer model in the relation
@@ -279,6 +310,8 @@ class QuestionRepository
                 $aid = (int)$ans->id;
                 if (array_key_exists($aid, $answerToNext)) {
                     $ans->setAttribute('next_question_id', $answerToNext[$aid]);
+                } elseif ($fallbackCompositeNextId !== null) {
+                    $ans->setAttribute('next_question_id', $fallbackCompositeNextId);
                 }
             }
         }
