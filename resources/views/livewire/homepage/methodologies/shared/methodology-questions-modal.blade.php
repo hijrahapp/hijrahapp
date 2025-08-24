@@ -7,6 +7,21 @@
             </button>
         </div>
         <div class="kt-modal-body p-5 flex flex-col gap-4">
+            @if($moduleId)
+                <div class="kt-card p-4">
+                    <div class="font-medium mb-2">Questions Mode</div>
+                    <div class="flex items-center gap-6">
+                        <label class="inline-flex items-center gap-2">
+                            <input type="radio" class="kt-radio" value="simple" wire:model.live="questionMode" />
+                            <span>Simple</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2">
+                            <input type="radio" class="kt-radio" value="dynamic" wire:model.live="questionMode" />
+                            <span>Dynamic</span>
+                        </label>
+                    </div>
+                </div>
+            @endif
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div class="kt-input">
                     <i class="ki-filled ki-magnifier"></i>
@@ -136,7 +151,7 @@
                                                         <i class="ki-filled ki-percentage"></i>
                                                     </div>
                                                 </div>
-                                                @if($moduleId)
+                                                @if($moduleId && $questionMode === 'dynamic')
                                                     <div class="md:col-span-1">
                                                         <span class="text-xs text-secondary-foreground/70">Leads to:</span>
                                                         <select class="kt-select w-full" wire:model="answerDependencies.{{ $ans->id }}">

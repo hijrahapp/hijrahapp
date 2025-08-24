@@ -27,6 +27,7 @@ class MethodologyQuestionsModal extends Component
     public array $answerWeights = [];   // answer_id => weight
     public array $answerDependencies = []; // answer_id => dependent_question_id
     public array $sequences = []; // question_id => sequence
+    public string $questionMode = 'simple'; // 'simple' or 'dynamic' (module context)
     public bool $suppressTagSuggestionsOnce = false;
     public array $questionItemIds = []; // question_id => module_id/pillar_id (general context)
     public string $generalItemKind = ''; // 'module' or 'pillar' for general context
@@ -49,6 +50,20 @@ class MethodologyQuestionsModal extends Component
 
         if ($this->moduleId !== null) {
             // Module context
+            // Initialize mode from the appropriate pivot (default simple)
+            if (!is_null($this->pillarId)) {
+                $pivot = \DB::table('pillar_module')
+                    ->where('methodology_id', $methodologyId)
+                    ->where('pillar_id', $this->pillarId)
+                    ->where('module_id', $moduleId)
+                    ->first(['questions_mode']);
+            } else {
+                $pivot = \DB::table('methodology_module')
+                    ->where('methodology_id', $methodologyId)
+                    ->where('module_id', $moduleId)
+                    ->first(['questions_mode']);
+            }
+            $this->questionMode = ($pivot && !empty($pivot->questions_mode)) ? (string)$pivot->questions_mode : 'simple';
             $existing = \DB::table('module_question')
                 ->where('methodology_id', $methodologyId)
                 ->where('module_id', $moduleId)
@@ -229,41 +244,16 @@ class MethodologyQuestionsModal extends Component
         $this->showTagSuggestions = false;
     }
 
-    public function toggleQuestion(int $questionId): void
-    {
-        if (in_array($questionId, $this->selectedQuestionIds, true)) {
-            // Prevent removing if any answer depends on this question
-            $dependentAnswer = collect($this->answerDependencies)
-                ->first(fn($qId) => (int)$qId === $questionId);
-            if ($dependentAnswer) {
-                $this->dispatch('show-toast', type: 'error', message: 'Remove the dependency before removing this question.');
-                // Instruct UI to revert checkbox toggle
-                $this->dispatch('revert-question-selection', id: $questionId);
-                return;
-            }
-            $this->selectedQuestionIds = array_values(array_diff($this->selectedQuestionIds, [$questionId]));
-            unset($this->questionWeights[$questionId], $this->sequences[$questionId]);
-            // Re-index sequences after removal
-            foreach ($this->selectedQuestionIds as $index => $qid) {
-                $this->sequences[$qid] = $index + 1;
-            }
-        } else {
-            $this->selectedQuestionIds[] = $questionId;
-            // Assign next sequence number on add
-            $this->sequences[$questionId] = count($this->selectedQuestionIds);
-            // Initialize weight if empty
-            if (!isset($this->questionWeights[$questionId])) {
-                $this->questionWeights[$questionId] = '0';
-            }
-            // Initialize general item selection to empty if in general context
-            if ($this->moduleId === null && !isset($this->questionItemIds[$questionId])) {
-                $this->questionItemIds[$questionId] = '';
-            }
-        }
-    }
-
     public function addQuestion(int $questionId): void
     {
+        // Prevent adding Multiple Select questions in dynamic mode (only for module context)
+        if ($this->moduleId !== null && $this->questionMode === 'dynamic') {
+            $type = (string) (Question::where('id', $questionId)->value('type'));
+            if ($type === QuestionType::MCQMultiple->value) {
+                $this->dispatch('show-toast', type: 'error', message: 'In Dynamic mode, Multiple Select questions are not allowed.');
+                return;
+            }
+        }
         if (in_array($questionId, $this->selectedQuestionIds, true)) {
             return;
         }
@@ -304,11 +294,11 @@ class MethodologyQuestionsModal extends Component
             return;
         }
         // Validate 100% totals
-        $totalQuestionWeight = array_sum(array_map('floatval', $this->questionWeights));
-        if (abs($totalQuestionWeight - 100) > 0.001) {
-            $this->dispatch('show-toast', type: 'error', message: 'Total question weights must sum to 100%.');
-            return;
-        }
+        // $totalQuestionWeight = array_sum(array_map('floatval', $this->questionWeights));
+        // if (abs($totalQuestionWeight - 100) > 0.001) {
+        //     $this->dispatch('show-toast', type: 'error', message: 'Total question weights must sum to 100%.');
+        //     return;
+        // }
 
         // Validate general context item selections (required for methodology questions)
         if ($this->moduleId === null && $this->methodologyId !== null) {
@@ -326,21 +316,44 @@ class MethodologyQuestionsModal extends Component
         }
 
         // Validate per-question answers sum to 100%
-        foreach ($this->selectedQuestionIds as $questionId) {
-            $question = Question::with('answers:id')->find($questionId);
-            $answerIds = $question ? $question->answers->pluck('id') : collect();
-            $sum = 0;
-            foreach ($answerIds as $aid) {
-                $sum += (float)($this->answerWeights[$questionId][$aid] ?? 0);
-            }
-            if (abs($sum - 100) > 0.001) {
-                $this->dispatch('show-toast', type: 'error', message: 'Each question’s answers must sum to 100%.');
-                return;
-            }
-        }
+        // foreach ($this->selectedQuestionIds as $questionId) {
+        //     $question = Question::with('answers:id')->find($questionId);
+        //     $answerIds = $question ? $question->answers->pluck('id') : collect();
+        //     $sum = 0;
+        //     foreach ($answerIds as $aid) {
+        //         $sum += (float)($this->answerWeights[$questionId][$aid] ?? 0);
+        //     }
+        //     if (abs($sum - 100) > 0.001) {
+        //         $this->dispatch('show-toast', type: 'error', message: 'Each question’s answers must sum to 100%.');
+        //         return;
+        //     }
+        // }
 
         if ($this->moduleId !== null) {
             // Persist module context
+            // Save selected questions mode on the appropriate pivot
+            if (!is_null($this->pillarId)) {
+                \DB::table('pillar_module')
+                    ->updateOrInsert([
+                        'methodology_id' => $this->methodologyId,
+                        'pillar_id' => $this->pillarId,
+                        'module_id' => $this->moduleId,
+                    ], [
+                        'questions_mode' => $this->questionMode,
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]);
+            } else {
+                \DB::table('methodology_module')
+                    ->updateOrInsert([
+                        'methodology_id' => $this->methodologyId,
+                        'module_id' => $this->moduleId,
+                    ], [
+                        'questions_mode' => $this->questionMode,
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]);
+            }
             // Clean up old answer contexts tied to this module-question set
             $oldMqIds = \DB::table('module_question')
                 ->where('methodology_id', $this->methodologyId)
@@ -525,6 +538,7 @@ class MethodologyQuestionsModal extends Component
         $this->generalItems = [];
         $this->suggestionsPage = 1;
         $this->suggestionsTotal = 0;
+        $this->questionMode = 'simple';
     }
 
     public function render()
@@ -537,6 +551,9 @@ class MethodologyQuestionsModal extends Component
                 ->when($this->search, fn($q) => $q->where('title', 'like', '%'.$this->search.'%'))
                 ->when($this->typeFilter, function ($q) {
                     $q->where('type', '=', (string)$this->typeFilter);
+                })
+                ->when($this->moduleId !== null && $this->questionMode === 'dynamic', function ($q) {
+                    $q->where('type', '!=', QuestionType::MCQMultiple->value);
                 })
                 ->when($this->tagSearch, function ($q) {
                     $tagIds = Tag::where('title', 'like', '%'.$this->tagSearch.'%')->pluck('id');
@@ -607,6 +624,32 @@ class MethodologyQuestionsModal extends Component
         // Reset suggestions pagination when filters change
         if (in_array($name, ['search', 'tagSearch', 'typeFilter'], true)) {
             $this->suggestionsPage = 1;
+        }
+
+        // Guard switching modes (module context): prevent switching to dynamic if any Multiple Select selected
+        if ($name === 'questionMode' && $this->moduleId !== null) {
+            if ($value === 'dynamic') {
+                $hasMultiple = Question::whereIn('id', $this->selectedQuestionIds)
+                    ->where('type', QuestionType::MCQMultiple->value)
+                    ->exists();
+                if ($hasMultiple) {
+                    $this->questionMode = 'simple';
+                    $this->dispatch('show-toast', type: 'error', message: 'Cannot switch to Dynamic while Multiple Select questions are selected. Remove them first.');
+                } else {
+                    $this->suggestionsPage = 1;
+                }
+            } else {
+                // Switching to simple: block if any dependency configured
+                $hasDependency = collect($this->answerDependencies)->filter(function ($v) {
+                    return $v !== null && $v !== '' && (int)$v > 0;
+                })->isNotEmpty();
+                if ($hasDependency) {
+                    $this->questionMode = 'dynamic';
+                    $this->dispatch('show-toast', type: 'error', message: 'Cannot switch to Simple while dependencies exist. Remove dependencies first.');
+                } else {
+                    $this->suggestionsPage = 1;
+                }
+            }
         }
     }
 
