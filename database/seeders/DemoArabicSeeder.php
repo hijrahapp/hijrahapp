@@ -53,7 +53,9 @@ class DemoArabicSeeder extends Seeder
         $tagComplex = Tag::create(['title' => 'معقد', 'active' => true]);
         $tagTwoSection = Tag::create(['title' => 'قسمان', 'active' => true]);
         $allTagIds = [$tagSimple->id, $tagComplex->id, $tagTwoSection->id];
-        $img = function (string $seed): string { return 'https://picsum.photos/seed/' . urlencode($seed) . '/600/400'; };
+        $img = function (string $seed): string {
+            return 'https://picsum.photos/seed/'.urlencode($seed).'/600/400';
+        };
 
         $findAnswerIds = function (array $titles): array {
             return Answer::whereIn('title', $titles)->pluck('id', 'title')->all();
@@ -92,7 +94,7 @@ class DemoArabicSeeder extends Seeder
             } else {
                 $answersToAttach = $findAnswerIds($type->getAnswers());
             }
-            if (!empty($answersToAttach)) {
+            if (! empty($answersToAttach)) {
                 $questionsByType[$type->value]->answers()->sync(array_values($answersToAttach));
             }
         }
@@ -101,16 +103,27 @@ class DemoArabicSeeder extends Seeder
         $makeModule = function (string $name, array $tags) use ($img) {
             $data = [
                 'name' => $name,
-                'description' => $name . ' الوصف',
-                'definition' => $name . ' التعريف',
-                'objectives' => $name . ' الأهداف',
+                'description' => $name.' الوصف',
+                'definition' => $name.' التعريف',
+                'objectives' => $name.' الأهداف',
                 'tags' => $tags,
             ];
-            if (Schema::hasColumn('modules', 'img_url')) $data['img_url'] = $img($name);
-            if (Schema::hasColumn('modules', 'questions_description')) $data['questions_description'] = 'أجب عن أسئلة هذا المكون.';
-            if (Schema::hasColumn('modules', 'questions_estimated_time')) $data['questions_estimated_time'] = '15د';
-            if (Schema::hasColumn('modules', 'questions_count')) $data['questions_count'] = 0;
-            if (Schema::hasColumn('modules', 'active')) $data['active'] = true;
+            if (Schema::hasColumn('modules', 'img_url')) {
+                $data['img_url'] = $img($name);
+            }
+            if (Schema::hasColumn('modules', 'questions_description')) {
+                $data['questions_description'] = 'أجب عن أسئلة هذا المكون.';
+            }
+            if (Schema::hasColumn('modules', 'questions_estimated_time')) {
+                $data['questions_estimated_time'] = '15د';
+            }
+            if (Schema::hasColumn('modules', 'questions_count')) {
+                $data['questions_count'] = 0;
+            }
+            if (Schema::hasColumn('modules', 'active')) {
+                $data['active'] = true;
+            }
+
             return Module::create($data);
         };
 
@@ -133,16 +146,27 @@ class DemoArabicSeeder extends Seeder
         $makePillar = function (string $name, array $tags) use ($img) {
             $data = [
                 'name' => $name,
-                'description' => $name . ' الوصف',
-                'definition' => $name . ' التعريف',
-                'objectives' => $name . ' الأهداف',
+                'description' => $name.' الوصف',
+                'definition' => $name.' التعريف',
+                'objectives' => $name.' الأهداف',
                 'tags' => $tags,
             ];
-            if (Schema::hasColumn('pillars', 'img_url')) $data['img_url'] = $img($name);
-            if (Schema::hasColumn('pillars', 'questions_description')) $data['questions_description'] = 'أجب عن أسئلة هذا العمود.';
-            if (Schema::hasColumn('pillars', 'questions_estimated_time')) $data['questions_estimated_time'] = '20د';
-            if (Schema::hasColumn('pillars', 'questions_count')) $data['questions_count'] = 0;
-            if (Schema::hasColumn('pillars', 'active')) $data['active'] = true;
+            if (Schema::hasColumn('pillars', 'img_url')) {
+                $data['img_url'] = $img($name);
+            }
+            if (Schema::hasColumn('pillars', 'questions_description')) {
+                $data['questions_description'] = 'أجب عن أسئلة هذا العمود.';
+            }
+            if (Schema::hasColumn('pillars', 'questions_estimated_time')) {
+                $data['questions_estimated_time'] = '20د';
+            }
+            if (Schema::hasColumn('pillars', 'questions_count')) {
+                $data['questions_count'] = 0;
+            }
+            if (Schema::hasColumn('pillars', 'active')) {
+                $data['active'] = true;
+            }
+
             return Pillar::create($data);
         };
 
@@ -162,11 +186,21 @@ class DemoArabicSeeder extends Seeder
             'type' => 'simple',
             'tags' => [$tagSimple->id],
         ];
-        if (Schema::hasColumn('methodology', 'img_url')) $simpleMethodData['img_url'] = $img('منهجية بسيطة');
-        if (Schema::hasColumn('methodology', 'questions_description')) $simpleMethodData['questions_description'] = 'أجب عن الأسئلة التالية الخاصة بالمنهجية.';
-        if (Schema::hasColumn('methodology', 'questions_estimated_time')) $simpleMethodData['questions_estimated_time'] = 30;
-        if (Schema::hasColumn('methodology', 'questions_count')) $simpleMethodData['questions_count'] = 0;
-        if (Schema::hasColumn('methodology', 'modules_definition')) $simpleMethodData['modules_definition'] = 'هذه المنهجية البسيطة تتكون من مكونين.';
+        if (Schema::hasColumn('methodology', 'img_url')) {
+            $simpleMethodData['img_url'] = $img('منهجية بسيطة');
+        }
+        if (Schema::hasColumn('methodology', 'questions_description')) {
+            $simpleMethodData['questions_description'] = 'أجب عن الأسئلة التالية الخاصة بالمنهجية.';
+        }
+        if (Schema::hasColumn('methodology', 'questions_estimated_time')) {
+            $simpleMethodData['questions_estimated_time'] = 30;
+        }
+        if (Schema::hasColumn('methodology', 'questions_count')) {
+            $simpleMethodData['questions_count'] = 0;
+        }
+        if (Schema::hasColumn('methodology', 'modules_definition')) {
+            $simpleMethodData['modules_definition'] = 'هذه المنهجية البسيطة تتكون من مكونين.';
+        }
         $simpleMethod = Methodology::create($simpleMethodData);
 
         $complexMethodData = [
@@ -177,12 +211,24 @@ class DemoArabicSeeder extends Seeder
             'type' => 'complex',
             'tags' => [$tagComplex->id],
         ];
-        if (Schema::hasColumn('methodology', 'img_url')) $complexMethodData['img_url'] = $img('منهجية معقدة');
-        if (Schema::hasColumn('methodology', 'questions_description')) $complexMethodData['questions_description'] = 'أجب عن الأسئلة التالية الخاصة بالمنهجية.';
-        if (Schema::hasColumn('methodology', 'questions_estimated_time')) $complexMethodData['questions_estimated_time'] = 45;
-        if (Schema::hasColumn('methodology', 'questions_count')) $complexMethodData['questions_count'] = 0;
-        if (Schema::hasColumn('methodology', 'pillars_definition')) $complexMethodData['pillars_definition'] = 'هذه المنهجية المعقدة تحتوي على أعمدة موضوعية.';
-        if (Schema::hasColumn('methodology', 'number_of_pillars')) $complexMethodData['number_of_pillars'] = '2';
+        if (Schema::hasColumn('methodology', 'img_url')) {
+            $complexMethodData['img_url'] = $img('منهجية معقدة');
+        }
+        if (Schema::hasColumn('methodology', 'questions_description')) {
+            $complexMethodData['questions_description'] = 'أجب عن الأسئلة التالية الخاصة بالمنهجية.';
+        }
+        if (Schema::hasColumn('methodology', 'questions_estimated_time')) {
+            $complexMethodData['questions_estimated_time'] = 45;
+        }
+        if (Schema::hasColumn('methodology', 'questions_count')) {
+            $complexMethodData['questions_count'] = 0;
+        }
+        if (Schema::hasColumn('methodology', 'pillars_definition')) {
+            $complexMethodData['pillars_definition'] = 'هذه المنهجية المعقدة تحتوي على أعمدة موضوعية.';
+        }
+        if (Schema::hasColumn('methodology', 'number_of_pillars')) {
+            $complexMethodData['number_of_pillars'] = '2';
+        }
         $complexMethod = Methodology::create($complexMethodData);
 
         $twoSectionMethodData = [
@@ -195,26 +241,56 @@ class DemoArabicSeeder extends Seeder
             'second_section_name' => 'القسم الثاني',
             'tags' => [$tagTwoSection->id],
         ];
-        if (Schema::hasColumn('methodology', 'img_url')) $twoSectionMethodData['img_url'] = $img('منهجية قسمان');
-        if (Schema::hasColumn('methodology', 'questions_description')) $twoSectionMethodData['questions_description'] = 'أجب عن الأسئلة التالية الخاصة بالمنهجية.';
-        if (Schema::hasColumn('methodology', 'questions_estimated_time')) $twoSectionMethodData['questions_estimated_time'] = 60;
-        if (Schema::hasColumn('methodology', 'questions_count')) $twoSectionMethodData['questions_count'] = 0;
-        if (Schema::hasColumn('methodology', 'first_section_description')) $twoSectionMethodData['first_section_description'] = 'نظرة عامة على القسم الأول.';
-        if (Schema::hasColumn('methodology', 'first_section_definition')) $twoSectionMethodData['first_section_definition'] = 'تعريف القسم الأول.';
-        if (Schema::hasColumn('methodology', 'first_section_objectives')) $twoSectionMethodData['first_section_objectives'] = 'أهداف القسم الأول.';
-        if (Schema::hasColumn('methodology', 'first_section_img_url')) $twoSectionMethodData['first_section_img_url'] = $img('القسم الأول');
-        if (Schema::hasColumn('methodology', 'first_section_number_of_pillars')) $twoSectionMethodData['first_section_number_of_pillars'] = '2';
-        if (Schema::hasColumn('methodology', 'first_section_pillars_definition')) $twoSectionMethodData['first_section_pillars_definition'] = 'عمودان في القسم الأول.';
-        if (Schema::hasColumn('methodology', 'first_section_number_of_questions')) $twoSectionMethodData['first_section_number_of_questions'] = '12';
-        if (Schema::hasColumn('methodology', 'first_section_minutes')) $twoSectionMethodData['first_section_minutes'] = 30;
-        if (Schema::hasColumn('methodology', 'second_section_description')) $twoSectionMethodData['second_section_description'] = 'نظرة عامة على القسم الثاني.';
-        if (Schema::hasColumn('methodology', 'second_section_definition')) $twoSectionMethodData['second_section_definition'] = 'تعريف القسم الثاني.';
-        if (Schema::hasColumn('methodology', 'second_section_objectives')) $twoSectionMethodData['second_section_objectives'] = 'أهداف القسم الثاني.';
-        if (Schema::hasColumn('methodology', 'second_section_img_url')) $twoSectionMethodData['second_section_img_url'] = $img('القسم الثاني');
-        if (Schema::hasColumn('methodology', 'second_section_number_of_pillars')) $twoSectionMethodData['second_section_number_of_pillars'] = '2';
-        if (Schema::hasColumn('methodology', 'second_section_pillars_definition')) $twoSectionMethodData['second_section_pillars_definition'] = 'عمودان في القسم الثاني.';
-        if (Schema::hasColumn('methodology', 'second_section_number_of_questions')) $twoSectionMethodData['second_section_number_of_questions'] = '12';
-        if (Schema::hasColumn('methodology', 'second_section_minutes')) $twoSectionMethodData['second_section_minutes'] = 30;
+        if (Schema::hasColumn('methodology', 'img_url')) {
+            $twoSectionMethodData['img_url'] = $img('منهجية قسمان');
+        }
+        if (Schema::hasColumn('methodology', 'questions_description')) {
+            $twoSectionMethodData['questions_description'] = 'أجب عن الأسئلة التالية الخاصة بالمنهجية.';
+        }
+        if (Schema::hasColumn('methodology', 'questions_estimated_time')) {
+            $twoSectionMethodData['questions_estimated_time'] = 60;
+        }
+        if (Schema::hasColumn('methodology', 'questions_count')) {
+            $twoSectionMethodData['questions_count'] = 0;
+        }
+        if (Schema::hasColumn('methodology', 'first_section_description')) {
+            $twoSectionMethodData['first_section_description'] = 'نظرة عامة على القسم الأول.';
+        }
+        if (Schema::hasColumn('methodology', 'first_section_definition')) {
+            $twoSectionMethodData['first_section_definition'] = 'تعريف القسم الأول.';
+        }
+        if (Schema::hasColumn('methodology', 'first_section_objectives')) {
+            $twoSectionMethodData['first_section_objectives'] = 'أهداف القسم الأول.';
+        }
+        if (Schema::hasColumn('methodology', 'first_section_img_url')) {
+            $twoSectionMethodData['first_section_img_url'] = $img('القسم الأول');
+        }
+        if (Schema::hasColumn('methodology', 'first_section_number_of_pillars')) {
+            $twoSectionMethodData['first_section_number_of_pillars'] = '2';
+        }
+        if (Schema::hasColumn('methodology', 'first_section_pillars_definition')) {
+            $twoSectionMethodData['first_section_pillars_definition'] = 'عمودان في القسم الأول.';
+        }
+
+        if (Schema::hasColumn('methodology', 'second_section_description')) {
+            $twoSectionMethodData['second_section_description'] = 'نظرة عامة على القسم الثاني.';
+        }
+        if (Schema::hasColumn('methodology', 'second_section_definition')) {
+            $twoSectionMethodData['second_section_definition'] = 'تعريف القسم الثاني.';
+        }
+        if (Schema::hasColumn('methodology', 'second_section_objectives')) {
+            $twoSectionMethodData['second_section_objectives'] = 'أهداف القسم الثاني.';
+        }
+        if (Schema::hasColumn('methodology', 'second_section_img_url')) {
+            $twoSectionMethodData['second_section_img_url'] = $img('القسم الثاني');
+        }
+        if (Schema::hasColumn('methodology', 'second_section_number_of_pillars')) {
+            $twoSectionMethodData['second_section_number_of_pillars'] = '2';
+        }
+        if (Schema::hasColumn('methodology', 'second_section_pillars_definition')) {
+            $twoSectionMethodData['second_section_pillars_definition'] = 'عمودان في القسم الثاني.';
+        }
+
         $twoSectionMethod = Methodology::create($twoSectionMethodData);
 
         // Relate: Simple methodology -> modules
@@ -225,12 +301,24 @@ class DemoArabicSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
-            if (Schema::hasColumn('methodology_module', 'number_of_questions')) $row['number_of_questions'] = 3;
-            if (Schema::hasColumn('methodology_module', 'weight')) $row['weight'] = 50.00;
-            if (Schema::hasColumn('methodology_module', 'minutes')) $row['minutes'] = 15;
-            if (Schema::hasColumn('methodology_module', 'report')) $row['report'] = $module->name . ' تقرير';
-            if (Schema::hasColumn('methodology_module', 'questions_description')) $row['questions_description'] = 'أسئلة المكون';
-            if (Schema::hasColumn('methodology_module', 'questions_estimated_time')) $row['questions_estimated_time'] = 15;
+            if (Schema::hasColumn('methodology_module', 'number_of_questions')) {
+                $row['number_of_questions'] = 3;
+            }
+            if (Schema::hasColumn('methodology_module', 'weight')) {
+                $row['weight'] = 50.00;
+            }
+            if (Schema::hasColumn('methodology_module', 'minutes')) {
+                $row['minutes'] = 15;
+            }
+            if (Schema::hasColumn('methodology_module', 'report')) {
+                $row['report'] = $module->name.' تقرير';
+            }
+            if (Schema::hasColumn('methodology_module', 'questions_description')) {
+                $row['questions_description'] = 'أسئلة المكون';
+            }
+            if (Schema::hasColumn('methodology_module', 'questions_estimated_time')) {
+                $row['questions_estimated_time'] = 15;
+            }
             DB::table('methodology_module')->insert($row);
         }
 
@@ -245,11 +333,21 @@ class DemoArabicSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
-            if (Schema::hasColumn('methodology_pillar', 'sequence')) $mpRow['sequence'] = $seq;
-            if (Schema::hasColumn('methodology_pillar', 'number_of_modules')) $mpRow['number_of_modules'] = count($mods);
-            if (Schema::hasColumn('methodology_pillar', 'weight')) $mpRow['weight'] = 50.00;
-            if (Schema::hasColumn('methodology_pillar', 'questions_description')) $mpRow['questions_description'] = 'أسئلة العمود';
-            if (Schema::hasColumn('methodology_pillar', 'questions_estimated_time')) $mpRow['questions_estimated_time'] = 20;
+            if (Schema::hasColumn('methodology_pillar', 'sequence')) {
+                $mpRow['sequence'] = $seq;
+            }
+            if (Schema::hasColumn('methodology_pillar', 'number_of_modules')) {
+                $mpRow['number_of_modules'] = count($mods);
+            }
+            if (Schema::hasColumn('methodology_pillar', 'weight')) {
+                $mpRow['weight'] = 50.00;
+            }
+            if (Schema::hasColumn('methodology_pillar', 'questions_description')) {
+                $mpRow['questions_description'] = 'أسئلة العمود';
+            }
+            if (Schema::hasColumn('methodology_pillar', 'questions_estimated_time')) {
+                $mpRow['questions_estimated_time'] = 20;
+            }
             DB::table('methodology_pillar')->insert($mpRow);
             foreach ($mods as [$mod, $modSeq]) {
                 $pmRow = [
@@ -259,12 +357,24 @@ class DemoArabicSeeder extends Seeder
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-                if (Schema::hasColumn('pillar_module', 'number_of_questions')) $pmRow['number_of_questions'] = 3;
-                if (Schema::hasColumn('pillar_module', 'weight')) $pmRow['weight'] = 50.00;
-                if (Schema::hasColumn('pillar_module', 'minutes')) $pmRow['minutes'] = 15;
-                if (Schema::hasColumn('pillar_module', 'report')) $pmRow['report'] = $mod->name . ' تقرير';
-                if (Schema::hasColumn('pillar_module', 'questions_description')) $pmRow['questions_description'] = 'أسئلة المكون';
-                if (Schema::hasColumn('pillar_module', 'questions_estimated_time')) $pmRow['questions_estimated_time'] = 15;
+                if (Schema::hasColumn('pillar_module', 'number_of_questions')) {
+                    $pmRow['number_of_questions'] = 3;
+                }
+                if (Schema::hasColumn('pillar_module', 'weight')) {
+                    $pmRow['weight'] = 50.00;
+                }
+                if (Schema::hasColumn('pillar_module', 'minutes')) {
+                    $pmRow['minutes'] = 15;
+                }
+                if (Schema::hasColumn('pillar_module', 'report')) {
+                    $pmRow['report'] = $mod->name.' تقرير';
+                }
+                if (Schema::hasColumn('pillar_module', 'questions_description')) {
+                    $pmRow['questions_description'] = 'أسئلة المكون';
+                }
+                if (Schema::hasColumn('pillar_module', 'questions_estimated_time')) {
+                    $pmRow['questions_estimated_time'] = 15;
+                }
                 DB::table('pillar_module')->insert($pmRow);
                 $modulePillarMap[$complexMethod->id][$mod->id] = $pillar->id;
             }
@@ -285,11 +395,21 @@ class DemoArabicSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
-            if (Schema::hasColumn('methodology_pillar', 'sequence')) $mpRow['sequence'] = $seq;
-            if (Schema::hasColumn('methodology_pillar', 'number_of_modules')) $mpRow['number_of_modules'] = count($mods);
-            if (Schema::hasColumn('methodology_pillar', 'weight')) $mpRow['weight'] = 25.00;
-            if (Schema::hasColumn('methodology_pillar', 'questions_description')) $mpRow['questions_description'] = 'أسئلة العمود';
-            if (Schema::hasColumn('methodology_pillar', 'questions_estimated_time')) $mpRow['questions_estimated_time'] = 20;
+            if (Schema::hasColumn('methodology_pillar', 'sequence')) {
+                $mpRow['sequence'] = $seq;
+            }
+            if (Schema::hasColumn('methodology_pillar', 'number_of_modules')) {
+                $mpRow['number_of_modules'] = count($mods);
+            }
+            if (Schema::hasColumn('methodology_pillar', 'weight')) {
+                $mpRow['weight'] = 25.00;
+            }
+            if (Schema::hasColumn('methodology_pillar', 'questions_description')) {
+                $mpRow['questions_description'] = 'أسئلة العمود';
+            }
+            if (Schema::hasColumn('methodology_pillar', 'questions_estimated_time')) {
+                $mpRow['questions_estimated_time'] = 20;
+            }
             DB::table('methodology_pillar')->insert($mpRow);
             foreach ($mods as [$mod, $modSeq]) {
                 $pmRow = [
@@ -299,12 +419,24 @@ class DemoArabicSeeder extends Seeder
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-                if (Schema::hasColumn('pillar_module', 'number_of_questions')) $pmRow['number_of_questions'] = 3;
-                if (Schema::hasColumn('pillar_module', 'weight')) $pmRow['weight'] = 1.00;
-                if (Schema::hasColumn('pillar_module', 'minutes')) $pmRow['minutes'] = 15;
-                if (Schema::hasColumn('pillar_module', 'report')) $pmRow['report'] = $mod->name . ' تقرير';
-                if (Schema::hasColumn('pillar_module', 'questions_description')) $pmRow['questions_description'] = 'أسئلة المكون';
-                if (Schema::hasColumn('pillar_module', 'questions_estimated_time')) $pmRow['questions_estimated_time'] = 15;
+                if (Schema::hasColumn('pillar_module', 'number_of_questions')) {
+                    $pmRow['number_of_questions'] = 3;
+                }
+                if (Schema::hasColumn('pillar_module', 'weight')) {
+                    $pmRow['weight'] = 1.00;
+                }
+                if (Schema::hasColumn('pillar_module', 'minutes')) {
+                    $pmRow['minutes'] = 15;
+                }
+                if (Schema::hasColumn('pillar_module', 'report')) {
+                    $pmRow['report'] = $mod->name.' تقرير';
+                }
+                if (Schema::hasColumn('pillar_module', 'questions_description')) {
+                    $pmRow['questions_description'] = 'أسئلة المكون';
+                }
+                if (Schema::hasColumn('pillar_module', 'questions_estimated_time')) {
+                    $pmRow['questions_estimated_time'] = 15;
+                }
                 DB::table('pillar_module')->insert($pmRow);
                 $modulePillarMap[$twoSectionMethod->id][$mod->id] = $pillar->id;
             }
@@ -354,7 +486,9 @@ class DemoArabicSeeder extends Seeder
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-                if (Schema::hasColumn('methodology_question', 'sequence')) $mqRow['sequence'] = $sequence;
+                if (Schema::hasColumn('methodology_question', 'sequence')) {
+                    $mqRow['sequence'] = $sequence;
+                }
                 $pivotId = DB::table('methodology_question')->insertGetId($mqRow);
                 $weightAnswersEvenly('methodology_question', $pivotId, $q);
                 $sequence++;
@@ -404,7 +538,9 @@ class DemoArabicSeeder extends Seeder
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
-                    if (Schema::hasColumn('module_question', 'sequence')) $modQRow['sequence'] = $sequence;
+                    if (Schema::hasColumn('module_question', 'sequence')) {
+                        $modQRow['sequence'] = $sequence;
+                    }
                     $pivotId = DB::table('module_question')->insertGetId($modQRow);
                     $modulePivotIds[] = ['id' => $pivotId, 'question' => $q];
                     $weightAnswersEvenly('module_question', $pivotId, $q);
@@ -457,5 +593,3 @@ class DemoArabicSeeder extends Seeder
         ]);
     }
 }
-
-

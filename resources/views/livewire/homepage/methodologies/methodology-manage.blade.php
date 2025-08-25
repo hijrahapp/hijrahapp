@@ -57,17 +57,7 @@
                             @error('definition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                         </div>
 
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium mb-1">Questions Description</label>
-                            <textarea class="kt-textarea w-full" rows="3" wire:model.defer="questionsDescription" placeholder="Enter a general description of the methodology questions"></textarea>
-                            @error('questionsDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                        </div>
-
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium mb-1">Estimated Questions Time (minutes)</label>
-                            <input type="number" min="0" class="kt-input w-full" wire:model.defer="questionsEstimatedTime" placeholder="Enter estimated time in minutes" />
-                            @error('questionsEstimatedTime')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                        </div>
+                        
 
                         <div class="mt-4">
                             <label class="block text-sm font-medium mb-1">Objectives</label>
@@ -92,6 +82,54 @@
                     </div>
                     <div class="kt-card-footer flex items-center justify-end gap-2">
                         <button class="kt-btn kt-btn-primary" wire:click="saveBasicDetails">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- General Questions Information (Collapsible) -->
+        <div data-kt-accordion="true" class="kt-accordion">
+            <div class="kt-card kt-accordion-item active" data-kt-accordion-item="true">
+                <button
+                    id="general_questions_info_toggle"
+                    data-kt-accordion-toggle="true"
+                    aria-controls="general_questions_info_content"
+                    class="kt-accordion-toggle kt-card-header"
+                >
+                    <h3 class="kt-card-title">General Questions Information</h3>
+                    <span aria-hidden="true" class="kt-accordion-indicator">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus kt-accordion-indicator-on" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus kt-accordion-indicator-off" aria-hidden="true"><path d="M5 12h14"></path></svg>
+                    </span>
+                </button>
+                <div class="kt-accordion-content" aria-labelledby="general_questions_info_toggle" id="general_questions_info_content">
+                    <div class="kt-card-body p-5">
+                        <div class="mt-0">
+                            <label class="block text-sm font-medium mb-1">Questions Description</label>
+                            <textarea class="kt-textarea w-full" rows="3" wire:model.defer="questionsDescription" placeholder="Enter a general description of the methodology questions"></textarea>
+                            @error('questionsDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium mb-1">Estimated Questions Time (minutes)</label>
+                            <input type="number" min="0" class="kt-input w-full" wire:model.defer="questionsEstimatedTime" placeholder="Enter estimated time in minutes" />
+                            @error('questionsEstimatedTime')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium mb-1">Number of Questions</label>
+                            <input type="number" min="0" class="kt-input w-full" wire:model.defer="questionsCount" placeholder="Enter number of questions" />
+                            @error('questionsCount')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium mb-1">Brief</label>
+                            <textarea class="kt-textarea w-full" rows="3" wire:model.defer="questionsBrief" placeholder="Enter brief"></textarea>
+                            @error('questionsBrief')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+                    <div class="kt-card-footer flex items-center justify-end gap-2">
+                        <button class="kt-btn kt-btn-primary" wire:click="saveGeneralQuestionsInfo">Save</button>
                     </div>
                 </div>
             </div>
@@ -228,28 +266,6 @@
                                 @error('firstSectionImgUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
 
-                            <div class="mt-6">
-                                <h4 class="text-md font-medium mb-3">General Questions Details</h4>
-
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Number of Questions</label>
-                                        <input type="text" class="kt-input w-full" wire:model.defer="firstSectionNumberOfQuestions" placeholder="Enter number of questions" />
-                                        @error('firstSectionNumberOfQuestions')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Minutes</label>
-                                        <input type="text" class="kt-input w-full" wire:model.defer="firstSectionMinutes" placeholder="Enter minutes" />
-                                        @error('firstSectionMinutes')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                                    </div>
-                                </div>
-
-                                <div class="mt-4">
-                                    <label class="block text-sm font-medium mb-1">Brief</label>
-                                    <textarea class="kt-textarea w-full" rows="3" wire:model.defer="firstSectionBrief" placeholder="Enter brief description"></textarea>
-                                    @error('firstSectionBrief')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
                         </div>
                         <div class="kt-card-footer flex items-center justify-end gap-2">
                             <button class="kt-btn kt-btn-primary" wire:click="saveSection1Details">Save</button>
@@ -319,28 +335,6 @@
                                 @error('secondSectionImgUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
 
-                            <div class="mt-6">
-                                <h4 class="text-md font-medium mb-3">General Questions Details</h4>
-
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Number of Questions</label>
-                                        <input type="text" class="kt-input w-full" wire:model.defer="secondSectionNumberOfQuestions" placeholder="Enter number of questions" />
-                                        @error('secondSectionNumberOfQuestions')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Minutes</label>
-                                        <input type="text" class="kt-input w-full" wire:model.defer="secondSectionMinutes" placeholder="Enter minutes" />
-                                        @error('secondSectionMinutes')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                                    </div>
-                                </div>
-
-                                <div class="mt-4">
-                                    <label class="block text-sm font-medium mb-1">Brief</label>
-                                    <textarea class="kt-textarea w-full" rows="3" wire:model.defer="secondSectionBrief" placeholder="Enter brief description"></textarea>
-                                    @error('secondSectionBrief')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
                         </div>
                         <div class="kt-card-footer flex items-center justify-end gap-2">
                             <button class="kt-btn kt-btn-primary" wire:click="saveSection2Details">Save</button>

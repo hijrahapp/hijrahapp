@@ -60,17 +60,7 @@
                         @error('definition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                     </div>
 
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium mb-1">Questions Description</label>
-                        <textarea class="kt-textarea w-full" rows="3" wire:model.defer="questionsDescription" placeholder="Enter a general description of the methodology questions"></textarea>
-                        @error('questionsDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                    </div>
-
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium mb-1">Estimated Questions Time (minutes)</label>
-                        <input type="number" min="0" class="kt-input w-full" wire:model.defer="questionsEstimatedTime" placeholder="Enter estimated time in minutes" />
-                        @error('questionsEstimatedTime')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                    </div>
+                    
 
                     <div class="mt-4">
                         <label class="block text-sm font-medium mb-1">Objectives</label>
@@ -93,65 +83,6 @@
                     </div>
                 </div>
 
-{{--                @if($type)--}}
-{{--                    <div class="kt-separator mt-4"></div>--}}
-{{--                @endif--}}
-
-{{--                <!-- Type-specific fields -->--}}
-{{--                @if($type === 'simple')--}}
-{{--                    <div>--}}
-{{--                        <h3 class="text-lg font-medium mb-4">Simple Type Configuration</h3>--}}
-{{--                        <div>--}}
-{{--                            <label class="block text-sm font-medium mb-1">Modules Definition</label>--}}
-{{--                            <textarea class="kt-textarea w-full" rows="3" wire:model.defer="modulesDefinition" placeholder="Enter modules definition (optional)"></textarea>--}}
-{{--                            @error('modulesDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                @endif--}}
-
-{{--                @if($type === 'complex')--}}
-{{--                    <div>--}}
-{{--                        <h3 class="text-lg font-medium mb-4">Complex Type Configuration</h3>--}}
-{{--                        <div class="mt-4">--}}
-{{--                            <label class="block text-sm font-medium mb-1">Pillars Definition</label>--}}
-{{--                            <textarea class="kt-textarea w-full" rows="3" wire:model.defer="pillarsDefinition" placeholder="Enter pillars definition (optional)"></textarea>--}}
-{{--                            @error('pillarsDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror--}}
-{{--                        </div>--}}
-{{--                        <div class="mt-4">--}}
-{{--                            <label class="block text-sm font-medium mb-1">Number of Pillars</label>--}}
-{{--                            <input type="text" class="kt-input w-full" wire:model.defer="numberOfPillars" placeholder="Enter number of pillars" />--}}
-{{--                            @error('numberOfPillars')<span class="text-destructive text-xs">{{ $message }}</span>@enderror--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                @endif--}}
-
-{{--                @if($type === 'twoSection')--}}
-{{--                    <div>--}}
-{{--                        <h3 class="text-lg font-medium mb-4">Two-Section Type Configuration</h3>--}}
-
-{{--                        <!-- Section 1 -->--}}
-{{--                        <div class="border-l-4 border-primary pl-4 mb-6">--}}
-{{--                            <h4 class="text-md font-medium mb-3 text-primary">Section 1</h4>--}}
-
-{{--                            <div class="mt-4">--}}
-{{--                                <label class="block text-sm font-medium mb-1">Name <span class="text-destructive">*</span></label>--}}
-{{--                                <input type="text" class="kt-input w-full" wire:model.defer="firstSectionName" placeholder="Enter section 1 name" />--}}
-{{--                                @error('firstSectionName')<span class="text-destructive text-xs">{{ $message }}</span>@enderror--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-
-{{--                        <!-- Section 2 -->--}}
-{{--                        <div class="border-l-4 border-primary pl-4">--}}
-{{--                            <h4 class="text-md font-medium mb-3 text-primary">Section 2</h4>--}}
-
-{{--                            <div class="mt-4">--}}
-{{--                                <label class="block text-sm font-medium mb-1">Name <span class="text-destructive">*</span></label>--}}
-{{--                                <input type="text" class="kt-input w-full" wire:model.defer="secondSectionName" placeholder="Enter section 2 name" />--}}
-{{--                                @error('secondSectionName')<span class="text-destructive text-xs">{{ $message }}</span>@enderror--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                @endif--}}
             </div>
             <div class="kt-modal-footer flex gap-2 justify-end p-5">
                 <button type="button" class="kt-btn kt-btn-outline" wire:click="closeModal">Cancel</button>

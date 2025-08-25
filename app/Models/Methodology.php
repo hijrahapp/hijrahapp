@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\DeletesStoredImages;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Traits\DeletesStoredImages;
 
 class Methodology extends Model
 {
-    use HasFactory, DeletesStoredImages;
+    use DeletesStoredImages, HasFactory;
 
     protected $table = 'methodology';
 
@@ -26,6 +26,7 @@ class Methodology extends Model
         'questions_description',
         'questions_estimated_time',
         'questions_count',
+        'questions_brief',
         'first_section_name',
         'first_section_description',
         'first_section_definition',
@@ -33,9 +34,7 @@ class Methodology extends Model
         'first_section_img_url',
         'first_section_number_of_pillars',
         'first_section_pillars_definition',
-        'first_section_number_of_questions',
-        'first_section_minutes',
-        'first_section_brief',
+
         'second_section_name',
         'second_section_description',
         'second_section_definition',
@@ -43,9 +42,7 @@ class Methodology extends Model
         'second_section_img_url',
         'second_section_number_of_pillars',
         'second_section_pillars_definition',
-        'second_section_number_of_questions',
-        'second_section_minutes',
-        'second_section_brief',
+
         'tags',
         'active',
     ];
@@ -134,6 +131,4 @@ class Methodology extends Model
             ->wherePivot('methodology_id', $this->id)
             ->wherePivot('pillar_id', $pillarId);
     }
-
-
 }
