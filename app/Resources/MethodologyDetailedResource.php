@@ -4,6 +4,7 @@ namespace App\Resources;
 
 use App\Http\Repositories\QuestionRepository;
 use App\Services\ResultCalculationService;
+use App\Services\ResultCalculationOptimizedService;
 use App\Traits\HasTagTitles;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -70,7 +71,9 @@ class MethodologyDetailedResource extends JsonResource
             if($this->type === 'twoSection'){
                 $sectionResults = null;
                 if (config('app.features.result_calculation')) {
-                    $service = new ResultCalculationService();
+                    $service = config('app.features.optimized_calculation')
+                        ? new ResultCalculationOptimizedService()
+                        : new ResultCalculationService();
                     if ($this->user_id) {
                         $sectionResults = [
                             1 => $service->calculateSectionResult($this->user_id, $this->id, 1),
@@ -125,6 +128,7 @@ class MethodologyDetailedResource extends JsonResource
             $questions['description'] = $this->questions_description;
             $questions['estimatedTime'] = $this->questions_estimated_time;
             $questions['size'] = count($questions['list']);
+            unset($questions["list"]);
             $questions = $this->filterArray($questions);
             $payload['questions'] = $questions;
         }
@@ -176,7 +180,9 @@ class MethodologyDetailedResource extends JsonResource
      */
     private function calculateResult()
     {
-        $service = new ResultCalculationService();
+        $service = config('app.features.dynamic_questions')
+            ? new ResultCalculationOptimizedService()
+            : new ResultCalculationService();
 
         if ($this->user_id) {
             return $service->calculateMethodologyResult($this->user_id, $this->id);

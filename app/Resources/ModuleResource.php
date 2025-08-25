@@ -3,6 +3,7 @@
 namespace App\Resources;
 
 use App\Services\ResultCalculationService;
+use App\Services\ResultCalculationOptimizedService;
 use App\Traits\HasTagTitles;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -31,7 +32,9 @@ class ModuleResource extends JsonResource
      */
     private function calculateResult()
     {
-        $service = new ResultCalculationService();
+        $service = config('app.features.optimized_calculation')
+            ? new ResultCalculationOptimizedService()
+            : new ResultCalculationService();
 
         $methodologyId = request()->route('methodologyId');
         $pillarId = $this->pillar_id ?? request()->route('pillarId');
@@ -61,8 +64,9 @@ class ModuleResource extends JsonResource
             return null;
         }
 
-        $service = new ResultCalculationService();
-        $status = $service->getModuleStatus($this->user_id, $this->id, (int) $methodologyId, $pillarId ? (int) $pillarId : null);
+        // Use ContextStatusService directly for status
+        $statusService = new \App\Services\ContextStatusService();
+        $status = $statusService->getModuleStatus($this->user_id, $this->id, (int) $methodologyId, $pillarId ? (int) $pillarId : null);
         return $status ?? null;
     }
 }

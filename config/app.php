@@ -19,5 +19,6 @@ return [
         'email_verification' => env('EMAIL_VERIFICATION', false),
         'result_calculation' => env('RESULT_CALCULATION', false),
         'dynamic_questions' => env('DYNAMIC_QUESTIONS', false),
+        'optimized_calculation' => env('OPTIMIZED_CALCULATION', false),
     ],
 ];

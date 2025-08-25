@@ -5,6 +5,7 @@ namespace App\Resources;
 use App\Http\Repositories\QuestionRepository;
 use App\Traits\HasTagTitles;
 use App\Services\ResultCalculationService;
+use App\Services\ResultCalculationOptimizedService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
@@ -57,6 +58,7 @@ class PillarDetailedResource extends JsonResource
         $questions['description'] = $pivotDescription;
         $questions['estimatedTime'] = $pivotEstimatedTime;
         $questions['size'] = count($questions['list']);
+        unset($questions["list"]);
         $questions = $this->filterArray($questions);
         $payload['questions'] = $questions;
 
@@ -86,7 +88,9 @@ class PillarDetailedResource extends JsonResource
 
     private function calculateResult()
     {
-        $service = new ResultCalculationService();
+        $service = config('app.features.optimized_calculation')
+            ? new ResultCalculationOptimizedService()
+            : new ResultCalculationService();
         $methodologyId = request()->route('methodologyId');
         if ($this->user_id && $methodologyId) {
             return $service->calculatePillarResult($this->user_id, $this->id, (int) $methodologyId);
