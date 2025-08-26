@@ -248,8 +248,9 @@ class MethodologyQuestionsModal extends Component
     {
         // Prevent adding Multiple Select questions in dynamic mode (only for module context)
         if ($this->moduleId !== null && $this->questionMode === 'dynamic') {
-            $type = (string) (Question::where('id', $questionId)->value('type'));
-            if ($type === QuestionType::MCQMultiple->value) {
+            $question = Question::find($questionId);
+            $typeEnum = $question?->type;
+            if ($typeEnum instanceof QuestionType && $typeEnum === QuestionType::MCQMultiple) {
                 $this->dispatch('show-toast', type: 'error', message: 'In Dynamic mode, Multiple Select questions are not allowed.');
                 return;
             }
