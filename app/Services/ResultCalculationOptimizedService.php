@@ -403,21 +403,14 @@ class ResultCalculationOptimizedService
             ->distinct()
             ->count('mq.question_id');
 
-        $numerator = DB::table('methodology_question as mq')
-            ->leftJoin('answer_contexts as ac', function ($join) {
-                $join->on('ac.context_id', '=', 'mq.id')
-                    ->where('ac.context_type', 'methodology_question');
-            })
-            ->join('user_answers as ua', function ($join) use ($userId, $methodologyId) {
-                $join->on('ua.question_id', '=', 'mq.question_id')
-                    ->on('ua.answer_id', '=', 'ac.answer_id')
-                    ->where('ua.context_type', 'methodology')
-                    ->where('ua.context_id', $methodologyId)
-                    ->where('ua.user_id', $userId);
-            })
-            ->where('mq.methodology_id', $methodologyId)
-            ->selectRaw('COALESCE(SUM(LEAST(GREATEST(ac.weight, 0), 100) * mq.weight), 0) as num')
-            ->value('num');
+        // Group multiple selections per question and normalize MCQMultiple
+        $numerator = $this->computeWeightedSumForContext(
+            $userId,
+            $methodologyId,
+            'methodology_question',
+            'methodology',
+            $methodologyId
+        );
 
         $sumWeights = (float) ($totals->sum_weights ?? 0);
         $percentage = $sumWeights > 0 ? round(((float) $numerator) / $sumWeights, 2) : 0.0;
@@ -458,23 +451,15 @@ class ResultCalculationOptimizedService
             ->distinct()
             ->count('mq.question_id');
 
-        // Numerator: sum(answer_percent * weight)
-        $numerator = DB::table('methodology_question as mq')
-            ->leftJoin('answer_contexts as ac', function ($join) {
-                $join->on('ac.context_id', '=', 'mq.id')
-                    ->where('ac.context_type', 'methodology_question');
-            })
-            ->join('user_answers as ua', function ($join) use ($userId, $methodologyId) {
-                $join->on('ua.question_id', '=', 'mq.question_id')
-                    ->on('ua.answer_id', '=', 'ac.answer_id')
-                    ->where('ua.context_type', 'methodology')
-                    ->where('ua.context_id', $methodologyId)
-                    ->where('ua.user_id', $userId);
-            })
-            ->where('mq.methodology_id', $methodologyId)
-            ->where($itemColumnFilter)
-            ->selectRaw('COALESCE(SUM(LEAST(GREATEST(ac.weight, 0), 100) * mq.weight), 0) as num')
-            ->value('num');
+        // Numerator: group and normalize MCQMultiple for this item context
+        $numerator = $this->computeWeightedSumForContextWithFilter(
+            $userId,
+            $methodologyId,
+            'methodology_question',
+            'methodology',
+            $methodologyId,
+            $itemColumnFilter
+        );
 
         // Denominator: sum of weights of answered questions only (dynamic-like)
         $denominator = DB::table('methodology_question as mq')
@@ -517,28 +502,16 @@ class ResultCalculationOptimizedService
      */
     protected function computePercentageForModule(int $userId, int $methodologyId, int $moduleId, ?int $pillarId, bool $simpleDenominator): array
     {
-        // Numerator: sum(answer_percent * weight)
-        $numerator = DB::table('module_question as mq')
-            ->leftJoin('answer_contexts as ac', function ($join) {
-                $join->on('ac.context_id', '=', 'mq.id')
-                    ->where('ac.context_type', 'module_question');
-            })
-            ->join('user_answers as ua', function ($join) use ($userId, $moduleId) {
-                $join->on('ua.question_id', '=', 'mq.question_id')
-                    ->on('ua.answer_id', '=', 'ac.answer_id')
-                    ->where('ua.context_type', 'module')
-                    ->where('ua.context_id', $moduleId)
-                    ->where('ua.user_id', $userId);
-            })
-            ->where('mq.methodology_id', $methodologyId)
-            ->where('mq.module_id', $moduleId)
-            ->when($pillarId !== null, function ($q) use ($pillarId) {
-                $q->where('mq.pillar_id', $pillarId);
-            }, function ($q) {
-                $q->whereNull('mq.pillar_id');
-            })
-            ->selectRaw('COALESCE(SUM(LEAST(GREATEST(ac.weight, 0), 100) * mq.weight), 0) as num')
-            ->value('num');
+        // Numerator: group multiple selections per question and normalize MCQMultiple in module context
+        $numerator = $this->computeWeightedSumForModuleContext(
+            $userId,
+            $methodologyId,
+            $moduleId,
+            $pillarId,
+            'module_question',
+            'module',
+            $moduleId
+        );
 
         if ($simpleDenominator) {
             $denominator = (float) DB::table('module_question as mq')
@@ -573,6 +546,173 @@ class ResultCalculationOptimizedService
         $percentage = $denominator > 0 ? round(((float) $numerator) / $denominator, 2) : 0.0;
 
         return ['percentage' => $percentage];
+    }
+
+    /**
+     * Group answers by question and normalize MCQMultiple using weighted sum.
+     * QuestionScore = (Σ(selectedAnswerWeights) / NumberOfPossibleAnswers) * questionWeight
+     */
+    protected function computeWeightedSumForContext(int $userId, int $methodologyId, string $contextType, string $userContextType, int $userContextId): float
+    {
+        return $this->computeWeightedSumForContextWithFilter($userId, $methodologyId, $contextType, $userContextType, $userContextId, null);
+    }
+
+    protected function computeWeightedSumForContextWithFilter(
+        int $userId,
+        int $methodologyId,
+        string $contextType,
+        string $userContextType,
+        int $userContextId,
+        ?\Closure $additionalFilter
+    ): float {
+        $rows = DB::table('methodology_question as mq')
+            ->leftJoin('questions as q', 'q.id', '=', 'mq.question_id')
+            ->leftJoin('answer_contexts as ac', function ($join) use ($contextType) {
+                $join->on('ac.context_id', '=', 'mq.id')
+                    ->where('ac.context_type', $contextType);
+            })
+            ->leftJoin('user_answers as ua', function ($join) use ($userId, $userContextType, $userContextId) {
+                $join->on('ua.question_id', '=', 'mq.question_id')
+                    ->on('ua.answer_id', '=', 'ac.answer_id')
+                    ->where('ua.context_type', $userContextType)
+                    ->where('ua.context_id', $userContextId)
+                    ->where('ua.user_id', $userId);
+            })
+            ->where('mq.methodology_id', $methodologyId)
+            ->when($additionalFilter, $additionalFilter)
+            ->whereNotNull('ua.id')
+            ->select([
+                'mq.question_id',
+                'q.type as question_type',
+                'mq.id as mq_id',
+                'mq.weight as question_weight',
+                'ac.answer_id',
+                'ac.weight as answer_weight',
+            ])
+            ->get();
+
+        $byQuestion = [];
+        foreach ($rows as $r) {
+            $qid = (int) $r->question_id;
+            $qType = (string) $r->question_type;
+            $qWeight = (float) $r->question_weight;
+            $aWeight = max(0.0, min(100.0, (float) ($r->answer_weight ?? 0)));
+
+            if (! isset($byQuestion[$qid])) {
+                $byQuestion[$qid] = [
+                    'type' => $qType,
+                    'weight' => $qWeight,
+                    'mq_id' => (int) $r->mq_id,
+                    'sum_selected' => 0.0,
+                    'total_possible' => 0,
+                ];
+            }
+            $byQuestion[$qid]['sum_selected'] += $aWeight;
+        }
+
+        foreach ($byQuestion as $qid => $q) {
+            if ($q['type'] === 'MCQMultiple') {
+                $total = DB::table('answer_contexts as ac')
+                    ->where('ac.context_type', $contextType)
+                    ->where('ac.context_id', $q['mq_id'])
+                    ->distinct()
+                    ->count('ac.answer_id');
+                $byQuestion[$qid]['total_possible'] = (int) $total;
+            }
+        }
+
+        $totalSum = 0.0;
+        foreach ($byQuestion as $q) {
+            if ($q['type'] === 'MCQMultiple' && $q['total_possible'] > 0) {
+                $totalSum += ($q['sum_selected'] / $q['total_possible']) * $q['weight'];
+            } else {
+                $totalSum += $q['sum_selected'] * $q['weight'];
+            }
+        }
+
+        return $totalSum;
+    }
+
+    protected function computeWeightedSumForModuleContext(
+        int $userId,
+        int $methodologyId,
+        int $moduleId,
+        ?int $pillarId,
+        string $contextType,
+        string $userContextType,
+        int $userContextId
+    ): float {
+        $rows = DB::table('module_question as mq')
+            ->leftJoin('questions as q', 'q.id', '=', 'mq.question_id')
+            ->leftJoin('answer_contexts as ac', function ($join) use ($contextType) {
+                $join->on('ac.context_id', '=', 'mq.id')
+                    ->where('ac.context_type', $contextType);
+            })
+            ->leftJoin('user_answers as ua', function ($join) use ($userId, $userContextType, $userContextId) {
+                $join->on('ua.question_id', '=', 'mq.question_id')
+                    ->on('ua.answer_id', '=', 'ac.answer_id')
+                    ->where('ua.context_type', $userContextType)
+                    ->where('ua.context_id', $userContextId)
+                    ->where('ua.user_id', $userId);
+            })
+            ->where('mq.methodology_id', $methodologyId)
+            ->where('mq.module_id', $moduleId)
+            ->when($pillarId !== null, function ($q) use ($pillarId) {
+                $q->where('mq.pillar_id', $pillarId);
+            }, function ($q) {
+                $q->whereNull('mq.pillar_id');
+            })
+            ->whereNotNull('ua.id')
+            ->select([
+                'mq.question_id',
+                'q.type as question_type',
+                'mq.id as mq_id',
+                'mq.weight as question_weight',
+                'ac.answer_id',
+                'ac.weight as answer_weight',
+            ])
+            ->get();
+
+        $byQuestion = [];
+        foreach ($rows as $r) {
+            $qid = (int) $r->question_id;
+            $qType = (string) $r->question_type;
+            $qWeight = (float) $r->question_weight;
+            $aWeight = max(0.0, min(100.0, (float) ($r->answer_weight ?? 0)));
+
+            if (! isset($byQuestion[$qid])) {
+                $byQuestion[$qid] = [
+                    'type' => $qType,
+                    'weight' => $qWeight,
+                    'mq_id' => (int) $r->mq_id,
+                    'sum_selected' => 0.0,
+                    'total_possible' => 0,
+                ];
+            }
+            $byQuestion[$qid]['sum_selected'] += $aWeight;
+        }
+
+        foreach ($byQuestion as $qid => $q) {
+            if ($q['type'] === 'MCQMultiple') {
+                $total = DB::table('answer_contexts as ac')
+                    ->where('ac.context_type', $contextType)
+                    ->where('ac.context_id', $q['mq_id'])
+                    ->distinct()
+                    ->count('ac.answer_id');
+                $byQuestion[$qid]['total_possible'] = (int) $total;
+            }
+        }
+
+        $totalSum = 0.0;
+        foreach ($byQuestion as $q) {
+            if ($q['type'] === 'MCQMultiple' && $q['total_possible'] > 0) {
+                $totalSum += ($q['sum_selected'] / $q['total_possible']) * $q['weight'];
+            } else {
+                $totalSum += $q['sum_selected'] * $q['weight'];
+            }
+        }
+
+        return $totalSum;
     }
 
     /**
