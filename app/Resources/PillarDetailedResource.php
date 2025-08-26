@@ -3,13 +3,12 @@
 namespace App\Resources;
 
 use App\Http\Repositories\QuestionRepository;
-use App\Traits\HasTagTitles;
 use App\Services\ContextStatusService;
-use App\Services\ResultCalculationService;
 use App\Services\ResultCalculationOptimizedService;
+use App\Services\ResultCalculationService;
+use App\Traits\HasTagTitles;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Collection;
 
 class PillarDetailedResource extends JsonResource
 {
@@ -50,29 +49,50 @@ class PillarDetailedResource extends JsonResource
             }
         }
 
-
-        $questionsRepo = new QuestionRepository();
-        $contextStatusService = new ContextStatusService();
-        $questions = [];
+        $questionsRepo = new QuestionRepository;
+        $contextStatusService = new ContextStatusService;
+        $questions = ['list' => []];
         if ($methodologyId) {
             $questions = $questionsRepo->getQuestionsByContext('pillar', $this->id, $methodologyId);
         }
+
+        // Ensure we have a valid questions structure
+        if (! isset($questions['list'])) {
+            $questions['list'] = [];
+        }
+
         $questions['description'] = $pivotDescription;
         $questions['estimatedTime'] = $pivotEstimatedTime;
         $questions['size'] = count($questions['list']);
         $questions['status'] = $this->user_id ? $contextStatusService->getPillarStatus($this->user_id, $this->id, $methodologyId) : 'not_started';
-        unset($questions["list"]);
+        unset($questions['list']);
         $questions = $this->filterArray($questions);
         $payload['questions'] = $questions;
 
-        // Modules under this pillar (if loaded)
-        $modulesList = $this->relationLoaded('modules') && $this->modules && $this->modules->isNotEmpty()
-            ? ModuleResource::collection($this->modules->map(function ($module) {
-                $module->setAttribute('user_id', $this->user_id ?? null);
-                $module->setAttribute('pillar_id', $this->id);
-                return $module;
-            }))
-            : null;
+        // Modules under this pillar (fetch for specific methodology if available, else all modules)
+        $modulesList = null;
+        if ($methodologyId) {
+            // Fetch modules for the specific methodology
+            $methodologyModules = $this->modulesForMethodology((int) $methodologyId)->get();
+            if ($methodologyModules->isNotEmpty()) {
+                $modulesList = ModuleResource::collection($methodologyModules->map(function ($module) {
+                    $module->setAttribute('user_id', $this->user_id ?? null);
+                    $module->setAttribute('pillar_id', $this->id);
+
+                    return $module;
+                }));
+            }
+        } else {
+            // Fallback to all modules under this pillar (if loaded)
+            if ($this->relationLoaded('modules') && $this->modules && $this->modules->isNotEmpty()) {
+                $modulesList = ModuleResource::collection($this->modules->map(function ($module) {
+                    $module->setAttribute('user_id', $this->user_id ?? null);
+                    $module->setAttribute('pillar_id', $this->id);
+
+                    return $module;
+                }));
+            }
+        }
         if ($modulesList) {
             $payload['modules'] = [
                 'list' => $modulesList,
@@ -92,25 +112,33 @@ class PillarDetailedResource extends JsonResource
     private function calculateResult()
     {
         $service = config('app.features.optimized_calculation')
-            ? new ResultCalculationOptimizedService()
-            : new ResultCalculationService();
+            ? new ResultCalculationOptimizedService
+            : new ResultCalculationService;
         $methodologyId = request()->route('methodologyId');
         if ($this->user_id && $methodologyId) {
             return $service->calculatePillarResult($this->user_id, $this->id, (int) $methodologyId);
         }
+
         return null;
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     private function filterArray(array $data): array
     {
         return array_filter($data, function ($value) {
-            if ($value === null) return false;
-            if (is_string($value) && trim($value) === '') return false;
-            if (is_array($value) && count($value) === 0) return false;
+            if ($value === null) {
+                return false;
+            }
+            if (is_string($value) && trim($value) === '') {
+                return false;
+            }
+            if (is_array($value) && count($value) === 0) {
+                return false;
+            }
+
             return true;
         });
     }
@@ -121,7 +149,7 @@ class PillarDetailedResource extends JsonResource
     private function getGroupedModuleQuestions(): array
     {
         $methodologyId = request()->route('methodologyId');
-        if (!$methodologyId) {
+        if (! $methodologyId) {
             return [];
         }
 
@@ -130,9 +158,8 @@ class PillarDetailedResource extends JsonResource
             return [];
         }
 
-        $questionRepo = new QuestionRepository();
+        $questionRepo = new QuestionRepository;
+
         return $questionRepo->getPillarModuleQuestionsGrouped($methodologyId, $this->id);
     }
 }
-
-
