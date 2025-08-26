@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Methodology;
 use App\Models\Module;
 use App\Models\Pillar;
-use App\Models\UserContextStatus;
 use Illuminate\Support\Facades\DB;
 
 class ResultCalculationOptimizedService
@@ -13,8 +12,9 @@ class ResultCalculationOptimizedService
     public function __construct(
         protected ?ContextStatusService $contextStatusService = null,
     ) {
-        $this->contextStatusService = $contextStatusService ?? new ContextStatusService();
+        $this->contextStatusService = $contextStatusService ?? new ContextStatusService;
     }
+
     /**
      * Calculate methodology results honoring simple/dynamic modes.
      * Keeps the same return structure as ResultCalculationService.
@@ -22,7 +22,7 @@ class ResultCalculationOptimizedService
     public function calculateMethodologyResult(int $userId, int $methodologyId)
     {
         $methodology = Methodology::with(['pillars', 'modules'])->find($methodologyId);
-        if (!$methodology) {
+        if (! $methodology) {
             return null;
         }
 
@@ -30,16 +30,16 @@ class ResultCalculationOptimizedService
             'pillars' => [],
             'modules' => [],
             'summary' => [
-                'text' => __('messages.lorem_ipsum'),
+                'text' => $methodology->report ?? '',
                 'overall_percentage' => 0,
                 'total_questions' => 0,
                 'answered_questions' => 0,
-            ]
+            ],
         ];
 
         // Methodology-level questions are always simple.
         $overall = $this->computeSimplePercentageForMethodology($userId, $methodologyId);
-        if($overall['answered_questions'] === 0) {
+        if ($overall['answered_questions'] === 0) {
             return null;
         }
 
@@ -59,15 +59,15 @@ class ResultCalculationOptimizedService
             foreach ($pillars as $pillar) {
                 $allModulesCompleted = $this->areAllPillarModulesCompleted($userId, $methodologyId, $pillar->id);
 
-                if($allModulesCompleted) {
+                if ($allModulesCompleted) {
                     $pillarResult = $this->calculatePillarResult($userId, $pillar->id, $methodologyId);
-                }else {
+                } else {
                     $pillarResult = $this->computeDynamicLikePercentageForMethodologyItem($userId, $methodologyId, 'pillar', $pillar->id);
                 }
 
                 $pillarPercentage = $pillarResult['percentage'] ?? 0;
-                $pillarWeight = (float)($pillar->pivot->weight ?? 0.0);
-                
+                $pillarWeight = (float) ($pillar->pivot->weight ?? 0.0);
+
                 // Add to weighted calculation
                 $pillarWeightedSum += ($pillarPercentage * $pillarWeight);
                 $pillarTotalWeight += $pillarWeight;
@@ -81,7 +81,7 @@ class ResultCalculationOptimizedService
                     'percentage' => $pillarPercentage,
                     'weight' => $pillarWeight,
                     'summary' => $pillarResult['summary'] ?? [
-                        'text' => __('messages.lorem_ipsum'),
+                        'text' => $pillar->pivot->report ?? '',
                         'total_questions' => 0,
                         'answered_questions' => 0,
                         'completion_rate' => 0,
@@ -100,7 +100,7 @@ class ResultCalculationOptimizedService
 
             foreach ($methodology->modules as $module) {
                 $moduleCompleted = $this->isModuleContextCompleted($userId, $module->id, $methodologyId, null);
-                
+
                 if ($moduleCompleted) {
                     $moduleResult = $this->calculateModuleResult($userId, $module->id, $methodologyId, null);
                 } else {
@@ -108,13 +108,13 @@ class ResultCalculationOptimizedService
                 }
 
                 // if (!$moduleResult) {
-                    // Fallback to methodology questions assigned to this module (item_id = module_id)
-                    // $moduleResult = $this->computeDynamicLikePercentageForMethodologyItem($userId, $methodologyId, 'module', $module->id);
+                // Fallback to methodology questions assigned to this module (item_id = module_id)
+                // $moduleResult = $this->computeDynamicLikePercentageForMethodologyItem($userId, $methodologyId, 'module', $module->id);
                 // }
 
                 $modulePercentage = $moduleResult['percentage'] ?? 0;
-                $moduleWeight = (float)($module->pivot->weight ?? 0.0);
-                
+                $moduleWeight = (float) ($module->pivot->weight ?? 0.0);
+
                 // Add to weighted calculation
                 $moduleWeightedSum += ($modulePercentage * $moduleWeight);
                 $moduleTotalWeight += $moduleWeight;
@@ -128,7 +128,7 @@ class ResultCalculationOptimizedService
                     'percentage' => $modulePercentage,
                     'weight' => $moduleWeight,
                     'summary' => $moduleResult['summary'] ?? [
-                        'text' => __('messages.lorem_ipsum'),
+                        'text' => $module->pivot->report ?? '',
                         'total_questions' => 0,
                         'answered_questions' => 0,
                         'completion_rate' => 0,
@@ -151,7 +151,7 @@ class ResultCalculationOptimizedService
     public function calculateSectionResult(int $userId, int $methodologyId, int $sectionNumber)
     {
         $methodology = Methodology::with(['pillars'])->find($methodologyId);
-        if (!$methodology || $methodology->type !== 'twoSection') {
+        if (! $methodology || $methodology->type !== 'twoSection') {
             return null;
         }
 
@@ -164,11 +164,11 @@ class ResultCalculationOptimizedService
         $result = [
             'pillars' => [],
             'summary' => [
-                'text' => __('messages.lorem_ipsum'),
+                'text' => $methodology->report ?? '',
                 'overall_percentage' => 0,
                 'total_questions' => 0,
                 'answered_questions' => 0,
-            ]
+            ],
         ];
 
         $pillarWeightedSum = 0.0;
@@ -177,14 +177,14 @@ class ResultCalculationOptimizedService
         foreach ($pillars as $pillar) {
             $pillarResult = $this->calculatePillarResult($userId, $pillar->id, $methodologyId);
             $pillarPercentage = $pillarResult['percentage'] ?? 0;
-            $pillarWeight = (float)($pillar->pivot->weight ?? 0.0);
-            
+            $pillarWeight = (float) ($pillar->pivot->weight ?? 0.0);
+
             if ($pillarResult) {
                 // Add to weighted calculation
                 $pillarWeightedSum += ($pillarPercentage * $pillarWeight);
                 $pillarTotalWeight += $pillarWeight;
             }
-            
+
             $result['pillars'][] = [
                 'id' => $pillar->id,
                 'name' => $pillar->name,
@@ -194,7 +194,7 @@ class ResultCalculationOptimizedService
                 'percentage' => $pillarPercentage,
                 'weight' => $pillarWeight,
                 'summary' => $pillarResult['summary'] ?? [
-                    'text' => __('messages.lorem_ipsum'),
+                    'text' => $pillar->pivot->report ?? '',
                     'total_questions' => 0,
                     'answered_questions' => 0,
                     'completion_rate' => 0,
@@ -209,13 +209,14 @@ class ResultCalculationOptimizedService
 
         // Derive totals from pillar summaries
         $result['summary']['total_questions'] = array_sum(array_map(function ($p) {
-            return (int)($p['summary']['total_questions'] ?? 0);
+            return (int) ($p['summary']['total_questions'] ?? 0);
         }, $result['pillars']));
         $result['summary']['answered_questions'] = array_sum(array_map(function ($p) {
-            return (int)($p['summary']['answered_questions'] ?? 0);
+            return (int) ($p['summary']['answered_questions'] ?? 0);
         }, $result['pillars']));
 
         $result['percentage'] = $result['summary']['overall_percentage'];
+
         return $result;
     }
 
@@ -225,25 +226,31 @@ class ResultCalculationOptimizedService
     public function calculatePillarResult(int $userId, int $pillarId, int $methodologyId)
     {
         $pillar = Pillar::with(['modules'])->find($pillarId);
-        if (!$pillar) {
+        if (! $pillar) {
             return null;
         }
 
         $allModulesCompleted = $this->areAllPillarModulesCompleted($userId, $methodologyId, $pillarId);
-        if(!$allModulesCompleted) {
+        if (! $allModulesCompleted) {
             return null;
         }
+
+        // Get pillar report from methodology_pillar pivot
+        $pillarPivot = DB::table('methodology_pillar')
+            ->where('methodology_id', $methodologyId)
+            ->where('pillar_id', $pillarId)
+            ->first();
 
         $modules = $pillar->modulesForMethodology($methodologyId)->get();
 
         $result = [
             'modules' => [],
             'summary' => [
-                'text' => __('messages.lorem_ipsum'),
+                'text' => $pillarPivot->report ?? '',
                 'overall_percentage' => 0,
                 'total_questions' => 0,
                 'answered_questions' => 0,
-            ]
+            ],
         ];
 
         $weightedSum = 0.0;
@@ -254,14 +261,14 @@ class ResultCalculationOptimizedService
         foreach ($modules as $module) {
             $moduleResult = $this->calculateModuleResult($userId, $module->id, $methodologyId, $pillarId);
             $modulePercentage = $moduleResult['percentage'] ?? 0;
-            $moduleWeight = (float)($module->pivot->weight ?? 0.0);
-            
+            $moduleWeight = (float) ($module->pivot->weight ?? 0.0);
+
             if ($moduleResult) {
                 // Add to weighted calculation
                 $weightedSum += ($modulePercentage * $moduleWeight);
                 $totalWeight += $moduleWeight;
-                $totalQuestions += (int)($moduleResult['summary']['total_questions'] ?? 0);
-                $answeredQuestions += (int)($moduleResult['summary']['answered_questions'] ?? 0);
+                $totalQuestions += (int) ($moduleResult['summary']['total_questions'] ?? 0);
+                $answeredQuestions += (int) ($moduleResult['summary']['answered_questions'] ?? 0);
             }
 
             $result['modules'][] = [
@@ -273,7 +280,7 @@ class ResultCalculationOptimizedService
                 'percentage' => $modulePercentage,
                 'weight' => $moduleWeight,
                 'summary' => $moduleResult['summary'] ?? [
-                    'text' => __('messages.lorem_ipsum'),
+                    'text' => $module->pivot->report ?? '',
                     'total_questions' => 0,
                     'answered_questions' => 0,
                     'completion_rate' => 0,
@@ -289,6 +296,7 @@ class ResultCalculationOptimizedService
         $result['summary']['total_questions'] = $totalQuestions;
         $result['summary']['answered_questions'] = $answeredQuestions;
         $result['percentage'] = $result['summary']['overall_percentage'];
+
         return $result;
     }
 
@@ -299,7 +307,7 @@ class ResultCalculationOptimizedService
     public function calculateModuleResult(int $userId, int $moduleId, int $methodologyId, ?int $pillarId = null)
     {
         $module = Module::find($moduleId);
-        if (!$module) {
+        if (! $module) {
             return null;
         }
 
@@ -338,8 +346,27 @@ class ResultCalculationOptimizedService
             ->distinct()
             ->count('mq.question_id');
 
-        if ($mode === 'dynamic' && !$contextCompleted) {
+        if ($mode === 'dynamic' && ! $contextCompleted) {
             return null;
+        }
+
+        // Get the appropriate report field based on context
+        $reportText = __('messages.lorem_ipsum');
+        if ($pillarId !== null) {
+            // Get report from pillar_module pivot
+            $pivotData = DB::table('pillar_module')
+                ->where('methodology_id', $methodologyId)
+                ->where('pillar_id', $pillarId)
+                ->where('module_id', $moduleId)
+                ->first();
+            $reportText = $pivotData->report ?? '';
+        } else {
+            // Get report from methodology_module pivot
+            $pivotData = DB::table('methodology_module')
+                ->where('methodology_id', $methodologyId)
+                ->where('module_id', $moduleId)
+                ->first();
+            $reportText = $pivotData->report ?? '';
         }
 
         $calc = $this->computePercentageForModule($userId, $methodologyId, $moduleId, $pillarId, $mode === 'simple');
@@ -347,11 +374,11 @@ class ResultCalculationOptimizedService
         return [
             'percentage' => $calc['percentage'],
             'summary' => [
-                'text' => __('messages.lorem_ipsum'),
+                'text' => $reportText,
                 'total_questions' => $totalQuestions,
                 'answered_questions' => $answeredQuestions,
                 'completion_rate' => $totalQuestions > 0 ? round(($answeredQuestions / $totalQuestions) * 100, 2) : 0.0,
-            ]
+            ],
         ];
     }
 
@@ -393,7 +420,7 @@ class ResultCalculationOptimizedService
             ->value('num');
 
         $sumWeights = (float) ($totals->sum_weights ?? 0);
-        $percentage = $sumWeights > 0 ? round(((float)$numerator) / $sumWeights, 2) : 0.0;
+        $percentage = $sumWeights > 0 ? round(((float) $numerator) / $sumWeights, 2) : 0.0;
 
         return [
             'percentage' => $percentage,
@@ -419,7 +446,7 @@ class ResultCalculationOptimizedService
             ->where($itemColumnFilter)
             ->first();
 
-        $answered = (int)DB::table('methodology_question as mq')
+        $answered = (int) DB::table('methodology_question as mq')
             ->join('user_answers as ua', function ($join) use ($userId, $methodologyId) {
                 $join->on('ua.question_id', '=', 'mq.question_id')
                     ->where('ua.context_type', 'methodology')
@@ -462,21 +489,25 @@ class ResultCalculationOptimizedService
             ->distinct()
             ->sum('mq.weight');
 
-        $percentage = $denominator > 0 ? round(((float)$numerator) / (float)$denominator, 2) : 0.0;
+        $percentage = $denominator > 0 ? round(((float) $numerator) / (float) $denominator, 2) : 0.0;
 
         if ($answered == 0) {
             return null;
         } else {
+            // Get methodology report for fallback methodology item calculations
+            $methodology = Methodology::find($methodologyId);
+            $reportText = $methodology->report ?? '';
+
             return [
                 'percentage' => $percentage,
                 'summary' => [
-                    'text' => __('messages.lorem_ipsum'),
-                    'total_questions' => (int)($totals->total_questions ?? 0),
+                    'text' => $reportText,
+                    'total_questions' => (int) ($totals->total_questions ?? 0),
                     'answered_questions' => $answered,
                     'completion_rate' => ($totals && $totals->total_questions > 0)
-                        ? round(($answered / (int)$totals->total_questions) * 100, 2)
+                        ? round(($answered / (int) $totals->total_questions) * 100, 2)
                         : 0.0,
-                ]
+                ],
             ];
         }
     }
@@ -539,7 +570,8 @@ class ResultCalculationOptimizedService
                 ->sum('mq.weight');
         }
 
-        $percentage = $denominator > 0 ? round(((float)$numerator) / $denominator, 2) : 0.0;
+        $percentage = $denominator > 0 ? round(((float) $numerator) / $denominator, 2) : 0.0;
+
         return ['percentage' => $percentage];
     }
 

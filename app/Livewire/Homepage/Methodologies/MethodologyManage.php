@@ -30,6 +30,8 @@ class MethodologyManage extends Component
 
     public string $questionsEstimatedTime = '';
 
+    public string $report = '';
+
     public string $error = '';
 
     // Extra details (by type)
@@ -83,6 +85,7 @@ class MethodologyManage extends Component
             'objectives' => 'nullable|string',
             'questionsDescription' => 'nullable|string',
             'questionsEstimatedTime' => 'nullable|integer|min:0',
+            'report' => 'nullable|string',
             'tags' => 'array',
             'tags.*' => 'integer',
             'imgUrl' => 'nullable|string',
@@ -112,6 +115,7 @@ class MethodologyManage extends Component
         $this->questionsEstimatedTime = is_numeric($methodology->questions_estimated_time ?? null)
             ? (string) ((int) $methodology->questions_estimated_time)
             : '';
+        $this->report = $methodology->report ?? '';
 
         // Prefill extra details by type
         $this->modulesDefinition = $methodology->modules_definition ?? '';
@@ -217,6 +221,7 @@ class MethodologyManage extends Component
             $this->validate([
                 'questionsDescription' => 'nullable|string',
                 'questionsEstimatedTime' => 'nullable|integer|min:0',
+                'report' => 'nullable|string',
 
             ]);
 
@@ -227,6 +232,7 @@ class MethodologyManage extends Component
                 'questions_estimated_time' => is_numeric($this->questionsEstimatedTime)
                     ? (int) $this->questionsEstimatedTime
                     : null,
+                'report' => $this->report ?: null,
 
             ]);
 
@@ -358,7 +364,7 @@ class MethodologyManage extends Component
         }
 
         // General questions fields
-        if (in_array($property, ['questionsDescription', 'questionsEstimatedTime', 'questionsCount', 'questionsBrief'], true)) {
+        if (in_array($property, ['questionsDescription', 'questionsEstimatedTime', 'questionsCount', 'questionsBrief', 'report'], true)) {
             $this->isGeneralDirty = true;
 
             return;

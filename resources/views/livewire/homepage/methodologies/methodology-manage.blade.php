@@ -116,9 +116,12 @@
                             @error('questionsEstimatedTime')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                         </div>
 
-                        
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium mb-1">Report</label>
+                            <textarea class="kt-textarea w-full" rows="5" wire:model.defer="report" placeholder="Enter methodology report"></textarea>
+                            @error('report')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                        </div>
 
-                        
                     </div>
                     <div class="kt-card-footer flex items-center justify-end gap-2">
                         <button class="kt-btn kt-btn-primary disabled:opacity-50 disabled:cursor-not-allowed" wire:click="saveGeneralQuestionsInfo" :disabled="!dirty" wire:loading.attr="disabled" wire:target="saveGeneralQuestionsInfo">Save</button>

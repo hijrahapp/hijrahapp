@@ -37,6 +37,8 @@ class MethodologyPillarAddModal extends Component
 
     public string $questionsEstimatedTime = '';
 
+    public string $report = '';
+
     public array $dependencyIds = [];
 
     public array $dependencySuggestions = [];
@@ -67,6 +69,7 @@ class MethodologyPillarAddModal extends Component
             'weight' => 'required|numeric',
             'questionsDescription' => 'nullable|string',
             'questionsEstimatedTime' => 'required|integer|min:0',
+            'report' => 'nullable|string',
             'dependencyIds' => 'array',
             'dependencyIds.*' => 'integer|exists:pillars,id',
             'sectionNumber' => 'nullable|in:1,2',
@@ -107,6 +110,7 @@ class MethodologyPillarAddModal extends Component
         // Clear questions meta; will be set explicitly for this methodology-pillar link
         $this->questionsDescription = '';
         $this->questionsEstimatedTime = '';
+        $this->report = '';
     }
 
     public function updatedDependencySearch(): void
@@ -156,6 +160,7 @@ class MethodologyPillarAddModal extends Component
                 'weight' => 'required|numeric',
                 'questionsDescription' => 'nullable|string',
                 'questionsEstimatedTime' => 'required|integer|min:0',
+                'report' => 'nullable|string',
             ]);
         } else {
             $rules = $this->rules();
@@ -227,6 +232,7 @@ class MethodologyPillarAddModal extends Component
                     'questions_estimated_time' => is_numeric($this->questionsEstimatedTime)
                         ? (int) $this->questionsEstimatedTime
                         : null,
+                    'report' => $this->report !== '' ? $this->report : null,
                     'sequence' => $maxSequence + 1,
                     'section' => $this->methodologyType === 'twoSection'
                         ? ($this->sectionNumber === '2' ? 'second' : 'first')
@@ -277,6 +283,7 @@ class MethodologyPillarAddModal extends Component
         $this->weight = '';
         $this->questionsDescription = '';
         $this->questionsEstimatedTime = '';
+        $this->report = '';
         $this->dependencyIds = [];
         $this->dependencySuggestions = [];
         $this->dependencySearch = '';
@@ -343,6 +350,9 @@ class MethodologyPillarAddModal extends Component
                 : '';
             $this->questionsEstimatedTime = property_exists($pivot, 'questions_estimated_time') && is_numeric($pivot->questions_estimated_time)
                 ? (string) ((int) $pivot->questions_estimated_time)
+                : '';
+            $this->report = property_exists($pivot, 'report') && $pivot->report !== null
+                ? (string) $pivot->report
                 : '';
         }
 

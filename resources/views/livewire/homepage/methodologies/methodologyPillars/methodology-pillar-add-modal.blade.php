@@ -66,6 +66,11 @@
                     @error('questionsDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
 
+                <div>
+                    <label class="block text-sm font-medium mb-1">Report (optional)</label>
+                    <textarea class="kt-textarea w-full" rows="5" wire:model.defer="report" placeholder="Enter pillar report"></textarea>
+                    @error('report')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                </div>
 
                 @if($methodologyType === 'twoSection')
                     <div>
