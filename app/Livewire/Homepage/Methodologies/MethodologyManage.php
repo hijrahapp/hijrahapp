@@ -73,6 +73,17 @@ class MethodologyManage extends Component
 
     public string $secondSectionImgUrl = '';
 
+    // Dirty state flags per section
+    public bool $isBasicDirty = false;
+
+    public bool $isGeneralDirty = false;
+
+    public bool $isExtraDirty = false;
+
+    public bool $isSection1Dirty = false;
+
+    public bool $isSection2Dirty = false;
+
     protected function rules(): array
     {
         return [
@@ -161,6 +172,8 @@ class MethodologyManage extends Component
             $methodology = Methodology::findOrFail($this->methodologyId);
             $methodology->update($data);
 
+            $this->isBasicDirty = false;
+            $this->dispatch('section-saved', section: 'basic');
             $this->dispatch('show-toast', type: 'success', message: 'Methodology details saved successfully!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             $firstError = $e->validator->errors()->first() ?: 'Please check the form for errors.';
@@ -201,6 +214,8 @@ class MethodologyManage extends Component
                 ]);
             }
 
+            $this->isExtraDirty = false;
+            $this->dispatch('section-saved', section: 'extra');
             $this->dispatch('show-toast', type: 'success', message: 'Extra details saved.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             $firstError = $e->validator->errors()->first() ?: 'Please check the form for errors.';
@@ -237,6 +252,8 @@ class MethodologyManage extends Component
                 'questions_brief' => $this->questionsBrief ?: null,
             ]);
 
+            $this->isGeneralDirty = false;
+            $this->dispatch('section-saved', section: 'general');
             $this->dispatch('show-toast', type: 'success', message: 'General questions information saved.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             $firstError = $e->validator->errors()->first() ?: 'Please check the form for errors.';
@@ -285,6 +302,8 @@ class MethodologyManage extends Component
 
             ]);
 
+            $this->isSection1Dirty = false;
+            $this->dispatch('section-saved', section: 'section1');
             $this->dispatch('show-toast', type: 'success', message: 'Section 1 details saved.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             $firstError = $e->validator->errors()->first() ?: 'Please check the form for errors.';
@@ -328,6 +347,8 @@ class MethodologyManage extends Component
 
             ]);
 
+            $this->isSection2Dirty = false;
+            $this->dispatch('section-saved', section: 'section2');
             $this->dispatch('show-toast', type: 'success', message: 'Section 2 details saved.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             $firstError = $e->validator->errors()->first() ?: 'Please check the form for errors.';
@@ -347,5 +368,42 @@ class MethodologyManage extends Component
     public function render()
     {
         return view('livewire.homepage.methodologies.methodology-manage');
+    }
+
+    public function updated(string $property, mixed $value): void
+    {
+        // Basic information fields
+        if (
+            in_array($property, ['name', 'description', 'definition', 'objectives', 'imgUrl'], true)
+            || $property === 'tags'
+            || str_starts_with($property, 'tags.')
+        ) {
+            $this->isBasicDirty = true;
+            return;
+        }
+
+        // General questions fields
+        if (in_array($property, ['questionsDescription', 'questionsEstimatedTime', 'questionsCount', 'questionsBrief'], true)) {
+            $this->isGeneralDirty = true;
+            return;
+        }
+
+        // Extra details fields
+        if (in_array($property, ['modulesDefinition', 'pillarsDefinition', 'numberOfPillars'], true)) {
+            $this->isExtraDirty = true;
+            return;
+        }
+
+        // Section 1 fields
+        if (str_starts_with($property, 'firstSection')) {
+            $this->isSection1Dirty = true;
+            return;
+        }
+
+        // Section 2 fields
+        if (str_starts_with($property, 'secondSection')) {
+            $this->isSection2Dirty = true;
+            return;
+        }
     }
 }

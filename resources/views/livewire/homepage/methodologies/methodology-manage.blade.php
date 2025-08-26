@@ -26,7 +26,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus kt-accordion-indicator-off" aria-hidden="true"><path d="M5 12h14"></path></svg>
                     </span>
                 </button>
-                <div class="kt-accordion-content" aria-labelledby="basic_info_toggle" id="basic_info_content">
+                <div class="kt-accordion-content" aria-labelledby="basic_info_toggle" id="basic_info_content" x-data="{ dirty: $wire.entangle('isBasicDirty') }" x-on:input="dirty = true" x-on:change="dirty = true" x-on:section-saved.window="if ($event.detail.section === 'basic') dirty = false">
                     <div class="kt-card-body p-5">
                         <div>
                             <label class="block text-sm font-medium mb-1">Name <span class="text-destructive">*</span></label>
@@ -81,7 +81,7 @@
 
                     </div>
                     <div class="kt-card-footer flex items-center justify-end gap-2">
-                        <button class="kt-btn kt-btn-primary" wire:click="saveBasicDetails">Save</button>
+                        <button class="kt-btn kt-btn-primary disabled:opacity-50 disabled:cursor-not-allowed" wire:click="saveBasicDetails" :disabled="!dirty" wire:loading.attr="disabled" wire:target="saveBasicDetails">Save</button>
                     </div>
                 </div>
             </div>
@@ -102,7 +102,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus kt-accordion-indicator-off" aria-hidden="true"><path d="M5 12h14"></path></svg>
                     </span>
                 </button>
-                <div class="kt-accordion-content" aria-labelledby="general_questions_info_toggle" id="general_questions_info_content">
+                <div class="kt-accordion-content" aria-labelledby="general_questions_info_toggle" id="general_questions_info_content" x-data="{ dirty: $wire.entangle('isGeneralDirty') }" x-on:input="dirty = true" x-on:change="dirty = true" x-on:section-saved.window="if ($event.detail.section === 'general') dirty = false">
                     <div class="kt-card-body p-5">
                         <div class="mt-0">
                             <label class="block text-sm font-medium mb-1">Questions Description</label>
@@ -129,7 +129,7 @@
                         </div>
                     </div>
                     <div class="kt-card-footer flex items-center justify-end gap-2">
-                        <button class="kt-btn kt-btn-primary" wire:click="saveGeneralQuestionsInfo">Save</button>
+                        <button class="kt-btn kt-btn-primary disabled:opacity-50 disabled:cursor-not-allowed" wire:click="saveGeneralQuestionsInfo" :disabled="!dirty" wire:loading.attr="disabled" wire:target="saveGeneralQuestionsInfo">Save</button>
                     </div>
                 </div>
             </div>
@@ -152,7 +152,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus kt-accordion-indicator-off" aria-hidden="true"><path d="M5 12h14"></path></svg>
                         </span>
                     </button>
-                    <div class="kt-accordion-content" aria-labelledby="extra_details_toggle" id="extra_details_content">
+                    <div class="kt-accordion-content" aria-labelledby="extra_details_toggle" id="extra_details_content" x-data="{ dirty: $wire.entangle('isExtraDirty') }" x-on:input="dirty = true" x-on:change="dirty = true" x-on:section-saved.window="if ($event.detail.section === 'extra') dirty = false">
                         <div class="kt-card-body p-5">
                             <div>
                                 <label class="block text-sm font-medium mb-1">Modules Definition</label>
@@ -161,7 +161,7 @@
                             </div>
                         </div>
                         <div class="kt-card-footer flex items-center justify-end gap-2">
-                            <button class="kt-btn kt-btn-primary" wire:click="saveExtraDetails">Save</button>
+                            <button class="kt-btn kt-btn-primary disabled:opacity-50 disabled:cursor-not-allowed" wire:click="saveExtraDetails" :disabled="!dirty" wire:loading.attr="disabled" wire:target="saveExtraDetails">Save</button>
                         </div>
                     </div>
                 </div>
@@ -183,7 +183,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus kt-accordion-indicator-off" aria-hidden="true"><path d="M5 12h14"></path></svg>
                         </span>
                     </button>
-                    <div class="kt-accordion-content" aria-labelledby="extra_details_toggle" id="extra_details_content">
+                    <div class="kt-accordion-content" aria-labelledby="extra_details_toggle" id="extra_details_content" x-data="{ dirty: $wire.entangle('isExtraDirty') }" x-on:input="dirty = true" x-on:change="dirty = true" x-on:section-saved.window="if ($event.detail.section === 'extra') dirty = false">
                         <div class="kt-card-body p-5">
                             <div class="mt-4">
                                 <label class="block text-sm font-medium mb-1">Pillars Definition</label>
@@ -197,7 +197,7 @@
                             </div>
                         </div>
                         <div class="kt-card-footer flex items-center justify-end gap-2">
-                            <button class="kt-btn kt-btn-primary" wire:click="saveExtraDetails">Save</button>
+                            <button class="kt-btn kt-btn-primary disabled:opacity-50 disabled:cursor-not-allowed" wire:click="saveExtraDetails" :disabled="!dirty" wire:loading.attr="disabled" wire:target="saveExtraDetails">Save</button>
                         </div>
                     </div>
                 </div>
@@ -219,7 +219,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus kt-accordion-indicator-off" aria-hidden="true"><path d="M5 12h14"></path></svg>
                         </span>
                     </button>
-                    <div class="kt-accordion-content" aria-labelledby="section1_toggle" id="section1_content">
+                    <div class="kt-accordion-content" aria-labelledby="section1_toggle" id="section1_content" x-data="{ dirty: $wire.entangle('isSection1Dirty') }" x-on:input="dirty = true" x-on:change="dirty = true" x-on:section-saved.window="if ($event.detail.section === 'section1') dirty = false">
                         <div class="kt-card-body p-5">
                             <div>
                                 <label class="block text-sm font-medium mb-1">Name <span class="text-destructive">*</span></label>
@@ -268,7 +268,7 @@
 
                         </div>
                         <div class="kt-card-footer flex items-center justify-end gap-2">
-                            <button class="kt-btn kt-btn-primary" wire:click="saveSection1Details">Save</button>
+                            <button class="kt-btn kt-btn-primary disabled:opacity-50 disabled:cursor-not-allowed" wire:click="saveSection1Details" :disabled="!dirty" wire:loading.attr="disabled" wire:target="saveSection1Details">Save</button>
                         </div>
                     </div>
                 </div>
@@ -288,7 +288,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus kt-accordion-indicator-off" aria-hidden="true"><path d="M5 12h14"></path></svg>
                         </span>
                     </button>
-                    <div class="kt-accordion-content" aria-labelledby="section2_toggle" id="section2_content">
+                    <div class="kt-accordion-content" aria-labelledby="section2_toggle" id="section2_content" x-data="{ dirty: $wire.entangle('isSection2Dirty') }" x-on:input="dirty = true" x-on:change="dirty = true" x-on:section-saved.window="if ($event.detail.section === 'section2') dirty = false">
                         <div class="kt-card-body p-5">
                             <div>
                                 <label class="block text-sm font-medium mb-1">Name <span class="text-destructive">*</span></label>
@@ -337,7 +337,7 @@
 
                         </div>
                         <div class="kt-card-footer flex items-center justify-end gap-2">
-                            <button class="kt-btn kt-btn-primary" wire:click="saveSection2Details">Save</button>
+                            <button class="kt-btn kt-btn-primary disabled:opacity-50 disabled:cursor-not-allowed" wire:click="saveSection2Details" :disabled="!dirty" wire:loading.attr="disabled" wire:target="saveSection2Details">Save</button>
                         </div>
                     </div>
                 </div>
