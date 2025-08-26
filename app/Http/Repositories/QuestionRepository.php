@@ -2,22 +2,16 @@
 
 namespace App\Http\Repositories;
 
-use App\Models\Question;
 use App\Models\Methodology;
-use App\Models\Pillar;
 use App\Models\Module;
+use App\Models\Pillar;
+use App\Models\Question;
 use App\Resources\QuestionResource;
-use Illuminate\Database\Eloquent\Collection;
 
 class QuestionRepository
 {
     /**
      * Get questions by context type and context ID
-     *
-     * @param string $context
-     * @param int $contextId
-     * @param int|null $methodologyId
-     * @param int|null $pillarId
      */
     public function getQuestionsByContext(string $context, int $contextId, ?int $methodologyId = null, ?int $pillarId = null)
     {
@@ -56,39 +50,57 @@ class QuestionRepository
         }
 
         $data['list'] = QuestionResource::collection($questions);
+
         return $data;
     }
 
     /**
      * Get questions for a specific methodology with weights
-     *
-     * @param int $methodologyId
      */
     private function getQuestionsByMethodology(int $methodologyId)
     {
-        $methodology = Methodology::with(['questions.answers'])->find($methodologyId);
+        $methodology = Methodology::find($methodologyId);
 
-        if (!$methodology) {
+        if (! $methodology) {
             throw new \InvalidArgumentException("Methodology with ID {$methodologyId} not found");
         }
 
-        // Get questions with their weights for this methodology
-        $questions = $methodology->questions;
+        // Get questions with their weights for this methodology, sorted by sequence
+        // Using raw query to ensure proper ordering
+        $questionIds = \DB::table('methodology_question')
+            ->where('methodology_id', $methodologyId)
+            ->orderBy('sequence', 'asc')
+            ->orderBy('id', 'asc')
+            ->pluck('question_id');
 
-        // Load weights for each question in this methodology context
-        foreach ($questions as $question) {
-            $pivotId = \DB::table('methodology_question')
-                ->where('methodology_id', $methodologyId)
-                ->where('question_id', $question->id)
-                ->value('id');
+        $questions = collect();
+        foreach ($questionIds as $questionId) {
+            $question = \App\Models\Question::with('answers')->find($questionId);
+            if ($question) {
+                // Get full pivot data including ID for weights
+                $pivotData = \DB::table('methodology_question')
+                    ->where('methodology_id', $methodologyId)
+                    ->where('question_id', $questionId)
+                    ->first();
 
-            if ($pivotId) {
-                $weights = \App\Models\AnswerContext::where('context_type', 'methodology_question')
-                    ->where('context_id', $pivotId)
-                    ->get()
-                    ->keyBy('answer_id');
+                $question->setRelation('pivot', (object) [
+                    'methodology_id' => $pivotData->methodology_id,
+                    'question_id' => $pivotData->question_id,
+                    'weight' => $pivotData->weight,
+                    'sequence' => $pivotData->sequence,
+                ]);
 
-                $question->setAttribute('answer_weights', $weights);
+                // Load weights for this question
+                if ($pivotData->id) {
+                    $weights = \App\Models\AnswerContext::where('context_type', 'methodology_question')
+                        ->where('context_id', $pivotData->id)
+                        ->get()
+                        ->keyBy('answer_id');
+
+                    $question->setAttribute('answer_weights', $weights);
+                }
+
+                $questions->push($question);
             }
         }
 
@@ -97,14 +109,11 @@ class QuestionRepository
 
     /**
      * Get questions for a specific pillar with weights
-     *
-     * @param int $pillarId
-     * @param int|null $methodologyId
      */
     private function getQuestionsByPillar(int $pillarId, ?int $methodologyId = null)
     {
         $pillar = Pillar::find($pillarId);
-        if (!$pillar) {
+        if (! $pillar) {
             throw new \InvalidArgumentException("Pillar with ID {$pillarId} not found");
         }
 
@@ -116,58 +125,96 @@ class QuestionRepository
             foreach ($questions as $question) {
                 $question->setAttribute('module_id', $module->id);
                 $question->setAttribute('module_name', $module->name);
-                $question->setAttribute('questionId_moduleId', $question->id . '_' . $module->id);
+                $question->setAttribute('questionId_moduleId', $question->id.'_'.$module->id);
                 $result[] = $question;
             }
         }
+
+        // Sort the final result by sequence within each module
+        // Since questions are already sorted by sequence within modules,
+        // we need to sort by module order and then by sequence within modules
+        usort($result, function ($a, $b) {
+            // First sort by module_id to maintain module order
+            if ($a->module_id !== $b->module_id) {
+                return $a->module_id <=> $b->module_id;
+            }
+            // Then sort by sequence within the same module
+            $aSequence = $a->pivot->sequence ?? 999999;
+            $bSequence = $b->pivot->sequence ?? 999999;
+            if ($aSequence !== $bSequence) {
+                return $aSequence <=> $bSequence;
+            }
+
+            // Finally by id as tiebreaker
+            return $a->id <=> $b->id;
+        });
 
         return $result;
     }
 
     /**
      * Get questions for a specific module with weights
-     *
-     * @param int $moduleId
-     * @param int|null $methodologyId
-     * @param int|null $pillarId
      */
     private function getQuestionsByModule(int $moduleId, ?int $methodologyId = null, ?int $pillarId = null)
     {
-        $module = Module::with(['questions.answers'])->find($moduleId);
+        $module = Module::find($moduleId);
 
-        if (!$module) {
+        if (! $module) {
             throw new \InvalidArgumentException("Module with ID {$moduleId} not found");
         }
 
-        // Get questions with their weights for this module
-        if ($methodologyId && $pillarId) {
-            $questions = $module->questionsForPillarInMethodology($methodologyId, $pillarId)->get();
-        } elseif ($methodologyId) {
-            $questions = $module->questionsForMethodology($methodologyId)->get();
-        } else {
-            $questions = $module->questions;
+        // Get questions with their weights for this module, sorted by sequence
+        $query = \DB::table('module_question')->where('module_id', $moduleId);
+
+        if ($methodologyId) {
+            $query->where('methodology_id', $methodologyId);
+        }
+        if ($pillarId) {
+            $query->where('pillar_id', $pillarId);
         }
 
-        // Load weights for each question in this module context
-        foreach ($questions as $question) {
-            $pivotId = \DB::table('module_question')
-                ->where('module_id', $moduleId)
-                ->where('question_id', $question->id)
-                ->when($methodologyId, function($query) use ($methodologyId) {
-                    return $query->where('methodology_id', $methodologyId);
-                })
-                ->when($pillarId, function($query) use ($pillarId) {
-                    return $query->where('pillar_id', $pillarId);
-                })
-                ->value('id');
+        $questionIds = $query->orderBy('sequence', 'asc')
+            ->orderBy('id', 'asc')
+            ->pluck('question_id');
 
-            if ($pivotId) {
-                $weights = \App\Models\AnswerContext::where('context_type', 'module_question')
-                    ->where('context_id', $pivotId)
-                    ->get()
-                    ->keyBy('answer_id');
+        $questions = collect();
+        foreach ($questionIds as $questionId) {
+            $question = \App\Models\Question::with('answers')->find($questionId);
+            if ($question) {
+                // Get full pivot data including ID for weights
+                $pivotQuery = \DB::table('module_question')
+                    ->where('module_id', $moduleId)
+                    ->where('question_id', $questionId);
 
-                $question->setAttribute('answer_weights', $weights);
+                if ($methodologyId) {
+                    $pivotQuery->where('methodology_id', $methodologyId);
+                }
+                if ($pillarId) {
+                    $pivotQuery->where('pillar_id', $pillarId);
+                }
+
+                $pivotData = $pivotQuery->first();
+
+                $question->setRelation('pivot', (object) [
+                    'module_id' => $pivotData->module_id,
+                    'question_id' => $pivotData->question_id,
+                    'methodology_id' => $pivotData->methodology_id,
+                    'pillar_id' => $pivotData->pillar_id,
+                    'weight' => $pivotData->weight,
+                    'sequence' => $pivotData->sequence,
+                ]);
+
+                // Load weights for this question
+                if ($pivotData->id) {
+                    $weights = \App\Models\AnswerContext::where('context_type', 'module_question')
+                        ->where('context_id', $pivotData->id)
+                        ->get()
+                        ->keyBy('answer_id');
+
+                    $question->setAttribute('answer_weights', $weights);
+                }
+
+                $questions->push($question);
             }
         }
 
@@ -179,15 +226,15 @@ class QuestionRepository
      * stored in answer_contexts. When pillar context flattens module questions and a
      * questionId_moduleId exists, use that composite id for next_question_id.
      *
-     * @param \Illuminate\Support\Collection|array $questions
-     * @param string $context One of: methodology|pillar|module
-     * @param int $contextId MethodologyId for methodology, PillarId for pillar, ModuleId for module
-     * @param int|null $methodologyId Optional methodology filter for pillar/module
-     * @param int|null $pillarId Optional pillar filter for module
+     * @param  \Illuminate\Support\Collection|array  $questions
+     * @param  string  $context  One of: methodology|pillar|module
+     * @param  int  $contextId  MethodologyId for methodology, PillarId for pillar, ModuleId for module
+     * @param  int|null  $methodologyId  Optional methodology filter for pillar/module
+     * @param  int|null  $pillarId  Optional pillar filter for module
      */
     private function attachNextQuestionDependencies($questions, string $context, int $contextId, ?int $methodologyId, ?int $pillarId): void
     {
-        if (!$questions) {
+        if (! $questions) {
             return;
         }
 
@@ -212,7 +259,7 @@ class QuestionRepository
                 $pivotTable = 'module_question';
                 $contextType = 'module_question';
                 $effectiveModuleId = ($context === 'module') ? $contextId : ($question->module_id ?? null);
-                if (!$effectiveModuleId) {
+                if (! $effectiveModuleId) {
                     continue;
                 }
                 $pivotQuery = \DB::table($pivotTable)
@@ -227,7 +274,7 @@ class QuestionRepository
                 $pivotId = $pivotQuery->value('id');
             }
 
-            if (!$pivotId) {
+            if (! $pivotId) {
                 continue;
             }
 
@@ -249,7 +296,7 @@ class QuestionRepository
                         ->first(['question_id', 'module_id']);
                     if ($target) {
                         $nextId = $isPillarContext
-                            ? ($target->question_id . '_' . $target->module_id)
+                            ? ($target->question_id.'_'.$target->module_id)
                             : $target->question_id;
                     }
                 } elseif ($dep->dependent_context_type === 'methodology_question') {
@@ -262,7 +309,7 @@ class QuestionRepository
                 }
 
                 if ($nextId !== null) {
-                    $answerToNext[(int)$dep->answer_id] = $nextId;
+                    $answerToNext[(int) $dep->answer_id] = $nextId;
                 }
             }
 
@@ -281,7 +328,7 @@ class QuestionRepository
 
                     $index = array_search($currentModuleId, $orderedModuleIds, true);
                     if ($index !== false && isset($orderedModuleIds[$index + 1])) {
-                        $nextModuleId = (int)$orderedModuleIds[$index + 1];
+                        $nextModuleId = (int) $orderedModuleIds[$index + 1];
 
                         $q = \DB::table('module_question')
                             ->where('module_id', $nextModuleId);
@@ -299,7 +346,7 @@ class QuestionRepository
                         $firstQuestionId = $q->orderBy('id', 'asc')->value('question_id');
 
                         if ($firstQuestionId) {
-                            $fallbackCompositeNextId = ((int)$firstQuestionId) . '_' . $nextModuleId;
+                            $fallbackCompositeNextId = ((int) $firstQuestionId).'_'.$nextModuleId;
                         }
                     }
                 }
@@ -307,7 +354,7 @@ class QuestionRepository
 
             // Attach next_question_id onto each answer model in the relation
             foreach ($question->answers as $ans) {
-                $aid = (int)$ans->id;
+                $aid = (int) $ans->id;
                 if (array_key_exists($aid, $answerToNext)) {
                     $ans->setAttribute('next_question_id', $answerToNext[$aid]);
                 } elseif ($fallbackCompositeNextId !== null) {

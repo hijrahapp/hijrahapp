@@ -87,7 +87,8 @@ class Methodology extends Model
      */
     public function questions(): BelongsToMany
     {
-        return $this->belongsToMany(Question::class, 'methodology_question')->withPivot('weight', 'sequence');
+        return $this->belongsToMany(Question::class, 'methodology_question')
+            ->withPivot('weight', 'sequence');
     }
 
     /**

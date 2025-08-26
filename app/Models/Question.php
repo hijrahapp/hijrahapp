@@ -38,7 +38,9 @@ class Question extends Model
     public function modules(): BelongsToMany
     {
         return $this->belongsToMany(Module::class, 'module_question')
-            ->withPivot('methodology_id', 'pillar_id', 'weight');
+            ->withPivot('methodology_id', 'pillar_id', 'weight', 'sequence')
+            ->orderBy('module_question.sequence', 'asc')
+            ->orderBy('module_question.id', 'asc');
     }
 
     public function pillars(): BelongsToMany
@@ -49,9 +51,11 @@ class Question extends Model
 
     public function methodologies(): BelongsToMany
     {
-        return $this->belongsToMany(Methodology::class, 'methodology_question')->withPivot('weight');
+        return $this->belongsToMany(Methodology::class, 'methodology_question')
+            ->withPivot('weight', 'sequence')
+            ->orderBy('methodology_question.sequence', 'asc')
+            ->orderBy('methodology_question.id', 'asc');
     }
-
 
     /**
      * Context-specific weights for answers linked through this question.

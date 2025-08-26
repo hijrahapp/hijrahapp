@@ -84,7 +84,9 @@ class Module extends Model
     public function questions(): BelongsToMany
     {
         return $this->belongsToMany(Question::class, 'module_question')
-            ->withPivot('methodology_id', 'pillar_id', 'weight');
+            ->withPivot('methodology_id', 'pillar_id', 'weight', 'sequence')
+            ->orderBy('module_question.sequence', 'asc')
+            ->orderBy('module_question.id', 'asc');
     }
 
     /**
@@ -93,8 +95,10 @@ class Module extends Model
     public function questionsForMethodology(int $methodologyId): BelongsToMany
     {
         return $this->belongsToMany(Question::class, 'module_question')
-            ->withPivot('methodology_id', 'pillar_id', 'weight')
-            ->wherePivot('methodology_id', $methodologyId);
+            ->withPivot('methodology_id', 'pillar_id', 'weight', 'sequence')
+            ->wherePivot('methodology_id', $methodologyId)
+            ->orderBy('module_question.sequence', 'asc')
+            ->orderBy('module_question.id', 'asc');
     }
 
     /**
@@ -103,8 +107,10 @@ class Module extends Model
     public function questionsForPillarInMethodology(int $methodologyId, int $pillarId): BelongsToMany
     {
         return $this->belongsToMany(Question::class, 'module_question')
-            ->withPivot('methodology_id', 'pillar_id', 'weight')
+            ->withPivot('methodology_id', 'pillar_id', 'weight', 'sequence')
             ->wherePivot('methodology_id', $methodologyId)
-            ->wherePivot('pillar_id', $pillarId);
+            ->wherePivot('pillar_id', $pillarId)
+            ->orderBy('module_question.sequence', 'asc')
+            ->orderBy('module_question.id', 'asc');
     }
 }
