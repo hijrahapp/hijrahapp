@@ -29,7 +29,7 @@ class TagsTable extends Component
     public function tags()
     {
         $query = Tag::where('title', 'like', '%'.$this->search.'%')
-            ->orderBy('id', 'asc');
+            ->orderBy('created_at', 'desc');
 
         // Use custom pagination without URL caching
         $page = $this->getPage();

@@ -34,7 +34,7 @@ class QuestionsTable extends Component
                 $q->whereJsonContains('tags', (int) $this->tagFilter);
             })
             ->withCount(['modules', 'pillars', 'methodologies'])
-            ->orderBy('id', 'asc');
+            ->orderBy('created_at', 'desc');
 
         // Use custom pagination without URL caching
         $page = $this->getPage();

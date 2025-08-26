@@ -34,7 +34,7 @@ class PillarsTable extends Component
                 $q->whereJsonContains('tags', (int) $this->tagFilter);
             })
             ->withCount(['methodologies', 'modules', 'questions'])
-            ->orderBy('id', 'asc');
+            ->orderBy('created_at', 'desc');
 
         // Use custom pagination without URL caching
         $page = $this->getPage();
