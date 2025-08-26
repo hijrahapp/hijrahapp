@@ -43,7 +43,6 @@
                             @if(($methodology->type ?? null) === 'twoSection')
                                 <th class="w-28 text-center">Section</th>
                             @endif
-                            <th class="w-28 text-center">Number of Modules</th>
                             <th class="w-20 text-center">Weight</th>
                             <th class="w-20 text-center">Actions</th>
                         </tr>
@@ -78,7 +77,6 @@
                                     @endphp
                                     <td class="text-center">{{ $section === 'second' ? '2' : '1' }}</td>
                                 @endif
-                                <td class="text-center">{{ $pillar->mp_number_of_modules ?? 0 }}</td>
                                 <td class="text-center">{{ $pillar->mp_weight !== null ? (int) $pillar->mp_weight : '-' }}%</td>
                                 <td class="text-center" wire:ignore>
                                     <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">

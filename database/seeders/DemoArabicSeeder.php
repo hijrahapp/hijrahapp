@@ -117,9 +117,6 @@ class DemoArabicSeeder extends Seeder
             if (Schema::hasColumn('modules', 'questions_estimated_time')) {
                 $data['questions_estimated_time'] = '15د';
             }
-            if (Schema::hasColumn('modules', 'questions_count')) {
-                $data['questions_count'] = 0;
-            }
             if (Schema::hasColumn('modules', 'active')) {
                 $data['active'] = true;
             }
@@ -160,9 +157,6 @@ class DemoArabicSeeder extends Seeder
             if (Schema::hasColumn('pillars', 'questions_estimated_time')) {
                 $data['questions_estimated_time'] = '20د';
             }
-            if (Schema::hasColumn('pillars', 'questions_count')) {
-                $data['questions_count'] = 0;
-            }
             if (Schema::hasColumn('pillars', 'active')) {
                 $data['active'] = true;
             }
@@ -195,9 +189,6 @@ class DemoArabicSeeder extends Seeder
         if (Schema::hasColumn('methodology', 'questions_estimated_time')) {
             $simpleMethodData['questions_estimated_time'] = 30;
         }
-        if (Schema::hasColumn('methodology', 'questions_count')) {
-            $simpleMethodData['questions_count'] = 0;
-        }
         if (Schema::hasColumn('methodology', 'modules_definition')) {
             $simpleMethodData['modules_definition'] = 'هذه المنهجية البسيطة تتكون من مكونين.';
         }
@@ -220,14 +211,8 @@ class DemoArabicSeeder extends Seeder
         if (Schema::hasColumn('methodology', 'questions_estimated_time')) {
             $complexMethodData['questions_estimated_time'] = 45;
         }
-        if (Schema::hasColumn('methodology', 'questions_count')) {
-            $complexMethodData['questions_count'] = 0;
-        }
         if (Schema::hasColumn('methodology', 'pillars_definition')) {
             $complexMethodData['pillars_definition'] = 'هذه المنهجية المعقدة تحتوي على أعمدة موضوعية.';
-        }
-        if (Schema::hasColumn('methodology', 'number_of_pillars')) {
-            $complexMethodData['number_of_pillars'] = '2';
         }
         $complexMethod = Methodology::create($complexMethodData);
 
@@ -250,9 +235,6 @@ class DemoArabicSeeder extends Seeder
         if (Schema::hasColumn('methodology', 'questions_estimated_time')) {
             $twoSectionMethodData['questions_estimated_time'] = 60;
         }
-        if (Schema::hasColumn('methodology', 'questions_count')) {
-            $twoSectionMethodData['questions_count'] = 0;
-        }
         if (Schema::hasColumn('methodology', 'first_section_description')) {
             $twoSectionMethodData['first_section_description'] = 'نظرة عامة على القسم الأول.';
         }
@@ -264,9 +246,6 @@ class DemoArabicSeeder extends Seeder
         }
         if (Schema::hasColumn('methodology', 'first_section_img_url')) {
             $twoSectionMethodData['first_section_img_url'] = $img('القسم الأول');
-        }
-        if (Schema::hasColumn('methodology', 'first_section_number_of_pillars')) {
-            $twoSectionMethodData['first_section_number_of_pillars'] = '2';
         }
         if (Schema::hasColumn('methodology', 'first_section_pillars_definition')) {
             $twoSectionMethodData['first_section_pillars_definition'] = 'عمودان في القسم الأول.';
@@ -284,9 +263,6 @@ class DemoArabicSeeder extends Seeder
         if (Schema::hasColumn('methodology', 'second_section_img_url')) {
             $twoSectionMethodData['second_section_img_url'] = $img('القسم الثاني');
         }
-        if (Schema::hasColumn('methodology', 'second_section_number_of_pillars')) {
-            $twoSectionMethodData['second_section_number_of_pillars'] = '2';
-        }
         if (Schema::hasColumn('methodology', 'second_section_pillars_definition')) {
             $twoSectionMethodData['second_section_pillars_definition'] = 'عمودان في القسم الثاني.';
         }
@@ -301,9 +277,6 @@ class DemoArabicSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
-            if (Schema::hasColumn('methodology_module', 'number_of_questions')) {
-                $row['number_of_questions'] = 3;
-            }
             if (Schema::hasColumn('methodology_module', 'weight')) {
                 $row['weight'] = 50.00;
             }
@@ -336,9 +309,6 @@ class DemoArabicSeeder extends Seeder
             if (Schema::hasColumn('methodology_pillar', 'sequence')) {
                 $mpRow['sequence'] = $seq;
             }
-            if (Schema::hasColumn('methodology_pillar', 'number_of_modules')) {
-                $mpRow['number_of_modules'] = count($mods);
-            }
             if (Schema::hasColumn('methodology_pillar', 'weight')) {
                 $mpRow['weight'] = 50.00;
             }
@@ -357,9 +327,6 @@ class DemoArabicSeeder extends Seeder
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-                if (Schema::hasColumn('pillar_module', 'number_of_questions')) {
-                    $pmRow['number_of_questions'] = 3;
-                }
                 if (Schema::hasColumn('pillar_module', 'weight')) {
                     $pmRow['weight'] = 50.00;
                 }
@@ -398,9 +365,6 @@ class DemoArabicSeeder extends Seeder
             if (Schema::hasColumn('methodology_pillar', 'sequence')) {
                 $mpRow['sequence'] = $seq;
             }
-            if (Schema::hasColumn('methodology_pillar', 'number_of_modules')) {
-                $mpRow['number_of_modules'] = count($mods);
-            }
             if (Schema::hasColumn('methodology_pillar', 'weight')) {
                 $mpRow['weight'] = 25.00;
             }
@@ -419,9 +383,6 @@ class DemoArabicSeeder extends Seeder
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-                if (Schema::hasColumn('pillar_module', 'number_of_questions')) {
-                    $pmRow['number_of_questions'] = 3;
-                }
                 if (Schema::hasColumn('pillar_module', 'weight')) {
                     $pmRow['weight'] = 1.00;
                 }
@@ -493,7 +454,6 @@ class DemoArabicSeeder extends Seeder
                 $weightAnswersEvenly('methodology_question', $pivotId, $q);
                 $sequence++;
             }
-            $methodology->update(['questions_count' => 4]);
         }
 
         // Module-level questions and dependencies
@@ -566,8 +526,6 @@ class DemoArabicSeeder extends Seeder
                             'updated_at' => now(),
                         ]);
                 }
-
-                $mod->update(['questions_count' => 3]);
             }
         }
 

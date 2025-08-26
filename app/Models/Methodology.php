@@ -21,18 +21,17 @@ class Methodology extends Model
         'img_url',
         'type',
         'pillars_definition',
-        'number_of_pillars',
+
         'modules_definition',
         'questions_description',
         'questions_estimated_time',
-        'questions_count',
-        'questions_brief',
+
         'first_section_name',
         'first_section_description',
         'first_section_definition',
         'first_section_objectives',
         'first_section_img_url',
-        'first_section_number_of_pillars',
+
         'first_section_pillars_definition',
 
         'second_section_name',
@@ -40,7 +39,7 @@ class Methodology extends Model
         'second_section_definition',
         'second_section_objectives',
         'second_section_img_url',
-        'second_section_number_of_pillars',
+
         'second_section_pillars_definition',
 
         'tags',

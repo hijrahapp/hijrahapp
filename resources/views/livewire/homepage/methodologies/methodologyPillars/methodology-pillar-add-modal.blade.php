@@ -46,15 +46,7 @@
                     @endif
                 </div>
 
-                <div class="{{ $isEditMode ? 'opacity-60' : '' }}">
-                    <label class="block text-sm font-medium mb-1">Number of modules <span class="text-destructive">*</span></label>
-                    @if($isEditMode)
-                        <input type="text" class="kt-input w-full" value="{{ $numberOfModules }}" disabled />
-                    @else
-                        <input type="text" class="kt-input w-full" wire:model.defer="numberOfModules" placeholder="Enter number of modules" />
-                    @endif
-                    @error('numberOfModules')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                </div>
+                
 
                 <div>
                     <label class="block text-sm font-medium mb-1">Weight  <span class="text-destructive">*</span></label>

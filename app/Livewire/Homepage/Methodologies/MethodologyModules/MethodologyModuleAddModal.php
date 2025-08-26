@@ -26,8 +26,6 @@ class MethodologyModuleAddModal extends Component
 
     public bool $showModuleSuggestions = false;
 
-    public string $numberOfQuestions = '';
-
     public string $weight = '';
 
     // minutes removed; use questionsEstimatedTime instead
@@ -81,7 +79,7 @@ class MethodologyModuleAddModal extends Component
         // Default add rules
         return [
             'selectedModuleId' => 'required|integer|exists:modules,id',
-            'numberOfQuestions' => 'required|integer|min:0',
+
             'weight' => 'required|numeric',
             // minutes removed
             'report' => 'nullable|string',
@@ -292,7 +290,6 @@ class MethodologyModuleAddModal extends Component
                     'pillar_id' => $this->selectedPillarId,
                     'module_id' => $this->selectedModuleId,
                 ], [
-                    'number_of_questions' => $this->numberOfQuestions !== '' ? (int) $this->numberOfQuestions : null,
                     'weight' => $this->weight !== '' ? (float) $this->weight : null,
                     // minutes removed
                     'report' => $this->report !== '' ? $this->report : null,
@@ -309,7 +306,6 @@ class MethodologyModuleAddModal extends Component
                         'module_id' => $this->selectedModuleId,
                     ],
                     [
-                        'number_of_questions' => $this->numberOfQuestions !== '' ? (int) $this->numberOfQuestions : null,
                         'weight' => $this->weight !== '' ? (int) $this->weight : null,
                         // minutes removed
                         'report' => $this->report !== '' ? $this->report : null,
@@ -360,7 +356,7 @@ class MethodologyModuleAddModal extends Component
         $this->selectedModuleId = null;
         $this->moduleSuggestions = [];
         $this->showModuleSuggestions = false;
-        $this->numberOfQuestions = '';
+
         $this->weight = '';
         // minutes removed
         $this->report = '';
@@ -427,13 +423,11 @@ class MethodologyModuleAddModal extends Component
                 ->where('methodology_id', $this->methodologyId)
                 ->where('module_id', $this->editingModuleId)
                 ->first();
-            $this->numberOfQuestions = $pm && $pm->number_of_questions !== null ? (string) $pm->number_of_questions : '';
             $this->weight = $pm && $pm->weight !== null ? (float) $pm->weight : 0;
             $this->report = $pm && $pm->report ? (string) $pm->report : '';
             $this->questionsDescription = $pm && property_exists($pm, 'questions_description') && $pm->questions_description !== null ? (string) $pm->questions_description : '';
             $this->questionsEstimatedTime = $pm && property_exists($pm, 'questions_estimated_time') && is_numeric($pm->questions_estimated_time) ? (string) ((int) $pm->questions_estimated_time) : '';
         } else {
-            $this->numberOfQuestions = $pivot && $pivot->number_of_questions !== null ? (string) $pivot->number_of_questions : '';
             $this->weight = $pivot && $pivot->weight !== null ? (int) $pivot->weight : 0;
             $this->report = $pivot && $pivot->report ? (string) $pivot->report : '';
             $this->questionsDescription = $pivot && property_exists($pivot, 'questions_description') && $pivot->questions_description !== null ? (string) $pivot->questions_description : '';

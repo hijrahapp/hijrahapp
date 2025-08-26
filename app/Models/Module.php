@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\DeletesStoredImages;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Traits\DeletesStoredImages;
 
 class Module extends Model
 {
-    use HasFactory, DeletesStoredImages;
+    use DeletesStoredImages, HasFactory;
 
     protected $fillable = [
         'name',
@@ -19,7 +19,7 @@ class Module extends Model
         'img_url',
         'questions_description',
         'questions_estimated_time',
-        'questions_count',
+
         'tags',
         'active',
     ];
@@ -107,5 +107,4 @@ class Module extends Model
             ->wherePivot('methodology_id', $methodologyId)
             ->wherePivot('pillar_id', $pillarId);
     }
-
 }

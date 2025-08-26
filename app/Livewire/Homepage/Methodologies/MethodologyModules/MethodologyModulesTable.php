@@ -12,15 +12,20 @@ use Livewire\Component;
 
 class MethodologyModulesTable extends Component
 {
-    use WithoutUrlPagination, \App\Traits\HasTagTitles;
+    use \App\Traits\HasTagTitles, WithoutUrlPagination;
 
     public int $methodologyId;
 
     public string $search = '';
+
     public int $perPage = 10;
+
     public string $tagFilter = '';
+
     public string $tagSearch = '';
+
     public array $tagSuggestions = [];
+
     public bool $showTagSuggestions = false;
 
     protected $listeners = [
@@ -31,7 +36,6 @@ class MethodologyModulesTable extends Component
     /**
      * Get names of modules that the given module depends on within the current methodology.
      *
-     * @param int $moduleId
      * @return array<int, string>
      */
     public function getDependencyNames(int $moduleId): array
@@ -53,14 +57,12 @@ class MethodologyModulesTable extends Component
             ->exists();
 
         if ($hasPillars) {
-            $hasNoq = \Schema::hasColumn('pillar_module', 'number_of_questions');
             $hasWeight = \Schema::hasColumn('pillar_module', 'weight');
             $hasReport = \Schema::hasColumn('pillar_module', 'report');
 
             $selectPieces = [];
-            $selectPieces[] = ($hasWeight ? 'pm.weight' : 'NULL') . ' as mm_weight';
-            $selectPieces[] = ($hasNoq ? 'pm.number_of_questions' : 'NULL') . ' as mm_number_of_questions';
-            $selectPieces[] = ($hasReport ? 'pm.report' : 'NULL') . ' as mm_reports';
+            $selectPieces[] = ($hasWeight ? 'pm.weight' : 'NULL').' as mm_weight';
+            $selectPieces[] = ($hasReport ? 'pm.report' : 'NULL').' as mm_reports';
             $selectPieces[] = 'pm.pillar_id as pm_pillar_id';
             $selectPieces[] = 'p.name as pillar_name';
             $selectRaw = implode(', ', $selectPieces);
@@ -80,15 +82,13 @@ class MethodologyModulesTable extends Component
                 ->select('modules.*')
                 ->selectRaw($selectRaw);
         } else {
-            $hasNoq = \Schema::hasColumn('methodology_module', 'number_of_questions');
             $hasWeight = \Schema::hasColumn('methodology_module', 'weight');
             $hasReport = \Schema::hasColumn('methodology_module', 'report');
 
             $selectPieces = [];
-            $selectPieces[] = ($hasWeight ? 'mm.weight' : 'NULL') . ' as mm_weight';
-            $selectPieces[] = ($hasNoq ? 'mm.number_of_questions' : 'NULL') . ' as mm_number_of_questions';
+            $selectPieces[] = ($hasWeight ? 'mm.weight' : 'NULL').' as mm_weight';
             // minutes removed column safely
-            $selectPieces[] = ($hasReport ? 'mm.report' : 'NULL') . ' as mm_reports';
+            $selectPieces[] = ($hasReport ? 'mm.report' : 'NULL').' as mm_reports';
             $selectRaw = implode(', ', $selectPieces);
 
             $query = Module::query()
@@ -110,6 +110,7 @@ class MethodologyModulesTable extends Component
         }
 
         $page = $this->getPage();
+
         return $query->paginate($this->perPage, ['*'], 'page', $page);
     }
 
@@ -181,6 +182,7 @@ class MethodologyModulesTable extends Component
 
         if ($hasDependents) {
             $this->dispatch('show-toast', type: 'error', message: "Can't remove this module; remove dependent modules first.");
+
             return;
         }
 
@@ -197,10 +199,10 @@ class MethodologyModulesTable extends Component
 
     public function deleteMethodologyModule($request): void
     {
-        $methodologyId = (int)($request['methodologyId'] ?? 0);
-        $moduleId = (int)($request['moduleId'] ?? 0);
+        $methodologyId = (int) ($request['methodologyId'] ?? 0);
+        $moduleId = (int) ($request['moduleId'] ?? 0);
 
-        if (!$methodologyId || !$moduleId) {
+        if (! $methodologyId || ! $moduleId) {
             return;
         }
 
@@ -212,6 +214,7 @@ class MethodologyModulesTable extends Component
 
         if ($hasDependents) {
             $this->dispatch('show-toast', type: 'error', message: "Can't remove this module; remove dependent modules first.");
+
             return;
         }
 
@@ -250,11 +253,10 @@ class MethodologyModulesTable extends Component
     public function render()
     {
         $methodology = Methodology::find($this->methodologyId);
+
         return view('livewire.homepage.methodologies.methodologyModules.methodology-modules-table', [
             'modules' => $this->modules,
             'methodology' => $methodology,
         ]);
     }
 }
-
-

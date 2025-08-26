@@ -78,7 +78,7 @@
                                         <span class="text-gray-400 text-sm">No dependencies</span>
                                     @endif
                                 </td>
-                                <td class="text-center">{{ $module->mm_number_of_questions ?? 0 }}</td>
+                                <td class="text-center">{{ $module->questions_count ?? 0 }}</td>
                                 <td class="text-center">{{ $module->mm_weight !== null ? (int) $module->mm_weight : '-' }}%</td>
                                 <td class="text-center" wire:ignore>
                                     <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">

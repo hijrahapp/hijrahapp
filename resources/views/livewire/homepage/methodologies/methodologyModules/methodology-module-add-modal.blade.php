@@ -60,15 +60,7 @@
                     @error('weight')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
                 
-                <div class="{{ $isEditMode ? 'opacity-60' : '' }}">
-                    <label class="block text-sm font-medium mb-1">Number of Questions <span class="text-destructive">*</span></label>
-                    @if($isEditMode)
-                        <input type="text" class="kt-input w-full" value="{{ $numberOfQuestions }}" disabled />
-                    @else
-                        <input type="text" class="kt-input w-full" wire:model.defer="numberOfQuestions" placeholder="Enter number of questions" />
-                    @endif
-                    @error('numberOfQuestions')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                </div>
+                
 
                 <div>
                     <label class="block text-sm font-medium mb-1">Estimated Questions Time (minutes) <span class="text-destructive">*</span></label>

@@ -26,8 +26,6 @@ class MethodologyPillarAddModal extends Component
 
     public bool $showPillarSuggestions = false;
 
-    public string $numberOfModules = '';
-
     public string $weight = '';
 
     public string $sectionNumber = '1';
@@ -66,7 +64,6 @@ class MethodologyPillarAddModal extends Component
     {
         return [
             'selectedPillarId' => 'required|integer|exists:pillars,id',
-            'numberOfModules' => 'required|integer|min:0',
             'weight' => 'required|numeric',
             'questionsDescription' => 'nullable|string',
             'questionsEstimatedTime' => 'required|integer|min:0',
@@ -202,7 +199,6 @@ class MethodologyPillarAddModal extends Component
                         'pillar_id' => $targetPillarId,
                     ],
                     [
-                        'number_of_modules' => $existing->number_of_modules ?? null,
                         'weight' => $this->weight !== '' ? (float) $this->weight : ($existing->weight ?? null),
                         'sequence' => $sequence,
                         'section' => $this->methodologyType === 'twoSection'
@@ -226,7 +222,6 @@ class MethodologyPillarAddModal extends Component
                     'pillar_id' => $this->selectedPillarId,
                 ],
                 [
-                    'number_of_modules' => (int) $this->numberOfModules,
                     'weight' => $this->weight !== '' ? (float) $this->weight : null,
                     'questions_description' => $this->questionsDescription !== '' ? $this->questionsDescription : null,
                     'questions_estimated_time' => is_numeric($this->questionsEstimatedTime)
@@ -278,7 +273,7 @@ class MethodologyPillarAddModal extends Component
         $this->selectedPillarId = null;
         $this->pillarSuggestions = [];
         $this->showPillarSuggestions = false;
-        $this->numberOfModules = '';
+
         $this->weight = '';
         $this->questionsDescription = '';
         $this->questionsEstimatedTime = '';
@@ -336,7 +331,6 @@ class MethodologyPillarAddModal extends Component
             ->where('pillar_id', $pillarId)
             ->first();
 
-        $this->numberOfModules = $pivot && $pivot->number_of_modules !== null ? (string) $pivot->number_of_modules : '';
         $this->weight = $pivot && $pivot->weight !== null ? (string) $pivot->weight : '';
         if ($pivot && property_exists($pivot, 'section')) {
             $this->sectionNumber = $pivot->section === 'second' ? '2' : '1';

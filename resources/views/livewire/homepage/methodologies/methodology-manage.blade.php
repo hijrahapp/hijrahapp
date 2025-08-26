@@ -116,17 +116,9 @@
                             @error('questionsEstimatedTime')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                         </div>
 
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium mb-1">Number of Questions</label>
-                            <input type="number" min="0" class="kt-input w-full" wire:model.defer="questionsCount" placeholder="Enter number of questions" />
-                            @error('questionsCount')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                        </div>
+                        
 
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium mb-1">Brief</label>
-                            <textarea class="kt-textarea w-full" rows="3" wire:model.defer="questionsBrief" placeholder="Enter brief"></textarea>
-                            @error('questionsBrief')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                        </div>
+                        
                     </div>
                     <div class="kt-card-footer flex items-center justify-end gap-2">
                         <button class="kt-btn kt-btn-primary disabled:opacity-50 disabled:cursor-not-allowed" wire:click="saveGeneralQuestionsInfo" :disabled="!dirty" wire:loading.attr="disabled" wire:target="saveGeneralQuestionsInfo">Save</button>
@@ -190,11 +182,6 @@
                                 <textarea class="kt-textarea w-full" rows="3" wire:model.defer="pillarsDefinition" placeholder="Enter pillars definition (optional)"></textarea>
                                 @error('pillarsDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Number of Pillars</label>
-                                <input type="text" class="kt-input w-full" wire:model.defer="numberOfPillars" placeholder="Enter number of pillars" />
-                                @error('numberOfPillars')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                            </div>
                         </div>
                         <div class="kt-card-footer flex items-center justify-end gap-2">
                             <button class="kt-btn kt-btn-primary disabled:opacity-50 disabled:cursor-not-allowed" wire:click="saveExtraDetails" :disabled="!dirty" wire:loading.attr="disabled" wire:target="saveExtraDetails">Save</button>
@@ -245,11 +232,7 @@
                                 @error('firstSectionObjectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
 
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Number of Pillars</label>
-                                <input type="text" class="kt-input w-full" wire:model.defer="firstSectionNumberOfPillars" placeholder="Enter number of pillars" />
-                                @error('firstSectionNumberOfPillars')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                            </div>
+                            
 
                             <div class="mt-4">
                                 <label class="block text-sm font-medium mb-1">Pillars Definition</label>
@@ -314,11 +297,7 @@
                                 @error('secondSectionObjectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
 
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Number of Pillars</label>
-                                <input type="text" class="kt-input w-full" wire:model.defer="secondSectionNumberOfPillars" placeholder="Enter number of pillars" />
-                                @error('secondSectionNumberOfPillars')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                            </div>
+                            
 
                             <div class="mt-4">
                                 <label class="block text-sm font-medium mb-1">Pillars Definition</label>
