@@ -8,20 +8,28 @@ use Livewire\Component;
 class PillarAddModal extends Component
 {
     public $name = '';
+
     public $description = '';
+
     public $definition = '';
+
     public $objectives = '';
+
     public $tags = [];
+
     public $imgUrl = '';
+
     public $error = '';
+
     public $isEditMode = false;
+
     public $pillarId = null;
 
     protected function rules()
     {
         return [
             'name' => 'required|string|min:3',
-            'description' => 'required|string|min:10',
+            'description' => 'required|string|min:10|max:200',
             'definition' => 'required|string|min:10',
             'objectives' => 'required|string|min:10',
             'tags' => 'array',
@@ -37,6 +45,7 @@ class PillarAddModal extends Component
             'name.min' => 'Pillar name must be at least 3 characters.',
             'description.required' => 'Description is required.',
             'description.min' => 'Description must be at least 10 characters.',
+            'description.max' => 'Description must not exceed 200 characters.',
             'definition.required' => 'Definition is required.',
             'definition.min' => 'Definition must be at least 10 characters.',
             'objectives.required' => 'Objectives are required.',
@@ -140,16 +149,16 @@ class PillarAddModal extends Component
             // Re-throw validation exceptions so they show in the form
             throw $e;
         } catch (\Exception $e) {
-            $this->error = 'An error occurred while saving the pillar: ' . $e->getMessage();
-            logger()->error('Pillar save error: ' . $e->getMessage(), [
+            $this->error = 'An error occurred while saving the pillar: '.$e->getMessage();
+            logger()->error('Pillar save error: '.$e->getMessage(), [
                 'pillar_data' => [
                     'name' => $this->name,
                     'description' => $this->description,
                     'definition' => $this->definition,
                     'objectives' => $this->objectives,
                     'tags' => $this->tags,
-                    'imgUrl' => $this->imgUrl ? substr($this->imgUrl, 0, 50) . '...' : null,
-                ]
+                    'imgUrl' => $this->imgUrl ? substr($this->imgUrl, 0, 50).'...' : null,
+                ],
             ]);
         }
     }

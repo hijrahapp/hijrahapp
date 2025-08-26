@@ -80,10 +80,10 @@ class MethodologyManage extends Component
     {
         return [
             'name' => 'required|string|min:3',
-            'description' => 'required|string|min:3',
+            'description' => 'required|string|min:3|max:200',
             'definition' => 'required|string|min:3',
             'objectives' => 'nullable|string',
-            'questionsDescription' => 'nullable|string',
+            'questionsDescription' => 'nullable|string|max:200',
             'questionsEstimatedTime' => 'nullable|integer|min:0',
             'report' => 'nullable|string',
             'tags' => 'array',
@@ -219,7 +219,7 @@ class MethodologyManage extends Component
 
         try {
             $this->validate([
-                'questionsDescription' => 'nullable|string',
+                'questionsDescription' => 'nullable|string|max:200',
                 'questionsEstimatedTime' => 'nullable|integer|min:0',
                 'report' => 'nullable|string',
 
@@ -265,7 +265,7 @@ class MethodologyManage extends Component
 
             $this->validate([
                 'firstSectionName' => 'required|string|min:3',
-                'firstSectionDescription' => 'required|string|min:3',
+                'firstSectionDescription' => 'required|string|min:3|max:200',
                 'firstSectionDefinition' => 'required|string|min:3',
                 'firstSectionObjectives' => 'nullable|string',
                 'firstSectionPillarsDefinition' => 'nullable|string',
@@ -308,7 +308,7 @@ class MethodologyManage extends Component
 
             $this->validate([
                 'secondSectionName' => 'required|string|min:3',
-                'secondSectionDescription' => 'required|string|min:3',
+                'secondSectionDescription' => 'required|string|min:3|max:200',
                 'secondSectionDefinition' => 'required|string|min:3',
                 'secondSectionObjectives' => 'nullable|string',
                 'secondSectionPillarsDefinition' => 'nullable|string',

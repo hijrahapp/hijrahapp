@@ -31,7 +31,7 @@ class MethodologyAddModal extends Component
     {
         $rules = [
             'name' => 'required|string|min:3',
-            'description' => 'required|string|min:3',
+            'description' => 'required|string|min:3|max:200',
             'definition' => 'required|string|min:3',
             'objectives' => 'nullable|string',
 

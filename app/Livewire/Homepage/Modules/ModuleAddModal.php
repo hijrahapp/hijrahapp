@@ -8,21 +8,29 @@ use Livewire\Component;
 class ModuleAddModal extends Component
 {
     public string $name = '';
+
     public string $description = '';
+
     public string $definition = '';
+
     public string $objectives = '';
+
     public array $tags = [];
+
     public string $imgUrl = '';
+
     public string $error = '';
+
     // Tag logic moved to TagPicker shared component
     public bool $isEditMode = false;
+
     public ?int $moduleId = null;
 
     protected function rules()
     {
         return [
             'name' => 'required|string|min:3',
-            'description' => 'required|string|min:3',
+            'description' => 'required|string|min:3|max:200',
             'definition' => 'required|string|min:3',
             'objectives' => 'required|string|min:3',
             'tags' => 'array',
@@ -118,16 +126,16 @@ class ModuleAddModal extends Component
             // Re-throw validation exceptions so they show in the form
             throw $e;
         } catch (\Exception $e) {
-            $this->error = 'An error occurred while saving the module: ' . $e->getMessage();
-            logger()->error('Module save error: ' . $e->getMessage(), [
+            $this->error = 'An error occurred while saving the module: '.$e->getMessage();
+            logger()->error('Module save error: '.$e->getMessage(), [
                 'module_data' => [
                     'name' => $this->name,
                     'description' => $this->description,
                     'definition' => $this->definition,
                     'objectives' => $this->objectives,
                     'tags' => $this->tags,
-                    'imgUrl' => $this->imgUrl ? substr($this->imgUrl, 0, 50) . '...' : null,
-                ]
+                    'imgUrl' => $this->imgUrl ? substr($this->imgUrl, 0, 50).'...' : null,
+                ],
             ]);
         }
     }
@@ -143,5 +151,3 @@ class ModuleAddModal extends Component
         return view('livewire.homepage.modules.module-add-modal');
     }
 }
-
-
