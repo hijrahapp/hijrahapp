@@ -6,24 +6,31 @@ use App\Models\Methodology;
 
 class MethodologyRepository
 {
-    public function getAllBasic() {
+    public function getAllBasic()
+    {
         return Methodology::where('active', true)->get();
     }
 
-    public function getAll() {
+    public function getAll()
+    {
         return Methodology::with(['pillars', 'modules', 'questions'])->get();
     }
 
-    public function findById(int $methodologyId): ?Methodology {
+    public function findById(int $methodologyId): ?Methodology
+    {
         return Methodology::with(['pillars', 'modules', 'questions'])->find($methodologyId);
     }
 
-    public function findByIdWithFullDetails(int $methodologyId): ?Methodology {
+    public function findByIdWithFullDetails(int $methodologyId): ?Methodology
+    {
         $methodology = Methodology::with([
             'pillars.modules.questions.answers',
             'pillars.questions.answers',
+            'pillars.dependsOn' => function ($query) use ($methodologyId) {
+                $query->wherePivot('methodology_id', $methodologyId);
+            },
             'modules.questions.answers',
-            'questions.answers'
+            'questions.answers',
         ])->find($methodologyId);
 
         if ($methodology) {
@@ -36,13 +43,17 @@ class MethodologyRepository
     /**
      * Find a methodology with a specific pillar and its nested relations
      */
-    public function findByIdWithSpecificPillar(int $methodologyId, int $pillarId): ?Methodology {
+    public function findByIdWithSpecificPillar(int $methodologyId, int $pillarId): ?Methodology
+    {
         $methodology = Methodology::with([
             'pillars' => function ($query) use ($pillarId) {
                 $query->where('pillars.id', $pillarId);
             },
             'pillars.modules.questions.answers',
             'pillars.questions.answers',
+            'pillars.dependsOn' => function ($query) use ($methodologyId) {
+                $query->wherePivot('methodology_id', $methodologyId);
+            },
             'questions.answers',
         ])->find($methodologyId);
 
@@ -56,7 +67,8 @@ class MethodologyRepository
     /**
      * Find a methodology with a specific direct module and its nested relations
      */
-    public function findByIdWithSpecificModule(int $methodologyId, int $moduleId): ?Methodology {
+    public function findByIdWithSpecificModule(int $methodologyId, int $moduleId): ?Methodology
+    {
         $methodology = Methodology::with([
             'modules' => function ($query) use ($moduleId) {
                 $query->where('modules.id', $moduleId);
@@ -75,7 +87,8 @@ class MethodologyRepository
     /**
      * Find a methodology with a specific pillar and specific module under that pillar
      */
-    public function findByIdWithSpecificPillarModule(int $methodologyId, int $pillarId, int $moduleId): ?Methodology {
+    public function findByIdWithSpecificPillarModule(int $methodologyId, int $pillarId, int $moduleId): ?Methodology
+    {
         $methodology = Methodology::with([
             'pillars' => function ($query) use ($pillarId) {
                 $query->where('pillars.id', $pillarId);
@@ -85,6 +98,9 @@ class MethodologyRepository
             },
             'pillars.modules.questions.answers',
             'pillars.questions.answers',
+            'pillars.dependsOn' => function ($query) use ($methodologyId) {
+                $query->wherePivot('methodology_id', $methodologyId);
+            },
             'questions.answers',
         ])->find($methodologyId);
 
@@ -95,15 +111,19 @@ class MethodologyRepository
         return $methodology;
     }
 
-    public function findByIdWithSectionPillars(int $methodologyId, int $sectionNumber): ?Methodology {
+    public function findByIdWithSectionPillars(int $methodologyId, int $sectionNumber): ?Methodology
+    {
         $methodology = Methodology::with([
             'pillars' => function ($query) use ($sectionNumber) {
                 $query->where('section', $sectionNumber === 1 ? 'first' : 'second');
             },
             'pillars.modules.questions.answers',
             'pillars.questions.answers',
+            'pillars.dependsOn' => function ($query) use ($methodologyId) {
+                $query->wherePivot('methodology_id', $methodologyId);
+            },
             'modules.questions.answers',
-            'questions.answers'
+            'questions.answers',
         ])->find($methodologyId);
 
         if ($methodology) {
@@ -113,20 +133,23 @@ class MethodologyRepository
         return $methodology;
     }
 
-    public function create(array $data): Methodology {
+    public function create(array $data): Methodology
+    {
         return Methodology::create($data);
     }
 
-    public function update(int $methodologyId, array $data): bool {
+    public function update(int $methodologyId, array $data): bool
+    {
         $methodology = Methodology::find($methodologyId);
-        if (!$methodology) {
+        if (! $methodology) {
             return false;
         }
 
         return $methodology->update($data);
     }
 
-    public function delete($methodology): bool {
+    public function delete($methodology): bool
+    {
         return $methodology->delete();
     }
 

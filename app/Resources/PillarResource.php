@@ -3,8 +3,8 @@
 namespace App\Resources;
 
 use App\Http\Repositories\QuestionRepository;
-use App\Services\ResultCalculationService;
 use App\Services\ResultCalculationOptimizedService;
+use App\Services\ResultCalculationService;
 use App\Traits\HasTagTitles;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -26,7 +26,26 @@ class PillarResource extends JsonResource
             'section' => $this->pivot->section ?? null,
             'status' => $this->calculateStatus(),
             'result' => $this->calculateResult(),
+            'dependsOn' => $this->getDependencyPillarId(),
         ];
+    }
+
+    /**
+     * Get the ID of the pillar this pillar depends on in the current methodology
+     */
+    private function getDependencyPillarId(): ?int
+    {
+        $methodologyId = request()->route('methodologyId');
+
+        if (! $methodologyId) {
+            return null;
+        }
+
+        $dependency = $this->dependsOn()
+            ->wherePivot('methodology_id', (int) $methodologyId)
+            ->first();
+
+        return $dependency ? $dependency->id : null;
     }
 
     /**
@@ -35,10 +54,10 @@ class PillarResource extends JsonResource
     private function calculateResult()
     {
         $service = config('app.features.optimized_calculation')
-            ? new ResultCalculationOptimizedService()
-            : new ResultCalculationService();
+            ? new ResultCalculationOptimizedService
+            : new ResultCalculationService;
 
-        if($this->user_id && request()->route('methodologyId')){
+        if ($this->user_id && request()->route('methodologyId')) {
             return $service->calculatePillarResult($this->user_id, $this->id, request()->route('methodologyId'));
         } else {
             return null;
@@ -53,13 +72,14 @@ class PillarResource extends JsonResource
     {
         $methodologyId = request()->route('methodologyId');
 
-        if (!$this->user_id || !$methodologyId) {
+        if (! $this->user_id || ! $methodologyId) {
             return null;
         }
 
         // Use ContextStatusService directly for status
-        $statusService = new \App\Services\ContextStatusService();
+        $statusService = new \App\Services\ContextStatusService;
         $status = $statusService->getPillarStatus($this->user_id, $this->id, (int) $methodologyId);
+
         return $status ?? null;
     }
 
@@ -69,7 +89,7 @@ class PillarResource extends JsonResource
     private function getGroupedModuleQuestions(): array
     {
         $methodologyId = request()->route('methodologyId');
-        if (!$methodologyId) {
+        if (! $methodologyId) {
             return [];
         }
 
@@ -78,10 +98,11 @@ class PillarResource extends JsonResource
             return [];
         }
 
-        $questionRepo = new QuestionRepository();
+        $questionRepo = new QuestionRepository;
 
         return $modules->map(function ($module) use ($methodologyId, $questionRepo) {
             $questions = $questionRepo->getQuestionsByContext('module', $module->id, (int) $methodologyId, $this->id);
+
             return [
                 'module' => [
                     'id' => $module->id,
