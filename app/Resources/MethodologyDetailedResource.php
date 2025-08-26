@@ -3,6 +3,7 @@
 namespace App\Resources;
 
 use App\Http\Repositories\QuestionRepository;
+use App\Services\ContextStatusService;
 use App\Services\ResultCalculationService;
 use App\Services\ResultCalculationOptimizedService;
 use App\Traits\HasTagTitles;
@@ -124,10 +125,12 @@ class MethodologyDetailedResource extends JsonResource
         // Questions block (include list only when loaded and non-empty)
         if ($sectionNumber == null ||$sectionNumber !== 2) {
             $questionsRepo = new QuestionRepository();
+            $contextStatusService = new ContextStatusService();
             $questions = $questionsRepo->getQuestionsByContext('methodology', $this->id);
             $questions['description'] = $this->questions_description;
             $questions['estimatedTime'] = $this->questions_estimated_time;
             $questions['size'] = count($questions['list']);
+            $questions['status'] = $this->user_id ? $contextStatusService->getMethodologyStatus($this->user_id, $this->id) : 'not_started';
             unset($questions["list"]);
             $questions = $this->filterArray($questions);
             $payload['questions'] = $questions;

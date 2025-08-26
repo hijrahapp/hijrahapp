@@ -4,6 +4,7 @@ namespace App\Resources;
 
 use App\Http\Repositories\QuestionRepository;
 use App\Traits\HasTagTitles;
+use App\Services\ContextStatusService;
 use App\Services\ResultCalculationService;
 use App\Services\ResultCalculationOptimizedService;
 use Illuminate\Http\Request;
@@ -65,6 +66,7 @@ class ModuleDetailedResource extends JsonResource
         }
 
         $questionsRepo = new QuestionRepository();
+        $contextStatusService = new ContextStatusService();
         $questions = [];
         if ($pillarId && $methodologyId) {
             $questions = $questionsRepo->getQuestionsByContext('module', $this->id, $methodologyId, $pillarId);
@@ -74,6 +76,7 @@ class ModuleDetailedResource extends JsonResource
         $questions['description'] = $pivotDescription;
         $questions['estimatedTime'] = $pivotEstimatedTime;
         $questions['size'] = count($questions['list']);
+        $questions['status'] = $this->user_id ? $contextStatusService->getModuleStatus($this->user_id, $this->id, $methodologyId, $pillarId) : 'not_started';
         $questions = $this->filterArray($questions);
         unset($questions["list"]);
         $payload['questions'] = $questions;

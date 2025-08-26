@@ -8,13 +8,51 @@ use App\Models\UserContextStatus;
 class ContextStatusService
 {
     /**
+     * Determine completion status for a methodology based on answered questions
+     * Returns: not_started | in_progress | completed
+     */
+    public function getMethodologyStatus(int $userId, int $methodologyId): string
+    {
+        $methodology = \App\Models\Methodology::find($methodologyId);
+        if (! $methodology) {
+            return 'not_started';
+        }
+
+        // Get only direct methodology questions (not pillar or module questions)
+        $methodologyQuestionIds = $methodology->questions()->pluck('questions.id');
+        $totalQuestionsCount = $methodologyQuestionIds->count();
+
+        if ($totalQuestionsCount === 0) {
+            return 'not_started';
+        }
+
+        // Count how many methodology questions the user has answered
+        $answeredQuestionsCount = \App\Models\UserAnswer::where('user_id', $userId)
+            ->where('context_type', 'methodology')
+            ->where('context_id', $methodologyId)
+            ->whereIn('question_id', $methodologyQuestionIds)
+            ->distinct('question_id')
+            ->count('question_id');
+
+        if ($answeredQuestionsCount === 0) {
+            return 'not_started';
+        }
+
+        if ($answeredQuestionsCount < $totalQuestionsCount) {
+            return 'in_progress';
+        }
+
+        return 'completed';
+    }
+
+    /**
      * Determine completion status for a pillar for a given user in a methodology
      * Returns: not_started | in_progress | completed
      */
     public function getPillarStatus(int $userId, int $pillarId, int $methodologyId): string
     {
         $pillar = Pillar::find($pillarId);
-        if (!$pillar) {
+        if (! $pillar) {
             return 'not_started';
         }
 
@@ -65,12 +103,10 @@ class ContextStatusService
         }
 
         $status = $statusQuery->value('status');
-        if (!$status) {
+        if (! $status) {
             return 'not_started';
         }
 
         return $status;
     }
 }
-
-
