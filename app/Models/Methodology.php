@@ -71,7 +71,7 @@ class Methodology extends Model
      */
     public function pillars(): BelongsToMany
     {
-        return $this->belongsToMany(Pillar::class, 'methodology_pillar')->withPivot('section');
+        return $this->belongsToMany(Pillar::class, 'methodology_pillar')->withPivot('section', 'weight');
     }
 
     /**
@@ -79,7 +79,7 @@ class Methodology extends Model
      */
     public function modules(): BelongsToMany
     {
-        return $this->belongsToMany(Module::class, 'methodology_module');
+        return $this->belongsToMany(Module::class, 'methodology_module')->withPivot('weight');
     }
 
     /**

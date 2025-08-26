@@ -72,7 +72,7 @@ class Pillar extends Model
     public function modulesForMethodology(int $methodologyId): BelongsToMany
     {
         return $this->belongsToMany(Module::class, 'pillar_module')
-            ->withPivot('methodology_id')
+            ->withPivot('methodology_id', 'weight')
             ->wherePivot('methodology_id', $methodologyId);
     }
 

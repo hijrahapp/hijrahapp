@@ -53,8 +53,10 @@ class ResultCalculationOptimizedService
                 ? $methodology->pillars()->wherePivot('section', 'first')->get()
                 : $methodology->pillars;
 
-            foreach ($pillars as $pillar) {
+            $pillarWeightedSum = 0.0;
+            $pillarTotalWeight = 0.0;
 
+            foreach ($pillars as $pillar) {
                 $allModulesCompleted = $this->areAllPillarModulesCompleted($userId, $methodologyId, $pillar->id);
 
                 if($allModulesCompleted) {
@@ -63,13 +65,21 @@ class ResultCalculationOptimizedService
                     $pillarResult = $this->computeDynamicLikePercentageForMethodologyItem($userId, $methodologyId, 'pillar', $pillar->id);
                 }
 
+                $pillarPercentage = $pillarResult['percentage'] ?? 0;
+                $pillarWeight = (float)($pillar->pivot->weight ?? 0.0);
+                
+                // Add to weighted calculation
+                $pillarWeightedSum += ($pillarPercentage * $pillarWeight);
+                $pillarTotalWeight += $pillarWeight;
+
                 $result['pillars'][] = [
                     'id' => $pillar->id,
                     'name' => $pillar->name,
                     'description' => $pillar->description,
                     'definition' => $pillar->definition,
                     'objectives' => $pillar->objectives,
-                    'percentage' => $pillarResult['percentage'] ?? 0,
+                    'percentage' => $pillarPercentage,
+                    'weight' => $pillarWeight,
                     'summary' => $pillarResult['summary'] ?? [
                         'text' => __('messages.lorem_ipsum'),
                         'total_questions' => 0,
@@ -78,8 +88,16 @@ class ResultCalculationOptimizedService
                     ],
                 ];
             }
+
+            // Update overall percentage with weighted average for pillars
+            if ($pillarTotalWeight > 0.0) {
+                $result['summary']['overall_percentage'] = round($pillarWeightedSum / $pillarTotalWeight, 2);
+            }
         } else {
-            // Simple methodology: produce module breakdown
+            // Simple methodology: produce module breakdown with weighted averages
+            $moduleWeightedSum = 0.0;
+            $moduleTotalWeight = 0.0;
+
             foreach ($methodology->modules as $module) {
                 $moduleResult = $this->calculateModuleResult($userId, $module->id, $methodologyId, null);
 
@@ -88,13 +106,21 @@ class ResultCalculationOptimizedService
                     $moduleResult = $this->computeDynamicLikePercentageForMethodologyItem($userId, $methodologyId, 'module', $module->id);
                 }
 
+                $modulePercentage = $moduleResult['percentage'] ?? 0;
+                $moduleWeight = (float)($module->pivot->weight ?? 0.0);
+                
+                // Add to weighted calculation
+                $moduleWeightedSum += ($modulePercentage * $moduleWeight);
+                $moduleTotalWeight += $moduleWeight;
+
                 $result['modules'][] = [
                     'id' => $module->id,
                     'name' => $module->name,
                     'description' => $module->description,
                     'definition' => $module->definition,
                     'objectives' => $module->objectives,
-                    'percentage' => $moduleResult['percentage'] ?? 0,
+                    'percentage' => $modulePercentage,
+                    'weight' => $moduleWeight,
                     'summary' => $moduleResult['summary'] ?? [
                         'text' => __('messages.lorem_ipsum'),
                         'total_questions' => 0,
@@ -102,6 +128,11 @@ class ResultCalculationOptimizedService
                         'completion_rate' => 0,
                     ],
                 ];
+            }
+
+            // Update overall percentage with weighted average for modules
+            if ($moduleTotalWeight > 0.0) {
+                $result['summary']['overall_percentage'] = round($moduleWeightedSum / $moduleTotalWeight, 2);
             }
         }
 
@@ -134,20 +165,28 @@ class ResultCalculationOptimizedService
             ]
         ];
 
-        $pillarPercentages = [];
+        $pillarWeightedSum = 0.0;
+        $pillarTotalWeight = 0.0;
 
         foreach ($pillars as $pillar) {
             $pillarResult = $this->calculatePillarResult($userId, $pillar->id, $methodologyId);
-            if ($pillarResult && isset($pillarResult['percentage'])) {
-                $pillarPercentages[] = (float)$pillarResult['percentage'];
+            $pillarPercentage = $pillarResult['percentage'] ?? 0;
+            $pillarWeight = (float)($pillar->pivot->weight ?? 0.0);
+            
+            if ($pillarResult) {
+                // Add to weighted calculation
+                $pillarWeightedSum += ($pillarPercentage * $pillarWeight);
+                $pillarTotalWeight += $pillarWeight;
             }
+            
             $result['pillars'][] = [
                 'id' => $pillar->id,
                 'name' => $pillar->name,
                 'description' => $pillar->description,
                 'definition' => $pillar->definition,
                 'objectives' => $pillar->objectives,
-                'percentage' => $pillarResult['percentage'] ?? 0,
+                'percentage' => $pillarPercentage,
+                'weight' => $pillarWeight,
                 'summary' => $pillarResult['summary'] ?? [
                     'text' => __('messages.lorem_ipsum'),
                     'total_questions' => 0,
@@ -157,8 +196,9 @@ class ResultCalculationOptimizedService
             ];
         }
 
-        if (!empty($pillarPercentages)) {
-            $result['summary']['overall_percentage'] = round(array_sum($pillarPercentages) / count($pillarPercentages), 2);
+        // Calculate weighted average instead of simple average
+        if ($pillarTotalWeight > 0.0) {
+            $result['summary']['overall_percentage'] = round($pillarWeightedSum / $pillarTotalWeight, 2);
         }
 
         // Derive totals from pillar summaries
@@ -200,14 +240,20 @@ class ResultCalculationOptimizedService
             ]
         ];
 
-        $modulePercentages = [];
+        $weightedSum = 0.0;
+        $totalWeight = 0.0;
         $totalQuestions = 0;
         $answeredQuestions = 0;
 
         foreach ($modules as $module) {
             $moduleResult = $this->calculateModuleResult($userId, $module->id, $methodologyId, $pillarId);
+            $modulePercentage = $moduleResult['percentage'] ?? 0;
+            $moduleWeight = (float)($module->pivot->weight ?? 0.0);
+            
             if ($moduleResult) {
-                $modulePercentages[] = (float)$moduleResult['percentage'];
+                // Add to weighted calculation
+                $weightedSum += ($modulePercentage * $moduleWeight);
+                $totalWeight += $moduleWeight;
                 $totalQuestions += (int)($moduleResult['summary']['total_questions'] ?? 0);
                 $answeredQuestions += (int)($moduleResult['summary']['answered_questions'] ?? 0);
             }
@@ -218,7 +264,8 @@ class ResultCalculationOptimizedService
                 'description' => $module->description,
                 'definition' => $module->definition,
                 'objectives' => $module->objectives,
-                'percentage' => $moduleResult['percentage'] ?? 0,
+                'percentage' => $modulePercentage,
+                'weight' => $moduleWeight,
                 'summary' => $moduleResult['summary'] ?? [
                     'text' => __('messages.lorem_ipsum'),
                     'total_questions' => 0,
@@ -228,8 +275,9 @@ class ResultCalculationOptimizedService
             ];
         }
 
-        if (!empty($modulePercentages)) {
-            $result['summary']['overall_percentage'] = round(array_sum($modulePercentages) / count($modulePercentages), 2);
+        // Calculate weighted average instead of simple average
+        if ($totalWeight > 0.0) {
+            $result['summary']['overall_percentage'] = round($weightedSum / $totalWeight, 2);
         }
 
         $result['summary']['total_questions'] = $totalQuestions;
