@@ -67,9 +67,9 @@ class MethodologyPillarAddModal extends Component
         return [
             'selectedPillarId' => 'required|integer|exists:pillars,id',
             'numberOfModules' => 'required|integer|min:0',
-            'weight' => 'nullable|numeric',
+            'weight' => 'required|numeric',
             'questionsDescription' => 'nullable|string',
-            'questionsEstimatedTime' => 'nullable|integer|min:0',
+            'questionsEstimatedTime' => 'required|integer|min:0',
             'dependencyIds' => 'array',
             'dependencyIds.*' => 'integer|exists:pillars,id',
             'sectionNumber' => 'nullable|in:1,2',
@@ -156,9 +156,9 @@ class MethodologyPillarAddModal extends Component
     {
         if ($this->isEditMode) {
             $this->validate([
-                'weight' => 'nullable|numeric',
+                'weight' => 'required|numeric',
                 'questionsDescription' => 'nullable|string',
-                'questionsEstimatedTime' => 'nullable|integer|min:0',
+                'questionsEstimatedTime' => 'required|integer|min:0',
             ]);
         } else {
             $rules = $this->rules();

@@ -11,34 +11,50 @@ class MethodologyModuleAddModal extends Component
     public int $methodologyId;
 
     public bool $isEditMode = false;
+
     public ?int $editingModuleId = null;
+
     public bool $isActiveMethodology = false;
+
     public string $moduleName = '';
 
     public string $moduleSearch = '';
+
     public ?int $selectedModuleId = null;
+
     public array $moduleSuggestions = [];
+
     public bool $showModuleSuggestions = false;
 
     public string $numberOfQuestions = '';
+
     public string $weight = '';
+
     // minutes removed; use questionsEstimatedTime instead
     public string $report = '';
 
     // Questions meta (pivot-level)
     public string $questionsDescription = '';
+
     public string $questionsEstimatedTime = '';
 
     public array $dependencyIds = [];
+
     public array $dependencySuggestions = [];
+
     public string $dependencySearch = '';
+
     public bool $showDependencySuggestions = false;
 
     // Pillar selection (for complex methodologies)
     public string $pillarSearch = '';
+
     public ?int $selectedPillarId = null;
+
     public array $pillarSuggestions = [];
+
     public bool $showPillarSuggestions = false;
+
     public bool $enablePillarSelection = false;
 
     protected $listeners = [
@@ -65,15 +81,17 @@ class MethodologyModuleAddModal extends Component
         // Default add rules
         return [
             'selectedModuleId' => 'required|integer|exists:modules,id',
-            'numberOfQuestions' => 'nullable|integer|min:0',
-            'weight' => 'nullable|numeric',
+            'numberOfQuestions' => 'required|integer|min:0',
+            'weight' => 'required|numeric',
             // minutes removed
             'report' => 'nullable|string',
             'questionsDescription' => 'nullable|string',
-            'questionsEstimatedTime' => 'nullable|integer|min:0',
+            'questionsEstimatedTime' => 'required|integer|min:0',
             'dependencyIds' => 'array',
             'dependencyIds.*' => 'integer|exists:modules,id',
-            'selectedPillarId' => 'nullable|integer|exists:pillars,id',
+            'selectedPillarId' => $this->enablePillarSelection
+                ? 'required|integer|exists:pillars,id'
+                : 'nullable|integer|exists:pillars,id',
         ];
     }
 
@@ -82,6 +100,7 @@ class MethodologyModuleAddModal extends Component
         if (strlen($this->moduleSearch) < 1) {
             $this->moduleSuggestions = [];
             $this->showModuleSuggestions = false;
+
             return;
         }
 
@@ -118,14 +137,16 @@ class MethodologyModuleAddModal extends Component
 
     public function updatedPillarSearch(): void
     {
-        if (!$this->enablePillarSelection) {
+        if (! $this->enablePillarSelection) {
             $this->pillarSuggestions = [];
             $this->showPillarSuggestions = false;
+
             return;
         }
         if (strlen($this->pillarSearch) < 1) {
             $this->pillarSuggestions = [];
             $this->showPillarSuggestions = false;
+
             return;
         }
 
@@ -155,6 +176,7 @@ class MethodologyModuleAddModal extends Component
         if (strlen($this->dependencySearch) < 1) {
             $this->dependencySuggestions = [];
             $this->showDependencySuggestions = false;
+
             return;
         }
 
@@ -188,6 +210,7 @@ class MethodologyModuleAddModal extends Component
     {
         if ($this->selectedModuleId && $moduleId === $this->selectedModuleId) {
             $this->dispatch('show-toast', type: 'error', message: 'A module cannot depend on itself.');
+
             return;
         }
         if (in_array($moduleId, $this->dependencyIds, true)) {
@@ -206,16 +229,17 @@ class MethodologyModuleAddModal extends Component
     {
         if ($this->isEditMode) {
             $this->validate([
-                'weight' => 'nullable|numeric',
+                'weight' => 'required|numeric',
                 'report' => 'nullable|string',
                 'questionsDescription' => 'nullable|string',
-                'questionsEstimatedTime' => 'nullable|integer|min:0',
+                'questionsEstimatedTime' => 'required|integer|min:0',
                 'selectedPillarId' => $this->enablePillarSelection ? 'required|integer|exists:pillars,id' : 'nullable|integer|exists:pillars,id',
             ]);
         } else {
             $this->validate($this->rules());
-            if ($this->enablePillarSelection && !$this->selectedPillarId) {
+            if ($this->enablePillarSelection && ! $this->selectedPillarId) {
                 $this->dispatch('show-toast', type: 'error', message: 'Please select a pillar.');
+
                 return;
             }
         }
@@ -223,15 +247,16 @@ class MethodologyModuleAddModal extends Component
         // Prevent circular dependencies
         if ($this->selectedModuleId && in_array($this->selectedModuleId, $this->dependencyIds, true)) {
             $this->dispatch('show-toast', type: 'error', message: 'A module cannot depend on itself.');
+
             return;
         }
 
         if ($this->isEditMode && $this->editingModuleId) {
             // Update only allowed fields on edit
-//            if ($this->isActiveMethodology) {
-//                $this->dispatch('show-toast', type: 'error', message: 'This module exists in an active methodology');
-//                return;
-//            }
+            //            if ($this->isActiveMethodology) {
+            //                $this->dispatch('show-toast', type: 'error', message: 'This module exists in an active methodology');
+            //                return;
+            //            }
             if ($this->enablePillarSelection) {
                 // Store edits on pillar_module for complex
                 \DB::table('pillar_module')
@@ -239,10 +264,10 @@ class MethodologyModuleAddModal extends Component
                     ->where('module_id', $this->editingModuleId)
                     ->update([
                         'pillar_id' => $this->selectedPillarId,
-                        'weight' => $this->weight !== '' ? (float)$this->weight : null,
+                        'weight' => $this->weight !== '' ? (float) $this->weight : null,
                         'report' => $this->report !== '' ? $this->report : null,
                         'questions_description' => $this->questionsDescription !== '' ? $this->questionsDescription : null,
-                        'questions_estimated_time' => is_numeric($this->questionsEstimatedTime) ? (int)$this->questionsEstimatedTime : null,
+                        'questions_estimated_time' => is_numeric($this->questionsEstimatedTime) ? (int) $this->questionsEstimatedTime : null,
                         'updated_at' => now(),
                     ]);
             } else {
@@ -250,10 +275,10 @@ class MethodologyModuleAddModal extends Component
                     ->where('methodology_id', $this->methodologyId)
                     ->where('module_id', $this->editingModuleId)
                     ->update([
-                        'weight' => $this->weight !== '' ? (float)$this->weight : null,
+                        'weight' => $this->weight !== '' ? (float) $this->weight : null,
                         'report' => $this->report !== '' ? $this->report : null,
                         'questions_description' => $this->questionsDescription !== '' ? $this->questionsDescription : null,
-                        'questions_estimated_time' => is_numeric($this->questionsEstimatedTime) ? (int)$this->questionsEstimatedTime : null,
+                        'questions_estimated_time' => is_numeric($this->questionsEstimatedTime) ? (int) $this->questionsEstimatedTime : null,
                         'updated_at' => now(),
                     ]);
             }
@@ -267,12 +292,12 @@ class MethodologyModuleAddModal extends Component
                     'pillar_id' => $this->selectedPillarId,
                     'module_id' => $this->selectedModuleId,
                 ], [
-                    'number_of_questions' => $this->numberOfQuestions !== '' ? (int)$this->numberOfQuestions : null,
-                    'weight' => $this->weight !== '' ? (float)$this->weight : null,
+                    'number_of_questions' => $this->numberOfQuestions !== '' ? (int) $this->numberOfQuestions : null,
+                    'weight' => $this->weight !== '' ? (float) $this->weight : null,
                     // minutes removed
                     'report' => $this->report !== '' ? $this->report : null,
                     'questions_description' => $this->questionsDescription !== '' ? $this->questionsDescription : null,
-                    'questions_estimated_time' => is_numeric($this->questionsEstimatedTime) ? (int)$this->questionsEstimatedTime : null,
+                    'questions_estimated_time' => is_numeric($this->questionsEstimatedTime) ? (int) $this->questionsEstimatedTime : null,
                     'updated_at' => now(),
                     'created_at' => now(),
                 ]);
@@ -284,12 +309,12 @@ class MethodologyModuleAddModal extends Component
                         'module_id' => $this->selectedModuleId,
                     ],
                     [
-                        'number_of_questions' => $this->numberOfQuestions !== '' ? (int)$this->numberOfQuestions : null,
-                        'weight' => $this->weight !== '' ? (int)$this->weight : null,
+                        'number_of_questions' => $this->numberOfQuestions !== '' ? (int) $this->numberOfQuestions : null,
+                        'weight' => $this->weight !== '' ? (int) $this->weight : null,
                         // minutes removed
                         'report' => $this->report !== '' ? $this->report : null,
                         'questions_description' => $this->questionsDescription !== '' ? $this->questionsDescription : null,
-                        'questions_estimated_time' => is_numeric($this->questionsEstimatedTime) ? (int)$this->questionsEstimatedTime : null,
+                        'questions_estimated_time' => is_numeric($this->questionsEstimatedTime) ? (int) $this->questionsEstimatedTime : null,
                         'updated_at' => now(),
                         'created_at' => now(),
                     ]
@@ -304,7 +329,7 @@ class MethodologyModuleAddModal extends Component
                     ->where('module_id', $this->selectedModuleId)
                     ->delete();
 
-                $deps = array_unique(array_filter($this->dependencyIds, fn($id) => $id !== $this->selectedModuleId));
+                $deps = array_unique(array_filter($this->dependencyIds, fn ($id) => $id !== $this->selectedModuleId));
 
                 foreach ($deps as $dependsOnId) {
                     \DB::table('module_dependencies')->insert([
@@ -402,17 +427,17 @@ class MethodologyModuleAddModal extends Component
                 ->where('methodology_id', $this->methodologyId)
                 ->where('module_id', $this->editingModuleId)
                 ->first();
-            $this->numberOfQuestions = $pm && $pm->number_of_questions !== null ? (string)$pm->number_of_questions : '';
-            $this->weight = $pm && $pm->weight !== null ? (float)$pm->weight : 0;
-            $this->report = $pm && $pm->report ? (string)$pm->report : '';
-            $this->questionsDescription = $pm && property_exists($pm, 'questions_description') && $pm->questions_description !== null ? (string)$pm->questions_description : '';
-            $this->questionsEstimatedTime = $pm && property_exists($pm, 'questions_estimated_time') && is_numeric($pm->questions_estimated_time) ? (string)((int)$pm->questions_estimated_time) : '';
+            $this->numberOfQuestions = $pm && $pm->number_of_questions !== null ? (string) $pm->number_of_questions : '';
+            $this->weight = $pm && $pm->weight !== null ? (float) $pm->weight : 0;
+            $this->report = $pm && $pm->report ? (string) $pm->report : '';
+            $this->questionsDescription = $pm && property_exists($pm, 'questions_description') && $pm->questions_description !== null ? (string) $pm->questions_description : '';
+            $this->questionsEstimatedTime = $pm && property_exists($pm, 'questions_estimated_time') && is_numeric($pm->questions_estimated_time) ? (string) ((int) $pm->questions_estimated_time) : '';
         } else {
-            $this->numberOfQuestions = $pivot && $pivot->number_of_questions !== null ? (string)$pivot->number_of_questions : '';
-            $this->weight = $pivot && $pivot->weight !== null ? (int)$pivot->weight : 0;
-            $this->report = $pivot && $pivot->report ? (string)$pivot->report : '';
-            $this->questionsDescription = $pivot && property_exists($pivot, 'questions_description') && $pivot->questions_description !== null ? (string)$pivot->questions_description : '';
-            $this->questionsEstimatedTime = $pivot && property_exists($pivot, 'questions_estimated_time') && is_numeric($pivot->questions_estimated_time) ? (string)((int)$pivot->questions_estimated_time) : '';
+            $this->numberOfQuestions = $pivot && $pivot->number_of_questions !== null ? (string) $pivot->number_of_questions : '';
+            $this->weight = $pivot && $pivot->weight !== null ? (int) $pivot->weight : 0;
+            $this->report = $pivot && $pivot->report ? (string) $pivot->report : '';
+            $this->questionsDescription = $pivot && property_exists($pivot, 'questions_description') && $pivot->questions_description !== null ? (string) $pivot->questions_description : '';
+            $this->questionsEstimatedTime = $pivot && property_exists($pivot, 'questions_estimated_time') && is_numeric($pivot->questions_estimated_time) ? (string) ((int) $pivot->questions_estimated_time) : '';
         }
 
         $this->dependencyIds = \DB::table('module_dependencies')
@@ -435,5 +460,3 @@ class MethodologyModuleAddModal extends Component
         }
     }
 }
-
-

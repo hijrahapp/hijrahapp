@@ -54,35 +54,33 @@
                 </div>
                 @endif
 
+                <div>
+                    <label class="block text-sm font-medium mb-1">Weight <span class="text-destructive">*</span></label>
+                    <input type="text" class="kt-input w-full" wire:model.defer="weight" placeholder="Enter weight" />
+                    @error('weight')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                </div>
+                
                 <div class="{{ $isEditMode ? 'opacity-60' : '' }}">
-                    <label class="block text-sm font-medium mb-1">Number of Questions</label>
+                    <label class="block text-sm font-medium mb-1">Number of Questions <span class="text-destructive">*</span></label>
                     @if($isEditMode)
                         <input type="text" class="kt-input w-full" value="{{ $numberOfQuestions }}" disabled />
                     @else
-                        <input type="text" class="kt-input w-full" wire:model.defer="numberOfQuestions" placeholder="Enter number of questions (optional)" />
+                        <input type="text" class="kt-input w-full" wire:model.defer="numberOfQuestions" placeholder="Enter number of questions" />
                     @endif
                     @error('numberOfQuestions')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium mb-1">Weight</label>
-                    <input type="text" class="kt-input w-full" wire:model.defer="weight" placeholder="Enter weight (optional)" />
-                    @error('weight')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium mb-1">Questions Description</label>
-                    <textarea class="kt-textarea w-full" rows="3" wire:model.defer="questionsDescription" placeholder="Enter a general description of this module's questions"></textarea>
-                    @error('questionsDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium mb-1">Estimated Questions Time (minutes)</label>
+                    <label class="block text-sm font-medium mb-1">Estimated Questions Time (minutes) <span class="text-destructive">*</span></label>
                     <input type="number" min="0" class="kt-input w-full" wire:model.defer="questionsEstimatedTime" placeholder="Enter estimated time in minutes" />
                     @error('questionsEstimatedTime')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
 
-                
+                <div>
+                    <label class="block text-sm font-medium mb-1">Questions Description (optional)</label>
+                    <textarea class="kt-textarea w-full" rows="3" wire:model.defer="questionsDescription" placeholder="Enter a general description of this module's questions"></textarea>
+                    @error('questionsDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                </div>
 
                 <div>
                     <label class="block text-sm font-medium mb-1">Report (optional)</label>
