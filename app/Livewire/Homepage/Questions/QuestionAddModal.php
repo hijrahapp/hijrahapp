@@ -116,7 +116,7 @@ class QuestionAddModal extends Component
         }
     }
 
-    public function save()
+    public function save(bool $addAnother = false)
     {
         $this->validate();
 
@@ -161,7 +161,13 @@ class QuestionAddModal extends Component
             }
 
             $this->dispatch('refreshTable');
-            $this->closeModal();
+
+            if ($addAnother) {
+                $this->resetForm();
+                // Keep modal open for adding another question
+            } else {
+                $this->closeModal();
+            }
         } catch (\Exception $e) {
             $this->error = 'Failed to ' . ($this->isEditMode ? 'update' : 'create') . ' question: ' . $e->getMessage();
         }

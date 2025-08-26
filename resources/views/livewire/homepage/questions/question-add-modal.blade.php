@@ -110,6 +110,7 @@
 
                 <div class="flex justify-end mt-4">
                     <button type="button" class="kt-btn kt-btn-outline me-2" wire:click="closeModal">Cancel</button>
+                    <button type="button" class="kt-btn kt-btn-outline me-2" wire:click="save(true)">Save and Add New</button>
                     <button type="submit" class="kt-btn kt-btn-primary">
                         {{ $isEditMode ? 'Update Question' : 'Save Question' }}
                     </button>
