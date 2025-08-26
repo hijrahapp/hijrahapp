@@ -99,12 +99,18 @@ class ResultCalculationOptimizedService
             $moduleTotalWeight = 0.0;
 
             foreach ($methodology->modules as $module) {
-                $moduleResult = $this->calculateModuleResult($userId, $module->id, $methodologyId, null);
-
-                if (!$moduleResult) {
-                    // Fallback to methodology questions assigned to this module (item_id = module_id)
+                $moduleCompleted = $this->isModuleContextCompleted($userId, $module->id, $methodologyId, null);
+                
+                if ($moduleCompleted) {
+                    $moduleResult = $this->calculateModuleResult($userId, $module->id, $methodologyId, null);
+                } else {
                     $moduleResult = $this->computeDynamicLikePercentageForMethodologyItem($userId, $methodologyId, 'module', $module->id);
                 }
+
+                // if (!$moduleResult) {
+                    // Fallback to methodology questions assigned to this module (item_id = module_id)
+                    // $moduleResult = $this->computeDynamicLikePercentageForMethodologyItem($userId, $methodologyId, 'module', $module->id);
+                // }
 
                 $modulePercentage = $moduleResult['percentage'] ?? 0;
                 $moduleWeight = (float)($module->pivot->weight ?? 0.0);
