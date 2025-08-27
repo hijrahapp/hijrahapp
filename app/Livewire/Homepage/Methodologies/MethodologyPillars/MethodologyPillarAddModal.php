@@ -135,19 +135,34 @@ class MethodologyPillarAddModal extends Component
         $this->showDependencySuggestions = true;
     }
 
-    public function toggleDependency(int $pillarId): void
+    public function toggleDependency(int $pillarId, ?string $pillarName = null): void
     {
         if ($this->selectedPillarId && $pillarId === $this->selectedPillarId) {
             $this->dispatch('show-toast', type: 'error', message: 'A pillar cannot depend on itself.');
 
             return;
         }
+        // Enforce single selection: select or clear
         if (in_array($pillarId, $this->dependencyIds, true)) {
-            $this->dependencyIds = array_values(array_diff($this->dependencyIds, [$pillarId]));
+            $this->dependencyIds = [];
+            $this->dependencySearch = '';
         } else {
-            $this->dependencyIds[] = $pillarId;
+            $this->dependencyIds = [$pillarId];
+            if ($pillarName !== null) {
+                $this->dependencySearch = $pillarName;
+            } else {
+                $name = Pillar::find($pillarId)?->name;
+                $this->dependencySearch = $name ?? '';
+            }
         }
 
+        $this->dependencySuggestions = [];
+        $this->showDependencySuggestions = false;
+    }
+
+    public function clearDependency(): void
+    {
+        $this->dependencyIds = [];
         $this->dependencySearch = '';
         $this->dependencySuggestions = [];
         $this->showDependencySuggestions = false;
@@ -361,5 +376,13 @@ class MethodologyPillarAddModal extends Component
             ->where('pillar_id', $this->editingPillarId)
             ->pluck('depends_on_pillar_id')
             ->toArray();
+
+        // Prefill the dependency input with the existing dependency name if present
+        if (count($this->dependencyIds) > 0) {
+            $firstId = $this->dependencyIds[0];
+            $this->dependencySearch = Pillar::find($firstId)?->name ?? '';
+        } else {
+            $this->dependencySearch = '';
+        }
     }
 }

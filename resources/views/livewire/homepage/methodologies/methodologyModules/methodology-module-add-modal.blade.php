@@ -37,7 +37,7 @@
                     <label class="block text-sm font-medium mb-1">Pillar <span class="text-destructive">*</span></label>
                     <div class="relative">
                         <div class="kt-input">
-                            <i class="ki-filled ki-signpost"></i>
+                            <i class="ki-filled ki-filter"></i>
                             <input type="text" class="kt-input" placeholder="Search methodology pillars" wire:model.live="pillarSearch" />
                         </div>
                         @if($showPillarSuggestions && count($pillarSuggestions) > 0)
@@ -60,8 +60,6 @@
                     @error('weight')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
                 
-                
-
                 <div>
                     <label class="block text-sm font-medium mb-1">Estimated Questions Time (minutes) <span class="text-destructive">*</span></label>
                     <input type="number" min="0" class="kt-input w-full" wire:model.defer="questionsEstimatedTime" placeholder="Enter estimated time in minutes" />
@@ -81,17 +79,22 @@
                 </div>
 
                 <div class="{{ $isEditMode ? 'opacity-60 pointer-events-none' : '' }}">
-                    <label class="block text-sm font-medium mb-1">Dependencies (modules this module depends on)</label>
-                    <p class="text-xs text-secondary-foreground/70 mb-2">Select modules that must be completed before users can access this module.</p>
+                    <label class="block text-sm font-medium mb-1">Dependency (optional)</label>
+                    <p class="text-xs text-secondary-foreground/70 mb-2">Select one module that must be completed before users can access this module.</p>
                     <div class="relative">
                         <div class="kt-input">
                             <i class="ki-filled ki-filter"></i>
-                            <input type="text" class="kt-input" placeholder="Search linked modules" wire:model.live="dependencySearch" @if($isEditMode) disabled @endif />
+                            <input type="text" class="kt-input pr-10" placeholder="Search linked modules" wire:model.live="dependencySearch" @if($isEditMode) disabled @endif />
+                            @if(count($dependencyIds) === 1 && !$isEditMode)
+                                <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-secondary-foreground/60 hover:text-secondary-foreground" wire:click="clearDependency">
+                                    <i class="ki-filled ki-cross"></i>
+                                </button>
+                            @endif
                         </div>
                         @if($showDependencySuggestions && count($dependencySuggestions) > 0)
                             <div class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
                                 @foreach($dependencySuggestions as $suggestion)
-                                    <button type="button" class="w-full flex items-center justify-between px-4 py-2 hover:bg-gray-100" wire:click="toggleDependency({{ $suggestion['id'] }})" @if($isEditMode) disabled @endif>
+                                    <button type="button" class="w-full flex items-center justify-between px-4 py-2 hover:bg-gray-100" wire:click="toggleDependency({{ $suggestion['id'] }}, '{{ $suggestion['name'] }}')" @if($isEditMode) disabled @endif>
                                         <span>{{ $suggestion['name'] }}</span>
                                         @if(in_array($suggestion['id'], $dependencyIds, true))
                                             <i class="ki-filled ki-check text-primary"></i>
@@ -101,13 +104,6 @@
                             </div>
                         @endif
                     </div>
-                    @if(count($dependencyIds) > 0)
-                        <ul class="mt-2 list-disc list-inside space-y-1">
-                            @foreach($dependencyIds as $depId)
-                                <li class="text-sm">{{ $selectedDependencyNames[$depId] ?? ('ID: '.$depId) }}</li>
-                            @endforeach
-                        </ul>
-                    @endif
                 </div>
             </div>
             <div class="kt-modal-footer flex gap-2 justify-end p-5">

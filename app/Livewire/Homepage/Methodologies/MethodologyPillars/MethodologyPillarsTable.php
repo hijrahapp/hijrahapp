@@ -55,8 +55,8 @@ class MethodologyPillarsTable extends Component
 				FROM pillar_module pm
 				WHERE pm.pillar_id = pillars.id AND pm.methodology_id = ?
 			) as modules_count', [$this->methodologyId])
-            ->orderBy('mp.sequence', 'asc')
-            ->orderBy('mp.created_at', 'asc');
+            // ->orderBy('mp.sequence', 'asc')
+            ->orderBy('mp.created_at', 'desc');
 
         $page = $this->getPage();
 

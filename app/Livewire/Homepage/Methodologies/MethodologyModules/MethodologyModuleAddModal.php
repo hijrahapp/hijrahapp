@@ -204,20 +204,37 @@ class MethodologyModuleAddModal extends Component
         $this->showDependencySuggestions = true;
     }
 
-    public function toggleDependency(int $moduleId): void
+    public function toggleDependency(int $moduleId, ?string $moduleName = null): void
     {
         if ($this->selectedModuleId && $moduleId === $this->selectedModuleId) {
             $this->dispatch('show-toast', type: 'error', message: 'A module cannot depend on itself.');
 
             return;
         }
+        // Enforce single selection: select or clear
         if (in_array($moduleId, $this->dependencyIds, true)) {
-            $this->dependencyIds = array_values(array_diff($this->dependencyIds, [$moduleId]));
+            // Deselect if clicked again
+            $this->dependencyIds = [];
+            $this->dependencySearch = '';
         } else {
-            $this->dependencyIds[] = $moduleId;
+            $this->dependencyIds = [$moduleId];
+            // Reflect selected dependency inside the input
+            if ($moduleName !== null) {
+                $this->dependencySearch = $moduleName;
+            } else {
+                $name = Module::find($moduleId)?->name;
+                $this->dependencySearch = $name ?? '';
+            }
         }
 
-        // Clear search and hide suggestions after each selection
+        // Hide suggestions after selection
+        $this->dependencySuggestions = [];
+        $this->showDependencySuggestions = false;
+    }
+
+    public function clearDependency(): void
+    {
+        $this->dependencyIds = [];
         $this->dependencySearch = '';
         $this->dependencySuggestions = [];
         $this->showDependencySuggestions = false;
@@ -439,6 +456,14 @@ class MethodologyModuleAddModal extends Component
             ->where('module_id', $this->editingModuleId)
             ->pluck('depends_on_module_id')
             ->toArray();
+
+        // Reflect any existing single dependency inside the input field in edit mode
+        if (count($this->dependencyIds) > 0) {
+            $firstId = $this->dependencyIds[0];
+            $this->dependencySearch = Module::find($firstId)?->name ?? '';
+        } else {
+            $this->dependencySearch = '';
+        }
 
         // Load existing pillar link if any
         if ($this->enablePillarSelection) {
