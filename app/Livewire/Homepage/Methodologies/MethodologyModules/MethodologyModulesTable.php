@@ -65,6 +65,7 @@ class MethodologyModulesTable extends Component
             $selectPieces[] = ($hasReport ? 'pm.report' : 'NULL').' as mm_reports';
             $selectPieces[] = 'pm.pillar_id as pm_pillar_id';
             $selectPieces[] = 'p.name as pillar_name';
+            $selectPieces[] = '(SELECT COUNT(*) FROM module_question mq WHERE mq.module_id = modules.id AND mq.methodology_id = '.$this->methodologyId.' AND mq.pillar_id = pm.pillar_id) as questions_count';
             $selectRaw = implode(', ', $selectPieces);
 
             $query = Module::query()
@@ -77,10 +78,9 @@ class MethodologyModulesTable extends Component
                         ->where('pm.methodology_id', '=', $this->methodologyId);
                 })
                 ->leftJoin('pillars as p', 'p.id', '=', 'pm.pillar_id')
-                ->withCount(['questions'])
-                ->orderBy('pm.created_at', 'asc')
                 ->select('modules.*')
-                ->selectRaw($selectRaw);
+                ->selectRaw($selectRaw)
+                ->orderBy('pm.created_at', 'desc');
         } else {
             $hasWeight = \Schema::hasColumn('methodology_module', 'weight');
             $hasReport = \Schema::hasColumn('methodology_module', 'report');
@@ -89,6 +89,7 @@ class MethodologyModulesTable extends Component
             $selectPieces[] = ($hasWeight ? 'mm.weight' : 'NULL').' as mm_weight';
             // minutes removed column safely
             $selectPieces[] = ($hasReport ? 'mm.report' : 'NULL').' as mm_reports';
+            $selectPieces[] = '(SELECT COUNT(*) FROM module_question mq WHERE mq.module_id = modules.id AND mq.methodology_id = '.$this->methodologyId.') as questions_count';
             $selectRaw = implode(', ', $selectPieces);
 
             $query = Module::query()
@@ -103,10 +104,9 @@ class MethodologyModulesTable extends Component
                     $join->on('mm.module_id', '=', 'modules.id')
                         ->where('mm.methodology_id', '=', $this->methodologyId);
                 })
-                ->withCount(['questions'])
-                ->orderBy('mm.created_at', 'asc')
                 ->select('modules.*')
-                ->selectRaw($selectRaw);
+                ->selectRaw($selectRaw)
+                ->orderBy('mm.created_at', 'asc');
         }
 
         $page = $this->getPage();
