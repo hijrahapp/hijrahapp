@@ -294,6 +294,25 @@ class MethodologyQuestionsModal extends Component
             $this->dispatch('show-toast', type: 'error', message: 'Circular dependency detected. Please fix dependencies.');
             return;
         }
+        // Validate weight ranges for questions and answers (0 - 100 inclusive)
+        foreach ($this->selectedQuestionIds as $questionId) {
+            $qWeight = (float) ($this->questionWeights[$questionId] ?? 0);
+            if ($qWeight < 0 || $qWeight > 100) {
+                $this->dispatch('show-toast', type: 'error', message: 'Question weights must be between 0 and 100.');
+                return;
+            }
+        }
+        foreach ($this->selectedQuestionIds as $questionId) {
+            $question = Question::with('answers:id')->find($questionId);
+            $answerIds = $question ? $question->answers->pluck('id') : collect();
+            foreach ($answerIds as $aid) {
+                $aWeight = (float) ($this->answerWeights[$questionId][$aid] ?? 0);
+                if ($aWeight < 0 || $aWeight > 100) {
+                    $this->dispatch('show-toast', type: 'error', message: 'Answer weights must be between 0 and 100.');
+                    return;
+                }
+            }
+        }
         // Validate 100% totals
         // $totalQuestionWeight = array_sum(array_map('floatval', $this->questionWeights));
         // if (abs($totalQuestionWeight - 100) > 0.001) {

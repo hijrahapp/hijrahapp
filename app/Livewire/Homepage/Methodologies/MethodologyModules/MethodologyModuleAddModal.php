@@ -80,7 +80,7 @@ class MethodologyModuleAddModal extends Component
         return [
             'selectedModuleId' => 'required|integer|exists:modules,id',
 
-            'weight' => 'required|numeric',
+            'weight' => 'required|numeric|min:0|max:100',
             // minutes removed
             'report' => 'nullable|string',
             'questionsDescription' => 'nullable|string',
@@ -244,7 +244,7 @@ class MethodologyModuleAddModal extends Component
     {
         if ($this->isEditMode) {
             $this->validate([
-                'weight' => 'required|numeric',
+                'weight' => 'required|numeric|min:0|max:100',
                 'report' => 'nullable|string',
                 'questionsDescription' => 'nullable|string',
                 'questionsEstimatedTime' => 'required|integer|min:0',

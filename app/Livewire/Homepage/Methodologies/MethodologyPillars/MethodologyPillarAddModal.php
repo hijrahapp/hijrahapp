@@ -66,7 +66,7 @@ class MethodologyPillarAddModal extends Component
     {
         return [
             'selectedPillarId' => 'required|integer|exists:pillars,id',
-            'weight' => 'required|numeric',
+            'weight' => 'required|numeric|min:0|max:100',
             'questionsDescription' => 'nullable|string',
             'questionsEstimatedTime' => 'required|integer|min:0',
             'report' => 'nullable|string',
@@ -172,7 +172,7 @@ class MethodologyPillarAddModal extends Component
     {
         if ($this->isEditMode) {
             $this->validate([
-                'weight' => 'required|numeric',
+                'weight' => 'required|numeric|min:0|max:100',
                 'questionsDescription' => 'nullable|string',
                 'questionsEstimatedTime' => 'required|integer|min:0',
                 'report' => 'nullable|string',

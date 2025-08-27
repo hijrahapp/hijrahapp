@@ -122,7 +122,7 @@
                                         <div class="flex gap-2 items-center justify-end mb-0.5">
                                             @if(!$moduleId && $generalItemKind)
                                                 <div class="flex items-center gap-2">
-                                                    <span class="text-xs text-secondary-foreground/70">{{ ucfirst($generalItemKind) }}:</span>
+                                                    <span class="text-xs text-secondary-foreground/70">{{ ucfirst($generalItemKind) }} <span class="text-destructive">*</span></span>
                                                     <select class="kt-select w-56" wire:model="questionItemIds.{{ $qid }}" required>
                                                         <option value="">Select {{ $generalItemKind }}</option>
                                                         @foreach($generalItems as $it)
@@ -132,9 +132,9 @@
                                                 </div>
                                             @endif
                                             <div class="flex items-center gap-2">
-                                                <span class="text-xs text-secondary-foreground/70">Weight:</span>
+                                                <span class="text-xs text-secondary-foreground/70">Weight <span class="text-destructive">*</span></span>
                                                 <div class="kt-input w-24">
-                                                    <input type="text" class="kt-input" placeholder="Weight %" wire:model.defer="questionWeights.{{ $qid }}" />
+                                                    <input type="number" class="kt-input" placeholder="Weight %" wire:model.defer="questionWeights.{{ $qid }}" />
                                                     <i class="ki-filled ki-percentage"></i>
                                                 </div>
                                             </div>
@@ -145,15 +145,15 @@
                                                     <div class="text-sm font-bold">{{ $ans->title }}</div>
                                                 </div>
                                                 <div class="md:col-span-1">
-                                                    <span class="text-xs text-secondary-foreground/70">Weight:</span>
+                                                    <span class="text-xs text-secondary-foreground/70">Weight <span class="text-destructive">*</span></span>
                                                     <div class="kt-input">
-                                                        <input type="text" class="kt-input" placeholder="Answer weight %" wire:model.defer="answerWeights.{{ $qid }}.{{ $ans->id }}" />
+                                                        <input type="number" class="kt-input" placeholder="Answer weight %" wire:model.defer="answerWeights.{{ $qid }}.{{ $ans->id }}" />
                                                         <i class="ki-filled ki-percentage"></i>
                                                     </div>
                                                 </div>
                                                 @if($moduleId && $questionMode === 'dynamic')
                                                     <div class="md:col-span-1">
-                                                        <span class="text-xs text-secondary-foreground/70">Leads to:</span>
+                                                        <span class="text-xs text-secondary-foreground/70">Leads to</span>
                                                         <select class="kt-select w-full" wire:model="answerDependencies.{{ $ans->id }}">
                                                             <option value="">No dependency</option>
                                                             @foreach($selectedQuestionIds as $dqId)

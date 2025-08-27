@@ -50,7 +50,7 @@
 
                 <div>
                     <label class="block text-sm font-medium mb-1">Weight  <span class="text-destructive">*</span></label>
-                    <input type="text" class="kt-input w-full" wire:model.defer="weight" placeholder="Enter weight" />
+                    <input type="number" class="kt-input w-full" wire:model.defer="weight" placeholder="Enter weight" />
                     @error('weight')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
 
