@@ -106,7 +106,7 @@ class MethodologyModulesTable extends Component
                 })
                 ->select('modules.*')
                 ->selectRaw($selectRaw)
-                ->orderBy('mm.created_at', 'asc');
+                ->orderBy('mm.created_at', 'desc');
         }
 
         $page = $this->getPage();

@@ -313,12 +313,6 @@ class MethodologyQuestionsModal extends Component
                 }
             }
         }
-        // Validate 100% totals
-        // $totalQuestionWeight = array_sum(array_map('floatval', $this->questionWeights));
-        // if (abs($totalQuestionWeight - 100) > 0.001) {
-        //     $this->dispatch('show-toast', type: 'error', message: 'Total question weights must sum to 100%.');
-        //     return;
-        // }
 
         // Validate general context item selections (required for methodology questions)
         if ($this->moduleId === null && $this->methodologyId !== null) {
@@ -335,44 +329,62 @@ class MethodologyQuestionsModal extends Component
             }
         }
 
-        // Validate per-question answers sum to 100%
-        // foreach ($this->selectedQuestionIds as $questionId) {
-        //     $question = Question::with('answers:id')->find($questionId);
-        //     $answerIds = $question ? $question->answers->pluck('id') : collect();
-        //     $sum = 0;
-        //     foreach ($answerIds as $aid) {
-        //         $sum += (float)($this->answerWeights[$questionId][$aid] ?? 0);
-        //     }
-        //     if (abs($sum - 100) > 0.001) {
-        //         $this->dispatch('show-toast', type: 'error', message: 'Each question’s answers must sum to 100%.');
-        //         return;
-        //     }
-        // }
-
         if ($this->moduleId !== null) {
             // Persist module context
             // Save selected questions mode on the appropriate pivot
             if (!is_null($this->pillarId)) {
-                \DB::table('pillar_module')
-                    ->updateOrInsert([
+                $exists = \DB::table('pillar_module')
+                    ->where('methodology_id', $this->methodologyId)
+                    ->where('pillar_id', $this->pillarId)
+                    ->where('module_id', $this->moduleId)
+                    ->exists();
+
+                if ($exists) {
+                    // Only update questions_mode and updated_at; do not touch created_at
+                    \DB::table('pillar_module')
+                        ->where('methodology_id', $this->methodologyId)
+                        ->where('pillar_id', $this->pillarId)
+                        ->where('module_id', $this->moduleId)
+                        ->update([
+                            'questions_mode' => $this->questionMode,
+                            'updated_at' => now(),
+                        ]);
+                } else {
+                    // Insert new linkage with created_at set once
+                    \DB::table('pillar_module')->insert([
                         'methodology_id' => $this->methodologyId,
                         'pillar_id' => $this->pillarId,
                         'module_id' => $this->moduleId,
-                    ], [
                         'questions_mode' => $this->questionMode,
-                        'updated_at' => now(),
                         'created_at' => now(),
+                        'updated_at' => now(),
                     ]);
+                }
             } else {
-                \DB::table('methodology_module')
-                    ->updateOrInsert([
+                $exists = \DB::table('methodology_module')
+                    ->where('methodology_id', $this->methodologyId)
+                    ->where('module_id', $this->moduleId)
+                    ->exists();
+
+                if ($exists) {
+                    // Only update questions_mode and updated_at; do not touch created_at
+                    \DB::table('methodology_module')
+                        ->where('methodology_id', $this->methodologyId)
+                        ->where('module_id', $this->moduleId)
+                        ->update([
+                            'questions_mode' => $this->questionMode,
+                            'updated_at' => now(),
+                        ]);
+                } else {
+                    // Insert new linkage with created_at set once
+                    \DB::table('methodology_module')->insert([
                         'methodology_id' => $this->methodologyId,
                         'module_id' => $this->moduleId,
-                    ], [
                         'questions_mode' => $this->questionMode,
-                        'updated_at' => now(),
                         'created_at' => now(),
+                        'updated_at' => now(),
                     ]);
+                }
             }
             // Clean up old answer contexts tied to this module-question set
             $oldMqIds = \DB::table('module_question')
@@ -618,29 +630,6 @@ class MethodologyQuestionsModal extends Component
 
     public function updated($name, $value): void
     {
-        // Intercept dependency selection changes to prevent circular graphs
-        if (str_starts_with($name, 'answerDependencies.')) {
-            // Self edge prevention: answer cannot lead to its own question
-            $answerId = (int) str_replace('answerDependencies.', '', $name);
-            $answerToQuestion = $this->buildAnswerToQuestionMap();
-            $fromQuestionId = $answerToQuestion[$answerId] ?? null;
-            // Normalize the stored value to int when non-empty, otherwise keep empty string
-            $this->answerDependencies[$answerId] = ($value === '' || $value === null) ? '' : (int)$value;
-            if ($fromQuestionId && (int)$value === $fromQuestionId) {
-                // Revert to empty string to align with <option value="">No dependency</option>
-                $this->answerDependencies[$answerId] = '';
-                $this->dispatch('show-toast', type: 'error', message: 'An answer cannot lead to its own question.');
-                return;
-            }
-
-            // Cycle prevention
-            if ($this->detectCircularDependency()) {
-                // Revert to empty string to ensure the UI select reflects "No dependency"
-                $this->answerDependencies[$answerId] = '';
-                $this->dispatch('show-toast', type: 'error', message: 'Circular dependency detected. Selection reverted.');
-            }
-        }
-
         // Reset suggestions pagination when filters change
         if (in_array($name, ['search', 'tagSearch', 'typeFilter'], true)) {
             $this->suggestionsPage = 1;
