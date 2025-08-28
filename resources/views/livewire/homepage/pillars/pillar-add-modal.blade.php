@@ -36,18 +36,13 @@
 
                 <!-- Description -->
                 <div>
-                    <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
-                    <div x-data="{ get val() { return $wire.get('description') }, set val(v) { $wire.set('description', v) } }" class="relative">
-                        <textarea class="kt-textarea w-full" rows="3" wire:model.defer="description" x-model="val" maxlength="200" placeholder="Enter pillar description"></textarea>
-                        <div class="pointer-events-none absolute right-2 bottom-2 text-xs text-gray-500" x-text="(val?.length || 0) + '/200'"></div>
-                    </div>
+                    <livewire:shared.components.textarea :label="'Description'" wire:model.defer="description" :required="true" :placeholder="'Enter pillar description'" :rows="3" :maxlength="200" />
                 </div>
                 @error('description')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
 
                 <!-- Definition -->
                 <div>
-                    <label class="block text-sm font-medium mb-1">Definition <span class="text-destructive">*</span></label>
-                    <textarea class="kt-textarea w-full" rows="3" wire:model.defer="definition" placeholder="Enter pillar definition"></textarea>
+                    <livewire:shared.components.textarea :label="'Definition'" wire:model.defer="definition" :required="true" :placeholder="'Enter pillar definition'" :rows="3" />
                 </div>
                 @error('definition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
 

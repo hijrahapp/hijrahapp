@@ -67,14 +67,12 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium mb-1">Questions Description (optional)</label>
-                    <textarea class="kt-textarea w-full" rows="3" wire:model.defer="questionsDescription" placeholder="Enter a general description of this module's questions"></textarea>
+                    <livewire:shared.components.textarea :label="'Questions Description (optional)'" wire:model.defer="questionsDescription" :placeholder="'Enter a general description of this module\'s questions'" :rows="3" />
                     @error('questionsDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium mb-1">Report (optional)</label>
-                    <textarea class="kt-textarea w-full" rows="3" wire:model.defer="report" placeholder="Enter report"></textarea>
+                    <livewire:shared.components.textarea :label="'Report (optional)'" wire:model.defer="report" :placeholder="'Enter report'" :rows="3" />
                     @error('report')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
 

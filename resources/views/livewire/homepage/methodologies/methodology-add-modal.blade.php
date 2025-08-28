@@ -49,17 +49,12 @@
                     </div>
 
                     <div class="mt-4">
-                        <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
-                        <div x-data="{ val: @js($description) }" class="relative">
-                            <textarea class="kt-textarea w-full" rows="3" wire:model.defer="description" x-model="val" maxlength="200" placeholder="Enter methodology description"></textarea>
-                            <div class="pointer-events-none absolute right-2 bottom-2 text-xs text-gray-500" x-text="(val?.length || 0) + '/200'"></div>
-                        </div>
+                        <livewire:shared.components.textarea :label="'Description'" wire:model.defer="description" :required="true" :placeholder="'Enter methodology description'" :rows="3" :maxlength="200" />
                         @error('description')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                     </div>
 
                     <div class="mt-4">
-                        <label class="block text-sm font-medium mb-1">Definition <span class="text-destructive">*</span></label>
-                        <textarea class="kt-textarea w-full" rows="3" wire:model.defer="definition" placeholder="Enter methodology definition"></textarea>
+                        <livewire:shared.components.textarea :label="'Definition'" wire:model.defer="definition" :required="true" :placeholder="'Enter methodology definition'" :rows="3" />
                         @error('definition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                     </div>
 

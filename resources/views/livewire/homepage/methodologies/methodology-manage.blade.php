@@ -46,17 +46,12 @@
                         </div>
 
                         <div class="mt-4">
-                            <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
-                            <div x-data="{ val: @js($description) }" class="relative">
-                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="description" x-model="val" maxlength="200" placeholder="Enter methodology description"></textarea>
-                                <div class="pointer-events-none absolute right-2 bottom-2 text-xs text-gray-500" x-text="(val?.length || 0) + '/200'"></div>
-                            </div>
+                            <livewire:shared.components.textarea :label="'Description'" wire:model.defer="description" :required="true" :placeholder="'Enter methodology description'" :rows="3" :maxlength="200" />
                             @error('description')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                         </div>
 
                         <div class="mt-4">
-                            <label class="block text-sm font-medium mb-1">Definition <span class="text-destructive">*</span></label>
-                            <textarea class="kt-textarea w-full" rows="3" wire:model.defer="definition" placeholder="Enter methodology definition"></textarea>
+                            <livewire:shared.components.textarea :label="'Definition'" wire:model.defer="definition" :required="true" :placeholder="'Enter methodology definition'" :rows="3" />
                             @error('definition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                         </div>
 
@@ -108,8 +103,7 @@
                 <div class="kt-accordion-content" aria-labelledby="general_questions_info_toggle" id="general_questions_info_content" x-data="{ dirty: $wire.entangle('isGeneralDirty') }" x-on:input="dirty = true" x-on:change="dirty = true" x-on:section-saved.window="if ($event.detail.section === 'general') dirty = false">
                     <div class="kt-card-body p-5">
                         <div class="mt-0">
-                            <label class="block text-sm font-medium mb-1">Questions Description</label>
-                            <textarea class="kt-textarea w-full" rows="3" wire:model.defer="questionsDescription" placeholder="Enter a general description of the methodology questions"></textarea>
+                            <livewire:shared.components.textarea :label="'Questions Description'" wire:model.defer="questionsDescription" :placeholder="'Enter a general description of the methodology questions'" :rows="3" />
                             @error('questionsDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                         </div>
 
@@ -120,8 +114,7 @@
                         </div>
 
                         <div class="mt-4">
-                            <label class="block text-sm font-medium mb-1">Report</label>
-                            <textarea class="kt-textarea w-full" rows="5" wire:model.defer="report" placeholder="Enter methodology report"></textarea>
+                            <livewire:shared.components.textarea :label="'Report'" wire:model.defer="report" :placeholder="'Enter methodology report'" :rows="5" />
                             @error('report')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                         </div>
 
@@ -153,8 +146,7 @@
                     <div class="kt-accordion-content" aria-labelledby="extra_details_toggle" id="extra_details_content" x-data="{ dirty: $wire.entangle('isExtraDirty') }" x-on:input="dirty = true" x-on:change="dirty = true" x-on:section-saved.window="if ($event.detail.section === 'extra') dirty = false">
                         <div class="kt-card-body p-5">
                             <div>
-                                <label class="block text-sm font-medium mb-1">Modules Definition</label>
-                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="modulesDefinition" placeholder="Enter modules definition (optional)"></textarea>
+                                <livewire:shared.components.textarea :label="'Modules Definition'" wire:model.defer="modulesDefinition" :placeholder="'Enter modules definition (optional)'" :rows="3" />
                                 @error('modulesDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
                         </div>
@@ -184,8 +176,7 @@
                     <div class="kt-accordion-content" aria-labelledby="extra_details_toggle" id="extra_details_content" x-data="{ dirty: $wire.entangle('isExtraDirty') }" x-on:input="dirty = true" x-on:change="dirty = true" x-on:section-saved.window="if ($event.detail.section === 'extra') dirty = false">
                         <div class="kt-card-body p-5">
                             <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Pillars Definition</label>
-                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="pillarsDefinition" placeholder="Enter pillars definition (optional)"></textarea>
+                                <livewire:shared.components.textarea :label="'Pillars Definition'" wire:model.defer="pillarsDefinition" :placeholder="'Enter pillars definition (optional)'" :rows="3" />
                                 @error('pillarsDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
                         </div>
@@ -221,14 +212,12 @@
                             </div>
 
                             <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
-                                <textarea class="kt-textarea w-full" rows="2" wire:model.defer="firstSectionDescription" placeholder="Enter section 1 description"></textarea>
+                                <livewire:shared.components.textarea :label="'Description'" wire:model.defer="firstSectionDescription" :required="true" :placeholder="'Enter section 1 description'" :rows="2" />
                                 @error('firstSectionDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
 
                             <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Definition <span class="text-destructive">*</span></label>
-                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="firstSectionDefinition" placeholder="Enter section 1 definition"></textarea>
+                                <livewire:shared.components.textarea :label="'Definition'" wire:model.defer="firstSectionDefinition" :required="true" :placeholder="'Enter section 1 definition'" :rows="3" />
                                 @error('firstSectionDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
 
@@ -241,8 +230,7 @@
                             
 
                             <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Pillars Definition</label>
-                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="firstSectionPillarsDefinition" placeholder="Enter pillars definition"></textarea>
+                                <livewire:shared.components.textarea :label="'Pillars Definition'" wire:model.defer="firstSectionPillarsDefinition" :placeholder="'Enter pillars definition'" :rows="3" />
                                 @error('firstSectionPillarsDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
 
@@ -286,14 +274,12 @@
                             </div>
 
                             <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
-                                <textarea class="kt-textarea w-full" rows="2" wire:model.defer="secondSectionDescription" placeholder="Enter section 2 description"></textarea>
+                                <livewire:shared.components.textarea :label="'Description'" wire:model.defer="secondSectionDescription" :required="true" :placeholder="'Enter section 2 description'" :rows="2" />
                                 @error('secondSectionDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
 
                             <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Definition <span class="text-destructive">*</span></label>
-                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="secondSectionDefinition" placeholder="Enter section 2 definition"></textarea>
+                                <livewire:shared.components.textarea :label="'Definition'" wire:model.defer="secondSectionDefinition" :required="true" :placeholder="'Enter section 2 definition'" :rows="3" />
                                 @error('secondSectionDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
 
@@ -306,8 +292,7 @@
                             
 
                             <div class="mt-4">
-                                <label class="block text-sm font-medium mb-1">Pillars Definition</label>
-                                <textarea class="kt-textarea w-full" rows="3" wire:model.defer="secondSectionPillarsDefinition" placeholder="Enter pillars definition"></textarea>
+                                <livewire:shared.components.textarea :label="'Pillars Definition'" wire:model.defer="secondSectionPillarsDefinition" :placeholder="'Enter pillars definition'" :rows="3" />
                                 @error('secondSectionPillarsDefinition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
 
