@@ -37,7 +37,10 @@
                 <!-- Description -->
                 <div>
                     <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
-                    <textarea class="kt-textarea w-full" rows="3" wire:model.defer="description" placeholder="Enter pillar description"></textarea>
+                    <div x-data="{ val: @js($description) }" class="relative">
+                        <textarea class="kt-textarea w-full" rows="3" wire:model.defer="description" x-model="val" maxlength="200" placeholder="Enter pillar description"></textarea>
+                        <div class="pointer-events-none absolute right-2 bottom-2 text-xs text-gray-500" x-text="(val?.length || 0) + '/200'"></div>
+                    </div>
                 </div>
                 @error('description')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
 
