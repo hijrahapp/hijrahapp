@@ -35,7 +35,7 @@
 
                 <div>
                     <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
-                    <div x-data="{ val: @js($description) }" class="relative">
+                    <div x-data="{ get val() { return $wire.get('description') }, set val(v) { $wire.set('description', v) } }" class="relative">
                         <textarea class="kt-textarea w-full" rows="3" wire:model.defer="description" x-model="val" maxlength="200" placeholder="Enter module description"></textarea>
                         <div class="pointer-events-none absolute right-2 bottom-2 text-xs text-gray-500" x-text="(val?.length || 0) + '/200'"></div>
                     </div>
@@ -66,6 +66,7 @@
             </div>
             <div class="kt-modal-footer flex gap-2 justify-end p-5">
                 <button type="button" class="kt-btn kt-btn-outline" wire:click="closeModal">Cancel</button>
+                <button type="button" class="kt-btn kt-btn-outline" wire:click="save(true)">Save and Add New</button>
                 <button type="submit" class="kt-btn kt-btn-primary">{{ $isEditMode ? 'Update Module' : 'Create Module' }}</button>
             </div>
         </form>

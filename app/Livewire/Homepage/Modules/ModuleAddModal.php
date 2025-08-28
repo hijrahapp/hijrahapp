@@ -87,7 +87,7 @@ class ModuleAddModal extends Component
         $this->moduleId = null;
     }
 
-    public function save()
+    public function save(bool $addAnother = false)
     {
         // Clear previous errors
         $this->resetErrorBag();
@@ -120,8 +120,14 @@ class ModuleAddModal extends Component
                 ]);
             }
             $this->dispatch('refreshTable');
-            $this->dispatch('click');
             $this->dispatch('show-toast', type: 'success', message: $this->isEditMode ? 'Module updated successfully!' : 'Module created successfully!');
+
+            if ($addAnother) {
+                $this->resetForm();
+                // Keep modal open for adding another
+            } else {
+                $this->dispatch('click');
+            }
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Re-throw validation exceptions so they show in the form
             throw $e;

@@ -106,7 +106,7 @@ class PillarAddModal extends Component
         $this->dispatch('morph.updated');
     }
 
-    public function save()
+    public function save(bool $addAnother = false)
     {
         // Clear previous errors
         $this->resetErrorBag();
@@ -142,8 +142,14 @@ class PillarAddModal extends Component
             }
 
             $this->dispatch('refreshTable');
-            $this->closeModal();
             $this->dispatch('show-toast', type: 'success', message: $this->isEditMode ? 'Pillar updated successfully!' : 'Pillar created successfully!');
+
+            if ($addAnother) {
+                $this->resetForm();
+                // Keep modal open for adding another
+            } else {
+                $this->closeModal();
+            }
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Re-throw validation exceptions so they show in the form
