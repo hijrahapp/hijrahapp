@@ -3,7 +3,7 @@
         {{ $slot ?? '' }}
     </div>
     <div wire:ignore>
-        <div id="{{ $editorId }}" data-richtext="quill" data-input-id="{{ $editorId }}_input" data-placeholder="{{ $placeholder }}" class="border rounded bg-background" style="min-height: {{ $minHeight }}"></div>
+        <div id="{{ $editorId }}" data-richtext="quill" data-input-id="{{ $editorId }}_input" data-placeholder="{{ $placeholder }}" class="border bg-background" style="min-height: {{ $minHeight }}"></div>
     </div>
     <textarea wire:model.defer="model" id="{{ $editorId }}_input" class="hidden">{!! $model !!}</textarea>
 
