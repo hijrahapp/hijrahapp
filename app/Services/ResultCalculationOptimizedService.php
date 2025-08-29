@@ -57,13 +57,13 @@ class ResultCalculationOptimizedService
             $pillarTotalWeight = 0.0;
 
             foreach ($pillars as $pillar) {
-                $allModulesCompleted = $this->areAllPillarModulesCompleted($userId, $methodologyId, $pillar->id);
+                // $allModulesCompleted = $this->areAllPillarModulesCompleted($userId, $methodologyId, $pillar->id);
 
-                if ($allModulesCompleted) {
-                    $pillarResult = $this->calculatePillarResult($userId, $pillar->id, $methodologyId);
-                } else {
+                // if ($allModulesCompleted) {
+                    // $pillarResult = $this->calculatePillarResult($userId, $pillar->id, $methodologyId);
+                // } else {
                     $pillarResult = $this->computeDynamicLikePercentageForMethodologyItem($userId, $methodologyId, 'pillar', $pillar->id);
-                }
+                // }
 
                 $pillarPercentage = $pillarResult['percentage'] ?? 0;
                 $pillarWeight = (float) ($pillar->pivot->weight ?? 0.0);
@@ -99,13 +99,13 @@ class ResultCalculationOptimizedService
             $moduleTotalWeight = 0.0;
 
             foreach ($methodology->modules as $module) {
-                $moduleCompleted = $this->isModuleContextCompleted($userId, $module->id, $methodologyId, null);
+                // $moduleCompleted = $this->isModuleContextCompleted($userId, $module->id, $methodologyId, null);
 
-                if ($moduleCompleted) {
-                    $moduleResult = $this->calculateModuleResult($userId, $module->id, $methodologyId, null);
-                } else {
+                // if ($moduleCompleted) {
+                    // $moduleResult = $this->calculateModuleResult($userId, $module->id, $methodologyId, null);
+                // } else {
                     $moduleResult = $this->computeDynamicLikePercentageForMethodologyItem($userId, $methodologyId, 'module', $module->id);
-                }
+                // }
 
                 // if (!$moduleResult) {
                 // Fallback to methodology questions assigned to this module (item_id = module_id)
