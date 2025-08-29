@@ -36,6 +36,7 @@ class PillarDetailedResource extends JsonResource
         $payload['details'] = $this->filterArray($details);
 
         $methodologyId = request()->route('methodologyId');
+        $sequence = null;
         $pivotDescription = null;
         $pivotEstimatedTime = null;
         if ($methodologyId) {
@@ -46,7 +47,22 @@ class PillarDetailedResource extends JsonResource
             if ($pivot) {
                 $pivotDescription = property_exists($pivot, 'questions_description') ? $pivot->questions_description : null;
                 $pivotEstimatedTime = property_exists($pivot, 'questions_estimated_time') ? $pivot->questions_estimated_time : null;
+                $sequence = property_exists($pivot, 'sequence') && $pivot->sequence !== null ? (int) $pivot->sequence : null;
+                if ($sequence === null) {
+                    $orderedPillarIds = \DB::table('methodology_pillar')
+                        ->where('methodology_id', (int) $methodologyId)
+                        ->orderBy('id')
+                        ->pluck('pillar_id')
+                        ->toArray();
+                    $position = array_search($this->id, $orderedPillarIds, true);
+                    if ($position !== false) {
+                        $sequence = $position + 1;
+                    }
+                }
             }
+        }
+        if ($sequence !== null) {
+            $payload['details'] = $this->filterArray(array_merge($payload['details'], ['sequence' => $sequence]));
         }
 
         $questionsRepo = new QuestionRepository;
