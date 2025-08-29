@@ -61,7 +61,7 @@
                 </div>
 
                 <div>
-                    <livewire:shared.components.textarea :label="'Questions Description (optional)'" wire:model.defer="questionsDescription" :placeholder="" :rows="3" />
+                    <livewire:shared.components.textarea :label="'Questions Description (optional)'" wire:model.defer="questionsDescription" :placeholder="'Enter a general description of this pillar\'s questions'" :rows="3" />
                     @error('questionsDescription')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                 </div>
 
