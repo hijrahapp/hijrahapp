@@ -144,9 +144,15 @@ class MethodologyDetailedResource extends JsonResource
             }))
             : null;
         $pillars = $this->filterArray([
-            'definition' => $this->pillars_definition,
-            'list' => $pillarsList,
+            'list' => $pillarsList
         ]);
+        if($sectionNumber === 1){
+            $pillars['definition'] = $this->first_section_pillars_definition;
+        } elseif($sectionNumber === 2){
+            $pillars['definition'] = $this->second_section_pillars_definition;
+        } else {
+            $pillars['definition'] = $this->pillars_definition;
+        }
         if ($pillarsList) {
             $payload['pillars'] = $this->filterArray($pillars);
         }
