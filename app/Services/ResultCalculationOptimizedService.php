@@ -461,20 +461,8 @@ class ResultCalculationOptimizedService
             $itemColumnFilter
         );
 
-        // Denominator: sum of weights of answered questions only (dynamic-like)
-        $denominator = DB::table('methodology_question as mq')
-            ->join('user_answers as ua', function ($join) use ($userId, $methodologyId) {
-                $join->on('ua.question_id', '=', 'mq.question_id')
-                    ->where('ua.context_type', 'methodology')
-                    ->where('ua.context_id', $methodologyId)
-                    ->where('ua.user_id', $userId);
-            })
-            ->where('mq.methodology_id', $methodologyId)
-            ->where($itemColumnFilter)
-            ->distinct()
-            ->sum('mq.weight');
-
-        $percentage = $denominator > 0 ? round(((float) $numerator) / (float) $denominator, 2) : 0.0;
+        $sumWeights = (float) ($totals->sum_weights ?? 0);
+        $percentage = $$sumWeights > 0 ? round(((float) $numerator) / (float) $$sumWeights, 2) : 0.0;
 
         if ($answered == 0) {
             return null;
