@@ -462,7 +462,7 @@ class ResultCalculationOptimizedService
         );
 
         $sumWeights = (float) ($totals->sum_weights ?? 0);
-        $percentage = $$sumWeights > 0 ? round(((float) $numerator) / (float) $$sumWeights, 2) : 0.0;
+        $percentage = $sumWeights > 0 ? round(((float) $numerator) / (float) $sumWeights, 2) : 0.0;
 
         if ($answered == 0) {
             return null;
