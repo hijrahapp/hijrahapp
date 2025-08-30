@@ -121,11 +121,33 @@ class QuestionRepository
 
         $result = [];
         foreach ($modules as $module) {
+            $sequence = null;
+            $pm = \DB::table('pillar_module')
+                    ->where('methodology_id', (int) $methodologyId)
+                    ->where('pillar_id', (int) $pillarId)
+                    ->where('module_id', $module->id)
+                    ->first();
+            if ($pm) {
+                $pivotDescription = property_exists($pm, 'questions_description') ? $pm->questions_description : null;
+                $pivotEstimatedTime = property_exists($pm, 'questions_estimated_time') ? $pm->questions_estimated_time : null;
+                // No sequence column in pillar_module; derive order by creation id within this pillar + methodology
+                $orderedModuleIds = \DB::table('pillar_module')
+                    ->where('methodology_id', (int) $methodologyId)
+                    ->where('pillar_id', (int) $pillarId)
+                    ->orderBy('id')
+                    ->pluck('module_id')
+                    ->toArray();
+                $position = array_search($module->id, $orderedModuleIds, true);
+                if ($position !== false) {
+                    $sequence = $position + 1;
+                }
+            }
             $questions = $this->getQuestionsByModule($module->id, $methodologyId, $pillarId);
             foreach ($questions as $question) {
                 $question->setAttribute('module_id', $module->id);
                 $question->setAttribute('module_name', $module->name);
                 $question->setAttribute('questionId_moduleId', $question->id.'_'.$module->id);
+                $question->setAttribute('module_sequence', $sequence);
                 $result[] = $question;
             }
         }

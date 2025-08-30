@@ -57,6 +57,7 @@ class QuestionResource extends JsonResource
         if($this->module_id) {
             $data['module_id'] = $this->module_id;
             $data['module_name'] = $this->module_name;
+            $data['module_sequence'] = $this->module_sequence;
         }
 
         // Add question weight if available (from pivot)
