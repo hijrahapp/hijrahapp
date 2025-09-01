@@ -5,13 +5,14 @@ namespace App\Livewire\Homepage\Questions;
 use App\Models\Question;
 use App\Models\Tag;
 use App\Traits\WithoutUrlPagination;
+use App\Traits\WithTableReload;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class QuestionsTable extends Component
 {
-    use WithFileUploads, WithoutUrlPagination;
+    use WithFileUploads, WithoutUrlPagination, WithTableReload;
 
     public $search = '';
     public $perPage = 10;
@@ -29,16 +30,18 @@ class QuestionsTable extends Component
     #[Computed]
     public function questions()
     {
-        $query = Question::where('title', 'like', '%'.$this->search.'%')
-            ->when($this->tagFilter, function ($q) {
-                $q->whereJsonContains('tags', (int) $this->tagFilter);
-            })
-            ->withCount(['modules', 'pillars', 'methodologies'])
-            ->orderBy('created_at', 'desc');
+        return $this->handleReloadState(function () {
+            $query = Question::where('title', 'like', '%'.$this->search.'%')
+                ->when($this->tagFilter, function ($q) {
+                    $q->whereJsonContains('tags', (int) $this->tagFilter);
+                })
+                ->withCount(['modules', 'pillars', 'methodologies'])
+                ->orderBy('created_at', 'desc');
 
-        // Use custom pagination without URL caching
-        $page = $this->getPage();
-        return $query->paginate($this->perPage, ['*'], 'page', $page);
+            // Use custom pagination without URL caching
+            $page = $this->getPage();
+            return $query->paginate($this->perPage, ['*'], 'page', $page);
+        });
     }
 
     public function getTagTitles($tagIds, $limit = 3)
@@ -166,7 +169,7 @@ class QuestionsTable extends Component
         $question = Question::findOrFail($request['id']);
         $question->active = $request['active'];
         $question->save();
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
         $this->dispatch('show-toast', type: 'success', message: $request['active'] ? 'Question activated successfully!' : 'Question deactivated successfully!');
     }
 
@@ -174,7 +177,7 @@ class QuestionsTable extends Component
     {
         $question = Question::findOrFail($request['id']);
         $question->delete();
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
     }
 
     public function render()

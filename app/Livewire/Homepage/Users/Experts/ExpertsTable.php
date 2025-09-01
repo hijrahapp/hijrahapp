@@ -5,37 +5,40 @@ namespace App\Livewire\Homepage\Users\Experts;
 use App\Models\Role;
 use App\Models\User;
 use App\Traits\WithoutUrlPagination;
+use App\Traits\WithTableReload;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class ExpertsTable extends Component
 {
-    use WithFileUploads, WithoutUrlPagination;
+    use WithFileUploads, WithoutUrlPagination, WithTableReload;
 
     public $search = '';
     public $perPage = 10;
 
     protected $listeners = [
-        'refreshTable' => '$refresh',
+        'refreshTable' => 'reloadTable',
         'changeUserStatus' => 'changeUserStatus'
     ];
 
     public function getUsersProperty()
     {
-        $expertsRoleId = Role::where('name', 'Expert')->value('id');
-        $query = User::with('role')
-            ->whereIn('roleId', [$expertsRoleId])
-            ->orderBy('id', 'asc')
-            ->when($this->search, function($q) {
-                $q->where(function($q) {
-                    $q->where('name', 'like', '%'.$this->search.'%')
-                        ->orWhere('email', 'like', '%'.$this->search.'%');
+        return $this->handleReloadState(function () {
+            $expertsRoleId = Role::where('name', 'Expert')->value('id');
+            $query = User::with('role')
+                ->whereIn('roleId', [$expertsRoleId])
+                ->orderBy('id', 'asc')
+                ->when($this->search, function($q) {
+                    $q->where(function($q) {
+                        $q->where('name', 'like', '%'.$this->search.'%')
+                            ->orWhere('email', 'like', '%'.$this->search.'%');
+                    });
                 });
-            });
 
-        // Use custom pagination without URL caching
-        $page = $this->getPage();
-        return $query->paginate($this->perPage, ['*'], 'page', $page);
+            // Use custom pagination without URL caching
+            $page = $this->getPage();
+            return $query->paginate($this->perPage, ['*'], 'page', $page);
+        });
     }
 
     public function handleUserEditOpen($user)
@@ -71,7 +74,7 @@ class ExpertsTable extends Component
         $user = User::findOrFail($request['userId']);
         $user->active = $request['status'];
         $user->save();
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
     }
 
     public function render()

@@ -72,7 +72,7 @@
                             <livewire:shared.components.image-picker
                                 wire:model="imgUrl"
                                 :label="'Methodology Image'"
-                                :required="false"
+                                :required="true"
                                 key="{{ $methodologyId ?: 'edit' }}" />
                             @error('imgUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                         </div>

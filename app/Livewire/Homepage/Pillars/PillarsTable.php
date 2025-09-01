@@ -5,13 +5,14 @@ namespace App\Livewire\Homepage\Pillars;
 use App\Models\Pillar;
 use App\Models\Tag;
 use App\Traits\WithoutUrlPagination;
+use App\Traits\WithTableReload;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class PillarsTable extends Component
 {
-    use WithFileUploads, WithoutUrlPagination;
+    use WithFileUploads, WithoutUrlPagination, WithTableReload;
 
     public $search = '';
     public $perPage = 10;
@@ -21,7 +22,7 @@ class PillarsTable extends Component
     public $showTagSuggestions = false;
 
     protected $listeners = [
-        'refreshTable' => '$refresh',
+        'refreshTable' => 'reloadTable',
         'deletePillar' => 'deletePillar',
         'changePillarStatus' => 'changePillarStatus',
     ];
@@ -29,16 +30,18 @@ class PillarsTable extends Component
     #[Computed]
     public function pillars()
     {
-        $query = Pillar::where('name', 'like', '%'.$this->search.'%')
-            ->when($this->tagFilter, function ($q) {
-                $q->whereJsonContains('tags', (int) $this->tagFilter);
-            })
-            ->withCount(['methodologies', 'modules', 'questions'])
-            ->orderBy('created_at', 'desc');
+        return $this->handleReloadState(function () {
+            $query = Pillar::where('name', 'like', '%'.$this->search.'%')
+                ->when($this->tagFilter, function ($q) {
+                    $q->whereJsonContains('tags', (int) $this->tagFilter);
+                })
+                ->withCount(['methodologies', 'modules', 'questions'])
+                ->orderBy('created_at', 'desc');
 
-        // Use custom pagination without URL caching
-        $page = $this->getPage();
-        return $query->paginate($this->perPage, ['*'], 'page', $page);
+            // Use custom pagination without URL caching
+            $page = $this->getPage();
+            return $query->paginate($this->perPage, ['*'], 'page', $page);
+        });
     }
 
     public function updatedTagSearch()
@@ -166,7 +169,7 @@ class PillarsTable extends Component
         $pillar = Pillar::findOrFail($request['id']);
         $pillar->active = $request['active'];
         $pillar->save();
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
         $this->dispatch('show-toast', type: 'success', message: $request['active'] ? 'Pillar activated successfully!' : 'Pillar deactivated successfully!');
     }
 
@@ -174,7 +177,7 @@ class PillarsTable extends Component
     {
         $pillar = Pillar::findOrFail($request['id']);
         $pillar->delete();
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
     }
 
     public function render()

@@ -5,13 +5,14 @@ namespace App\Livewire\Homepage\Modules;
 use App\Models\Module;
 use App\Models\Tag;
 use App\Traits\WithoutUrlPagination;
+use App\Traits\WithTableReload;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class ModulesTable extends Component
 {
-    use WithFileUploads, WithoutUrlPagination;
+    use WithFileUploads, WithoutUrlPagination, WithTableReload;
 
     public string $search = '';
     public int $perPage = 10;
@@ -21,7 +22,7 @@ class ModulesTable extends Component
     public bool $showTagSuggestions = false;
 
     protected $listeners = [
-        'refreshTable' => '$refresh',
+        'refreshTable' => 'reloadTable',
         'deleteModule' => 'deleteModule',
         'changeModuleStatus' => 'changeModuleStatus',
     ];
@@ -29,16 +30,18 @@ class ModulesTable extends Component
     #[Computed]
     public function modules()
     {
-        $query = Module::where('name', 'like', '%'.$this->search.'%')
-            ->when($this->tagFilter, function ($q) {
-                $q->whereJsonContains('tags', (int) $this->tagFilter);
-            })
-            ->withCount(['methodologies', 'pillars', 'questions'])
-            ->orderBy('created_at', 'desc');
+        return $this->handleReloadState(function () {
+            $query = Module::where('name', 'like', '%'.$this->search.'%')
+                ->when($this->tagFilter, function ($q) {
+                    $q->whereJsonContains('tags', (int) $this->tagFilter);
+                })
+                ->withCount(['methodologies', 'pillars', 'questions'])
+                ->orderBy('created_at', 'desc');
 
-        // Use custom pagination without URL caching
-        $page = $this->getPage();
-        return $query->paginate($this->perPage, ['*'], 'page', $page);
+            // Use custom pagination without URL caching
+            $page = $this->getPage();
+            return $query->paginate($this->perPage, ['*'], 'page', $page);
+        });
     }
 
     public function updatedTagSearch()
@@ -167,7 +170,7 @@ class ModulesTable extends Component
         $module = Module::findOrFail($request['id']);
         $module->active = $request['active'];
         $module->save();
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
         $this->dispatch('show-toast', type: 'success', message: $request['active'] ? 'Module activated successfully!' : 'Module deactivated successfully!');
     }
 
@@ -175,7 +178,7 @@ class ModulesTable extends Component
     {
         $module = Module::findOrFail($request['id']);
         $module->delete();
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
     }
 
     public function render()

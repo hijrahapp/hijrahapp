@@ -8,19 +8,20 @@ use App\Models\Pillar;
 use App\Models\Question;
 use App\Models\Tag;
 use App\Traits\WithoutUrlPagination;
+use App\Traits\WithTableReload;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class TagsTable extends Component
 {
-    use WithFileUploads, WithoutUrlPagination;
+    use WithFileUploads, WithoutUrlPagination, WithTableReload;
 
     public $search = '';
     public $perPage = 10;
 
     protected $listeners = [
-        'refreshTable' => '$refresh',
+        'refreshTable' => 'reloadTable',
         'changeTagStatus' => 'changeTagStatus',
         'deleteTag' => 'deleteTag',
     ];
@@ -80,7 +81,7 @@ class TagsTable extends Component
             // On deactivation, remove the tag from all related entities
             $this->removeTagFromAllEntities((int) $tag->id);
         }
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
     }
 
     public function deleteTag($request)
@@ -90,7 +91,7 @@ class TagsTable extends Component
         $this->removeTagFromAllEntities((int) $tag->id);
         // Delete the tag itself
         $tag->delete();
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
     }
 
     private function removeTagFromAllEntities(int $tagId): void

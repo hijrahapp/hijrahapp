@@ -5,55 +5,58 @@ namespace App\Livewire\Homepage\Users\Admins;
 use App\Models\Role;
 use App\Models\User;
 use App\Traits\WithoutUrlPagination;
+use App\Traits\WithTableReload;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class AdminsTable extends Component
 {
-    use WithFileUploads, WithoutUrlPagination;
+    use WithFileUploads, WithoutUrlPagination, WithTableReload;
 
     public $search = '';
     public $perPage = 10;
 
     protected $listeners = [
-        'refreshTable' => '$refresh',
+        'refreshTable' => 'reloadTable',
         'changeUserStatus' => 'changeUserStatus'
     ];
 
     #[Computed]
     public function users()
     {
-        $user = session('user');
-        if ($user['role'] === 'SuperAdmin')
-        {
-            $superAdmin = Role::where('name', 'SuperAdmin')->value('id');
-            $adminRoleId = Role::where('name', 'Admin')->value('id');
-            $query = User::with('role')
-                ->whereIn('roleId', [$superAdmin, $adminRoleId])
-                ->orderBy('id', 'asc')
-                ->when($this->search, function($q) {
-                    $q->where(function($q) {
-                        $q->where('name', 'like', '%'.$this->search.'%')
-                        ->orWhere('email', 'like', '%'.$this->search.'%');
+        return $this->handleReloadState(function () {
+            $user = session('user');
+            if ($user['role'] === 'SuperAdmin')
+            {
+                $superAdmin = Role::where('name', 'SuperAdmin')->value('id');
+                $adminRoleId = Role::where('name', 'Admin')->value('id');
+                $query = User::with('role')
+                    ->whereIn('roleId', [$superAdmin, $adminRoleId])
+                    ->orderBy('id', 'asc')
+                    ->when($this->search, function($q) {
+                        $q->where(function($q) {
+                            $q->where('name', 'like', '%'.$this->search.'%')
+                            ->orWhere('email', 'like', '%'.$this->search.'%');
+                        });
                     });
-                });
-        } else {
-            $adminRoleId = Role::where('name', 'Admin')->value('id');
-            $query = User::with('role')
-                ->whereIn('roleId', [$adminRoleId])
-                ->orderBy('id', 'asc')
-                ->when($this->search, function($q) {
-                    $q->where(function($q) {
-                        $q->where('name', 'like', '%'.$this->search.'%')
-                        ->orWhere('email', 'like', '%'.$this->search.'%');
+            } else {
+                $adminRoleId = Role::where('name', 'Admin')->value('id');
+                $query = User::with('role')
+                    ->whereIn('roleId', [$adminRoleId])
+                    ->orderBy('id', 'asc')
+                    ->when($this->search, function($q) {
+                        $q->where(function($q) {
+                            $q->where('name', 'like', '%'.$this->search.'%')
+                            ->orWhere('email', 'like', '%'.$this->search.'%');
+                        });
                     });
-                });
-        }
+            }
 
-        // Use custom pagination without URL caching
-        $page = $this->getPage();
-        return $query->paginate($this->perPage, ['*'], 'page', $page);
+            // Use custom pagination without URL caching
+            $page = $this->getPage();
+            return $query->paginate($this->perPage, ['*'], 'page', $page);
+        });
     }
 
     public function handleUserEditOpen($user)
@@ -89,7 +92,7 @@ class AdminsTable extends Component
         $user = User::findOrFail($request['userId']);
         $user->active = $request['status'];
         $user->save();
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
     }
 
     public function render()

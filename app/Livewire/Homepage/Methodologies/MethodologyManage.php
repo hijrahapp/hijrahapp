@@ -88,7 +88,7 @@ class MethodologyManage extends Component
             'report' => 'nullable|string',
             'tags' => 'array',
             'tags.*' => 'integer',
-            'imgUrl' => 'nullable|string',
+            'imgUrl' => 'required|string',
             'type' => 'required|in:simple,complex,twoSection',
         ];
     }

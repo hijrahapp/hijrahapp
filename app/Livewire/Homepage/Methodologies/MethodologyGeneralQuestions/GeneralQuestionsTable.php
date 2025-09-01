@@ -5,11 +5,12 @@ namespace App\Livewire\Homepage\Methodologies\MethodologyGeneralQuestions;
 use App\Models\Question;
 use App\Models\Tag;
 use App\Traits\HasTagTitles;
+use App\Traits\WithTableReload;
 use Livewire\Component;
 
 class GeneralQuestionsTable extends Component
 {
-    use HasTagTitles;
+    use HasTagTitles, WithTableReload;
 
     public int $methodologyId;
     public string $search = '';
@@ -19,7 +20,7 @@ class GeneralQuestionsTable extends Component
     public bool $showTagSuggestions = false;
 
     protected $listeners = [
-        'refreshTable' => '$refresh',
+        'refreshTable' => 'reloadTable',
     ];
 
     public function updatedTagSearch(): void
@@ -65,32 +66,34 @@ class GeneralQuestionsTable extends Component
             ->where('question_id', $questionId)
             ->orderBy('sequence')
             ->delete();
-        $this->dispatch('refresh-general-questions');
+        $this->reloadTable();
         $this->dispatch('show-toast', type: 'success', message: 'Removed successfully');
     }
 
     public function getQuestions()
     {
-        $ids = \DB::table('methodology_question')
-            ->where('methodology_id', $this->methodologyId)
-            ->orderBy('sequence')
-            ->pluck('question_id')
-            ->toArray();
+        return $this->handleReloadState(function () {
+            $ids = \DB::table('methodology_question')
+                ->where('methodology_id', $this->methodologyId)
+                ->orderBy('sequence')
+                ->pluck('question_id')
+                ->toArray();
 
-        if (empty($ids)) {
-            return collect();
-        }
+            if (empty($ids)) {
+                return collect();
+            }
 
-        $ids = array_map('intval', $ids);
+            $ids = array_map('intval', $ids);
 
-        $q = Question::query()
-            ->whereIn('id', $ids)
-            ->when($this->search, fn($qq) => $qq->where('title', 'like', '%'.$this->search.'%'))
-            ->when($this->tagFilter, fn($qq) => $qq->whereJsonContains('tags', (int)$this->tagFilter))
-            ->orderByRaw('FIELD(id, '.implode(',', $ids).')')
-            ->get();
+            $q = Question::query()
+                ->whereIn('id', $ids)
+                ->when($this->search, fn($qq) => $qq->where('title', 'like', '%'.$this->search.'%'))
+                ->when($this->tagFilter, fn($qq) => $qq->whereJsonContains('tags', (int)$this->tagFilter))
+                ->orderByRaw('FIELD(id, '.implode(',', $ids).')')
+                ->get();
 
-        return $q;
+            return $q;
+        });
     }
 
     public function render()

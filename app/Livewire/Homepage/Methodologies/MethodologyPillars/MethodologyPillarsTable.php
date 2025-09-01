@@ -6,13 +6,14 @@ use App\Models\Methodology;
 use App\Models\Pillar;
 use App\Models\Tag;
 use App\Traits\WithoutUrlPagination;
+use App\Traits\WithTableReload;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class MethodologyPillarsTable extends Component
 {
-    use \App\Traits\HasTagTitles, WithoutUrlPagination;
+    use \App\Traits\HasTagTitles, WithoutUrlPagination, WithTableReload;
 
     public int $methodologyId;
 
@@ -29,38 +30,40 @@ class MethodologyPillarsTable extends Component
     public bool $showTagSuggestions = false;
 
     protected $listeners = [
-        'refreshTable' => '$refresh',
+        'refreshTable' => 'reloadTable',
         'confirm-delete-methodology-pillar' => 'deleteMethodologyPillar',
     ];
 
     #[Computed]
     public function pillars(): LengthAwarePaginator
     {
-        $query = Pillar::query()
-            ->where('pillars.name', 'like', '%'.$this->search.'%')
-            ->whereHas('methodologies', function ($q) {
-                $q->where('methodology_id', $this->methodologyId);
-            })
-            ->when($this->tagFilter, function ($q) {
-                $q->whereJsonContains('pillars.tags', (int) $this->tagFilter);
-            })
-            ->join('methodology_pillar as mp', function ($join) {
-                $join->on('mp.pillar_id', '=', 'pillars.id')
-                    ->where('mp.methodology_id', '=', $this->methodologyId);
-            })
-            ->select('pillars.*')
-            ->selectRaw('mp.weight as mp_weight, mp.sequence as mp_sequence')
-            ->selectRaw('(
-				SELECT COUNT(DISTINCT pm.module_id)
-				FROM pillar_module pm
-				WHERE pm.pillar_id = pillars.id AND pm.methodology_id = ?
-			) as modules_count', [$this->methodologyId])
-            // ->orderBy('mp.sequence', 'asc')
-            ->orderBy('mp.created_at', 'desc');
+        return $this->handleReloadState(function () {
+            $query = Pillar::query()
+                ->where('pillars.name', 'like', '%'.$this->search.'%')
+                ->whereHas('methodologies', function ($q) {
+                    $q->where('methodology_id', $this->methodologyId);
+                })
+                ->when($this->tagFilter, function ($q) {
+                    $q->whereJsonContains('pillars.tags', (int) $this->tagFilter);
+                })
+                ->join('methodology_pillar as mp', function ($join) {
+                    $join->on('mp.pillar_id', '=', 'pillars.id')
+                        ->where('mp.methodology_id', '=', $this->methodologyId);
+                })
+                ->select('pillars.*')
+                ->selectRaw('mp.weight as mp_weight, mp.sequence as mp_sequence')
+                ->selectRaw('(
+                    SELECT COUNT(DISTINCT pm.module_id)
+                    FROM pillar_module pm
+                    WHERE pm.pillar_id = pillars.id AND pm.methodology_id = ?
+                ) as modules_count', [$this->methodologyId])
+                // ->orderBy('mp.sequence', 'asc')
+                ->orderBy('mp.created_at', 'desc');
 
-        $page = $this->getPage();
+            $page = $this->getPage();
 
-        return $query->paginate($this->perPage, ['*'], 'page', $page);
+            return $query->paginate($this->perPage, ['*'], 'page', $page);
+        });
     }
 
     /**
@@ -195,7 +198,7 @@ class MethodologyPillarsTable extends Component
                 ->delete();
         });
 
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
         $this->dispatch('show-toast', type: 'success', message: 'Removed successfully');
     }
 

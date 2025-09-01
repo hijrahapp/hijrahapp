@@ -5,13 +5,14 @@ namespace App\Livewire\Homepage\Methodologies;
 use App\Models\Methodology;
 use App\Models\Tag;
 use App\Traits\WithoutUrlPagination;
+use App\Traits\WithTableReload;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class MethodologyTable extends Component
 {
-    use WithFileUploads, WithoutUrlPagination;
+    use WithFileUploads, WithoutUrlPagination, WithTableReload;
 
     public string $search = '';
 
@@ -26,7 +27,7 @@ class MethodologyTable extends Component
     public bool $showTagSuggestions = false;
 
     protected $listeners = [
-        'refreshTable' => '$refresh',
+        'refreshTable' => 'reloadTable',
         'deleteMethodology' => 'deleteMethodology',
         'changeMethodologyStatus' => 'changeMethodologyStatus',
     ];
@@ -34,17 +35,19 @@ class MethodologyTable extends Component
     #[Computed]
     public function methodologies()
     {
-        $query = Methodology::where('name', 'like', '%'.$this->search.'%')
-            ->when($this->tagFilter, function ($q) {
-                $q->whereJsonContains('tags', (int) $this->tagFilter);
-            })
-            ->withCount(['pillars', 'modules', 'questions'])
-            ->orderBy('created_at', 'desc');
+        return $this->handleReloadState(function () {
+            $query = Methodology::where('name', 'like', '%'.$this->search.'%')
+                ->when($this->tagFilter, function ($q) {
+                    $q->whereJsonContains('tags', (int) $this->tagFilter);
+                })
+                ->withCount(['pillars', 'modules', 'questions'])
+                ->orderBy('created_at', 'desc');
 
-        // Use custom pagination without URL caching
-        $page = $this->getPage();
+            // Use custom pagination without URL caching
+            $page = $this->getPage();
 
-        return $query->paginate($this->perPage, ['*'], 'page', $page);
+            return $query->paginate($this->perPage, ['*'], 'page', $page);
+        });
     }
 
     public function updatedTagSearch()
@@ -159,7 +162,7 @@ class MethodologyTable extends Component
         $methodology = Methodology::findOrFail($request['id']);
         $methodology->active = $request['active'];
         $methodology->save();
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
         $this->dispatch('show-toast', type: 'success', message: $request['active'] ? 'Methodology activated successfully!' : 'Methodology deactivated successfully!');
     }
 
@@ -173,7 +176,7 @@ class MethodologyTable extends Component
         $methodology->questions()->detach();
 
         $methodology->delete();
-        $this->dispatch('refreshTable');
+        $this->reloadTable();
         $this->dispatch('show-toast', type: 'success', message: 'Methodology deleted successfully!');
     }
 
