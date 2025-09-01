@@ -187,7 +187,7 @@ document.addEventListener('livewire:init', () => {
                     appearance: 'solid',
                     position: 'top-end',
                     dismissible: true,
-                    duration: 3500
+                    duration: 5000
                 });
                 return;
             }
@@ -201,7 +201,7 @@ document.addEventListener('livewire:init', () => {
                     appearance: 'solid',
                     position: 'top-end',
                     dismissible: true,
-                    duration: 3500
+                    duration: 5000
                 });
                 return;
             }

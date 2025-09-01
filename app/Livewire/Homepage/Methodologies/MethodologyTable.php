@@ -6,6 +6,7 @@ use App\Models\Methodology;
 use App\Models\Tag;
 use App\Traits\WithoutUrlPagination;
 use App\Traits\WithTableReload;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -163,10 +164,135 @@ class MethodologyTable extends Component
     public function changeMethodologyStatus($request)
     {
         $methodology = Methodology::findOrFail($request['id']);
+        
+        // If activating, validate the methodology meets all criteria
+        if ($request['active']) {
+            $validationResult = $this->validateMethodologyForActivation($methodology);
+            if (!$validationResult['valid']) {
+                $this->dispatch('show-toast', type: 'error', message: $validationResult['message']);
+                return;
+            }
+        }
+        
         $methodology->active = $request['active'];
         $methodology->save();
         $this->reloadTable();
         $this->dispatch('show-toast', type: 'success', message: $request['active'] ? 'Methodology activated successfully!' : 'Methodology deactivated successfully!');
+    }
+
+    /**
+     * Validate if a methodology meets all criteria for activation.
+     */
+    private function validateMethodologyForActivation(Methodology $methodology): array
+    {
+        $errors = [];
+
+        // 1. Check if methodology has at least 1 general question
+        $generalQuestionsCount = $methodology->questions()->count();
+        if ($generalQuestionsCount === 0) {
+            $errors[] = 'Methodology must have at least 1 general question';
+        }
+
+        // 2. Type-specific validations
+        if ($methodology->type === 'simple') {
+            // For simple: at least 1 module
+            $directModulesCount = $methodology->modules()->count();
+            if ($directModulesCount === 0) {
+                $errors[] = 'Simple methodology must have at least 1 module';
+            }
+            
+            // Check each direct module has at least 1 question
+            $modulesWithoutQuestions = [];
+            foreach ($methodology->modules as $module) {
+                // Skip if module is null or false
+                if (!$module || !is_object($module)) {
+                    continue;
+                }
+                
+                $moduleQuestionsCount = $module->questionsForMethodology($methodology->id)->count();
+                if ($moduleQuestionsCount === 0) {
+                    $modulesWithoutQuestions[] = $module->name;
+                }
+            }
+            if (!empty($modulesWithoutQuestions)) {
+                $errors[] = 'The following modules must have at least 1 question each: ' . implode(', ', $modulesWithoutQuestions);
+            }
+            
+        } elseif (in_array($methodology->type, ['complex', '2-section'])) {
+            // For complex & 2-section: at least 1 pillar AND at least 1 module (direct or within pillars)
+            $pillarsCount = $methodology->pillars()->count();
+            if ($pillarsCount === 0) {
+                $errors[] = ucfirst($methodology->type) . ' methodology must have at least 1 pillar';
+            }
+            
+            $directModulesCount = $methodology->modules()->count();
+            $pillarModulesCount = DB::table('pillar_module')
+                ->where('methodology_id', $methodology->id)
+                ->count();
+            $totalModulesCount = $directModulesCount + $pillarModulesCount;
+            
+            if ($totalModulesCount === 0) {
+                $errors[] = ucfirst($methodology->type) . ' methodology must have at least 1 module';
+            }
+            
+            // Check each pillar has at least 1 module using direct database query
+            $pillarsWithoutModules = DB::table('methodology_pillar as mp')
+                ->join('pillars as p', 'mp.pillar_id', '=', 'p.id')
+                ->leftJoin('pillar_module as pm', function($join) use ($methodology) {
+                    $join->on('mp.pillar_id', '=', 'pm.pillar_id')
+                         ->where('pm.methodology_id', '=', $methodology->id);
+                })
+                ->where('mp.methodology_id', $methodology->id)
+                ->whereNull('pm.id')
+                ->pluck('p.name')
+                ->toArray();
+                
+            if (!empty($pillarsWithoutModules)) {
+                $errors[] = 'The following pillars must have at least 1 module each: ' . implode(', ', $pillarsWithoutModules);
+            }
+            
+            // Check direct modules have at least 1 question using direct database query
+            $directModulesWithoutQuestions = DB::table('methodology_module as mm')
+                ->join('modules as m', 'mm.module_id', '=', 'm.id')
+                ->leftJoin('module_question as mq', function($join) use ($methodology) {
+                    $join->on('mm.module_id', '=', 'mq.module_id')
+                         ->where('mq.methodology_id', '=', $methodology->id)
+                         ->whereNull('mq.pillar_id'); // Direct module questions have null pillar_id
+                })
+                ->where('mm.methodology_id', $methodology->id)
+                ->whereNull('mq.id')
+                ->pluck('m.name')
+                ->toArray();
+            
+            // Check pillar modules have at least 1 question using direct database query  
+            $pillarModulesWithoutQuestions = DB::table('pillar_module as pm')
+                ->join('modules as m', 'pm.module_id', '=', 'm.id')
+                ->join('pillars as p', 'pm.pillar_id', '=', 'p.id')
+                ->leftJoin('module_question as mq', function($join) use ($methodology) {
+                    $join->on('pm.module_id', '=', 'mq.module_id')
+                         ->on('pm.pillar_id', '=', 'mq.pillar_id')
+                         ->where('mq.methodology_id', '=', $methodology->id);
+                })
+                ->where('pm.methodology_id', $methodology->id)
+                ->whereNull('mq.id')
+                ->select(DB::raw("CONCAT(m.name, ' (in ', p.name, ')') as module_name"))
+                ->pluck('module_name')
+                ->toArray();
+            
+            $allModulesWithoutQuestions = array_merge($directModulesWithoutQuestions, $pillarModulesWithoutQuestions);
+            if (!empty($allModulesWithoutQuestions)) {
+                $errors[] = 'The following modules must have at least 1 question each: ' . implode(', ', $allModulesWithoutQuestions);
+            }
+        }
+
+        if (empty($errors)) {
+            return ['valid' => true, 'message' => ''];
+        }
+
+        return [
+            'valid' => false,
+            'message' => 'Cannot activate methodology. Please fix the following issues:' . '<br>' . '• ' . implode('<br>' . '• ', $errors)
+        ];
     }
 
     public function deleteMethodology($request)
