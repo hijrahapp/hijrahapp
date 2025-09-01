@@ -9,6 +9,8 @@ use App\Livewire\Homepage\Index as HomepageIndex;
 use App\Livewire\Homepage\Methodologies\Methodologies;
 use App\Livewire\Homepage\Methodologies\MethodologyManage;
 use App\Livewire\Homepage\Methodologies\MethodologyQuestions\MethodologyQuestions;
+use App\Livewire\Homepage\Methodologies\Users\MethodologyUserDetails;
+use App\Livewire\Homepage\Methodologies\Users\MethodologyUserList;
 use App\Livewire\Homepage\Modules\Modules;
 use App\Livewire\Homepage\Pillars\Pillars;
 use App\Livewire\Homepage\Questions\Questions;
@@ -39,6 +41,10 @@ Route::prefix('app')->get('/customers', Customers::class)->name('customers');
 Route::prefix('app')->get('/methodologies', Methodologies::class)->name('methodologies');
 Route::prefix('app')->get('/methodology/{methodologyId}', MethodologyManage::class)->name('methodology.manage');
 Route::prefix('app')->get('/methodology/{methodologyId}/questions', MethodologyQuestions::class)->name('methodology.questions');
+
+// User Answers Per Methodology
+Route::prefix('app')->get('/methodology/{methodology}/users', MethodologyUserList::class)->name('methodology.users');
+Route::prefix('app')->get('/methodology/{methodology}/user/{user}', MethodologyUserDetails::class)->name('methodology.user.answers');
 
 // Banks
 Route::prefix('app')->get('/pillars', Pillars::class)->name('pillars');

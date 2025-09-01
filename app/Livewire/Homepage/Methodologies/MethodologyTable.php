@@ -14,10 +14,15 @@ class MethodologyTable extends Component
     use WithFileUploads, WithoutUrlPagination;
 
     public string $search = '';
+
     public int $perPage = 10;
+
     public string $tagFilter = '';
+
     public string $tagSearch = '';
+
     public array $tagSuggestions = [];
+
     public bool $showTagSuggestions = false;
 
     protected $listeners = [
@@ -38,13 +43,14 @@ class MethodologyTable extends Component
 
         // Use custom pagination without URL caching
         $page = $this->getPage();
+
         return $query->paginate($this->perPage, ['*'], 'page', $page);
     }
 
     public function updatedTagSearch()
     {
         if (strlen($this->tagSearch) >= 1) {
-            $this->tagSuggestions = Tag::where('title', 'like', '%' . $this->tagSearch . '%')
+            $this->tagSuggestions = Tag::where('title', 'like', '%'.$this->tagSearch.'%')
                 ->where('active', true)
                 ->limit(7)
                 ->get(['id', 'title'])
@@ -74,7 +80,7 @@ class MethodologyTable extends Component
 
     public function getTagTitles($tagIds, $limit = 3)
     {
-        if (empty($tagIds) || !is_array($tagIds)) {
+        if (empty($tagIds) || ! is_array($tagIds)) {
             return [
                 'tags' => [],
                 'hasMore' => false,
@@ -96,7 +102,7 @@ class MethodologyTable extends Component
             'tags' => $displayedTags,
             'hasMore' => $hasMore,
             'totalCount' => $totalCount,
-            'remainingCount' => max(0, $totalCount - $limit)
+            'remainingCount' => max(0, $totalCount - $limit),
         ];
     }
 
@@ -121,10 +127,11 @@ class MethodologyTable extends Component
         $this->dispatch('openConfirmationModal', $modal);
     }
 
-    public function openMethodologyStatusModal($request) {
+    public function openMethodologyStatusModal($request)
+    {
         $methodology = Methodology::findOrFail($request['id']);
 
-        if($request['active']) {
+        if ($request['active']) {
             $title = __('messages.activate_methodology_title');
             $message = __('messages.activate_methodology_message');
             $action = __('messages.activate_action');
@@ -142,7 +149,7 @@ class MethodologyTable extends Component
             'note' => $note,
             'action' => $action,
             'callback' => 'changeMethodologyStatus',
-            'object' => $request
+            'object' => $request,
         ];
         $this->dispatch('openConfirmationModal', $modal);
     }
@@ -197,7 +204,7 @@ class MethodologyTable extends Component
 
     public function viewUsers($methodologyId)
     {
-        $this->dispatch('view-users', $methodologyId);
+        return redirect()->route('methodology.users', ['methodology' => $methodologyId]);
     }
 
     public function render()

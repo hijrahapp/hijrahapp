@@ -1,6 +1,6 @@
 @props(['paginator'])
 
-<div class="flex justify-center mt-6">
+<div class="flex justify-center mt-6 mb-2">
     <div class="kt-card kt-card-div">
         <div class="kt-card-content p-1">
             <ol class="kt-pagination">

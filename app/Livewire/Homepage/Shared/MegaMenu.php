@@ -3,12 +3,13 @@
 namespace App\Livewire\Homepage\Shared;
 
 use Illuminate\Support\Facades\Route;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class MegaMenu extends Component
 {
     public $currentSection;
+
     public $currentSubSection;
 
     public function mount()
@@ -29,6 +30,10 @@ class MegaMenu extends Component
                 $this->currentSubSection = 'Experts Management';
                 break;
             case 'methodologies':
+            case 'methodology.manage':
+            case 'methodology.questions':
+            case 'methodology.users':
+            case 'methodology.user.answers':
                 $this->currentSection = 'Methodologies';
                 $this->currentSubSection = 'Methodologies Management';
                 break;

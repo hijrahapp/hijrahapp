@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\DeletesStoredImages;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
-use App\Traits\DeletesStoredImages;
 
 class User extends Model
 {
-    use HasFactory, Notifiable, DeletesStoredImages;
+    use DeletesStoredImages, HasFactory, Notifiable;
 
     protected $table = 'users';
 
@@ -51,16 +52,26 @@ class User extends Model
         return ['profile_picture'];
     }
 
-    public function role() {
+    public function role()
+    {
         return $this->belongsTo(Role::class, 'roleId');
     }
 
-    public function getJWTIdentifier() {
+    public function getJWTIdentifier()
+    {
         return $this->getKey();
     }
 
-    public function getJWTCustomClaims(): array {
+    public function getJWTCustomClaims(): array
+    {
         return [];
     }
 
+    /**
+     * User's submitted answers.
+     */
+    public function userAnswers(): HasMany
+    {
+        return $this->hasMany(UserAnswer::class);
+    }
 }
