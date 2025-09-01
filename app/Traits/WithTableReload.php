@@ -72,6 +72,47 @@ trait WithTableReload
     }
 
     /**
+     * Handle page updates to reload table data
+     */
+    public function updatedPage(): void
+    {
+        $this->reloadTable();
+    }
+
+    /**
+     * Handle search updates to reset page and reload table
+     */
+    public function updatedSearch(): void
+    {
+        if (method_exists($this, 'resetPage')) {
+            $this->resetPage();
+        }
+        $this->reloadTable();
+    }
+
+    /**
+     * Handle per page updates to reset page and reload table
+     */
+    public function updatedPerPage(): void
+    {
+        if (method_exists($this, 'resetPage')) {
+            $this->resetPage();
+        }
+        $this->reloadTable();
+    }
+
+    /**
+     * Generic method to reset page and reload table for filter changes
+     */
+    public function resetPageAndReload(): void
+    {
+        if (method_exists($this, 'resetPage')) {
+            $this->resetPage();
+        }
+        $this->reloadTable();
+    }
+
+    /**
      * Update the listeners to include table reload
      */
     protected function getListeners(): array

@@ -129,6 +129,7 @@ class MethodologyModulesTable extends Component
         } else {
             $this->tagFilter = '';
             $this->showTagSuggestions = false;
+            $this->resetPageAndReload();
         }
     }
 
@@ -138,6 +139,7 @@ class MethodologyModulesTable extends Component
         $this->tagSearch = $tagTitle;
         $this->tagSuggestions = [];
         $this->showTagSuggestions = false;
+        $this->resetPageAndReload();
     }
 
     public function clearTagFilter(): void
@@ -145,6 +147,7 @@ class MethodologyModulesTable extends Component
         $this->tagFilter = '';
         $this->showTagSuggestions = false;
         $this->tagSearch = '';
+        $this->resetPageAndReload();
     }
 
     public function openAddModal(): void

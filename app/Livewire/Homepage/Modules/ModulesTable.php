@@ -56,6 +56,7 @@ class ModulesTable extends Component
         } else {
             $this->tagFilter = '';
             $this->showTagSuggestions = false;
+            $this->resetPageAndReload();
         }
     }
 
@@ -65,6 +66,7 @@ class ModulesTable extends Component
         $this->tagSearch = $tagTitle;
         $this->tagSuggestions = [];
         $this->showTagSuggestions = false;
+        $this->resetPageAndReload();
     }
 
     public function clearTagFilter()
@@ -73,6 +75,7 @@ class ModulesTable extends Component
         $this->tagSearch = '';
         $this->tagSuggestions = [];
         $this->showTagSuggestions = false;
+        $this->resetPageAndReload();
     }
 
     public function getTagTitles($tagIds, $limit = 3)

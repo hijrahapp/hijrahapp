@@ -95,6 +95,7 @@ class MethodologyPillarsTable extends Component
         } else {
             $this->tagFilter = '';
             $this->showTagSuggestions = false;
+            $this->resetPageAndReload();
         }
     }
 
@@ -104,6 +105,7 @@ class MethodologyPillarsTable extends Component
         $this->tagSearch = $tagTitle;
         $this->tagSuggestions = [];
         $this->showTagSuggestions = false;
+        $this->resetPageAndReload();
     }
 
     public function clearTagFilter(): void
@@ -111,6 +113,7 @@ class MethodologyPillarsTable extends Component
         $this->tagFilter = '';
         $this->showTagSuggestions = false;
         $this->tagSearch = '';
+        $this->resetPageAndReload();
     }
 
     public function openAddModal(): void

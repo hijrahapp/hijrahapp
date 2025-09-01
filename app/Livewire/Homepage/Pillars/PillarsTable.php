@@ -57,6 +57,7 @@ class PillarsTable extends Component
             $this->tagFilter = '';
             $this->tagSuggestions = [];
             $this->showTagSuggestions = false;
+            $this->resetPageAndReload();
         }
     }
 
@@ -66,6 +67,7 @@ class PillarsTable extends Component
         $this->tagSearch = $tagTitle;
         $this->tagSuggestions = [];
         $this->showTagSuggestions = false;
+        $this->resetPageAndReload();
     }
 
     public function clearTagFilter()
@@ -74,6 +76,7 @@ class PillarsTable extends Component
         $this->tagSearch = '';
         $this->tagSuggestions = [];
         $this->showTagSuggestions = false;
+        $this->resetPageAndReload();
     }
 
     public function getTagTitles($tagIds, $limit = 3)

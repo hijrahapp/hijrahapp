@@ -35,6 +35,7 @@ class GeneralQuestionsTable extends Component
         } else {
             $this->tagFilter = '';
             $this->showTagSuggestions = false;
+            $this->resetPageAndReload();
         }
     }
 
@@ -44,6 +45,7 @@ class GeneralQuestionsTable extends Component
         $this->tagSearch = $tagTitle;
         $this->tagSuggestions = [];
         $this->showTagSuggestions = false;
+        $this->resetPageAndReload();
     }
 
     public function clearTagFilter(): void
@@ -51,6 +53,7 @@ class GeneralQuestionsTable extends Component
         $this->tagFilter = '';
         $this->tagSearch = '';
         $this->showTagSuggestions = false;
+        $this->resetPageAndReload();
     }
 
     public function openConfig(): void

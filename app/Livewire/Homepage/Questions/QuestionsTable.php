@@ -84,6 +84,7 @@ class QuestionsTable extends Component
             $this->tagFilter = '';
             $this->tagSuggestions = [];
             $this->showTagSuggestions = false;
+            $this->resetPageAndReload();
         }
     }
 
@@ -93,6 +94,7 @@ class QuestionsTable extends Component
         $this->tagSearch = $tagTitle;
         $this->tagSuggestions = [];
         $this->showTagSuggestions = false;
+        $this->resetPageAndReload();
     }
 
     public function clearTagFilter()
@@ -101,6 +103,7 @@ class QuestionsTable extends Component
         $this->tagSearch = '';
         $this->tagSuggestions = [];
         $this->showTagSuggestions = false;
+        $this->resetPageAndReload();
     }
 
     public function editQuestion($questionId)
