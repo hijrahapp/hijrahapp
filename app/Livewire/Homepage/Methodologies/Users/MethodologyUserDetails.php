@@ -86,9 +86,13 @@ class MethodologyUserDetails extends Component
                 ->pillars()
                 ->with([
                     'modules' => function ($m) {
-                        $m->with(['questions' => function ($q) {
-                            $q->orderBy('module_question.sequence', 'asc')->orderBy('module_question.id', 'asc');
-                        }]);
+                        // Get modules through pillar_module pivot table for this specific methodology
+                        $m->wherePivot('methodology_id', $this->methodology->id)
+                            ->with(['questions' => function ($q) {
+                                $q->where('module_question.methodology_id', $this->methodology->id)
+                                    ->orderBy('module_question.sequence', 'asc')
+                                    ->orderBy('module_question.id', 'asc');
+                            }]);
                     },
                 ])
                 ->orderBy('methodology_pillar.sequence', 'asc')
@@ -103,9 +107,13 @@ class MethodologyUserDetails extends Component
             ->where('methodology_pillar.section', 'first')
             ->with([
                 'modules' => function ($m) {
-                    $m->with(['questions' => function ($q) {
-                        $q->orderBy('module_question.sequence', 'asc')->orderBy('module_question.id', 'asc');
-                    }]);
+                    // Get modules through pillar_module pivot table for this specific methodology
+                    $m->wherePivot('methodology_id', $this->methodology->id)
+                        ->with(['questions' => function ($q) {
+                            $q->where('module_question.methodology_id', $this->methodology->id)
+                                ->orderBy('module_question.sequence', 'asc')
+                                ->orderBy('module_question.id', 'asc');
+                        }]);
                 },
             ])
             ->orderBy('methodology_pillar.sequence', 'asc')
@@ -116,9 +124,13 @@ class MethodologyUserDetails extends Component
             ->where('methodology_pillar.section', 'second')
             ->with([
                 'modules' => function ($m) {
-                    $m->with(['questions' => function ($q) {
-                        $q->orderBy('module_question.sequence', 'asc')->orderBy('module_question.id', 'asc');
-                    }]);
+                    // Get modules through pillar_module pivot table for this specific methodology
+                    $m->wherePivot('methodology_id', $this->methodology->id)
+                        ->with(['questions' => function ($q) {
+                            $q->where('module_question.methodology_id', $this->methodology->id)
+                                ->orderBy('module_question.sequence', 'asc')
+                                ->orderBy('module_question.id', 'asc');
+                        }]);
                 },
             ])
             ->orderBy('methodology_pillar.sequence', 'asc')
@@ -309,7 +321,7 @@ class MethodologyUserDetails extends Component
             }
 
             $answerWeight = $normalized; // report normalized when MCQMultiple
-            $score = $normalized * (float) ($placement['weight'] ?? 0.0);
+            $score = ($normalized * (float) ($placement['weight'] ?? 0.0)) / ($placement['weight'] ?? 0.0);
         }
 
         return [
@@ -317,25 +329,6 @@ class MethodologyUserDetails extends Component
             'answer_weight' => $answerWeight,
             'answered_at' => $answeredAt,
             'score' => $score,
-        ];
-    }
-
-    public function getPillarQuestionMeta(int $pillarId, int $questionId): array
-    {
-        $placement = $this->placementMaps['pillar'][$pillarId][$questionId] ?? null;
-        $ua = $this->userAnswersAll->first(function ($a) use ($pillarId, $questionId) {
-            return $a->context_type === 'pillar' && (int) $a->context_id === $pillarId && (int) $a->question_id === $questionId;
-        });
-
-        $answerWeight = null;
-        if ($placement && $ua) {
-            $answerWeight = $this->answerWeightMaps['pillar_question'][$placement['placement_id']][$ua->answer_id] ?? null;
-        }
-
-        return [
-            'question_weight' => $placement['weight'] ?? null,
-            'answer_weight' => $answerWeight,
-            'answered_at' => $ua?->created_at,
         ];
     }
 
@@ -364,36 +357,25 @@ class MethodologyUserDetails extends Component
     {
         $service = new ResultCalculationOptimizedService;
 
-        return $service->calculateMethodologyResult($this->user->id, $this->methodology->id);
+        return $service->calculateMethodologyResult($this->user->id, $this->methodology->id, true);
     }
 
     #[Computed]
     public function generalResults(): array
     {
-        $placements = $this->placementMaps['methodology'];
-        if (empty($placements)) {
+        $service = new ResultCalculationOptimizedService;
+        $methodologyResult = $service->calculateMethodologyResult($this->user->id, $this->methodology->id);
+
+        if (! $methodologyResult || ! isset($methodologyResult['summary'])) {
             return ['percentage' => 0.0, 'total_questions' => 0, 'answered_questions' => 0];
         }
 
-        $denominator = 0.0;
-        $numerator = 0.0;
-        $answeredCount = 0;
-
-        foreach ($placements as $questionId => $meta) {
-            $denominator += (float) ($meta['weight'] ?? 0.0);
-            $g = $this->getGeneralQuestionMeta((int) $questionId);
-            if ($g['answer_weight'] !== null) {
-                $answeredCount += 1;
-            }
-            $numerator += (float) ($g['score'] ?? 0.0);
-        }
-
-        $percentage = $denominator > 0.0 ? round($numerator / $denominator, 2) : 0.0;
+        $summary = $methodologyResult['summary'];
 
         return [
-            'percentage' => $percentage,
-            'total_questions' => count($placements),
-            'answered_questions' => $answeredCount,
+            'percentage' => (float) ($summary['overall_percentage'] ?? 0.0),
+            'total_questions' => (int) ($summary['total_questions'] ?? 0),
+            'answered_questions' => (int) ($summary['answered_questions'] ?? 0),
         ];
     }
 
@@ -416,16 +398,25 @@ class MethodologyUserDetails extends Component
         return $data;
     }
 
-    public function getModulePercentage(int $moduleId): ?float
+    public function getModulePercentage(int $moduleId, ?int $pillarId = null): ?float
     {
         $scores = $this->scores;
-        if (! $scores || ! isset($scores['modules'])) {
-            return null;
-        }
-        foreach ($scores['modules'] as $m) {
-            if ((int) ($m['id'] ?? 0) === $moduleId) {
-                return (float) ($m['percentage'] ?? 0);
+
+        // For simple type, check the modules array from service
+        if ($pillarId === null && $scores && isset($scores['modules'])) {
+            foreach ($scores['modules'] as $m) {
+                if ((int) ($m['id'] ?? 0) === $moduleId) {
+                    return (float) ($m['percentage'] ?? 0);
+                }
             }
+        }
+
+        // For complex/twoSection types, use the service to calculate module result
+        if ($pillarId !== null) {
+            $service = new ResultCalculationOptimizedService;
+            $moduleResult = $service->calculateModuleResult($this->user->id, $moduleId, $this->methodology->id, $pillarId);
+
+            return $moduleResult ? (float) ($moduleResult['percentage'] ?? 0) : 0.0;
         }
 
         return null;
@@ -434,31 +425,44 @@ class MethodologyUserDetails extends Component
     public function getPillarPercentage(int $pillarId): ?float
     {
         $scores = $this->scores;
-        if (! $scores || ! isset($scores['pillars'])) {
-            return null;
-        }
-        foreach ($scores['pillars'] as $p) {
-            if ((int) ($p['id'] ?? 0) === $pillarId) {
-                return (float) ($p['percentage'] ?? 0);
+
+        // First try to get from service results
+        if ($scores && isset($scores['pillars'])) {
+            foreach ($scores['pillars'] as $p) {
+                if ((int) ($p['id'] ?? 0) === $pillarId) {
+                    return (float) ($p['percentage'] ?? 0);
+                }
             }
         }
 
-        return null;
+        // If not found in service results, use the service to calculate pillar result
+        $service = new ResultCalculationOptimizedService;
+        $pillarResult = $service->calculatePillarResult($this->user->id, $pillarId, $this->methodology->id);
+
+        return $pillarResult ? (float) ($pillarResult['percentage'] ?? 0) : 0.0;
     }
 
     public function getSectionPercentage(string $sectionName): ?float
     {
         $scores = $this->scores;
-        if (! $scores || ! isset($scores['sections'])) {
-            return null;
-        }
-        foreach ($scores['sections'] as $s) {
-            if (($s['name'] ?? '') === $sectionName) {
-                return (float) ($s['percentage'] ?? 0);
+
+        // First try to get from service results
+        if ($scores && isset($scores['sections'])) {
+            foreach ($scores['sections'] as $s) {
+                if (($s['name'] ?? '') === $sectionName) {
+                    return (float) ($s['percentage'] ?? 0);
+                }
             }
         }
 
-        return null;
+        // If not found, use the service to calculate section result
+        // Map section name to section number (1 for first, 2 for second)
+        $sectionNumber = ($sectionName === ($this->methodology->first_section_name ?? 'First Section')) ? 1 : 2;
+
+        $service = new ResultCalculationOptimizedService;
+        $sectionResult = $service->calculateSectionResult($this->user->id, $this->methodology->id, $sectionNumber);
+
+        return $sectionResult ? (float) ($sectionResult['percentage'] ?? 0) : 0.0;
     }
 
     public function getMethodologyStatus(): string
@@ -609,65 +613,38 @@ class MethodologyUserDetails extends Component
         $scores = $this->scores;
         $structure = $this->methodologyStructure;
 
+        if (! $scores || ! isset($scores['summary'])) {
+            return [
+                'percentage' => 0,
+                'label' => 'Overall Score',
+                'count' => 0,
+            ];
+        }
+
+        $summary = $scores['summary'];
+
+        // Get count based on methodology type
+        $count = 0;
         switch ($structure['type']) {
             case 'simple':
-                // Sum all module scores
-                $totalPercentage = 0;
-                $moduleCount = 0;
-                if ($scores && isset($scores['modules'])) {
-                    foreach ($scores['modules'] as $module) {
-                        $totalPercentage += (float) ($module['percentage'] ?? 0);
-                        $moduleCount++;
-                    }
-                }
-
-                return [
-                    'percentage' => $moduleCount > 0 ? round($totalPercentage / $moduleCount, 2) : 0,
-                    'label' => 'Overall Score',
-                    'count' => $moduleCount,
-                ];
-
+                $count = isset($scores['modules']) ? count($scores['modules']) : 0;
+                break;
             case 'complex':
-                // Sum all pillar scores
-                $totalPercentage = 0;
-                $pillarCount = 0;
-                if ($scores && isset($scores['pillars'])) {
-                    foreach ($scores['pillars'] as $pillar) {
-                        $totalPercentage += (float) ($pillar['percentage'] ?? 0);
-                        $pillarCount++;
-                    }
-                }
-
-                return [
-                    'percentage' => $pillarCount > 0 ? round($totalPercentage / $pillarCount, 2) : 0,
-                    'label' => 'Overall Score',
-                    'count' => $pillarCount,
-                ];
-
+                $count = isset($scores['pillars']) ? count($scores['pillars']) : 0;
+                break;
             case 'twoSection':
-                // Sum all section scores
-                $totalPercentage = 0;
-                $sectionCount = 0;
-                if ($scores && isset($scores['sections'])) {
-                    foreach ($scores['sections'] as $section) {
-                        $totalPercentage += (float) ($section['percentage'] ?? 0);
-                        $sectionCount++;
-                    }
-                }
-
-                return [
-                    'percentage' => $sectionCount > 0 ? round($totalPercentage / $sectionCount, 2) : 0,
-                    'label' => 'Overall Score',
-                    'count' => $sectionCount,
-                ];
-
+                $count = isset($scores['sections']) ? count($scores['sections']) : 0;
+                break;
             default:
-                return [
-                    'percentage' => $scores['summary']['overall_percentage'] ?? 0,
-                    'label' => 'Overall Score',
-                    'count' => $scores['summary']['total_questions'] ?? 0,
-                ];
+                $count = (int) ($summary['total_questions'] ?? 0);
+                break;
         }
+
+        return [
+            'percentage' => (float) ($summary['overall_percentage'] ?? 0),
+            'label' => 'Overall Score',
+            'count' => $count,
+        ];
     }
 
     public function render()

@@ -130,18 +130,18 @@
                                                 <li class="kt-dropdown-menu-separator"></li>
 
                                                 <li>
-                                                    <a href="#" class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="openDeleteMethodologyModal({{ Js::from(['id' => $methodology->id]) }})">
-                                                        <i class="ki-filled ki-trash"></i>
-                                                        Delete
+                                                    <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="viewUsers({{ $methodology->id }})">
+                                                        <i class="ki-filled ki-users"></i>
+                                                        View Users
                                                     </a>
                                                 </li>
 
                                                 <li class="kt-dropdown-menu-separator"></li>
 
                                                 <li>
-                                                    <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="viewUsers({{ $methodology->id }})">
-                                                        <i class="ki-filled ki-users"></i>
-                                                        View Users
+                                                    <a href="#" class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="openDeleteMethodologyModal({{ Js::from(['id' => $methodology->id]) }})">
+                                                        <i class="ki-filled ki-trash"></i>
+                                                        Delete
                                                     </a>
                                                 </li>
                                             </ul>

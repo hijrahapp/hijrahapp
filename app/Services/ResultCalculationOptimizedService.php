@@ -19,7 +19,7 @@ class ResultCalculationOptimizedService
      * Calculate methodology results honoring simple/dynamic modes.
      * Keeps the same return structure as ResultCalculationService.
      */
-    public function calculateMethodologyResult(int $userId, int $methodologyId)
+    public function calculateMethodologyResult(int $userId, int $methodologyId, ?bool $computeActualPercentage = false)
     {
         $methodology = Methodology::with(['pillars', 'modules'])->find($methodologyId);
         if (! $methodology) {
@@ -49,7 +49,7 @@ class ResultCalculationOptimizedService
 
         if ($methodology->type === 'complex' || $methodology->type === 'twoSection') {
             $isTwoSection = ($methodology->type === 'twoSection');
-            $pillars = $isTwoSection
+            $pillars = ($isTwoSection && !$computeActualPercentage)
                 ? $methodology->pillars()->wherePivot('section', 'first')->get()
                 : $methodology->pillars;
 
@@ -57,13 +57,12 @@ class ResultCalculationOptimizedService
             $pillarTotalWeight = 0.0;
 
             foreach ($pillars as $pillar) {
-                // $allModulesCompleted = $this->areAllPillarModulesCompleted($userId, $methodologyId, $pillar->id);
 
-                // if ($allModulesCompleted) {
-                    // $pillarResult = $this->calculatePillarResult($userId, $pillar->id, $methodologyId);
-                // } else {
+                if ($computeActualPercentage) {
+                    $pillarResult = $this->calculatePillarResult($userId, $pillar->id, $methodologyId);
+                } else {
                     $pillarResult = $this->computeDynamicLikePercentageForMethodologyItem($userId, $methodologyId, 'pillar', $pillar->id);
-                // }
+                }
 
                 $pillarPercentage = $pillarResult['percentage'] ?? 0;
                 $pillarWeight = (float) ($pillar->pivot->weight ?? 0.0);
@@ -99,18 +98,12 @@ class ResultCalculationOptimizedService
             $moduleTotalWeight = 0.0;
 
             foreach ($methodology->modules as $module) {
-                // $moduleCompleted = $this->isModuleContextCompleted($userId, $module->id, $methodologyId, null);
 
-                // if ($moduleCompleted) {
-                    // $moduleResult = $this->calculateModuleResult($userId, $module->id, $methodologyId, null);
-                // } else {
+                if ($computeActualPercentage) {
+                    $moduleResult = $this->calculateModuleResult($userId, $module->id, $methodologyId, null);
+                } else {
                     $moduleResult = $this->computeDynamicLikePercentageForMethodologyItem($userId, $methodologyId, 'module', $module->id);
-                // }
-
-                // if (!$moduleResult) {
-                // Fallback to methodology questions assigned to this module (item_id = module_id)
-                // $moduleResult = $this->computeDynamicLikePercentageForMethodologyItem($userId, $methodologyId, 'module', $module->id);
-                // }
+                }
 
                 $modulePercentage = $moduleResult['percentage'] ?? 0;
                 $moduleWeight = (float) ($module->pivot->weight ?? 0.0);
@@ -434,7 +427,7 @@ class ResultCalculationOptimizedService
         };
 
         $totals = DB::table('methodology_question as mq')
-            ->selectRaw('COUNT(*) as total_questions')
+            ->selectRaw('COUNT(*) as total_questions, COALESCE(SUM(mq.weight), 0) as sum_weights')
             ->where('mq.methodology_id', $methodologyId)
             ->where($itemColumnFilter)
             ->first();

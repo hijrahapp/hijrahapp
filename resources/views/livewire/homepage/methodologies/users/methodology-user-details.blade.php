@@ -65,17 +65,23 @@
                             <div class="text-xs text-secondary-foreground mb-2">
                                 Question Weight: {{ $meta['question_weight'] ?? '—' }}
                             </div>
-                            @php($ua = $this->userAnswersAll->first(fn($a) => $a->context_type==='methodology' && (int)$a->context_id===$methodology->id && (int)$a->question_id===$question->id))
-                            @if ($ua)
-                                <p><strong>Answer:</strong> {{ $ua->answer->title }}</p>
-                                <div class="flex justify-between text-xs text-secondary-foreground mt-1">
-                                    <span>Answer Weight: {{ $meta['answer_weight'] ?? '—' }}</span>
-                                    <span>Score: {{ isset($meta['score']) ? number_format($meta['score'], 2) : '—' }}</span>
-                                </div>
-                                <p class="text-xs text-secondary-foreground mt-1">{{ optional($meta['answered_at'])->format('Y-m-d, h:ia') }}</p>
+                                                    @php($userAnswers = $this->userAnswersAll->filter(fn($a) => $a->context_type==='methodology' && (int)$a->context_id===$methodology->id && (int)$a->question_id===$question->id))
+                        @if ($userAnswers->isNotEmpty())
+                            @if($userAnswers->count() > 1)
+                                <p><strong>Answers:</strong> 
+                                    <span class="text-sm">{{ $userAnswers->pluck('answer.title')->join(' • ') }}</span>
+                                </p>
                             @else
-                                <p class="text-gray-500 italic">No answer provided</p>
+                                <p><strong>Answer:</strong> {{ $userAnswers->first()->answer->title }}</p>
                             @endif
+                            <div class="flex justify-between text-xs text-secondary-foreground mt-1">
+                                <span>Answer Weight: {{ $meta['answer_weight'] ?? '—' }}</span>
+                                <span>Score: {{ isset($meta['score']) ? number_format($meta['score'], 2) : '—' }}</span>
+                            </div>
+                            <p class="text-xs text-secondary-foreground mt-1">{{ optional($meta['answered_at'])->format('Y-m-d, h:ia') }}</p>
+                        @else
+                            <p class="text-gray-500 italic">No answer provided</p>
+                        @endif
                         </div>
                     </div>
                 @endforeach
@@ -96,7 +102,7 @@
                 @foreach ($structure['modules'] as $module)
                     <div class="mb-6">
                         <div class="flex items-center gap-2 mb-4">
-                            <h3 class="text-md font-medium">{{ $module->name }}</h3>
+                            <h3 class="text-md font-medium">Module: {{ $module->name }}</h3>
                             @php($pct = $this->getModulePercentage($module->id))
                             @if(!is_null($pct))
                                 <span class="text-xs px-2 py-1 bg-green-100 rounded">{{ number_format($pct, 2) }}%</span>
@@ -114,9 +120,15 @@
                                     <div class="kt-card-content p-3">
                                         <h5 class="font-medium text-sm mb-2">{{ $question->title }}</h5>
                                         <div class="text-xs text-secondary-foreground mb-2">Weight: {{ $meta['question_weight'] ?? '—' }}</div>
-                                        @php($ua = $this->userAnswersAll->first(fn($a) => $a->context_type==='module' && (int)$a->context_id===$module->id && (int)$a->question_id===$question->id))
-                                        @if ($ua)
-                                            <p class="text-sm"><strong>Answer:</strong> {{ $ua->answer->title }}</p>
+                                        @php($moduleAnswers = $this->userAnswersAll->filter(fn($a) => $a->context_type==='module' && (int)$a->context_id===$module->id && (int)$a->question_id===$question->id))
+                                        @if ($moduleAnswers->isNotEmpty())
+                                            @if($moduleAnswers->count() > 1)
+                                                <p class="text-sm"><strong>Answers:</strong> 
+                                                    {{ $moduleAnswers->pluck('answer.title')->join(' • ') }}
+                                                </p>
+                                            @else
+                                                <p class="text-sm"><strong>Answer:</strong> {{ $moduleAnswers->first()->answer->title }}</p>
+                                            @endif
                                             <div class="text-xs text-secondary-foreground mt-1">
                                                 <div>Answer Weight: {{ $meta['answer_weight'] ?? '—' }}</div>
                                                 <div>{{ optional($meta['answered_at'])->format('Y-m-d, h:ia') }}</div>
@@ -137,13 +149,13 @@
         <!-- Complex Type: Pillars → Modules -->
         <div class="mb-8 kt-card">
             <div class="kt-card-header">
-                <h2 class="kt-card-title text-lg font-semibold">Pillar & Module Responses</h2>
+                <h2 class="kt-card-title text-lg font-semibold">Pillar Responses</h2>
             </div>
             <div class="kt-card-content">
                 @foreach ($structure['pillars'] as $pillar)
                     <div class="mb-8 border rounded-lg p-4">
                         <div class="flex items-center gap-2 mb-4">
-                            <h3 class="text-lg font-medium">{{ $pillar->name }}</h3>
+                            <h3 class="text-lg font-medium">Pillar: {{ $pillar->name }}</h3>
                             @php($ppct = $this->getPillarPercentage($pillar->id))
                             @if(!is_null($ppct))
                                 <span class="text-sm px-3 py-1 bg-blue-100 rounded">{{ number_format($ppct, 2) }}%</span>
@@ -157,8 +169,8 @@
                         @foreach ($pillar->modules as $module)
                             <div class="ml-4 mb-6">
                                 <div class="flex items-center gap-2 mb-3">
-                                    <h4 class="text-md font-medium">{{ $module->name }}</h4>
-                                    @php($pct = $this->getModulePercentage($module->id))
+                                    <h4 class="text-md font-medium">Module: {{ $module->name }}</h4>
+                                    @php($pct = $this->getModulePercentage($module->id, $pillar->id))
                                     @if(!is_null($pct))
                                         <span class="text-xs px-2 py-1 bg-green-100 rounded">{{ number_format($pct, 2) }}%</span>
                                     @endif
@@ -200,13 +212,13 @@
         <!-- Two-Section Type: Sections → Pillars → Modules -->
         <div class="mb-8 kt-card">
             <div class="kt-card-header">
-                <h2 class="kt-card-title text-lg font-semibold">Section, Pillar & Module Responses</h2>
+                <h2 class="kt-card-title text-lg font-semibold">Sections Responses</h2>
             </div>
             <div class="kt-card-content">
                 @foreach ($structure['sections'] as $sectionKey => $section)
                     <div class="mb-10 border-2 rounded-lg p-6">
                         <div class="flex items-center gap-2 mb-6">
-                            <h2 class="text-xl font-bold">{{ $section['name'] }}</h2>
+                            <h2 class="text-xl font-bold">Section: {{ $section['name'] }}</h2>
                             @php($spct = $this->getSectionPercentage($section['name']))
                             @if(!is_null($spct))
                                 <span class="text-sm px-3 py-1 bg-purple-100 rounded font-medium">{{ number_format($spct, 2) }}%</span>
@@ -220,7 +232,7 @@
                         @foreach ($section['pillars'] as $pillar)
                             <div class="ml-4 mb-8 border rounded-lg p-4">
                                 <div class="flex items-center gap-2 mb-4">
-                                    <h3 class="text-lg font-medium">{{ $pillar->name }}</h3>
+                                    <h3 class="text-lg font-medium">Pillar: {{ $pillar->name }}</h3>
                                     @php($ppct = $this->getPillarPercentage($pillar->id))
                                     @if(!is_null($ppct))
                                         <span class="text-sm px-3 py-1 bg-blue-100 rounded">{{ number_format($ppct, 2) }}%</span>
@@ -234,8 +246,8 @@
                                 @foreach ($pillar->modules as $module)
                                     <div class="ml-4 mb-6">
                                         <div class="flex items-center gap-2 mb-3">
-                                            <h4 class="text-md font-medium">{{ $module->name }}</h4>
-                                            @php($pct = $this->getModulePercentage($module->id))
+                                            <h4 class="text-md font-medium">Module: {{ $module->name }}</h4>
+                                            @php($pct = $this->getModulePercentage($module->id, $pillar->id))
                                             @if(!is_null($pct))
                                                 <span class="text-xs px-2 py-1 bg-green-100 rounded">{{ number_format($pct, 2) }}%</span>
                                             @endif
@@ -277,7 +289,7 @@
     @endif
 
     <!-- Chart Section -->
-    <div class="kt-card">
+    <!-- <div class="kt-card">
         <div class="kt-card-header">
             <h3 class="kt-card-title">Performance Chart</h3>
         </div>
@@ -305,5 +317,5 @@
                 chart.appendTo('#chart');
             });
         </script>
-    @endpush
+    @endpush -->
 </div>
