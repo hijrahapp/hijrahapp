@@ -40,6 +40,13 @@
                             <th class="w-20 text-center">Order</th>
                             <th class="">Name</th>
                             <th class="">Type</th>
+                            <th class="">
+                                @if($methodologyType === 'simple')
+                                    Module
+                                @else
+                                    Pillar
+                                @endif
+                            </th>
                             <th class="w-24 text-center">Weight</th>
                             <th class="w-20 text-center">Remove</th>
                         </tr>
@@ -54,9 +61,17 @@
                                         {{ __('lookups.'.$question->type->value) }}
                                     </span>
                                 </td>
+                                <td>
+                                    @if($question->item_name)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                                            {{ $question->item_name }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted-foreground text-sm">-</span>
+                                    @endif
+                                </td>
                                 <td class="text-center">
-                                    @php $pivot = \DB::table('methodology_question')->where('methodology_id', $methodologyId)->where('question_id', $question->id)->first(); @endphp
-                                    <span class="font-medium">{{ (int)($pivot->weight ?? 0) }}%</span>
+                                    <span class="font-medium">{{ (int)($question->weight ?? 0) }}%</span>
                                 </td>
                                 <td class="text-center">
                                     <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" wire:click="remove({{ $question->id }})" title="Remove">
@@ -66,7 +81,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-4">No general questions configured.</td>
+                                <td colspan="6" class="text-center py-4">No general questions configured.</td>
                             </tr>
                         @endforelse
                     </tbody>

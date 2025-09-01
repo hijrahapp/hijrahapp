@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Homepage\Methodologies\MethodologyGeneralQuestions;
 
+use App\Models\Methodology;
+use App\Models\Module;
+use App\Models\Pillar;
 use App\Models\Question;
 use App\Models\Tag;
 use App\Traits\HasTagTitles;
@@ -13,11 +16,18 @@ class GeneralQuestionsTable extends Component
     use HasTagTitles, WithTableReload;
 
     public int $methodologyId;
+
     public string $search = '';
+
     public string $tagFilter = '';
+
     public string $tagSearch = '';
+
     public array $tagSuggestions = [];
+
     public bool $showTagSuggestions = false;
+
+    public ?string $methodologyType = null;
 
     protected $listeners = [
         'refreshTable' => 'reloadTable',
@@ -73,37 +83,72 @@ class GeneralQuestionsTable extends Component
         $this->dispatch('show-toast', type: 'success', message: 'Removed successfully');
     }
 
+    public function mount(int $methodologyId): void
+    {
+        $this->methodologyId = $methodologyId;
+        $methodology = Methodology::findOrFail($methodologyId);
+        $this->methodologyType = $methodology->type;
+    }
+
     public function getQuestions()
     {
         return $this->handleReloadState(function () {
-            $ids = \DB::table('methodology_question')
+            $methodologyQuestions = \DB::table('methodology_question')
                 ->where('methodology_id', $this->methodologyId)
                 ->orderBy('sequence')
-                ->pluck('question_id')
-                ->toArray();
+                ->get(['question_id', 'weight', 'item_id']);
 
-            if (empty($ids)) {
+            if ($methodologyQuestions->isEmpty()) {
                 return collect();
             }
 
-            $ids = array_map('intval', $ids);
+            $questionIds = $methodologyQuestions->pluck('question_id')->toArray();
+            $questionIds = array_map('intval', $questionIds);
 
-            $q = Question::query()
-                ->whereIn('id', $ids)
-                ->when($this->search, fn($qq) => $qq->where('title', 'like', '%'.$this->search.'%'))
-                ->when($this->tagFilter, fn($qq) => $qq->whereJsonContains('tags', (int)$this->tagFilter))
-                ->orderByRaw('FIELD(id, '.implode(',', $ids).')')
+            // Get questions with basic data
+            $questions = Question::query()
+                ->whereIn('id', $questionIds)
+                ->when($this->search, fn ($qq) => $qq->where('title', 'like', '%'.$this->search.'%'))
+                ->when($this->tagFilter, fn ($qq) => $qq->whereJsonContains('tags', (int) $this->tagFilter))
+                ->orderByRaw('FIELD(id, '.implode(',', $questionIds).')')
                 ->get();
 
-            return $q;
+            // Add methodology question data and item names to each question
+            $questionsWithData = $questions->map(function ($question) use ($methodologyQuestions) {
+                $methodologyQuestion = $methodologyQuestions->firstWhere('question_id', $question->id);
+                $question->weight = $methodologyQuestion->weight ?? 0;
+                $question->item_id = $methodologyQuestion->item_id;
+                $question->item_name = $this->getItemName($methodologyQuestion->item_id);
+
+                return $question;
+            });
+
+            return $questionsWithData;
         });
+    }
+
+    private function getItemName(?int $itemId): ?string
+    {
+        if (! $itemId || ! $this->methodologyType) {
+            return null;
+        }
+
+        if ($this->methodologyType === 'simple') {
+            $module = Module::find($itemId);
+
+            return $module?->name;
+        } else {
+            // complex or twoSection
+            $pillar = Pillar::find($itemId);
+
+            return $pillar?->name;
+        }
     }
 
     public function render()
     {
         $questions = $this->getQuestions();
+
         return view('livewire.homepage.methodologies.methodologyGeneralQuestions.general-questions-table', compact('questions'));
     }
 }
-
-
