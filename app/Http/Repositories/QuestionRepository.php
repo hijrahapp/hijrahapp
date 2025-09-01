@@ -123,10 +123,10 @@ class QuestionRepository
         foreach ($modules as $module) {
             $sequence = null;
             $pm = \DB::table('pillar_module')
-                    ->where('methodology_id', (int) $methodologyId)
-                    ->where('pillar_id', (int) $pillarId)
-                    ->where('module_id', $module->id)
-                    ->first();
+                ->where('methodology_id', (int) $methodologyId)
+                ->where('pillar_id', (int) $pillarId)
+                ->where('module_id', $module->id)
+                ->first();
             if ($pm) {
                 $pivotDescription = property_exists($pm, 'questions_description') ? $pm->questions_description : null;
                 $pivotEstimatedTime = property_exists($pm, 'questions_estimated_time') ? $pm->questions_estimated_time : null;
@@ -344,7 +344,7 @@ class QuestionRepository
                     $orderedModuleIds = \DB::table('pillar_module')
                         ->where('methodology_id', $methodologyId)
                         ->where('pillar_id', $effectivePillarId)
-                        ->orderBy('created_at', 'asc')
+                        ->orderBy('id', 'asc')
                         ->pluck('module_id')
                         ->toArray();
 
