@@ -55,7 +55,10 @@ class UserAnswerController
                 $end ? 'completed' : 'in_progress'
             );
 
-            return response()->json(null, 201);
+            return response()->json($end ? [
+                'success' => true,
+                'message' => __('messages.methodology_answers_submitted_successfully'),
+            ] : null, 201);
 
         } catch (\InvalidArgumentException $e) {
             return response()->json([
@@ -159,7 +162,10 @@ class UserAnswerController
 //                $this->userAnswerRepo->submitPillarModuleAnswers($userId, $methodologyId, $pillarId, $moduleId, $flat);
 //            }
 
-            return response()->json(null, 201);
+            return response()->json($end ? [
+                'success' => true,
+                'message' => __('messages.pillar_answers_submitted_successfully'),
+            ] : null, 201);
 
         } catch (\InvalidArgumentException $e) {
             return response()->json([
@@ -218,7 +224,10 @@ class UserAnswerController
                 $end ? 'completed' : 'in_progress'
             );
 
-            return response()->json(null, 201);
+            return response()->json($end ? [
+                'success' => true,
+                'message' => __('messages.module_answers_submitted_successfully'),
+            ] : null, 201);
 
         } catch (\InvalidArgumentException $e) {
             return response()->json([
@@ -278,7 +287,10 @@ class UserAnswerController
                 $end ? 'completed' : 'in_progress'
             );
 
-            return response()->json(null, 201);
+            return response()->json($end ? [
+                'success' => true,
+                'message' => __('messages.pillar_module_answers_submitted_successfully'),
+            ] : null, 201);
 
         } catch (\InvalidArgumentException $e) {
             return response()->json([
