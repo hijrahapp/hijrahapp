@@ -5,6 +5,7 @@ namespace App\Resources;
 use App\Http\Repositories\QuestionRepository;
 use App\Services\ResultCalculationOptimizedService;
 use App\Services\ResultCalculationService;
+use App\Services\ContextStatusService;
 use App\Traits\HasTagTitles;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -45,7 +46,7 @@ class PillarResource extends JsonResource
             ->wherePivot('methodology_id', (int) $methodologyId)
             ->first();
 
-        return $dependency ? $dependency->id : null;
+        return ($dependency && $this->calculatePillarStatus($dependency->id) !== 'completed') ? $dependency->id : null;
     }
 
     /**
@@ -70,6 +71,15 @@ class PillarResource extends JsonResource
      */
     private function calculateStatus(): ?string
     {
+        return $this->calculatePillarStatus($this->id);
+    }
+
+    /**
+     * Calculate completion status for this pillar based on user answers
+     * not_started | in_progress | completed
+     */
+    private function calculatePillarStatus(int $pillarId): ?string
+    {
         $methodologyId = request()->route('methodologyId');
 
         if (! $this->user_id || ! $methodologyId) {
@@ -78,7 +88,7 @@ class PillarResource extends JsonResource
 
         // Use ContextStatusService directly for status
         $statusService = new \App\Services\ContextStatusService;
-        $status = $statusService->getPillarStatus($this->user_id, $this->id, (int) $methodologyId);
+        $status = $statusService->getPillarStatus($this->user_id, $pillarId, (int) $methodologyId);
 
         return $status ?? null;
     }
