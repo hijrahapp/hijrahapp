@@ -321,7 +321,7 @@ class MethodologyUserDetails extends Component
             }
 
             $answerWeight = $normalized; // report normalized when MCQMultiple
-            $score = ($normalized * (float) ($placement['weight'] ?? 0.0)) / ($placement['weight'] ?? 0.0);
+            $score = $placement['weight'] > 0 ? ($normalized * (float) ($placement['weight'])) / ($placement['weight']) : 0.0;
         }
 
         return [

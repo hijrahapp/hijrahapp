@@ -9,6 +9,7 @@ use App\Services\ContextStatusService;
 use App\Traits\HasTagTitles;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Models\Pillar;
 
 class PillarResource extends JsonResource
 {
@@ -16,7 +17,7 @@ class PillarResource extends JsonResource
 
     public function toArray(Request $request): array
     {
-        return [
+        $response = [
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
@@ -27,14 +28,22 @@ class PillarResource extends JsonResource
             'section' => $this->pivot->section ?? null,
             'status' => $this->calculateStatus(),
             'result' => $this->calculateResult(),
-            'dependsOn' => $this->getDependencyPillarId(),
         ];
+
+        $dependency = $this->getDependencyPillar();
+
+        if ($dependency) {
+            $response['dependsOn'] = $dependency->id;
+            $response['dependsOnName'] = $dependency->name;
+        }
+
+        return $response;
     }
 
     /**
      * Get the ID of the pillar this pillar depends on in the current methodology
      */
-    private function getDependencyPillarId(): ?int
+    private function getDependencyPillar(): ?Pillar
     {
         $methodologyId = request()->route('methodologyId');
 
@@ -46,7 +55,7 @@ class PillarResource extends JsonResource
             ->wherePivot('methodology_id', (int) $methodologyId)
             ->first();
 
-        return ($dependency && $this->calculatePillarStatus($dependency->id) !== 'completed') ? $dependency->id : null;
+        return ($dependency && $this->calculatePillarStatus($dependency->id) !== 'completed') ? $dependency : null;
     }
 
     /**

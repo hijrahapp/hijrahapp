@@ -44,7 +44,7 @@
             <div class="kt-card-content kt-card-div rounded-b-xl">
                 @php($overallData = $this->overallScoreData)
                 <p><strong>{{ $overallData['label'] }}:</strong> {{ number_format($overallData['percentage'], 2) }}%</p>
-                <p><strong>Count:</strong> {{ $overallData['count'] }}</p>
+                <!--<p><strong>Count:</strong> {{ $overallData['count'] }}</p>-->
             </div>
         </div>
     </div>
@@ -61,7 +61,7 @@
                     @php($meta = $this->getGeneralQuestionMeta($question->id))
                     <div class="kt-card kt-card-div">
                         <div class="kt-card-content p-4">
-                            <h4 class="font-medium mb-2">{{ $question->title }}</h4>
+                            <h4 class="font-medium mb-2"><strong>Q:</strong> {{ $question->title }}</h4>
                             <div class="text-xs text-secondary-foreground mb-2">
                                 Question Weight: {{ $meta['question_weight'] ?? '—' }}
                             </div>
@@ -72,13 +72,13 @@
                                     <span class="text-sm">{{ $userAnswers->pluck('answer.title')->join(' • ') }}</span>
                                 </p>
                             @else
-                                <p><strong>Answer:</strong> {{ $userAnswers->first()->answer->title }}</p>
+                                <p><strong>A:</strong> {{ $userAnswers->first()->answer->title }}</p>
                             @endif
                             <div class="flex justify-between text-xs text-secondary-foreground mt-1">
                                 <span>Answer Weight: {{ $meta['answer_weight'] ?? '—' }}</span>
                                 <span>Score: {{ isset($meta['score']) ? number_format($meta['score'], 2) : '—' }}</span>
                             </div>
-                            <p class="text-xs text-secondary-foreground mt-1">{{ optional($meta['answered_at'])->format('Y-m-d, h:ia') }}</p>
+                            <!--<p class="text-xs text-secondary-foreground mt-1">{{ optional($meta['answered_at'])->format('Y-m-d, h:ia') }}</p>-->
                         @else
                             <p class="text-gray-500 italic">No answer provided</p>
                         @endif
@@ -118,7 +118,7 @@
                                 @php($meta = $this->getModuleQuestionMeta($module->id, $question->pivot->pillar_id ?? null, $question->id))
                                 <div class="kt-card kt-card-div">
                                     <div class="kt-card-content p-3">
-                                        <h5 class="font-medium text-sm mb-2">{{ $question->title }}</h5>
+                                        <h5 class="font-medium text-sm mb-2"><strong>Q:</strong> {{ $question->title }}</h5>
                                         <div class="text-xs text-secondary-foreground mb-2">Weight: {{ $meta['question_weight'] ?? '—' }}</div>
                                         @php($moduleAnswers = $this->userAnswersAll->filter(fn($a) => $a->context_type==='module' && (int)$a->context_id===$module->id && (int)$a->question_id===$question->id))
                                         @if ($moduleAnswers->isNotEmpty())
@@ -127,11 +127,11 @@
                                                     {{ $moduleAnswers->pluck('answer.title')->join(' • ') }}
                                                 </p>
                                             @else
-                                                <p class="text-sm"><strong>Answer:</strong> {{ $moduleAnswers->first()->answer->title }}</p>
+                                                <p class="text-sm"><strong>A:</strong> {{ $moduleAnswers->first()->answer->title }}</p>
                                             @endif
                                             <div class="text-xs text-secondary-foreground mt-1">
                                                 <div>Answer Weight: {{ $meta['answer_weight'] ?? '—' }}</div>
-                                                <div>{{ optional($meta['answered_at'])->format('Y-m-d, h:ia') }}</div>
+                                                <!--<div>{{ optional($meta['answered_at'])->format('Y-m-d, h:ia') }}</div>-->
                                             </div>
                                         @else
                                             <p class="text-gray-500 italic text-sm">No answer</p>
@@ -185,14 +185,14 @@
                                         @php($meta = $this->getModuleQuestionMeta($module->id, $question->pivot->pillar_id ?? null, $question->id))
                                         <div class="kt-card kt-card-div">
                                             <div class="kt-card-content p-3">
-                                                <h6 class="font-medium text-sm mb-2">{{ $question->title }}</h6>
+                                                <h6 class="font-medium text-sm mb-2"><strong>Q:</strong> {{ $question->title }}</h6>
                                                 <div class="text-xs text-secondary-foreground mb-2">Weight: {{ $meta['question_weight'] ?? '—' }}</div>
                                                 @php($ua = $this->userAnswersAll->first(fn($a) => $a->context_type==='module' && (int)$a->context_id===$module->id && (int)$a->question_id===$question->id))
                                                 @if ($ua)
-                                                    <p class="text-sm"><strong>Answer:</strong> {{ $ua->answer->title }}</p>
+                                                    <p class="text-sm"><strong>A:</strong> {{ $ua->answer->title }}</p>
                                                     <div class="text-xs text-secondary-foreground mt-1">
                                                         <div>Answer Weight: {{ $meta['answer_weight'] ?? '—' }}</div>
-                                                        <div>{{ optional($meta['answered_at'])->format('Y-m-d, h:ia') }}</div>
+                                                        <!--<div>{{ optional($meta['answered_at'])->format('Y-m-d, h:ia') }}</div>-->
                                                     </div>
                                                 @else
                                                     <p class="text-gray-500 italic text-sm">No answer</p>
@@ -262,14 +262,14 @@
                                                 @php($meta = $this->getModuleQuestionMeta($module->id, $question->pivot->pillar_id ?? null, $question->id))
                                                 <div class="kt-card kt-card-div">
                                                     <div class="kt-card-content p-3">
-                                                        <h6 class="font-medium text-sm mb-2">{{ $question->title }}</h6>
+                                                        <h6 class="font-medium text-sm mb-2"><strong>Q:</strong> {{ $question->title }}</h6>
                                                         <div class="text-xs text-secondary-foreground mb-2">Weight: {{ $meta['question_weight'] ?? '—' }}</div>
                                                         @php($ua = $this->userAnswersAll->first(fn($a) => $a->context_type==='module' && (int)$a->context_id===$module->id && (int)$a->question_id===$question->id))
                                                         @if ($ua)
-                                                            <p class="text-sm"><strong>Answer:</strong> {{ $ua->answer->title }}</p>
+                                                            <p class="text-sm"><strong>A:</strong> {{ $ua->answer->title }}</p>
                                                             <div class="text-xs text-secondary-foreground mt-1">
                                                                 <div>Answer Weight: {{ $meta['answer_weight'] ?? '—' }}</div>
-                                                                <div>{{ optional($meta['answered_at'])->format('Y-m-d, h:ia') }}</div>
+                                                                <!--<div>{{ optional($meta['answered_at'])->format('Y-m-d, h:ia') }}</div>-->
                                                             </div>
                                                         @else
                                                             <p class="text-gray-500 italic text-sm">No answer</p>

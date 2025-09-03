@@ -220,6 +220,11 @@ class MethodologyPillarAddModal extends Component
                     ],
                     [
                         'weight' => $this->weight !== '' ? (float) $this->weight : ($existing->weight ?? null),
+                        'questions_description' => $this->questionsDescription !== '' ? $this->questionsDescription : null,
+                        'questions_estimated_time' => is_numeric($this->questionsEstimatedTime)
+                            ? (int) $this->questionsEstimatedTime
+                            : null,
+                        'report' => $this->report !== '' ? $this->report : null,
                         'sequence' => $sequence,
                         'section' => $this->methodologyType === 'twoSection'
                             ? ($this->sectionNumber === '2' ? 'second' : 'first')
