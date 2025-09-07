@@ -11,9 +11,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="name", type="string", example="John Doe"),
  *     @OA\Property(property="email", type="string", example="john@example.com"),
  *     @OA\Property(property="gender", type="string", enum={"male", "female"}, example="male"),
- *     @OA\Property(property="birthdate", type="date", format="date", example="2000-01-01"),
- *     @OA\Property(property="role", type="string", enum={"SuperAdmin", "Admin", "Expert", "Customer"}, example="Customer")
- *     @OA\Property(property="profilePhoto", type="string", example="localhost:8000/assets/media/avatars/blank.png"),
+ *     @OA\Property(property="birthdate", type="string", format="date", example="2000-01-01"),
+ *     @OA\Property(property="role", type="string", enum={"SuperAdmin", "Admin", "Expert", "Customer"}, example="Customer"),
+ *     @OA\Property(property="profilePhoto", type="string", example="localhost:8000/assets/media/avatars/blank.png")
  * )
  */
 class UserResource extends JsonResource

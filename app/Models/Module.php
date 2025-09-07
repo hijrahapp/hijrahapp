@@ -113,4 +113,25 @@ class Module extends Model
             ->orderBy('module_question.sequence', 'asc')
             ->orderBy('module_question.id', 'asc');
     }
+
+    /**
+     * Programs that include this module with score ranges.
+     */
+    public function programs(): BelongsToMany
+    {
+        return $this->belongsToMany(Program::class, 'program_module')
+            ->withPivot('methodology_id', 'pillar_id', 'min_score', 'max_score')
+            ->withTimestamps();
+    }
+
+    /**
+     * Programs that include this module for a specific methodology.
+     */
+    public function programsForMethodology(int $methodologyId): BelongsToMany
+    {
+        return $this->belongsToMany(Program::class, 'program_module')
+            ->withPivot('methodology_id', 'pillar_id', 'min_score', 'max_score')
+            ->withTimestamps()
+            ->wherePivot('methodology_id', $methodologyId);
+    }
 }
