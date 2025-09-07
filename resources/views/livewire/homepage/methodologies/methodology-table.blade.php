@@ -27,7 +27,7 @@
                         </div>
                     @endif
                 </div>
-                <button class="kt-btn kt-btn-outline flex items-center justify-center" data-kt-modal-toggle="#methodology_add_modal" title="Add Methodology">
+                <button class="kt-btn kt-btn-outline flex items-center justify-center" title="Add Methodology" wire:click="openAddModal">
                     <i class="ki-filled ki-plus"></i>
                 </button>
             </div>

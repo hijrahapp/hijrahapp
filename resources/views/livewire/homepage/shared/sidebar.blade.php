@@ -147,6 +147,18 @@
                             @endif
                         </div>
                     </div>
+                    <div class="kt-menu-item">
+                        <div wire:click="setActiveSection('programs')" class="kt-menu-link flex items-center grow cursor-pointer border border-transparent gap-[10px] ps-[10px] pe-[10px] py-[6px]">
+                                <span class="kt-menu-icon items-start text-muted-foreground w-[20px]">
+                                    <i class="ki-filled ki-file-sheet text-lg kt-menu-title kt-menu-item-active:text-primary kt-menu-item-active:font-semibold kt-menu-link-hover:!text-primary font-normal text-foreground">
+                                    </i>
+                                </span>
+                            <span class="kt-menu-title text-sm font-medium text-foreground kt-menu-item-active:text-primary kt-menu-link-hover:!text-primary">
+                                    Programs
+                                </span>
+                        </div>
+                    </div>
+
             </div>
         </div>
     </div>

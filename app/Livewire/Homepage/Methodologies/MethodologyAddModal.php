@@ -47,11 +47,18 @@ class MethodologyAddModal extends Component
     protected $listeners = [
         'reset-modal' => 'resetForm',
         'edit-methodology' => 'editMethodology',
+        'add-methodology' => 'open',
     ];
 
     public function mount()
     {
         $this->resetForm();
+    }
+
+    public function open()
+    {
+        $this->resetForm();
+        $this->dispatch('show-modal', selector: '#methodology_add_modal');
     }
 
     public function editMethodology(int $methodologyId)

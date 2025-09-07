@@ -45,6 +45,10 @@ class MegaMenu extends Component
                 $this->currentSection = 'Methodologies';
                 $this->currentSubSection = 'Modules Management';
                 break;
+            case 'programs':
+                $this->currentSection = 'Programs';
+                $this->currentSubSection = 'Programs Management';
+                break;
             case 'questions':
                 $this->currentSection = 'Methodologies';
                 $this->currentSubSection = 'Questions Management';

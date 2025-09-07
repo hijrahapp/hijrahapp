@@ -13,6 +13,7 @@ use App\Livewire\Homepage\Methodologies\Users\MethodologyUserDetails;
 use App\Livewire\Homepage\Methodologies\Users\MethodologyUserList;
 use App\Livewire\Homepage\Modules\Modules;
 use App\Livewire\Homepage\Pillars\Pillars;
+use App\Livewire\Homepage\Programs\Programs;
 use App\Livewire\Homepage\Questions\Questions;
 use App\Livewire\Homepage\Tags\Tags;
 use App\Livewire\Homepage\Users\Admins\Admins;
@@ -49,5 +50,6 @@ Route::prefix('app')->get('/methodology/{methodology}/user/{user}', MethodologyU
 // Banks
 Route::prefix('app')->get('/pillars', Pillars::class)->name('pillars');
 Route::prefix('app')->get('/modules', Modules::class)->name('modules');
+Route::prefix('app')->get('/programs', Programs::class)->name('programs');
 Route::prefix('app')->get('/questions', Questions::class)->name('questions');
 Route::prefix('app')->get('/tags', Tags::class)->name('tags');
