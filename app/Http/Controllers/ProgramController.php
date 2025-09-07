@@ -13,10 +13,18 @@ class ProgramController
 {
     public function __construct(private ProgramRepository $programRepo) {}
 
-    public function all(): JsonResponse
+    public function all(Request $request): JsonResponse
     {
         try {
-            $programs = $this->programRepo->getAll();
+            // Get programs eligible for the authenticated user based on their module scores
+            $user = $request->authUser ?? null;
+
+            if ($user) {
+                $programs = $this->programRepo->getProgramsForUser($user->id);
+            } else {
+                // Fallback to all programs if no authenticated user
+                $programs = $this->programRepo->getAll();
+            }
 
             return response()->json(ProgramResource::collection($programs));
         } catch (\Exception $e) {
@@ -283,6 +291,7 @@ class ProgramController
             }
 
             $program = $this->programRepo->findById($programId);
+
             return response()->json(new ProgramResource($program));
         } catch (ValidationException $e) {
             return response()->json([
