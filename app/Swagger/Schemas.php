@@ -446,7 +446,6 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="text", type="string", example="How would you rate your current cloud infrastructure?"),
  *     @OA\Property(property="type", type="string", enum={"multiple_choice", "rating", "text"}, example="multiple_choice"),
- *     @OA\Property(property="order", type="integer", example=1),
  *     @OA\Property(
  *         property="answers",
  *         type="array",
@@ -563,7 +562,29 @@ use OpenApi\Annotations as OA;
  *     ),
  *     @OA\Property(property="time_type_display", type="string", example="Minutes"),
  *     @OA\Property(property="formatted_duration", type="string", example="30 Minutes"),
- *     @OA\Property(property="order", type="integer", example=1),
+ *     @OA\Property(property="header", type="string", nullable=true, example="Journal Entry Header"),
+ *     @OA\Property(property="content", type="string", nullable=true, example="Article content or mission description"),
+ *     @OA\Property(property="description", type="string", nullable=true, example="Detailed description of the objective"),
+ *     @OA\Property(property="content_url", type="string", nullable=true, format="url", example="https://example.com/video.mp4"),
+ *     @OA\Property(property="content_image", type="string", nullable=true, format="url", example="https://example.com/book-cover.jpg"),
+ *     @OA\Property(
+ *         property="advices",
+ *         type="array",
+ *         nullable=true,
+ *
+ *         @OA\Items(type="string"),
+ *         example={"Follow daily routine", "Practice mindfulness", "Set clear goals"}
+ *     ),
+ *
+ *     @OA\Property(
+ *         property="challenges",
+ *         type="array",
+ *         nullable=true,
+ *
+ *         @OA\Items(type="string"),
+ *         example={"30-day challenge", "Weekly reflection", "Goal achievement"}
+ *     ),
+ *
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time")
  * )
@@ -575,30 +596,15 @@ use OpenApi\Annotations as OA;
  *         @OA\Schema(
  *             type="object",
  *
- *             @OA\Property(property="program", ref="#/components/schemas/Program"),
- *             @OA\Property(
- *                 property="type_specific_data",
- *                 type="object",
- *                 oneOf={
- *
- *                     @OA\Schema(ref="#/components/schemas/JournalData"),
- *                     @OA\Schema(ref="#/components/schemas/ArticleData"),
- *                     @OA\Schema(ref="#/components/schemas/AdviceData"),
- *                     @OA\Schema(ref="#/components/schemas/DailyMissionData"),
- *                     @OA\Schema(ref="#/components/schemas/QuizData"),
- *                     @OA\Schema(ref="#/components/schemas/VideoData"),
- *                     @OA\Schema(ref="#/components/schemas/AudioData"),
- *                     @OA\Schema(ref="#/components/schemas/BookData"),
- *                     @OA\Schema(ref="#/components/schemas/ChallengeData")
- *                 }
- *             )
+ *             @OA\Property(property="program", ref="#/components/schemas/Program")
  *         )
  *     }
  * )
+ *
  * @OA\Schema(
  *     schema="CreateObjectiveRequest",
  *     type="object",
- *     required={"program_id", "name", "type", "time_to_finish", "time_type", "type_specific_data"},
+ *     required={"program_id", "name", "type", "time_to_finish", "time_type"},
  *
  *     @OA\Property(property="program_id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Complete Module Assessment"),
@@ -615,12 +621,28 @@ use OpenApi\Annotations as OA;
  *         enum={"hours", "days", "weeks", "months"},
  *         example="minutes"
  *     ),
+ *     @OA\Property(property="header", type="string", nullable=true, example="Journal Entry Header"),
+ *     @OA\Property(property="content", type="string", nullable=true, example="Article content or mission description"),
+ *     @OA\Property(property="description", type="string", nullable=true, example="Detailed description of the objective"),
+ *     @OA\Property(property="content_url", type="string", nullable=true, format="url", example="https://example.com/video.mp4"),
+ *     @OA\Property(property="content_image", type="string", nullable=true, format="url", example="https://example.com/book-cover.jpg"),
  *     @OA\Property(
- *         property="type_specific_data",
- *         type="object",
- *         example={"questions": "array of question IDs"}
+ *         property="advices",
+ *         type="array",
+ *         nullable=true,
+ *
+ *         @OA\Items(type="string"),
+ *         example={"Follow daily routine", "Practice mindfulness", "Set clear goals"}
  *     ),
- *     @OA\Property(property="order", type="integer", minimum=1, example=1)
+ *
+ *     @OA\Property(
+ *         property="challenges",
+ *         type="array",
+ *         nullable=true,
+ *
+ *         @OA\Items(type="string"),
+ *         example={"30-day challenge", "Weekly reflection", "Goal achievement"}
+ *     )
  * )
  *
  * @OA\Schema(
@@ -642,30 +664,29 @@ use OpenApi\Annotations as OA;
  *         enum={"hours", "days", "weeks", "months"},
  *         example="minutes"
  *     ),
+ *     @OA\Property(property="header", type="string", nullable=true, example="Updated Journal Entry Header"),
+ *     @OA\Property(property="content", type="string", nullable=true, example="Updated article content or mission description"),
+ *     @OA\Property(property="description", type="string", nullable=true, example="Updated detailed description of the objective"),
+ *     @OA\Property(property="content_url", type="string", nullable=true, format="url", example="https://example.com/updated-video.mp4"),
+ *     @OA\Property(property="content_image", type="string", nullable=true, format="url", example="https://example.com/updated-book-cover.jpg"),
  *     @OA\Property(
- *         property="type_specific_data",
- *         type="object",
- *         example={"questions": "array of question IDs"}
- *     ),
- *     @OA\Property(property="order", type="integer", minimum=1, example=2)
- * )
- *
- * @OA\Schema(
- *     schema="ReorderObjectivesRequest",
- *     type="object",
- *     required={"objective_orders"},
- *
- *     @OA\Property(
- *         property="objective_orders",
+ *         property="advices",
  *         type="array",
+ *         nullable=true,
  *
- *         @OA\Items(type="integer"),
- *         example="array of objective IDs",
- *         description="Array of objective IDs in the desired order"
+ *         @OA\Items(type="string"),
+ *         example={"Updated daily routine", "Enhanced mindfulness practice", "Refined goal setting"}
+ *     ),
+ *
+ *     @OA\Property(
+ *         property="challenges",
+ *         type="array",
+ *         nullable=true,
+ *
+ *         @OA\Items(type="string"),
+ *         example={"Extended 30-day challenge", "Bi-weekly reflection", "Advanced goal achievement"}
  *     )
  * )
- *
- * // ==================== OBJECTIVE TYPE-SPECIFIC DATA SCHEMAS ====================
  *
  * @OA\Schema(
  *     schema="JournalData",
@@ -788,6 +809,251 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="description", type="string", example="Updated program description"),
  *     @OA\Property(property="definition", type="string", example="Updated program definition"),
  *     @OA\Property(property="objectives", type="string", example="Updated program objectives")
+ * )
+ *
+ * @OA\Schema(
+ *     schema="ReorderObjectivesRequest",
+ *     type="object",
+ *     required={"objective_ids"},
+ *
+ *     @OA\Property(
+ *         property="objective_ids",
+ *         type="array",
+ *
+ *         @OA\Items(type="integer"),
+ *         example={1, 3, 2, 4},
+ *         description="Array of objective IDs in the desired order"
+ *     )
+ * )
+ *
+ * @OA\Schema(
+ *     schema="UserProgram",
+ *     allOf={
+ *         @OA\Schema(ref="#/components/schemas/Program"),
+ *         @OA\Schema(
+ *             type="object",
+ *
+ *             @OA\Property(
+ *                 property="status",
+ *                 type="string",
+ *                 enum={"in_progress", "completed"},
+ *                 example="in_progress",
+ *                 description="User's progress status for this program"
+ *             ),
+ *             @OA\Property(
+ *                 property="started_at",
+ *                 type="string",
+ *                 format="date-time",
+ *                 nullable=true,
+ *                 example="2024-01-15T10:30:00Z",
+ *                 description="When the user started this program"
+ *             ),
+ *             @OA\Property(
+ *                 property="completed_at",
+ *                 type="string",
+ *                 format="date-time",
+ *                 nullable=true,
+ *                 example="2024-01-25T14:45:00Z",
+ *                 description="When the user completed this program"
+ *             ),
+ *             @OA\Property(
+ *                 property="objectives",
+ *                 type="array",
+ *
+ *                 @OA\Items(ref="#/components/schemas/Objective"),
+ *                 description="Program objectives"
+ *             )
+ *         )
+ *     }
+ * )
+ *
+ * // ==================== STEP SCHEMAS ====================
+ *
+ * @OA\Schema(
+ *     schema="Step",
+ *     type="object",
+ *
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="program_id", type="integer", example=1),
+ *     @OA\Property(property="name", type="string", example="Daily Reflection"),
+ *     @OA\Property(property="description", type="string", example="Write about your day and experiences"),
+ *     @OA\Property(property="type", type="string", enum={"journal", "quiz", "challenge"}, example="journal"),
+ *     @OA\Property(property="order", type="integer", example=1),
+ *     @OA\Property(property="is_active", type="boolean", example=true),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time")
+ * )
+ *
+ * @OA\Schema(
+ *     schema="StepResource",
+ *     allOf={
+ *         @OA\Schema(ref="#/components/schemas/Step"),
+ *         @OA\Schema(
+ *             type="object",
+ *
+ *             @OA\Property(property="program", ref="#/components/schemas/Program")
+ *         )
+ *     }
+ * )
+ *
+ * @OA\Schema(
+ *     schema="StepDetailedResource",
+ *     allOf={
+ *         @OA\Schema(ref="#/components/schemas/StepResource"),
+ *         @OA\Schema(
+ *             type="object",
+ *
+ *             @OA\Property(
+ *                 property="user_progress",
+ *                 ref="#/components/schemas/UserStepProgress",
+ *                 nullable=true,
+ *                 description="User's progress for this step"
+ *             )
+ *         )
+ *     }
+ * )
+ *
+ * @OA\Schema(
+ *     schema="UserStepProgress",
+ *     type="object",
+ *
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="user_id", type="integer", example=1),
+ *     @OA\Property(property="program_id", type="integer", example=1),
+ *     @OA\Property(property="step_id", type="integer", example=1),
+ *     @OA\Property(
+ *         property="status",
+ *         type="string",
+ *         enum={"not_started", "in_progress", "completed"},
+ *         example="in_progress"
+ *     ),
+ *     @OA\Property(
+ *         property="thought",
+ *         type="string",
+ *         nullable=true,
+ *         example="Today I learned about patience and resilience",
+ *         description="For journal type steps"
+ *     ),
+ *     @OA\Property(
+ *         property="score",
+ *         type="integer",
+ *         nullable=true,
+ *         example=85,
+ *         description="For quiz type steps"
+ *     ),
+ *     @OA\Property(
+ *         property="challenges_done",
+ *         type="integer",
+ *         nullable=true,
+ *         example=7,
+ *         description="For challenge type steps"
+ *     ),
+ *     @OA\Property(
+ *         property="percentage",
+ *         type="number",
+ *         format="float",
+ *         nullable=true,
+ *         example=87.5,
+ *         description="For challenge type steps"
+ *     ),
+ *     @OA\Property(
+ *         property="started_at",
+ *         type="string",
+ *         format="date-time",
+ *         nullable=true,
+ *         example="2024-01-15T10:30:00Z"
+ *     ),
+ *     @OA\Property(
+ *         property="completed_at",
+ *         type="string",
+ *         format="date-time",
+ *         nullable=true,
+ *         example="2024-01-15T11:00:00Z"
+ *     ),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time")
+ * )
+ *
+ * @OA\Schema(
+ *     schema="JournalStepCompletionRequest",
+ *     type="object",
+ *     required={"thought"},
+ *
+ *     @OA\Property(
+ *         property="thought",
+ *         type="string",
+ *         maxLength=2000,
+ *         example="Today I reflected on my spiritual journey and realized the importance of consistency in my daily practices.",
+ *         description="Reflection text for journal step completion"
+ *     )
+ * )
+ *
+ * @OA\Schema(
+ *     schema="QuizStepCompletionRequest",
+ *     type="object",
+ *     required={"score"},
+ *
+ *     @OA\Property(
+ *         property="score",
+ *         type="integer",
+ *         minimum=0,
+ *         maximum=100,
+ *         example=85,
+ *         description="Quiz score between 0-100"
+ *     )
+ * )
+ *
+ * @OA\Schema(
+ *     schema="ChallengeStepCompletionRequest",
+ *     type="object",
+ *     required={"challenges_done", "percentage"},
+ *
+ *     @OA\Property(
+ *         property="challenges_done",
+ *         type="integer",
+ *         minimum=0,
+ *         example=7,
+ *         description="Number of challenges completed"
+ *     ),
+ *     @OA\Property(
+ *         property="percentage",
+ *         type="number",
+ *         format="float",
+ *         minimum=0,
+ *         maximum=100,
+ *         example=87.5,
+ *         description="Completion percentage"
+ *     )
+ * )
+ *
+ * @OA\Schema(
+ *     schema="ChallengeProgressRequest",
+ *     type="object",
+ *     required={"challenges_done"},
+ *
+ *     @OA\Property(
+ *         property="challenges_done",
+ *         type="integer",
+ *         minimum=0,
+ *         example=5,
+ *         description="Number of challenges completed so far"
+ *     )
+ * )
+ *
+ * @OA\Schema(
+ *     schema="ChallengeProgressResponse",
+ *     type="object",
+ *
+ *     @OA\Property(property="success", type="boolean", example=true),
+ *     @OA\Property(property="message", type="string", example="Challenge progress updated successfully"),
+ *     @OA\Property(
+ *         property="data",
+ *         type="object",
+ *         @OA\Property(property="challenges_done", type="integer", example=5),
+ *         @OA\Property(property="total_challenges", type="integer", example=10),
+ *         @OA\Property(property="percentage", type="number", format="float", example=50.0),
+ *         @OA\Property(property="status", type="string", enum={"not_started", "in_progress", "completed"}, example="in_progress")
+ *     )
  * )
  */
 class Schemas {}

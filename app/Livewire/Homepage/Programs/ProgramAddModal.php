@@ -25,9 +25,9 @@ class ProgramAddModal extends Component
     {
         return [
             'name' => 'required|string|min:3|max:255',
-            'description' => 'required|string|min:3',
+            'description' => 'required|string|min:3|max:200',
             'definition' => 'required|string|min:3',
-            'objectives' => 'required|string|min:3',
+            'objectives' => 'nullable|string',
         ];
     }
 

@@ -27,7 +27,7 @@ class ProgramsTable extends Component
     {
         return $this->handleReloadState(function () {
             $query = Program::where('name', 'like', '%'.$this->search.'%')
-                ->withCount(['objectives'])
+                ->withCount(['stepsList'])
                 ->orderBy('created_at', 'desc');
 
             // Use custom pagination without URL caching
@@ -35,6 +35,11 @@ class ProgramsTable extends Component
 
             return $query->paginate($this->perPage, ['*'], 'page', $page);
         });
+    }
+
+    public function manageProgram($programId)
+    {
+        return redirect()->route('program.manage', ['programId' => $programId]);
     }
 
     public function deleteProgram($programId)

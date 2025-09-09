@@ -43,16 +43,13 @@ use OpenApi\Annotations as OA;
  * )
  * @OA\Tag(
  *     name="Programs",
- *     description="Program management and module linking endpoints"
- * )
- * @OA\Tag(
- *     name="Objectives",
- *     description="Program objectives management endpoints"
+ *     description="Program progress and step management endpoints"
  * )
  * @OA\Tag(
  *     name="User Management",
  *     description="User management endpoints (Admin only)"
  * )
+
  *
  * @OA\Post(
  *     path="/api/auth/signup",
@@ -603,10 +600,10 @@ use OpenApi\Annotations as OA;
  * // ==================== PROGRAMS ENDPOINTS ====================
  *
  * @OA\Get(
- *     path="/api/programs/all",
- *     summary="Get all programs",
- *     description="Retrieve a list of all programs",
- *     operationId="getAllPrograms",
+ *     path="/api/program/suggested",
+ *     summary="Get suggested programs",
+ *     description="Retrieve programs suggested for the authenticated user",
+ *     operationId="getSuggestedPrograms",
  *     tags={"Programs"},
  *     security={{"bearerAuth":{}}},
  *
@@ -617,17 +614,7 @@ use OpenApi\Annotations as OA;
  *         @OA\JsonContent(
  *             type="array",
  *
- *             @OA\Items(
- *                 type="object",
- *
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="name", type="string", example="Sample Program"),
- *                 @OA\Property(property="description", type="string", example="Program description"),
- *                 @OA\Property(property="definition", type="string", example="Program definition"),
- *                 @OA\Property(property="objectives", type="string", example="Program objectives"),
- *                 @OA\Property(property="created_at", type="string", format="date-time"),
- *                 @OA\Property(property="updated_at", type="string", format="date-time")
- *             )
+ *             @OA\Items(ref="#/components/schemas/Program")
  *         )
  *     ),
  *
@@ -636,9 +623,32 @@ use OpenApi\Annotations as OA;
  * )
  *
  * @OA\Get(
- *     path="/api/programs/{programId}",
+ *     path="/api/program/my",
+ *     summary="Get user's programs",
+ *     description="Retrieve programs that the authenticated user has interacted with, along with their status",
+ *     operationId="getMyPrograms",
+ *     tags={"Programs"},
+ *     security={{"bearerAuth":{}}},
+ *
+ *     @OA\Response(
+ *         response=200,
+ *         description="Successful operation",
+ *
+ *         @OA\JsonContent(
+ *             type="array",
+ *
+ *             @OA\Items(ref="#/components/schemas/Program")
+ *         )
+ *     ),
+ *
+ *     @OA\Response(response=401, description="Unauthorized"),
+ *     @OA\Response(response=500, description="Internal server error")
+ * )
+ *
+ * @OA\Get(
+ *     path="/api/program/{programId}",
  *     summary="Get program details",
- *     description="Retrieve detailed information about a specific program including linked modules",
+ *     description="Retrieve detailed information about a specific program",
  *     operationId="getProgram",
  *     tags={"Programs"},
  *     security={{"bearerAuth":{}}},
@@ -656,34 +666,7 @@ use OpenApi\Annotations as OA;
  *         response=200,
  *         description="Successful operation",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="id", type="integer", example=1),
- *             @OA\Property(property="name", type="string", example="Sample Program"),
- *             @OA\Property(property="description", type="string", example="Program description"),
- *             @OA\Property(property="definition", type="string", example="Program definition"),
- *             @OA\Property(property="objectives", type="string", example="Program objectives"),
- *             @OA\Property(
- *                 property="modules",
- *                 type="array",
- *
- *                 @OA\Items(
- *                     type="object",
- *
- *                     @OA\Property(property="id", type="integer", example=1),
- *                     @OA\Property(property="name", type="string", example="Module Name"),
- *                     @OA\Property(property="methodology_id", type="integer", example=1),
- *                     @OA\Property(property="pillar_id", type="integer", nullable=true, example=null),
- *                     @OA\Property(property="min_score", type="number", format="float", example=25.50),
- *                     @OA\Property(property="max_score", type="number", format="float", example=85.75),
- *                     @OA\Property(property="linked_at", type="string", format="date-time")
- *                 )
- *             ),
- *             @OA\Property(property="modules_count", type="integer", example=3),
- *             @OA\Property(property="created_at", type="string", format="date-time"),
- *             @OA\Property(property="updated_at", type="string", format="date-time")
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/ProgramDetailed")
  *     ),
  *
  *     @OA\Response(response=404, description="Program not found"),
@@ -692,167 +675,55 @@ use OpenApi\Annotations as OA;
  * )
  *
  * @OA\Post(
- *     path="/api/programs",
- *     summary="Create a new program (Admin only)",
- *     description="Create a new program with basic information. Requires Admin role.",
- *     operationId="createProgram",
+ *     path="/api/program/{programId}/start",
+ *     summary="Start a program",
+ *     description="Start a program for the authenticated user. Creates a user-program relationship with 'in_progress' status.",
+ *     operationId="startProgram",
  *     tags={"Programs"},
  *     security={{"bearerAuth":{}}},
  *
- *     @OA\RequestBody(
+ *     @OA\Parameter(
+ *         name="programId",
+ *         in="path",
+ *         description="Program ID",
  *         required=true,
- *         description="Program data",
  *
- *         @OA\JsonContent(
- *             type="object",
- *             required={"name", "description", "definition", "objectives"},
- *
- *             @OA\Property(property="name", type="string", example="New Program"),
- *             @OA\Property(property="description", type="string", example="Detailed program description"),
- *             @OA\Property(property="definition", type="string", example="Program definition and scope"),
- *             @OA\Property(property="objectives", type="string", example="Program learning objectives")
- *         )
+ *         @OA\Schema(type="integer", example=1)
  *     ),
  *
  *     @OA\Response(
  *         response=201,
- *         description="Program created successfully",
+ *         description="Program started successfully",
  *
  *         @OA\JsonContent(
  *             type="object",
  *
- *             @OA\Property(property="id", type="integer", example=1),
- *             @OA\Property(property="name", type="string", example="New Program"),
- *             @OA\Property(property="description", type="string", example="Detailed program description"),
- *             @OA\Property(property="definition", type="string", example="Program definition and scope"),
- *             @OA\Property(property="objectives", type="string", example="Program learning objectives"),
- *             @OA\Property(property="created_at", type="string", format="date-time"),
- *             @OA\Property(property="updated_at", type="string", format="date-time")
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Program started successfully")
  *         )
  *     ),
  *
  *     @OA\Response(
- *         response=422,
- *         description="Validation failed",
+ *         response=400,
+ *         description="Program not found or already started",
  *
  *         @OA\JsonContent(
  *             type="object",
  *
  *             @OA\Property(property="success", type="boolean", example=false),
- *             @OA\Property(property="message", type="string", example="Validation failed"),
- *             @OA\Property(
- *                 property="errors",
- *                 type="object",
- *
- *                 @OA\AdditionalProperties(
- *                     type="array",
- *
- *                     @OA\Items(type="string")
- *                 )
- *             )
+ *             @OA\Property(property="message", type="string", example="Program not found or already started")
  *         )
  *     ),
  *
  *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=403, description="Forbidden - Admin role required"),
- *     @OA\Response(response=500, description="Internal server error")
- * )
- *
- * @OA\Put(
- *     path="/api/programs/{programId}",
- *     summary="Update program (Admin only)",
- *     description="Update an existing program. Requires Admin role.",
- *     operationId="updateProgram",
- *     tags={"Programs"},
- *     security={{"bearerAuth":{}}},
- *
- *     @OA\Parameter(
- *         name="programId",
- *         in="path",
- *         required=true,
- *         description="Program ID",
- *
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\RequestBody(
- *         required=true,
- *         description="Program data to update",
- *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="name", type="string", example="Updated Program Name"),
- *             @OA\Property(property="description", type="string", example="Updated program description"),
- *             @OA\Property(property="definition", type="string", example="Updated program definition"),
- *             @OA\Property(property="objectives", type="string", example="Updated program objectives")
- *         )
- *     ),
- *
- *     @OA\Response(
- *         response=200,
- *         description="Program updated successfully",
- *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="id", type="integer", example=1),
- *             @OA\Property(property="name", type="string", example="Updated Program Name"),
- *             @OA\Property(property="description", type="string", example="Updated program description"),
- *             @OA\Property(property="definition", type="string", example="Updated program definition"),
- *             @OA\Property(property="objectives", type="string", example="Updated program objectives"),
- *             @OA\Property(property="created_at", type="string", format="date-time"),
- *             @OA\Property(property="updated_at", type="string", format="date-time")
- *         )
- *     ),
- *
- *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=403, description="Forbidden - Admin role required"),
- *     @OA\Response(response=404, description="Program not found"),
- *     @OA\Response(response=422, description="Validation failed"),
- *     @OA\Response(response=500, description="Internal server error")
- * )
- *
- * @OA\Delete(
- *     path="/api/programs/{programId}",
- *     summary="Delete program (Admin only)",
- *     description="Delete a program and all its associated data. Requires Admin role.",
- *     operationId="deleteProgram",
- *     tags={"Programs"},
- *     security={{"bearerAuth":{}}},
- *
- *     @OA\Parameter(
- *         name="programId",
- *         in="path",
- *         required=true,
- *         description="Program ID",
- *
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\Response(
- *         response=200,
- *         description="Program deleted successfully",
- *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Program deleted successfully")
- *         )
- *     ),
- *
- *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=403, description="Forbidden - Admin role required"),
- *     @OA\Response(response=404, description="Program not found"),
  *     @OA\Response(response=500, description="Internal server error")
  * )
  *
  * @OA\Post(
- *     path="/api/programs/{programId}/modules/attach",
- *     summary="Attach module to program (Admin only)",
- *     description="Link a module to a program with score configuration. Requires Admin role.",
- *     operationId="attachModuleToProgram",
+ *     path="/api/program/{programId}/complete",
+ *     summary="Complete a program",
+ *     description="Mark a program as completed for the authenticated user. Updates the user-program relationship status to 'completed'.",
+ *     operationId="completeProgram",
  *     tags={"Programs"},
  *     security={{"bearerAuth":{}}},
  *
@@ -863,260 +734,44 @@ use OpenApi\Annotations as OA;
  *         required=true,
  *
  *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\RequestBody(
- *         required=true,
- *         description="Module attachment data",
- *
- *         @OA\JsonContent(
- *             type="object",
- *             required={"module_id", "methodology_id"},
- *
- *             @OA\Property(property="module_id", type="integer", example=1),
- *             @OA\Property(property="methodology_id", type="integer", example=1),
- *             @OA\Property(property="pillar_id", type="integer", nullable=true, example=null),
- *             @OA\Property(property="min_score", type="number", format="float", example=25.50),
- *             @OA\Property(property="max_score", type="number", format="float", example=85.75)
- *         )
- *     ),
- *
- *     @OA\Response(
- *         response=201,
- *         description="Module attached successfully",
- *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Module attached successfully")
- *         )
- *     ),
- *
- *     @OA\Response(response=400, description="Relationship already exists or program not found"),
- *     @OA\Response(response=422, description="Validation failed"),
- *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=500, description="Internal server error")
- * )
- *
- * @OA\Delete(
- *     path="/api/programs/{programId}/modules/detach",
- *     summary="Detach module from program (Admin only)",
- *     description="Remove a module link from a program. Requires Admin role.",
- *     operationId="detachModuleFromProgram",
- *     tags={"Programs"},
- *     security={{"bearerAuth":{}}},
- *
- *     @OA\Parameter(
- *         name="programId",
- *         in="path",
- *         description="Program ID",
- *         required=true,
- *
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\RequestBody(
- *         required=true,
- *         description="Module detachment data",
- *
- *         @OA\JsonContent(
- *             type="object",
- *             required={"module_id", "methodology_id"},
- *
- *             @OA\Property(property="module_id", type="integer", example=1),
- *             @OA\Property(property="methodology_id", type="integer", example=1),
- *             @OA\Property(property="pillar_id", type="integer", nullable=true, example=null)
- *         )
  *     ),
  *
  *     @OA\Response(
  *         response=200,
- *         description="Module detached successfully",
+ *         description="Program completed successfully",
  *
  *         @OA\JsonContent(
  *             type="object",
  *
  *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Module detached successfully")
- *         )
- *     ),
- *
- *     @OA\Response(response=404, description="Program or module relationship not found"),
- *     @OA\Response(response=422, description="Validation failed"),
- *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=500, description="Internal server error")
- * )
- *
- * @OA\Put(
- *     path="/api/programs/{programId}/modules/scores",
- *     summary="Update module score configuration (Admin only)",
- *     description="Update the minimum and maximum score configuration for a module linked to a program. Requires Admin role.",
- *     operationId="updateModuleScores",
- *     tags={"Programs"},
- *     security={{"bearerAuth":{}}},
- *
- *     @OA\Parameter(
- *         name="programId",
- *         in="path",
- *         description="Program ID",
- *         required=true,
- *
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\RequestBody(
- *         required=true,
- *         description="Module score update data",
- *
- *         @OA\JsonContent(
- *             type="object",
- *             required={"module_id", "methodology_id", "min_score", "max_score"},
- *
- *             @OA\Property(property="module_id", type="integer", example=1),
- *             @OA\Property(property="methodology_id", type="integer", example=1),
- *             @OA\Property(property="pillar_id", type="integer", nullable=true, example=null),
- *             @OA\Property(property="min_score", type="number", format="float", example=30.00),
- *             @OA\Property(property="max_score", type="number", format="float", example=90.00)
+ *             @OA\Property(property="message", type="string", example="Program completed successfully")
  *         )
  *     ),
  *
  *     @OA\Response(
- *         response=200,
- *         description="Module scores updated successfully",
+ *         response=400,
+ *         description="Program not found or not in progress",
  *
  *         @OA\JsonContent(
  *             type="object",
  *
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Module scores updated successfully")
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Program not found or not in progress")
  *         )
  *     ),
  *
- *     @OA\Response(response=404, description="Program not found"),
- *     @OA\Response(response=422, description="Validation failed"),
  *     @OA\Response(response=401, description="Unauthorized"),
  *     @OA\Response(response=500, description="Internal server error")
  * )
+ *
+ * // ==================== STEP PROGRESS ENDPOINTS ====================
  *
  * @OA\Get(
- *     path="/api/programs/methodology/{methodologyId}/available-modules",
- *     summary="Get available modules for a methodology",
- *     description="Retrieve all modules available for linking to programs within a specific methodology",
- *     operationId="getAvailableModules",
+ *     path="/api/program/{programId}/steps",
+ *     summary="Get program steps",
+ *     description="Retrieve all steps for a specific program",
+ *     operationId="getProgramSteps",
  *     tags={"Programs"},
- *     security={{"bearerAuth":{}}},
- *
- *     @OA\Parameter(
- *         name="methodologyId",
- *         in="path",
- *         description="Methodology ID",
- *         required=true,
- *
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\Response(
- *         response=200,
- *         description="Successful operation",
- *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(
- *                 property="data",
- *                 type="array",
- *
- *                 @OA\Items(
- *                     type="object",
- *
- *                     @OA\Property(property="id", type="integer", example=1),
- *                     @OA\Property(property="name", type="string", example="Module Name"),
- *                     @OA\Property(property="description", type="string", example="Module description"),
- *                     @OA\Property(property="methodology_id", type="integer", example=1),
- *                     @OA\Property(property="pillar_id", type="integer", nullable=true, example=null),
- *                     @OA\Property(property="pillar_name", type="string", nullable=true, example="Pillar Name")
- *                 )
- *             )
- *         )
- *     ),
- *
- *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=500, description="Internal server error")
- * )
- *
- * @OA\Get(
- *     path="/api/programs/{programId}/methodology/{methodologyId}",
- *     summary="Get program with methodology-specific modules",
- *     description="Retrieve detailed program information with modules linked to a specific methodology",
- *     operationId="getProgramWithMethodologyModules",
- *     tags={"Programs"},
- *     security={{"bearerAuth":{}}},
- *
- *     @OA\Parameter(
- *         name="programId",
- *         in="path",
- *         description="Program ID",
- *         required=true,
- *
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\Parameter(
- *         name="methodologyId",
- *         in="path",
- *         description="Methodology ID",
- *         required=true,
- *
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\Response(
- *         response=200,
- *         description="Successful operation",
- *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="id", type="integer", example=1),
- *             @OA\Property(property="name", type="string", example="Sample Program"),
- *             @OA\Property(property="description", type="string", example="Program description"),
- *             @OA\Property(property="definition", type="string", example="Program definition"),
- *             @OA\Property(property="objectives", type="string", example="Program objectives"),
- *             @OA\Property(
- *                 property="modules",
- *                 type="array",
- *
- *                 @OA\Items(
- *                     type="object",
- *
- *                     @OA\Property(property="id", type="integer", example=1),
- *                     @OA\Property(property="name", type="string", example="Module Name"),
- *                     @OA\Property(property="methodology_id", type="integer", example=1),
- *                     @OA\Property(property="pillar_id", type="integer", nullable=true, example=null),
- *                     @OA\Property(property="min_score", type="number", format="float", example=25.50),
- *                     @OA\Property(property="max_score", type="number", format="float", example=85.75)
- *                 )
- *             ),
- *             @OA\Property(property="created_at", type="string", format="date-time"),
- *             @OA\Property(property="updated_at", type="string", format="date-time")
- *         )
- *     ),
- *
- *     @OA\Response(response=404, description="Program not found"),
- *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=500, description="Internal server error")
- * )
- *
- * // ==================== OBJECTIVES ENDPOINTS ====================
- *
- * @OA\Get(
- *     path="/api/programs/{programId}/objectives",
- *     summary="Get program objectives",
- *     description="Retrieve all objectives for a specific program",
- *     operationId="getProgramObjectives",
- *     tags={"Objectives"},
  *     security={{"bearerAuth":{}}},
  *
  *     @OA\Parameter(
@@ -1135,7 +790,7 @@ use OpenApi\Annotations as OA;
  *         @OA\JsonContent(
  *             type="array",
  *
- *             @OA\Items(ref="#/components/schemas/Objective")
+ *             @OA\Items(ref="#/components/schemas/StepResource")
  *         )
  *     ),
  *
@@ -1143,48 +798,12 @@ use OpenApi\Annotations as OA;
  *     @OA\Response(response=500, description="Internal server error")
  * )
  *
- * @OA\Post(
- *     path="/api/programs/{programId}/objectives",
- *     summary="Create objective (Admin only)",
- *     description="Create a new objective for a program. Requires Admin role.",
- *     operationId="createObjective",
- *     tags={"Objectives"},
- *     security={{"bearerAuth":{}}},
- *
- *     @OA\Parameter(
- *         name="programId",
- *         in="path",
- *         description="Program ID",
- *         required=true,
- *
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\RequestBody(
- *         required=true,
- *         description="Objective data",
- *
- *         @OA\JsonContent(ref="#/components/schemas/CreateObjectiveRequest")
- *     ),
- *
- *     @OA\Response(
- *         response=201,
- *         description="Objective created successfully",
- *
- *         @OA\JsonContent(ref="#/components/schemas/Objective")
- *     ),
- *
- *     @OA\Response(response=422, description="Validation failed"),
- *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=500, description="Internal server error")
- * )
- *
  * @OA\Get(
- *     path="/api/programs/{programId}/objectives/{objectiveId}",
- *     summary="Get objective details",
- *     description="Retrieve detailed information about a specific objective",
- *     operationId="getObjective",
- *     tags={"Objectives"},
+ *     path="/api/program/{programId}/step/{stepId}",
+ *     summary="Get step details",
+ *     description="Retrieve detailed information about a specific step",
+ *     operationId="getStep",
+ *     tags={"Programs"},
  *     security={{"bearerAuth":{}}},
  *
  *     @OA\Parameter(
@@ -1197,9 +816,9 @@ use OpenApi\Annotations as OA;
  *     ),
  *
  *     @OA\Parameter(
- *         name="objectiveId",
+ *         name="stepId",
  *         in="path",
- *         description="Objective ID",
+ *         description="Step ID",
  *         required=true,
  *
  *         @OA\Schema(type="integer", example=1)
@@ -1209,106 +828,20 @@ use OpenApi\Annotations as OA;
  *         response=200,
  *         description="Successful operation",
  *
- *         @OA\JsonContent(ref="#/components/schemas/ObjectiveDetailed")
+ *         @OA\JsonContent(ref="#/components/schemas/StepDetailedResource")
  *     ),
  *
- *     @OA\Response(response=404, description="Objective not found"),
+ *     @OA\Response(response=404, description="Step not found"),
  *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=500, description="Internal server error")
- * )
- *
- * @OA\Put(
- *     path="/api/programs/{programId}/objectives/{objectiveId}",
- *     summary="Update objective (Admin only)",
- *     description="Update an existing objective. Requires Admin role.",
- *     operationId="updateObjective",
- *     tags={"Objectives"},
- *     security={{"bearerAuth":{}}},
- *
- *     @OA\Parameter(
- *         name="programId",
- *         in="path",
- *         description="Program ID",
- *         required=true,
- *
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\Parameter(
- *         name="objectiveId",
- *         in="path",
- *         description="Objective ID",
- *         required=true,
- *
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\RequestBody(
- *         required=true,
- *         description="Objective data to update",
- *
- *         @OA\JsonContent(ref="#/components/schemas/UpdateObjectiveRequest")
- *     ),
- *
- *     @OA\Response(
- *         response=200,
- *         description="Objective updated successfully",
- *
- *         @OA\JsonContent(ref="#/components/schemas/Objective")
- *     ),
- *
- *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=403, description="Forbidden - Admin role required"),
- *     @OA\Response(response=404, description="Objective not found"),
- *     @OA\Response(response=422, description="Validation failed"),
- *     @OA\Response(response=500, description="Internal server error")
- * )
- *
- * @OA\Delete(
- *     path="/api/programs/{programId}/objectives/{objectiveId}",
- *     summary="Delete objective (Admin only)",
- *     description="Delete an objective from a program. Requires Admin role.",
- *     operationId="deleteObjective",
- *     tags={"Objectives"},
- *     security={{"bearerAuth":{}}},
- *
- *     @OA\Parameter(
- *         name="programId",
- *         in="path",
- *         description="Program ID",
- *         required=true,
- *
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\Parameter(
- *         name="objectiveId",
- *         in="path",
- *         description="Objective ID",
- *         required=true,
- *
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *
- *     @OA\Response(
- *         response=200,
- *         description="Objective deleted successfully",
- *
- *         @OA\JsonContent(ref="#/components/schemas/SuccessResponse")
- *     ),
- *
- *     @OA\Response(response=404, description="Objective not found"),
- *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=403, description="Forbidden - Admin role required"),
  *     @OA\Response(response=500, description="Internal server error")
  * )
  *
  * @OA\Post(
- *     path="/api/programs/{programId}/objectives/{objectiveId}/duplicate",
- *     summary="Duplicate objective (Admin only)",
- *     description="Create a copy of an existing objective. Requires Admin role.",
- *     operationId="duplicateObjective",
- *     tags={"Objectives"},
+ *     path="/api/program/{programId}/step/{stepId}/start",
+ *     summary="Start a step",
+ *     description="Start a step for the authenticated user. Creates step progress tracking with 'in_progress' status.",
+ *     operationId="startStep",
+ *     tags={"Programs"},
  *     security={{"bearerAuth":{}}},
  *
  *     @OA\Parameter(
@@ -1321,9 +854,63 @@ use OpenApi\Annotations as OA;
  *     ),
  *
  *     @OA\Parameter(
- *         name="objectiveId",
+ *         name="stepId",
  *         in="path",
- *         description="Objective ID to duplicate",
+ *         description="Step ID",
+ *         required=true,
+ *
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=200,
+ *         description="Step started successfully",
+ *
+ *         @OA\JsonContent(
+ *             type="object",
+ *
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Step started successfully")
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=400,
+ *         description="Error starting step",
+ *
+ *         @OA\JsonContent(
+ *             type="object",
+ *
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Error starting step")
+ *         )
+ *     ),
+ *
+ *     @OA\Response(response=401, description="Unauthorized"),
+ *     @OA\Response(response=500, description="Internal server error")
+ * )
+ *
+ * @OA\Post(
+ *     path="/api/program/{programId}/step/{stepId}/complete",
+ *     summary="Complete a step",
+ *     description="Complete a step with type-specific data. Journal steps require 'thought', Quiz steps require 'score', Challenge steps require 'challenges_done' and 'percentage'.",
+ *     operationId="completeStep",
+ *     tags={"Programs"},
+ *     security={{"bearerAuth":{}}},
+ *
+ *     @OA\Parameter(
+ *         name="programId",
+ *         in="path",
+ *         description="Program ID",
+ *         required=true,
+ *
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *
+ *     @OA\Parameter(
+ *         name="stepId",
+ *         in="path",
+ *         description="Step ID",
  *         required=true,
  *
  *         @OA\Schema(type="integer", example=1)
@@ -1331,35 +918,81 @@ use OpenApi\Annotations as OA;
  *
  *     @OA\RequestBody(
  *         required=false,
- *         description="Optional target program ID for the duplicate",
+ *         description="Step completion data (varies by step type)",
  *
  *         @OA\JsonContent(
- *             type="object",
+ *             oneOf={
  *
- *             @OA\Property(property="program_id", type="integer", example=2, description="Target program ID (optional)")
+ *                 @OA\Schema(ref="#/components/schemas/JournalStepCompletionRequest"),
+ *                 @OA\Schema(ref="#/components/schemas/QuizStepCompletionRequest"),
+ *                 @OA\Schema(ref="#/components/schemas/ChallengeStepCompletionRequest")
+ *             }
  *         )
  *     ),
  *
  *     @OA\Response(
- *         response=201,
- *         description="Objective duplicated successfully",
+ *         response=200,
+ *         description="Step completed successfully",
  *
- *         @OA\JsonContent(ref="#/components/schemas/Objective")
+ *         @OA\JsonContent(
+ *             type="object",
+ *
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Step completed successfully")
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=400,
+ *         description="Error completing step",
+ *
+ *         @OA\JsonContent(
+ *             type="object",
+ *
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Error completing step")
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=404,
+ *         description="Step not found",
+ *
+ *         @OA\JsonContent(
+ *             type="object",
+ *
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Step not found")
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation failed",
+ *
+ *         @OA\JsonContent(
+ *             type="object",
+ *
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Validation failed"),
+ *             @OA\Property(
+ *                 property="errors",
+ *                 type="object",
+ *                 example={"thought": {"The thought field is required."}}
+ *             )
+ *         )
  *     ),
  *
  *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=403, description="Forbidden - Admin role required"),
- *     @OA\Response(response=404, description="Objective not found"),
- *     @OA\Response(response=422, description="Validation failed"),
  *     @OA\Response(response=500, description="Internal server error")
  * )
  *
- * @OA\Put(
- *     path="/api/programs/{programId}/objectives/reorder",
- *     summary="Reorder objectives (Admin only)",
- *     description="Change the order of objectives within a program. Requires Admin role.",
- *     operationId="reorderObjectives",
- *     tags={"Objectives"},
+ * @OA\Post(
+ *     path="/api/program/{programId}/step/{stepId}/challenge-progress",
+ *     summary="Update challenge progress",
+ *     description="Update the progress of challenge-type steps by tracking individual challenges completed. Automatically calculates percentage based on total challenges and sets step to 'in_progress' status.",
+ *     operationId="updateChallengeProgress",
+ *     tags={"Programs"},
  *     security={{"bearerAuth":{}}},
  *
  *     @OA\Parameter(
@@ -1371,28 +1004,59 @@ use OpenApi\Annotations as OA;
  *         @OA\Schema(type="integer", example=1)
  *     ),
  *
+ *     @OA\Parameter(
+ *         name="stepId",
+ *         in="path",
+ *         description="Step ID (must be a challenge-type step)",
+ *         required=true,
+ *
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *
  *     @OA\RequestBody(
  *         required=true,
- *         description="New order of objectives",
+ *         description="Challenge progress data",
  *
- *         @OA\JsonContent(ref="#/components/schemas/ReorderObjectivesRequest")
+ *         @OA\JsonContent(ref="#/components/schemas/ChallengeProgressRequest")
  *     ),
  *
  *     @OA\Response(
  *         response=200,
- *         description="Objectives reordered successfully",
+ *         description="Challenge progress updated successfully",
+ *
+ *         @OA\JsonContent(ref="#/components/schemas/ChallengeProgressResponse")
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=400,
+ *         description="Invalid step type or other error",
  *
  *         @OA\JsonContent(
  *             type="object",
  *
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Objectives reordered successfully")
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Invalid step type for challenge progress")
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation failed",
+ *
+ *         @OA\JsonContent(
+ *             type="object",
+ *
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Validation failed"),
+ *             @OA\Property(
+ *                 property="errors",
+ *                 type="object",
+ *                 example={"challenges_done": {"The challenges done field is required."}}
+ *             )
  *         )
  *     ),
  *
  *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=403, description="Forbidden - Admin role required"),
- *     @OA\Response(response=422, description="Validation failed"),
  *     @OA\Response(response=500, description="Internal server error")
  * )
  *
@@ -1413,17 +1077,7 @@ use OpenApi\Annotations as OA;
  *         @OA\JsonContent(
  *             type="array",
  *
- *             @OA\Items(
- *                 type="object",
- *
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="name", type="string", example="Methodology Name"),
- *                 @OA\Property(property="description", type="string", example="Methodology description"),
- *                 @OA\Property(property="type", type="string", example="standard"),
- *                 @OA\Property(property="imgUrl", type="string", nullable=true),
- *                 @OA\Property(property="created_at", type="string", format="date-time"),
- *                 @OA\Property(property="updated_at", type="string", format="date-time")
- *             )
+ *             @OA\Items(ref="#/components/schemas/Methodology")
  *         )
  *     ),
  *
@@ -1452,43 +1106,7 @@ use OpenApi\Annotations as OA;
  *         response=200,
  *         description="Successful operation",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="id", type="integer", example=1),
- *             @OA\Property(property="name", type="string", example="Methodology Name"),
- *             @OA\Property(property="description", type="string", example="Detailed methodology description"),
- *             @OA\Property(property="definition", type="string", example="Methodology definition"),
- *             @OA\Property(property="objectives", type="string", example="Methodology objectives"),
- *             @OA\Property(property="type", type="string", example="standard"),
- *             @OA\Property(property="imgUrl", type="string", nullable=true),
- *             @OA\Property(
- *                 property="pillars",
- *                 type="array",
- *
- *                 @OA\Items(
- *                     type="object",
- *
- *                     @OA\Property(property="id", type="integer"),
- *                     @OA\Property(property="name", type="string"),
- *                     @OA\Property(property="description", type="string")
- *                 )
- *             ),
- *             @OA\Property(
- *                 property="modules",
- *                 type="array",
- *
- *                 @OA\Items(
- *                     type="object",
- *
- *                     @OA\Property(property="id", type="integer"),
- *                     @OA\Property(property="name", type="string"),
- *                     @OA\Property(property="description", type="string")
- *                 )
- *             ),
- *             @OA\Property(property="created_at", type="string", format="date-time"),
- *             @OA\Property(property="updated_at", type="string", format="date-time")
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/MethodologyDetailed")
  *     ),
  *
  *     @OA\Response(response=404, description="Methodology not found"),
@@ -1532,8 +1150,8 @@ use OpenApi\Annotations as OA;
  *             @OA\Property(property="id", type="integer", example=1),
  *             @OA\Property(property="name", type="string", example="Methodology Name"),
  *             @OA\Property(property="section", type="integer", example=1),
- *             @OA\Property(property="pillars", type="array", @OA\Items(type="object")),
- *             @OA\Property(property="modules", type="array", @OA\Items(type="object"))
+ *             @OA\Property(property="pillars", type="array", @OA\Items(ref="#/components/schemas/Pillar")),
+ *             @OA\Property(property="modules", type="array", @OA\Items(ref="#/components/schemas/Module"))
  *         )
  *     ),
  *
@@ -1572,25 +1190,7 @@ use OpenApi\Annotations as OA;
  *         response=200,
  *         description="Successful operation",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="id", type="integer", example=1),
- *             @OA\Property(property="name", type="string", example="Pillar Name"),
- *             @OA\Property(property="description", type="string", example="Pillar description"),
- *             @OA\Property(
- *                 property="modules",
- *                 type="array",
- *
- *                 @OA\Items(
- *                     type="object",
- *
- *                     @OA\Property(property="id", type="integer"),
- *                     @OA\Property(property="name", type="string"),
- *                     @OA\Property(property="description", type="string")
- *                 )
- *             )
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/PillarDetailed")
  *     ),
  *
  *     @OA\Response(response=404, description="Methodology or pillar not found"),
@@ -1628,16 +1228,7 @@ use OpenApi\Annotations as OA;
  *         response=200,
  *         description="Successful operation",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="id", type="integer", example=1),
- *             @OA\Property(property="name", type="string", example="Module Name"),
- *             @OA\Property(property="description", type="string", example="Module description"),
- *             @OA\Property(property="definition", type="string", example="Module definition"),
- *             @OA\Property(property="objectives", type="string", example="Module objectives"),
- *             @OA\Property(property="imgUrl", type="string", nullable=true)
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/Module")
  *     ),
  *
  *     @OA\Response(response=404, description="Methodology or module not found"),
@@ -1684,14 +1275,7 @@ use OpenApi\Annotations as OA;
  *         response=200,
  *         description="Successful operation",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="id", type="integer", example=1),
- *             @OA\Property(property="name", type="string", example="Module Name"),
- *             @OA\Property(property="description", type="string", example="Module description"),
- *             @OA\Property(property="pillar_context", type="string", example="Pillar-specific context")
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/Module")
  *     ),
  *
  *     @OA\Response(response=404, description="Methodology, pillar, or module not found"),
@@ -1725,26 +1309,7 @@ use OpenApi\Annotations as OA;
  *         @OA\JsonContent(
  *             type="array",
  *
- *             @OA\Items(
- *                 type="object",
- *
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="text", type="string", example="What is your assessment of...?"),
- *                 @OA\Property(property="type", type="string", example="multiple_choice"),
- *                 @OA\Property(
- *                     property="answers",
- *                     type="array",
- *
- *                     @OA\Items(
- *                         type="object",
- *
- *                         @OA\Property(property="id", type="integer"),
- *                         @OA\Property(property="text", type="string"),
- *                         @OA\Property(property="value", type="integer")
- *                     )
- *                 ),
- *                 @OA\Property(property="order", type="integer", example=1)
- *             )
+ *             @OA\Items(ref="#/components/schemas/Question")
  *         )
  *     ),
  *
@@ -1786,15 +1351,7 @@ use OpenApi\Annotations as OA;
  *         @OA\JsonContent(
  *             type="array",
  *
- *             @OA\Items(
- *                 type="object",
- *
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="text", type="string", example="Pillar-specific question text"),
- *                 @OA\Property(property="type", type="string", example="multiple_choice"),
- *                 @OA\Property(property="answers", type="array", @OA\Items(type="object")),
- *                 @OA\Property(property="pillar_context", type="string")
- *             )
+ *             @OA\Items(ref="#/components/schemas/Question")
  *         )
  *     ),
  *
@@ -1836,15 +1393,7 @@ use OpenApi\Annotations as OA;
  *         @OA\JsonContent(
  *             type="array",
  *
- *             @OA\Items(
- *                 type="object",
- *
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="text", type="string", example="Module-specific question text"),
- *                 @OA\Property(property="type", type="string", example="multiple_choice"),
- *                 @OA\Property(property="answers", type="array", @OA\Items(type="object")),
- *                 @OA\Property(property="module_context", type="string")
- *             )
+ *             @OA\Items(ref="#/components/schemas/Question")
  *         )
  *     ),
  *
@@ -1895,16 +1444,7 @@ use OpenApi\Annotations as OA;
  *         @OA\JsonContent(
  *             type="array",
  *
- *             @OA\Items(
- *                 type="object",
- *
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="text", type="string", example="Pillar module question text"),
- *                 @OA\Property(property="type", type="string", example="multiple_choice"),
- *                 @OA\Property(property="answers", type="array", @OA\Items(type="object")),
- *                 @OA\Property(property="pillar_context", type="string"),
- *                 @OA\Property(property="module_context", type="string")
- *             )
+ *             @OA\Items(ref="#/components/schemas/Question")
  *         )
  *     ),
  *
@@ -1936,38 +1476,14 @@ use OpenApi\Annotations as OA;
  *         required=true,
  *         description="User answers data",
  *
- *         @OA\JsonContent(
- *             type="object",
- *             required={"answers"},
- *
- *             @OA\Property(
- *                 property="answers",
- *                 type="array",
- *
- *                 @OA\Items(
- *                     type="object",
- *
- *                     @OA\Property(property="question_id", type="integer", example=1),
- *                     @OA\Property(property="answer_id", type="integer", example=1),
- *                     @OA\Property(property="value", type="integer", example=3)
- *                 )
- *             )
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/SubmitAnswersRequest")
  *     ),
  *
  *     @OA\Response(
  *         response=201,
  *         description="Answers submitted successfully",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Answers submitted successfully"),
- *             @OA\Property(property="score", type="number", format="float", example=85.5),
- *             @OA\Property(property="total_questions", type="integer", example=10),
- *             @OA\Property(property="answered_questions", type="integer", example=10)
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/SubmitAnswersResponse")
  *     ),
  *
  *     @OA\Response(response=404, description="Methodology not found"),
@@ -1997,28 +1513,7 @@ use OpenApi\Annotations as OA;
  *         response=200,
  *         description="Successful operation",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="methodology_id", type="integer", example=1),
- *             @OA\Property(property="user_id", type="integer", example=1),
- *             @OA\Property(property="score", type="number", format="float", example=85.5),
- *             @OA\Property(property="completion_percentage", type="number", format="float", example=100.0),
- *             @OA\Property(
- *                 property="answers",
- *                 type="array",
- *
- *                 @OA\Items(
- *                     type="object",
- *
- *                     @OA\Property(property="question_id", type="integer"),
- *                     @OA\Property(property="answer_id", type="integer"),
- *                     @OA\Property(property="value", type="integer"),
- *                     @OA\Property(property="submitted_at", type="string", format="date-time")
- *                 )
- *             ),
- *             @OA\Property(property="submitted_at", type="string", format="date-time")
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/UserAnswersResponse")
  *     ),
  *
  *     @OA\Response(response=404, description="Methodology not found or no answers submitted"),
@@ -2056,36 +1551,14 @@ use OpenApi\Annotations as OA;
  *         required=true,
  *         description="User answers data",
  *
- *         @OA\JsonContent(
- *             type="object",
- *             required={"answers"},
- *
- *             @OA\Property(
- *                 property="answers",
- *                 type="array",
- *
- *                 @OA\Items(
- *                     type="object",
- *
- *                     @OA\Property(property="question_id", type="integer"),
- *                     @OA\Property(property="answer_id", type="integer"),
- *                     @OA\Property(property="value", type="integer")
- *                 )
- *             )
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/SubmitAnswersRequest")
  *     ),
  *
  *     @OA\Response(
  *         response=201,
  *         description="Pillar answers submitted successfully",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Pillar answers submitted successfully"),
- *             @OA\Property(property="pillar_score", type="number", format="float", example=78.5)
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/SubmitAnswersResponse")
  *     ),
  *
  *     @OA\Response(response=404, description="Methodology or pillar not found"),
@@ -2124,16 +1597,7 @@ use OpenApi\Annotations as OA;
  *         response=200,
  *         description="Successful operation",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="pillar_id", type="integer", example=1),
- *             @OA\Property(property="methodology_id", type="integer", example=1),
- *             @OA\Property(property="user_id", type="integer", example=1),
- *             @OA\Property(property="pillar_score", type="number", format="float", example=78.5),
- *             @OA\Property(property="answers", type="array", @OA\Items(type="object")),
- *             @OA\Property(property="submitted_at", type="string", format="date-time")
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/UserAnswersResponse")
  *     ),
  *
  *     @OA\Response(response=404, description="Methodology, pillar not found or no answers submitted"),
@@ -2171,36 +1635,14 @@ use OpenApi\Annotations as OA;
  *         required=true,
  *         description="User answers data",
  *
- *         @OA\JsonContent(
- *             type="object",
- *             required={"answers"},
- *
- *             @OA\Property(
- *                 property="answers",
- *                 type="array",
- *
- *                 @OA\Items(
- *                     type="object",
- *
- *                     @OA\Property(property="question_id", type="integer"),
- *                     @OA\Property(property="answer_id", type="integer"),
- *                     @OA\Property(property="value", type="integer")
- *                 )
- *             )
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/SubmitAnswersRequest")
  *     ),
  *
  *     @OA\Response(
  *         response=201,
  *         description="Module answers submitted successfully",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Module answers submitted successfully"),
- *             @OA\Property(property="module_score", type="number", format="float", example=92.0)
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/SubmitAnswersResponse")
  *     ),
  *
  *     @OA\Response(response=404, description="Methodology or module not found"),
@@ -2239,16 +1681,7 @@ use OpenApi\Annotations as OA;
  *         response=200,
  *         description="Successful operation",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="module_id", type="integer", example=1),
- *             @OA\Property(property="methodology_id", type="integer", example=1),
- *             @OA\Property(property="user_id", type="integer", example=1),
- *             @OA\Property(property="module_score", type="number", format="float", example=92.0),
- *             @OA\Property(property="answers", type="array", @OA\Items(type="object")),
- *             @OA\Property(property="submitted_at", type="string", format="date-time")
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/UserAnswersResponse")
  *     ),
  *
  *     @OA\Response(response=404, description="Methodology, module not found or no answers submitted"),
@@ -2295,36 +1728,14 @@ use OpenApi\Annotations as OA;
  *         required=true,
  *         description="User answers data",
  *
- *         @OA\JsonContent(
- *             type="object",
- *             required={"answers"},
- *
- *             @OA\Property(
- *                 property="answers",
- *                 type="array",
- *
- *                 @OA\Items(
- *                     type="object",
- *
- *                     @OA\Property(property="question_id", type="integer"),
- *                     @OA\Property(property="answer_id", type="integer"),
- *                     @OA\Property(property="value", type="integer")
- *                 )
- *             )
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/SubmitAnswersRequest")
  *     ),
  *
  *     @OA\Response(
  *         response=201,
  *         description="Pillar module answers submitted successfully",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Pillar module answers submitted successfully"),
- *             @OA\Property(property="module_score", type="number", format="float", example=88.5)
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/SubmitAnswersResponse")
  *     ),
  *
  *     @OA\Response(response=404, description="Methodology, pillar, or module not found"),
@@ -2372,17 +1783,7 @@ use OpenApi\Annotations as OA;
  *         response=200,
  *         description="Successful operation",
  *
- *         @OA\JsonContent(
- *             type="object",
- *
- *             @OA\Property(property="module_id", type="integer", example=1),
- *             @OA\Property(property="pillar_id", type="integer", example=1),
- *             @OA\Property(property="methodology_id", type="integer", example=1),
- *             @OA\Property(property="user_id", type="integer", example=1),
- *             @OA\Property(property="module_score", type="number", format="float", example=88.5),
- *             @OA\Property(property="answers", type="array", @OA\Items(type="object")),
- *             @OA\Property(property="submitted_at", type="string", format="date-time")
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/UserAnswersResponse")
  *     ),
  *
  *     @OA\Response(response=404, description="Methodology, pillar, module not found or no answers submitted"),

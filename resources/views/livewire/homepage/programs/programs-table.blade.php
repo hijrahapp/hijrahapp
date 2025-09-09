@@ -20,7 +20,7 @@
                             <th class="w-20 text-center">#</th>
                             <th class="">Name</th>
                             <th class="">Description</th>
-                            <th class="text-center">Objectives Count</th>
+                            <th class="text-center">Steps Count</th>
                             <th class="w-20 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -37,7 +37,7 @@
                                     <div class="text-sm text-gray-600 max-w-xs truncate">{{ $program->description }}</div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="kt-badge kt-badge-light-primary">{{ $program->objectives_count }}</span>
+                                    <span class="kt-badge kt-badge-light-primary">{{ $program->stepsList->count() }}</span>
                                 </td>
                                 <td class="text-center" wire:ignore>
                                     <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">
@@ -46,6 +46,12 @@
                                         </button>
                                         <div class="kt-dropdown-menu w-52" data-kt-dropdown-menu="true">
                                             <ul class="kt-dropdown-menu-sub">
+                                                <li>
+                                                    <a class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="manageProgram({{ $program->id }})">
+                                                        <i class="ki-filled ki-setting-2"></i>
+                                                        Manage Program
+                                                    </a>
+                                                </li>
                                                 <li>
                                                     <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="confirmDelete('{{ $program->id }}', 'deleteProgram')">
                                                         <i class="ki-filled ki-trash"></i>

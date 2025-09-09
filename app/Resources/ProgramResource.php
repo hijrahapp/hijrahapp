@@ -2,6 +2,7 @@
 
 namespace App\Resources;
 
+use App\Services\ContextStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,9 +21,18 @@ class ProgramResource extends JsonResource
             'description' => $this->description,
             'definition' => $this->definition,
             'objectives' => $this->objectives,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'steps_count' => $this->whenLoaded('stepsList', function () {
+                return $this->stepsList->count();
+            }),
+            'completed_steps_count' => 0,
         ];
+
+        // Add program status for the authenticated user
+        if ($request->authUserId) {
+            $contextStatusService = app(ContextStatusService::class);
+            $array['status'] = $contextStatusService->getProgramStatus($request->authUserId, $this->id);
+            $array['completed_steps_count'] = $contextStatusService->getCompletedStepsCount($request->authUserId, $this->id);
+        }
 
         // Include scoring information if this program comes from user eligibility query
         if (isset($this->user_score)) {
@@ -37,13 +47,13 @@ class ProgramResource extends JsonResource
                 $array['pillar_name'] = $this->pillar_name;
             }
 
-            $array['eligibility'] = [
-                'user_score' => round($this->user_score, 2),
-                'score_range' => [
-                    'min_score' => (float) $this->min_score,
-                    'max_score' => (float) $this->max_score,
-                ],
-            ];
+            // $array['eligibility'] = [
+            //     'user_score' => round($this->user_score, 2),
+            //     'score_range' => [
+            //         'min_score' => (float) $this->min_score,
+            //         'max_score' => (float) $this->max_score,
+            //     ],
+            // ];
         }
 
         return $array;

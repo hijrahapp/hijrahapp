@@ -13,176 +13,20 @@ class ProgramRepository
         private readonly ResultCalculationService $resultCalculationService
     ) {}
 
-    public function getAll(): Collection
-    {
-        return Program::all();
-    }
-
     public function findById(int $programId): ?Program
     {
         return Program::find($programId);
     }
 
-    public function create(array $data): Program
+    public function getAll(): Collection
     {
-        return Program::create($data);
-    }
-
-    public function update(int $programId, array $data): bool
-    {
-        $program = Program::find($programId);
-        if (! $program) {
-            return false;
-        }
-
-        return $program->update($data);
-    }
-
-    public function delete(int $programId): bool
-    {
-        $program = Program::find($programId);
-        if (! $program) {
-            return false;
-        }
-
-        return $program->delete();
+        return Program::all();
     }
 
     /**
-     * Get program with all its modules and relationships.
+     * Get suggested programs that the user is eligible for based on their module scores.
      */
-    public function findByIdWithModules(int $programId): ?Program
-    {
-        return Program::with(['modules', 'objectives'])->find($programId);
-    }
-
-    /**
-     * Get program with modules for a specific methodology.
-     */
-    public function findByIdWithModulesForMethodology(int $programId, int $methodologyId): ?Program
-    {
-        return Program::with(['modulesForMethodology' => function ($query) use ($methodologyId) {
-            $query->where('program_module.methodology_id', $methodologyId);
-        }])->find($programId);
-    }
-
-    /**
-     * Attach a module to a program with score configuration.
-     */
-    public function attachModule(int $programId, array $moduleData): bool
-    {
-        $program = Program::find($programId);
-        if (! $program) {
-            return false;
-        }
-
-        // Check if this relationship already exists
-        $existingRelation = $program->modules()
-            ->wherePivot('module_id', $moduleData['module_id'])
-            ->wherePivot('methodology_id', $moduleData['methodology_id'])
-            ->wherePivot('pillar_id', $moduleData['pillar_id'] ?? null)
-            ->exists();
-
-        if ($existingRelation) {
-            return false; // Relationship already exists
-        }
-
-        $program->modules()->attach($moduleData['module_id'], [
-            'methodology_id' => $moduleData['methodology_id'],
-            'pillar_id' => $moduleData['pillar_id'] ?? null,
-            'min_score' => $moduleData['min_score'] ?? 0.00,
-            'max_score' => $moduleData['max_score'] ?? 100.00,
-        ]);
-
-        return true;
-    }
-
-    /**
-     * Detach a module from a program.
-     */
-    public function detachModule(int $programId, int $moduleId, int $methodologyId, ?int $pillarId = null): bool
-    {
-        $program = Program::find($programId);
-        if (! $program) {
-            return false;
-        }
-
-        $query = $program->modules()
-            ->wherePivot('module_id', $moduleId)
-            ->wherePivot('methodology_id', $methodologyId);
-
-        if ($pillarId !== null) {
-            $query->wherePivot('pillar_id', $pillarId);
-        } else {
-            $query->whereNull('program_module.pillar_id');
-        }
-
-        return $query->detach() > 0;
-    }
-
-    /**
-     * Update module score configuration for a program.
-     */
-    public function updateModuleScores(int $programId, int $moduleId, int $methodologyId, ?int $pillarId, array $scoreData): bool
-    {
-        $program = Program::find($programId);
-        if (! $program) {
-            return false;
-        }
-
-        $program->modules()
-            ->wherePivot('module_id', $moduleId)
-            ->wherePivot('methodology_id', $methodologyId)
-            ->wherePivot('pillar_id', $pillarId)
-            ->updateExistingPivot($moduleId, [
-                'min_score' => $scoreData['min_score'] ?? 0.00,
-                'max_score' => $scoreData['max_score'] ?? 100.00,
-            ]);
-
-        return true;
-    }
-
-    /**
-     * Get all modules available for linking to programs within a methodology.
-     */
-    public function getAvailableModulesForMethodology(int $methodologyId): Collection
-    {
-        // Get direct methodology modules
-        $directModules = \App\Models\Methodology::find($methodologyId)
-            ?->modules()
-            ->select('modules.*', 'methodology_module.methodology_id')
-            ->selectRaw('NULL as pillar_id')
-            ->get();
-
-        // Get pillar modules
-        $pillarModules = \DB::table('pillar_module')
-            ->join('modules', 'pillar_module.module_id', '=', 'modules.id')
-            ->join('pillars', 'pillar_module.pillar_id', '=', 'pillars.id')
-            ->where('pillar_module.methodology_id', $methodologyId)
-            ->select(
-                'modules.*',
-                'pillar_module.methodology_id',
-                'pillar_module.pillar_id',
-                'pillars.name as pillar_name'
-            )
-            ->get();
-
-        // Combine both collections
-        $allModules = collect();
-        if ($directModules) {
-            $allModules = $allModules->merge($directModules);
-        }
-        if ($pillarModules) {
-            $allModules = $allModules->merge($pillarModules);
-        }
-
-        return $allModules;
-    }
-
-    /**
-     * Get programs that the user is eligible for based on their module scores.
-     */
-    public function getProgramsForUser(int $userId): Collection
+    public function getSuggestedPrograms(int $userId): Collection
     {
         // Get all user's completed modules with their methodology and pillar contexts
         $userModuleScores = DB::table('user_context_statuses as ucs')
@@ -192,7 +36,7 @@ class ProgramRepository
             ->get(['context_id as module_id', 'methodology_id', 'pillar_id']);
 
         if ($userModuleScores->isEmpty()) {
-            return collect();
+            return Program::query()->whereRaw('1 = 0')->get(); // Return empty Eloquent Collection
         }
 
         $eligiblePrograms = collect();
@@ -247,11 +91,121 @@ class ProgramRepository
             $eligiblePrograms = $eligiblePrograms->merge($qualifyingPrograms);
         }
 
-        // Remove duplicates and load relationships
-        return $eligiblePrograms
+        // Remove duplicates and convert to Eloquent Collection
+        $uniquePrograms = $eligiblePrograms
             ->unique('id')
-            ->values()
-            ->loadMissing(['objectives'])
-            ->sortBy('name');
+            ->values();
+
+        if ($uniquePrograms->isEmpty()) {
+            return Program::query()->whereRaw('1 = 0')->get(); // Return empty Eloquent Collection
+        }
+
+        // Convert to Eloquent models while preserving the additional data
+        $programs = $uniquePrograms->map(function ($programData) {
+            // Create a Program model instance
+            $program = new Program;
+            $program->fill($programData->toArray());
+            $program->exists = true; // Mark as existing to avoid save issues
+
+            // Ensure the ID is properly set
+            $program->setAttribute('id', $programData->id);
+
+            // Add the additional fields as attributes
+            $program->setAttribute('user_score', $programData->user_score);
+            $program->setAttribute('qualifying_module_id', $programData->qualifying_module_id);
+            $program->setAttribute('module_name', $programData->module_name);
+            $program->setAttribute('methodology_id', $programData->methodology_id);
+            $program->setAttribute('methodology_name', $programData->methodology_name);
+            $program->setAttribute('pillar_id', $programData->pillar_id);
+            $program->setAttribute('pillar_name', $programData->pillar_name);
+            $program->setAttribute('min_score', $programData->min_score);
+            $program->setAttribute('max_score', $programData->max_score);
+
+            return $program;
+        });
+
+        // Load the stepsList relationship for each program
+        $programIds = $programs->pluck('id');
+        $programsWithSteps = Program::query()
+            ->whereIn('id', $programIds)
+            ->with(['stepsList'])
+            ->get()
+            ->keyBy('id');
+
+        // Merge the stepsList data into our programs
+        $programs->each(function ($program) use ($programsWithSteps) {
+            if ($programsWithSteps->has($program->id)) {
+                $program->setRelation('stepsList', $programsWithSteps[$program->id]->stepsList);
+            }
+        });
+
+        return new Collection($programs->sortBy('name')->values());
+    }
+
+    /**
+     * Get programs the user has interacted with.
+     */
+    public function getUserPrograms(int $userId): Collection
+    {
+        return Program::query()
+            ->join('user_programs', 'programs.id', '=', 'user_programs.program_id')
+            ->where('user_programs.user_id', $userId)
+            ->select([
+                'programs.*',
+                'user_programs.status',
+                'user_programs.started_at',
+                'user_programs.completed_at',
+            ])
+            ->with(['stepsList'])
+            ->orderBy('user_programs.created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Start a program for a user.
+     */
+    public function startProgram(int $userId, int $programId): bool
+    {
+        $program = Program::find($programId);
+        if (! $program) {
+            return false;
+        }
+
+        // Check if already started
+        $existing = $program->users()
+            ->wherePivot('user_id', $userId)
+            ->exists();
+
+        if ($existing) {
+            return false; // User already has this program
+        }
+
+        $program->users()->attach($userId, [
+            'status' => 'in_progress',
+            'started_at' => now(),
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Complete a program for a user.
+     */
+    public function completeProgram(int $userId, int $programId): bool
+    {
+        $program = Program::find($programId);
+        if (! $program) {
+            return false;
+        }
+
+        $updated = $program->users()
+            ->wherePivot('user_id', $userId)
+            ->wherePivot('status', 'in_progress')
+            ->updateExistingPivot($userId, [
+                'status' => 'completed',
+                'completed_at' => now(),
+            ]);
+
+        return $updated > 0;
     }
 }

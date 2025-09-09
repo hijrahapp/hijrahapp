@@ -6,7 +6,6 @@ use App\Http\Repositories\UserAnswerRepository;
 use App\Resources\UserAnswerGroupedResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class UserAnswerController
@@ -15,10 +14,6 @@ class UserAnswerController
 
     /**
      * Submit user answers for methodology questions
-     *
-     * @param Request $request
-     * @param int $methodologyId
-     * @return JsonResponse
      */
     public function submitMethodologyAnswers(Request $request, int $methodologyId): JsonResponse
     {
@@ -35,13 +30,13 @@ class UserAnswerController
                 return response()->json([
                     'success' => false,
                     'message' => __('messages.validation_failed'),
-                    'errors' => $validator->errors()
-                ], 422);
+                    'errors' => $validator->errors(),
+                ], 400);
             }
 
             $userId = $request->authUser->id;
             $answers = $request->input('answers');
-            $end = (bool)($request->input('endQuestions', false));
+            $end = (bool) ($request->input('endQuestions', false));
 
             $submittedAnswers = $this->userAnswerRepo->submitMethodologyAnswers($userId, $methodologyId, $answers);
 
@@ -63,24 +58,19 @@ class UserAnswerController
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.error_submitting_methodology_answers'),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Submit user answers for pillar questions within a methodology
-     *
-     * @param Request $request
-     * @param int $methodologyId
-     * @param int $pillarId
-     * @return JsonResponse
      */
     public function submitPillarAnswers(Request $request, int $methodologyId, int $pillarId): JsonResponse
     {
@@ -95,7 +85,7 @@ class UserAnswerController
                 return response()->json([
                     'success' => false,
                     'message' => __('messages.validation_failed'),
-                    'errors' => $endValidator->errors()
+                    'errors' => $endValidator->errors(),
                 ], 422);
             }
 
@@ -106,6 +96,7 @@ class UserAnswerController
                     $answer['question_id'] = $parts[0];
                     $answer['module_id'] = $parts[1];
                 }
+
                 return $answer;
             })->all();
 
@@ -121,13 +112,13 @@ class UserAnswerController
                 return response()->json([
                     'success' => false,
                     'message' => __('messages.validation_failed'),
-                    'errors' => $validator->errors()
+                    'errors' => $validator->errors(),
                 ], 422);
             }
 
             // Group answers by module_id
             $groupedAnswers = collect($answers)->groupBy('module_id');
-            $end = (bool)($request->input('endQuestions', false));
+            $end = (bool) ($request->input('endQuestions', false));
             foreach ($groupedAnswers as $moduleId => $moduleGroup) {
                 $flat = collect($moduleGroup)->map(function ($item) {
                     return [
@@ -143,24 +134,24 @@ class UserAnswerController
                 $this->userAnswerRepo->upsertContextStatus(
                     $userId,
                     'module',
-                    (int)$moduleId,
+                    (int) $moduleId,
                     $methodologyId,
                     $pillarId,
                     $end ? 'completed' : 'in_progress'
                 );
             }
-//            foreach ($groupedAnswers as $moduleGroup) {
-//                $moduleId = $moduleGroup['module_id'];
-//                $flat = collect($moduleGroup['items'])->map(function ($item) {
-//                    return [
-//                        'question_id' => $item['question_id'],
-//                        'answerIds' => $item['answerIds'],
-//                    ];
-//                })->values()->all();
-//
-//                // Submit as module answers tied to pillar context
-//                $this->userAnswerRepo->submitPillarModuleAnswers($userId, $methodologyId, $pillarId, $moduleId, $flat);
-//            }
+            //            foreach ($groupedAnswers as $moduleGroup) {
+            //                $moduleId = $moduleGroup['module_id'];
+            //                $flat = collect($moduleGroup['items'])->map(function ($item) {
+            //                    return [
+            //                        'question_id' => $item['question_id'],
+            //                        'answerIds' => $item['answerIds'],
+            //                    ];
+            //                })->values()->all();
+            //
+            //                // Submit as module answers tied to pillar context
+            //                $this->userAnswerRepo->submitPillarModuleAnswers($userId, $methodologyId, $pillarId, $moduleId, $flat);
+            //            }
 
             return response()->json($end ? [
                 'success' => true,
@@ -170,24 +161,19 @@ class UserAnswerController
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.error_submitting_pillar_answers'),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Submit user answers for module questions within a methodology
-     *
-     * @param Request $request
-     * @param int $methodologyId
-     * @param int $moduleId
-     * @return JsonResponse
      */
     public function submitModuleAnswers(Request $request, int $methodologyId, int $moduleId): JsonResponse
     {
@@ -204,13 +190,13 @@ class UserAnswerController
                 return response()->json([
                     'success' => false,
                     'message' => __('messages.validation_failed'),
-                    'errors' => $validator->errors()
+                    'errors' => $validator->errors(),
                 ], 422);
             }
 
             $userId = $request->authUser->id;
             $answers = $request->input('answers');
-            $end = (bool)($request->input('endQuestions', false));
+            $end = (bool) ($request->input('endQuestions', false));
 
             $submittedAnswers = $this->userAnswerRepo->submitModuleAnswers($userId, $methodologyId, $moduleId, $answers);
 
@@ -232,25 +218,19 @@ class UserAnswerController
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.error_submitting_module_answers'),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Submit user answers for module questions within a pillar of a methodology
-     *
-     * @param Request $request
-     * @param int $methodologyId
-     * @param int $pillarId
-     * @param int $moduleId
-     * @return JsonResponse
      */
     public function submitPillarModuleAnswers(Request $request, int $methodologyId, int $pillarId, int $moduleId): JsonResponse
     {
@@ -267,13 +247,13 @@ class UserAnswerController
                 return response()->json([
                     'success' => false,
                     'message' => __('messages.validation_failed'),
-                    'errors' => $validator->errors()
+                    'errors' => $validator->errors(),
                 ], 422);
             }
 
             $userId = $request->authUser->id;
             $answers = $request->input('answers');
-            $end = (bool)($request->input('endQuestions', false));
+            $end = (bool) ($request->input('endQuestions', false));
 
             $submittedAnswers = $this->userAnswerRepo->submitPillarModuleAnswers($userId, $methodologyId, $pillarId, $moduleId, $answers);
 
@@ -295,22 +275,19 @@ class UserAnswerController
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.error_submitting_pillar_module_answers'),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Get user answers for methodology questions
-     *
-     * @param int $methodologyId
-     * @return JsonResponse
      */
     public function getMethodologyAnswers(Request $request, int $methodologyId): JsonResponse
     {
@@ -324,17 +301,13 @@ class UserAnswerController
             return response()->json([
                 'success' => false,
                 'message' => __('messages.error_fetching_methodology_answers'),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Get user answers for pillar questions within a methodology
-     *
-     * @param int $methodologyId
-     * @param int $pillarId
-     * @return JsonResponse
      */
     public function getPillarAnswers(Request $request, int $methodologyId, int $pillarId): JsonResponse
     {
@@ -348,17 +321,13 @@ class UserAnswerController
             return response()->json([
                 'success' => false,
                 'message' => __('messages.error_fetching_pillar_answers'),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Get user answers for module questions within a methodology
-     *
-     * @param int $methodologyId
-     * @param int $moduleId
-     * @return JsonResponse
      */
     public function getModuleAnswers(Request $request, int $methodologyId, int $moduleId): JsonResponse
     {
@@ -372,18 +341,13 @@ class UserAnswerController
             return response()->json([
                 'success' => false,
                 'message' => __('messages.error_fetching_module_answers'),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Get user answers for module questions within a pillar of a methodology
-     *
-     * @param int $methodologyId
-     * @param int $pillarId
-     * @param int $moduleId
-     * @return JsonResponse
      */
     public function getPillarModuleAnswers(Request $request, int $methodologyId, int $pillarId, int $moduleId): JsonResponse
     {
@@ -397,7 +361,7 @@ class UserAnswerController
             return response()->json([
                 'success' => false,
                 'message' => __('messages.error_fetching_pillar_module_answers'),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

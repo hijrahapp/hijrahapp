@@ -1,4 +1,5 @@
 <?php
+
 return [
     'welcome' => 'Welcome!',
     'login_success' => 'Login successful',
@@ -134,4 +135,27 @@ return [
     'delete_methodology_note' => 'This action cannot be undone.',
     'sections_updated_successfully' => 'Sections updated successfully!',
     'lorem_ipsum' => 'Lorem ipsum dolor sit amet, ludus animal moderatius his ea, et nostrud intellegam sed. Eam cu nostrud invenire. Ius no legere discere, in vidit imperdiet comprehensam nec. Tation latine omittam ne nec, eos ex placerat suscipiantur, sea saperet torquatos ea. Eos oratio denique tincidunt in, id duo erat iusto oblique.',
+
+    // Steps
+    'step_not_found' => 'Step not found',
+    'error_fetching_step' => 'Error fetching step',
+    'error_fetching_program_steps' => 'Error fetching program steps',
+    'step_completed_successfully' => 'Step completed successfully',
+    'error_completing_step' => 'Error completing step',
+    'step_started_successfully' => 'Step started successfully',
+    'error_starting_step' => 'Error starting step',
+    'challenge_progress_updated' => 'Challenge progress updated successfully',
+    'error_updating_challenge_progress' => 'Error updating challenge progress',
+
+    // Programs
+    'error_fetching_programs' => 'Error fetching programs',
+    'error_fetching_user_programs' => 'Error fetching user programs',
+    'program_not_found' => 'Program not found',
+    'error_fetching_program' => 'Error fetching program',
+    'program_not_found_or_already_started' => 'Program not found or already started',
+    'program_started_successfully' => 'Program started successfully',
+    'error_starting_program' => 'Error starting program',
+    'program_not_found_or_not_in_progress' => 'Program not found or not in progress',
+    'program_completed_successfully' => 'Program completed successfully',
+    'error_completing_program' => 'Error completing program',
 ];

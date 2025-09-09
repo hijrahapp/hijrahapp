@@ -81,7 +81,7 @@
                                         @if(count($customAnswers) > 2)
                                             <button
                                                 type="button"
-                                                class="kt-btn kt-btn-outline kt-btn-sm text-destructive"
+                                                class="kt-btn kt-btn-outline kt-btn-destructive text-destructive"
                                                 wire:click="removeAnswer({{ $index }})"
                                                 title="Remove answer"
                                             >

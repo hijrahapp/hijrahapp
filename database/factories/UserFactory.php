@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 
@@ -21,7 +22,7 @@ class UserFactory extends Factory
             'active' => $this->faker->boolean(),
             'gender' => $this->faker->randomElement(['male', 'female']),
             'birthDate' => $this->faker->date('Y-m-d', '2005-01-01'),
-            'roleId' => Role::inRandomOrder()->first()?->id ?? Role::factory(),
+            'roleId' => 1, // Use User role for tests
         ];
     }
 

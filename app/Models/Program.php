@@ -29,11 +29,11 @@ class Program extends Model
      |------------------------------------------------------------------------*/
 
     /**
-     * Objectives linked to this program.
+     * Steps linked to this program.
      */
-    public function objectives(): HasMany
+    public function stepsList(): HasMany
     {
-        return $this->hasMany(Objective::class)->ordered();
+        return $this->hasMany(Step::class)->orderBy('id', 'asc');
     }
 
     /**
@@ -49,12 +49,11 @@ class Program extends Model
     /**
      * Modules linked to this program for a specific methodology.
      */
-    public function modulesForMethodology(int $methodologyId): BelongsToMany
+    public function modulesForMethodology(): BelongsToMany
     {
         return $this->belongsToMany(Module::class, 'program_module')
             ->withPivot('methodology_id', 'pillar_id', 'min_score', 'max_score')
-            ->withTimestamps()
-            ->wherePivot('methodology_id', $methodologyId);
+            ->withTimestamps();
     }
 
     /**
@@ -79,5 +78,31 @@ class Program extends Model
             ->withTimestamps()
             ->wherePivot('methodology_id', $methodologyId)
             ->whereNull('program_module.pillar_id');
+    }
+
+    /**
+     * Users who have interacted with this program.
+     */
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_programs')
+            ->withPivot('status', 'started_at', 'completed_at')
+            ->withTimestamps();
+    }
+
+    /**
+     * Users currently working on this program.
+     */
+    public function usersInProgress(): BelongsToMany
+    {
+        return $this->users()->wherePivot('status', 'in_progress');
+    }
+
+    /**
+     * Users who have completed this program.
+     */
+    public function usersCompleted(): BelongsToMany
+    {
+        return $this->users()->wherePivot('status', 'completed');
     }
 }

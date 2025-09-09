@@ -1,12 +1,12 @@
 <?php
 
 return [
-    //Answers
+    // Answers
     'Yes' => 'نعم',
     'No' => 'لا',
     'True' => 'صح',
     'False' => 'خطأ',
-    //Rating
+    // Rating
     '1' => '١',
     '2' => '٢',
     '3' => '٣',
@@ -17,13 +17,13 @@ return [
     '8' => '٨',
     '9' => '٩',
     '10' => '١٠',
-    //Scale
+    // Scale
     'Strongly Agree' => 'أوافق بشدة',
     'Agree' => 'أوافق',
     'Neutral' => 'محايد',
     'Disagree' => 'لا أوافق',
     'Strongly Disagree' => 'لا أوافق بشدة',
-    //Question Types
+    // Question Types
     'YesNo' => 'نعم/لا',
     'TrueFalse' => 'صح/خطأ',
     'MCQSingle' => 'اختيار من متعدد - إجابة واحدة',
@@ -31,13 +31,34 @@ return [
     'Rating1to5' => 'تقييم من ١ إلى ٥',
     'Rating1to10' => 'تقييم من ١ إلى ١٠',
     'ScaleAgreeDisagree' => 'مقياس الموافقة/الاعتراض',
-    //Methodology Types
+    // Methodology Types
     'simple' => 'بسيط',
     'complex' => 'معقد',
     'two_section' => 'قسمين',
     'twoSection' => 'قسمين',
-    //Status
+    // Status
     'not_started' => 'لم يبدأ',
     'in_progress' => 'قيد التنفيذ',
     'completed' => 'تمّ',
+    // Time Types
+    'minute' => 'دقيقة',
+    'minutes' => 'دقائق',
+    'hour' => 'ساعة',
+    'hours' => 'ساعات',
+    'day' => 'يوم',
+    'days' => 'أيام',
+    'week' => 'أسبوع',
+    'weeks' => 'أسابيع',
+    'month' => 'شهر',
+    'months' => 'أشهر',
+    // Objective Types
+    'journal' => 'تأملات يومية',
+    'article' => 'مقالات',
+    'advice' => 'إرشادات',
+    'daily_mission' => 'مهام يومية',
+    'quiz' => 'اختبارات',
+    'video' => 'فيديوهات',
+    'audio' => 'مقاطع صوتية',
+    'book' => 'كتيبات  PDF',
+    'challenge' => 'تحديات',
 ];

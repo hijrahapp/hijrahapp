@@ -135,4 +135,27 @@ return [
     'delete_methodology_note' => 'سيؤدي ذلك إلى حذف المنهجية من أي ركائز أو وحدات أو أسئلة مرتبطة.',
     'sections_updated_successfully' => 'تم تحديث الأقسام بنجاح!',
     'lorem_ipsum' => 'ودول الحدود عرض. التي إعادة وبداية أن هذا. بال قد جمعت فبعد, وبغطاء السيطرة عدد ان. غريمه الثالث، وبالتحديد، يبق عن, لم شدّت وقامت غير, ان بين حقول محاولات الأراضي. بقصف ماشاء المشترك بال ٣٠, في أخذ لدحر احداث, ذلك بلديهما وقدّموا قد.',
+
+    // الخطوات
+    'step_not_found' => 'الخطوة غير موجودة',
+    'error_fetching_step' => 'خطأ في جلب الخطوة',
+    'error_fetching_program_steps' => 'خطأ في جلب خطوات البرنامج',
+    'step_completed_successfully' => 'تم إكمال الخطوة بنجاح',
+    'error_completing_step' => 'خطأ في إكمال الخطوة',
+    'step_started_successfully' => 'تم بدء الخطوة بنجاح',
+    'error_starting_step' => 'خطأ في بدء الخطوة',
+    'challenge_progress_updated' => 'تم تحديث تقدم التحدي بنجاح',
+    'error_updating_challenge_progress' => 'خطأ في تحديث تقدم التحدي',
+
+    // البرامج
+    'error_fetching_programs' => 'خطأ في جلب البرامج',
+    'error_fetching_user_programs' => 'خطأ في جلب برامج المستخدم',
+    'program_not_found' => 'البرنامج غير موجود',
+    'error_fetching_program' => 'خطأ في جلب البرنامج',
+    'program_not_found_or_already_started' => 'البرنامج غير موجود أو تم بدؤه بالفعل',
+    'program_started_successfully' => 'تم بدء البرنامج بنجاح',
+    'error_starting_program' => 'خطأ في بدء البرنامج',
+    'program_not_found_or_not_in_progress' => 'البرنامج غير موجود أو ليس قيد التقدم',
+    'program_completed_successfully' => 'تم إكمال البرنامج بنجاح',
+    'error_completing_program' => 'خطأ في إكمال البرنامج',
 ];

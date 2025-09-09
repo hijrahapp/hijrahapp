@@ -1042,14 +1042,14 @@
                 ]
             }
         },
-        "/api/programs/all": {
+        "/api/program/suggested": {
             "get": {
                 "tags": [
                     "Programs"
                 ],
-                "summary": "Get all programs",
-                "description": "Retrieve a list of all programs",
-                "operationId": "getAllPrograms",
+                "summary": "Get suggested programs",
+                "description": "Retrieve programs suggested for the authenticated user",
+                "operationId": "getSuggestedPrograms",
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -1058,37 +1058,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "name": {
-                                                "type": "string",
-                                                "example": "Sample Program"
-                                            },
-                                            "description": {
-                                                "type": "string",
-                                                "example": "Program description"
-                                            },
-                                            "definition": {
-                                                "type": "string",
-                                                "example": "Program definition"
-                                            },
-                                            "objectives": {
-                                                "type": "string",
-                                                "example": "Program objectives"
-                                            },
-                                            "created_at": {
-                                                "type": "string",
-                                                "format": "date-time"
-                                            },
-                                            "updated_at": {
-                                                "type": "string",
-                                                "format": "date-time"
-                                            }
-                                        },
-                                        "type": "object"
+                                        "$ref": "#/components/schemas/Program"
                                     }
                                 }
                             }
@@ -1108,13 +1078,49 @@
                 ]
             }
         },
-        "/api/programs/{programId}": {
+        "/api/program/my": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get user's programs",
+                "description": "Retrieve programs that the authenticated user has interacted with, along with their status",
+                "operationId": "getMyPrograms",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Program"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/program/{programId}": {
             "get": {
                 "tags": [
                     "Programs"
                 ],
                 "summary": "Get program details",
-                "description": "Retrieve detailed information about a specific program including linked modules",
+                "description": "Retrieve detailed information about a specific program",
                 "operationId": "getProgram",
                 "parameters": [
                     {
@@ -1134,80 +1140,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "name": {
-                                            "type": "string",
-                                            "example": "Sample Program"
-                                        },
-                                        "description": {
-                                            "type": "string",
-                                            "example": "Program description"
-                                        },
-                                        "definition": {
-                                            "type": "string",
-                                            "example": "Program definition"
-                                        },
-                                        "objectives": {
-                                            "type": "string",
-                                            "example": "Program objectives"
-                                        },
-                                        "modules": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Module Name"
-                                                    },
-                                                    "methodology_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "pillar_id": {
-                                                        "type": "integer",
-                                                        "example": null,
-                                                        "nullable": true
-                                                    },
-                                                    "min_score": {
-                                                        "type": "number",
-                                                        "format": "float",
-                                                        "example": 25.5
-                                                    },
-                                                    "max_score": {
-                                                        "type": "number",
-                                                        "format": "float",
-                                                        "example": 85.75
-                                                    },
-                                                    "linked_at": {
-                                                        "type": "string",
-                                                        "format": "date-time"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "modules_count": {
-                                            "type": "integer",
-                                            "example": 3
-                                        },
-                                        "created_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        },
-                                        "updated_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/ProgramDetailed"
                                 }
                             }
                         }
@@ -1217,176 +1150,6 @@
                     },
                     "401": {
                         "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Programs"
-                ],
-                "summary": "Update program (Admin only)",
-                "description": "Update an existing program. Requires Admin role.",
-                "operationId": "updateProgram",
-                "parameters": [
-                    {
-                        "name": "programId",
-                        "in": "path",
-                        "description": "Program ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Program data to update",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Updated Program Name"
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "example": "Updated program description"
-                                    },
-                                    "definition": {
-                                        "type": "string",
-                                        "example": "Updated program definition"
-                                    },
-                                    "objectives": {
-                                        "type": "string",
-                                        "example": "Updated program objectives"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Program updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "name": {
-                                            "type": "string",
-                                            "example": "Updated Program Name"
-                                        },
-                                        "description": {
-                                            "type": "string",
-                                            "example": "Updated program description"
-                                        },
-                                        "definition": {
-                                            "type": "string",
-                                            "example": "Updated program definition"
-                                        },
-                                        "objectives": {
-                                            "type": "string",
-                                            "example": "Updated program objectives"
-                                        },
-                                        "created_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        },
-                                        "updated_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden - Admin role required"
-                    },
-                    "404": {
-                        "description": "Program not found"
-                    },
-                    "422": {
-                        "description": "Validation failed"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Programs"
-                ],
-                "summary": "Delete program (Admin only)",
-                "description": "Delete a program and all its associated data. Requires Admin role.",
-                "operationId": "deleteProgram",
-                "parameters": [
-                    {
-                        "name": "programId",
-                        "in": "path",
-                        "description": "Program ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Program deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Program deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden - Admin role required"
-                    },
-                    "404": {
-                        "description": "Program not found"
                     },
                     "500": {
                         "description": "Internal server error"
@@ -1399,83 +1162,452 @@
                 ]
             }
         },
-        "/api/programs": {
+        "/api/program/{programId}/start": {
             "post": {
                 "tags": [
                     "Programs"
                 ],
-                "summary": "Create a new program (Admin only)",
-                "description": "Create a new program with basic information. Requires Admin role.",
-                "operationId": "createProgram",
+                "summary": "Start a program",
+                "description": "Start a program for the authenticated user. Creates a user-program relationship with 'in_progress' status.",
+                "operationId": "startProgram",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Program started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Program started successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Program not found or already started",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Program not found or already started"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/program/{programId}/complete": {
+            "post": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Complete a program",
+                "description": "Mark a program as completed for the authenticated user. Updates the user-program relationship status to 'completed'.",
+                "operationId": "completeProgram",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Program completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Program completed successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Program not found or not in progress",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Program not found or not in progress"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/program/{programId}/steps": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get program steps",
+                "description": "Retrieve all steps for a specific program",
+                "operationId": "getProgramSteps",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/StepResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/program/{programId}/step/{stepId}": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get step details",
+                "description": "Retrieve detailed information about a specific step",
+                "operationId": "getStep",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "stepId",
+                        "in": "path",
+                        "description": "Step ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StepDetailedResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Step not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/program/{programId}/step/{stepId}/start": {
+            "post": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Start a step",
+                "description": "Start a step for the authenticated user. Creates step progress tracking with 'in_progress' status.",
+                "operationId": "startStep",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "stepId",
+                        "in": "path",
+                        "description": "Step ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Step started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Step started successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error starting step",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error starting step"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/program/{programId}/step/{stepId}/complete": {
+            "post": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Complete a step",
+                "description": "Complete a step with type-specific data. Journal steps require 'thought', Quiz steps require 'score', Challenge steps require 'challenges_done' and 'percentage'.",
+                "operationId": "completeStep",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "stepId",
+                        "in": "path",
+                        "description": "Step ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
                 "requestBody": {
-                    "description": "Program data",
-                    "required": true,
+                    "description": "Step completion data (varies by step type)",
+                    "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "name",
-                                    "description",
-                                    "definition",
-                                    "objectives"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "New Program"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/JournalStepCompletionRequest"
                                     },
-                                    "description": {
-                                        "type": "string",
-                                        "example": "Detailed program description"
+                                    {
+                                        "$ref": "#/components/schemas/QuizStepCompletionRequest"
                                     },
-                                    "definition": {
-                                        "type": "string",
-                                        "example": "Program definition and scope"
-                                    },
-                                    "objectives": {
-                                        "type": "string",
-                                        "example": "Program learning objectives"
+                                    {
+                                        "$ref": "#/components/schemas/ChallengeStepCompletionRequest"
                                     }
-                                },
-                                "type": "object"
+                                ]
                             }
                         }
                     }
                 },
                 "responses": {
-                    "201": {
-                        "description": "Program created successfully",
+                    "200": {
+                        "description": "Step completed successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
-                                        "name": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "New Program"
+                                            "example": "Step completed successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error completing step",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
                                         },
-                                        "description": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "Detailed program description"
+                                            "example": "Error completing step"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Step not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
                                         },
-                                        "definition": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "Program definition and scope"
-                                        },
-                                        "objectives": {
-                                            "type": "string",
-                                            "example": "Program learning objectives"
-                                        },
-                                        "created_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        },
-                                        "updated_at": {
-                                            "type": "string",
-                                            "format": "date-time"
+                                            "example": "Step not found"
                                         }
                                     },
                                     "type": "object"
@@ -1499,11 +1631,10 @@
                                         },
                                         "errors": {
                                             "type": "object",
-                                            "additionalProperties": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string"
-                                                }
+                                            "example": {
+                                                "thought": [
+                                                    "The thought field is required."
+                                                ]
                                             }
                                         }
                                     },
@@ -1514,9 +1645,6 @@
                     },
                     "401": {
                         "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden - Admin role required"
                     },
                     "500": {
                         "description": "Internal server error"
@@ -1529,14 +1657,14 @@
                 ]
             }
         },
-        "/api/programs/{programId}/modules/attach": {
+        "/api/program/{programId}/step/{stepId}/challenge-progress": {
             "post": {
                 "tags": [
                     "Programs"
                 ],
-                "summary": "Attach module to program (Admin only)",
-                "description": "Link a module to a program with score configuration. Requires Admin role.",
-                "operationId": "attachModuleToProgram",
+                "summary": "Update challenge progress",
+                "description": "Update the progress of challenge-type steps by tracking individual challenges completed. Automatically calculates percentage based on total challenges and sets step to 'in_progress' status.",
+                "operationId": "updateChallengeProgress",
                 "parameters": [
                     {
                         "name": "programId",
@@ -1547,153 +1675,53 @@
                             "type": "integer",
                             "example": 1
                         }
+                    },
+                    {
+                        "name": "stepId",
+                        "in": "path",
+                        "description": "Step ID (must be a challenge-type step)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
                     }
                 ],
                 "requestBody": {
-                    "description": "Module attachment data",
+                    "description": "Challenge progress data",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "module_id",
-                                    "methodology_id"
-                                ],
-                                "properties": {
-                                    "module_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "methodology_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "pillar_id": {
-                                        "type": "integer",
-                                        "example": null,
-                                        "nullable": true
-                                    },
-                                    "min_score": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 25.5
-                                    },
-                                    "max_score": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 85.75
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/ChallengeProgressRequest"
                             }
                         }
                     }
                 },
                 "responses": {
-                    "201": {
-                        "description": "Module attached successfully",
+                    "200": {
+                        "description": "Challenge progress updated successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Module attached successfully"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/ChallengeProgressResponse"
                                 }
                             }
                         }
                     },
                     "400": {
-                        "description": "Relationship already exists or program not found"
-                    },
-                    "422": {
-                        "description": "Validation failed"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/programs/{programId}/modules/detach": {
-            "delete": {
-                "tags": [
-                    "Programs"
-                ],
-                "summary": "Detach module from program (Admin only)",
-                "description": "Remove a module link from a program. Requires Admin role.",
-                "operationId": "detachModuleFromProgram",
-                "parameters": [
-                    {
-                        "name": "programId",
-                        "in": "path",
-                        "description": "Program ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Module detachment data",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "module_id",
-                                    "methodology_id"
-                                ],
-                                "properties": {
-                                    "module_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "methodology_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "pillar_id": {
-                                        "type": "integer",
-                                        "example": null,
-                                        "nullable": true
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Module detached successfully",
+                        "description": "Invalid step type or other error",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "success": {
                                             "type": "boolean",
-                                            "example": true
+                                            "example": false
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Module detached successfully"
+                                            "example": "Invalid step type for challenge progress"
                                         }
                                     },
                                     "type": "object"
@@ -1701,192 +1729,26 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Program or module relationship not found"
-                    },
                     "422": {
-                        "description": "Validation failed"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/programs/{programId}/modules/scores": {
-            "put": {
-                "tags": [
-                    "Programs"
-                ],
-                "summary": "Update module score configuration (Admin only)",
-                "description": "Update the minimum and maximum score configuration for a module linked to a program. Requires Admin role.",
-                "operationId": "updateModuleScores",
-                "parameters": [
-                    {
-                        "name": "programId",
-                        "in": "path",
-                        "description": "Program ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Module score update data",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "module_id",
-                                    "methodology_id",
-                                    "min_score",
-                                    "max_score"
-                                ],
-                                "properties": {
-                                    "module_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "methodology_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "pillar_id": {
-                                        "type": "integer",
-                                        "example": null,
-                                        "nullable": true
-                                    },
-                                    "min_score": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 30
-                                    },
-                                    "max_score": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 90
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Module scores updated successfully",
+                        "description": "Validation failed",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "success": {
                                             "type": "boolean",
-                                            "example": true
+                                            "example": false
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Module scores updated successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Program not found"
-                    },
-                    "422": {
-                        "description": "Validation failed"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/programs/methodology/{methodologyId}/available-modules": {
-            "get": {
-                "tags": [
-                    "Programs"
-                ],
-                "summary": "Get available modules for a methodology",
-                "description": "Retrieve all modules available for linking to programs within a specific methodology",
-                "operationId": "getAvailableModules",
-                "parameters": [
-                    {
-                        "name": "methodologyId",
-                        "in": "path",
-                        "description": "Methodology ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
+                                            "example": "Validation failed"
                                         },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Module Name"
-                                                    },
-                                                    "description": {
-                                                        "type": "string",
-                                                        "example": "Module description"
-                                                    },
-                                                    "methodology_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "pillar_id": {
-                                                        "type": "integer",
-                                                        "example": null,
-                                                        "nullable": true
-                                                    },
-                                                    "pillar_name": {
-                                                        "type": "string",
-                                                        "example": "Pillar Name",
-                                                        "nullable": true
-                                                    }
-                                                },
-                                                "type": "object"
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "challenges_done": [
+                                                    "The challenges done field is required."
+                                                ]
                                             }
                                         }
                                     },
@@ -1897,578 +1759,6 @@
                     },
                     "401": {
                         "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/programs/{programId}/methodology/{methodologyId}": {
-            "get": {
-                "tags": [
-                    "Programs"
-                ],
-                "summary": "Get program with methodology-specific modules",
-                "description": "Retrieve detailed program information with modules linked to a specific methodology",
-                "operationId": "getProgramWithMethodologyModules",
-                "parameters": [
-                    {
-                        "name": "programId",
-                        "in": "path",
-                        "description": "Program ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    },
-                    {
-                        "name": "methodologyId",
-                        "in": "path",
-                        "description": "Methodology ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "name": {
-                                            "type": "string",
-                                            "example": "Sample Program"
-                                        },
-                                        "description": {
-                                            "type": "string",
-                                            "example": "Program description"
-                                        },
-                                        "definition": {
-                                            "type": "string",
-                                            "example": "Program definition"
-                                        },
-                                        "objectives": {
-                                            "type": "string",
-                                            "example": "Program objectives"
-                                        },
-                                        "modules": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Module Name"
-                                                    },
-                                                    "methodology_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "pillar_id": {
-                                                        "type": "integer",
-                                                        "example": null,
-                                                        "nullable": true
-                                                    },
-                                                    "min_score": {
-                                                        "type": "number",
-                                                        "format": "float",
-                                                        "example": 25.5
-                                                    },
-                                                    "max_score": {
-                                                        "type": "number",
-                                                        "format": "float",
-                                                        "example": 85.75
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "created_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        },
-                                        "updated_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Program not found"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/programs/{programId}/objectives": {
-            "get": {
-                "tags": [
-                    "Objectives"
-                ],
-                "summary": "Get program objectives",
-                "description": "Retrieve all objectives for a specific program",
-                "operationId": "getProgramObjectives",
-                "parameters": [
-                    {
-                        "name": "programId",
-                        "in": "path",
-                        "description": "Program ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Objective"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Objectives"
-                ],
-                "summary": "Create objective (Admin only)",
-                "description": "Create a new objective for a program. Requires Admin role.",
-                "operationId": "createObjective",
-                "parameters": [
-                    {
-                        "name": "programId",
-                        "in": "path",
-                        "description": "Program ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Objective data",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CreateObjectiveRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Objective created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Objective"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation failed"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/programs/{programId}/objectives/{objectiveId}": {
-            "get": {
-                "tags": [
-                    "Objectives"
-                ],
-                "summary": "Get objective details",
-                "description": "Retrieve detailed information about a specific objective",
-                "operationId": "getObjective",
-                "parameters": [
-                    {
-                        "name": "programId",
-                        "in": "path",
-                        "description": "Program ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    },
-                    {
-                        "name": "objectiveId",
-                        "in": "path",
-                        "description": "Objective ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ObjectiveDetailed"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Objective not found"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Objectives"
-                ],
-                "summary": "Update objective (Admin only)",
-                "description": "Update an existing objective. Requires Admin role.",
-                "operationId": "updateObjective",
-                "parameters": [
-                    {
-                        "name": "programId",
-                        "in": "path",
-                        "description": "Program ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    },
-                    {
-                        "name": "objectiveId",
-                        "in": "path",
-                        "description": "Objective ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Objective data to update",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/UpdateObjectiveRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Objective updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Objective"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden - Admin role required"
-                    },
-                    "404": {
-                        "description": "Objective not found"
-                    },
-                    "422": {
-                        "description": "Validation failed"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Objectives"
-                ],
-                "summary": "Delete objective (Admin only)",
-                "description": "Delete an objective from a program. Requires Admin role.",
-                "operationId": "deleteObjective",
-                "parameters": [
-                    {
-                        "name": "programId",
-                        "in": "path",
-                        "description": "Program ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    },
-                    {
-                        "name": "objectiveId",
-                        "in": "path",
-                        "description": "Objective ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Objective deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SuccessResponse"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Objective not found"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden - Admin role required"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/programs/{programId}/objectives/{objectiveId}/duplicate": {
-            "post": {
-                "tags": [
-                    "Objectives"
-                ],
-                "summary": "Duplicate objective (Admin only)",
-                "description": "Create a copy of an existing objective. Requires Admin role.",
-                "operationId": "duplicateObjective",
-                "parameters": [
-                    {
-                        "name": "programId",
-                        "in": "path",
-                        "description": "Program ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    },
-                    {
-                        "name": "objectiveId",
-                        "in": "path",
-                        "description": "Objective ID to duplicate",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Optional target program ID for the duplicate",
-                    "required": false,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "program_id": {
-                                        "description": "Target program ID (optional)",
-                                        "type": "integer",
-                                        "example": 2
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Objective duplicated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Objective"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden - Admin role required"
-                    },
-                    "404": {
-                        "description": "Objective not found"
-                    },
-                    "422": {
-                        "description": "Validation failed"
-                    },
-                    "500": {
-                        "description": "Internal server error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/programs/{programId}/objectives/reorder": {
-            "put": {
-                "tags": [
-                    "Objectives"
-                ],
-                "summary": "Reorder objectives (Admin only)",
-                "description": "Change the order of objectives within a program. Requires Admin role.",
-                "operationId": "reorderObjectives",
-                "parameters": [
-                    {
-                        "name": "programId",
-                        "in": "path",
-                        "description": "Program ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "New order of objectives",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ReorderObjectivesRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Objectives reordered successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Objectives reordered successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden - Admin role required"
-                    },
-                    "422": {
-                        "description": "Validation failed"
                     },
                     "500": {
                         "description": "Internal server error"
@@ -2497,37 +1787,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "name": {
-                                                "type": "string",
-                                                "example": "Methodology Name"
-                                            },
-                                            "description": {
-                                                "type": "string",
-                                                "example": "Methodology description"
-                                            },
-                                            "type": {
-                                                "type": "string",
-                                                "example": "standard"
-                                            },
-                                            "imgUrl": {
-                                                "type": "string",
-                                                "nullable": true
-                                            },
-                                            "created_at": {
-                                                "type": "string",
-                                                "format": "date-time"
-                                            },
-                                            "updated_at": {
-                                                "type": "string",
-                                                "format": "date-time"
-                                            }
-                                        },
-                                        "type": "object"
+                                        "$ref": "#/components/schemas/Methodology"
                                     }
                                 }
                             }
@@ -2573,79 +1833,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "name": {
-                                            "type": "string",
-                                            "example": "Methodology Name"
-                                        },
-                                        "description": {
-                                            "type": "string",
-                                            "example": "Detailed methodology description"
-                                        },
-                                        "definition": {
-                                            "type": "string",
-                                            "example": "Methodology definition"
-                                        },
-                                        "objectives": {
-                                            "type": "string",
-                                            "example": "Methodology objectives"
-                                        },
-                                        "type": {
-                                            "type": "string",
-                                            "example": "standard"
-                                        },
-                                        "imgUrl": {
-                                            "type": "string",
-                                            "nullable": true
-                                        },
-                                        "pillars": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "name": {
-                                                        "type": "string"
-                                                    },
-                                                    "description": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "modules": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "name": {
-                                                        "type": "string"
-                                                    },
-                                                    "description": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "created_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        },
-                                        "updated_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/MethodologyDetailed"
                                 }
                             }
                         }
@@ -2719,13 +1907,13 @@
                                         "pillars": {
                                             "type": "array",
                                             "items": {
-                                                "type": "object"
+                                                "$ref": "#/components/schemas/Pillar"
                                             }
                                         },
                                         "modules": {
                                             "type": "array",
                                             "items": {
-                                                "type": "object"
+                                                "$ref": "#/components/schemas/Module"
                                             }
                                         }
                                     },
@@ -2787,38 +1975,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "name": {
-                                            "type": "string",
-                                            "example": "Pillar Name"
-                                        },
-                                        "description": {
-                                            "type": "string",
-                                            "example": "Pillar description"
-                                        },
-                                        "modules": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "name": {
-                                                        "type": "string"
-                                                    },
-                                                    "description": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/PillarDetailed"
                                 }
                             }
                         }
@@ -2876,33 +2033,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "name": {
-                                            "type": "string",
-                                            "example": "Module Name"
-                                        },
-                                        "description": {
-                                            "type": "string",
-                                            "example": "Module description"
-                                        },
-                                        "definition": {
-                                            "type": "string",
-                                            "example": "Module definition"
-                                        },
-                                        "objectives": {
-                                            "type": "string",
-                                            "example": "Module objectives"
-                                        },
-                                        "imgUrl": {
-                                            "type": "string",
-                                            "nullable": true
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/Module"
                                 }
                             }
                         }
@@ -2970,25 +2101,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "name": {
-                                            "type": "string",
-                                            "example": "Module Name"
-                                        },
-                                        "description": {
-                                            "type": "string",
-                                            "example": "Module description"
-                                        },
-                                        "pillar_context": {
-                                            "type": "string",
-                                            "example": "Pillar-specific context"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/Module"
                                 }
                             }
                         }
@@ -3038,42 +2151,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "text": {
-                                                "type": "string",
-                                                "example": "What is your assessment of...?"
-                                            },
-                                            "type": {
-                                                "type": "string",
-                                                "example": "multiple_choice"
-                                            },
-                                            "answers": {
-                                                "type": "array",
-                                                "items": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer"
-                                                        },
-                                                        "text": {
-                                                            "type": "string"
-                                                        },
-                                                        "value": {
-                                                            "type": "integer"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "order": {
-                                                "type": "integer",
-                                                "example": 1
-                                            }
-                                        },
-                                        "type": "object"
+                                        "$ref": "#/components/schemas/Question"
                                     }
                                 }
                             }
@@ -3134,30 +2212,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "text": {
-                                                "type": "string",
-                                                "example": "Pillar-specific question text"
-                                            },
-                                            "type": {
-                                                "type": "string",
-                                                "example": "multiple_choice"
-                                            },
-                                            "answers": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "pillar_context": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "type": "object"
+                                        "$ref": "#/components/schemas/Question"
                                     }
                                 }
                             }
@@ -3218,30 +2273,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "text": {
-                                                "type": "string",
-                                                "example": "Module-specific question text"
-                                            },
-                                            "type": {
-                                                "type": "string",
-                                                "example": "multiple_choice"
-                                            },
-                                            "answers": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "module_context": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "type": "object"
+                                        "$ref": "#/components/schemas/Question"
                                     }
                                 }
                             }
@@ -3312,33 +2344,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "text": {
-                                                "type": "string",
-                                                "example": "Pillar module question text"
-                                            },
-                                            "type": {
-                                                "type": "string",
-                                                "example": "multiple_choice"
-                                            },
-                                            "answers": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "pillar_context": {
-                                                "type": "string"
-                                            },
-                                            "module_context": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "type": "object"
+                                        "$ref": "#/components/schemas/Question"
                                     }
                                 }
                             }
@@ -3387,52 +2393,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "methodology_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "user_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "score": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 85.5
-                                        },
-                                        "completion_percentage": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 100
-                                        },
-                                        "answers": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "question_id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "answer_id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "value": {
-                                                        "type": "integer"
-                                                    },
-                                                    "submitted_at": {
-                                                        "type": "string",
-                                                        "format": "date-time"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "submitted_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UserAnswersResponse"
                                 }
                             }
                         }
@@ -3478,32 +2439,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "answers"
-                                ],
-                                "properties": {
-                                    "answers": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "question_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "answer_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "value": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/SubmitAnswersRequest"
                             }
                         }
                     }
@@ -3514,30 +2450,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Answers submitted successfully"
-                                        },
-                                        "score": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 85.5
-                                        },
-                                        "total_questions": {
-                                            "type": "integer",
-                                            "example": 10
-                                        },
-                                        "answered_questions": {
-                                            "type": "integer",
-                                            "example": 10
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/SubmitAnswersResponse"
                                 }
                             }
                         }
@@ -3598,36 +2511,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "pillar_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "methodology_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "user_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "pillar_score": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 78.5
-                                        },
-                                        "answers": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "submitted_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UserAnswersResponse"
                                 }
                             }
                         }
@@ -3683,29 +2567,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "answers"
-                                ],
-                                "properties": {
-                                    "answers": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "question_id": {
-                                                    "type": "integer"
-                                                },
-                                                "answer_id": {
-                                                    "type": "integer"
-                                                },
-                                                "value": {
-                                                    "type": "integer"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/SubmitAnswersRequest"
                             }
                         }
                     }
@@ -3716,22 +2578,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Pillar answers submitted successfully"
-                                        },
-                                        "pillar_score": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 78.5
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/SubmitAnswersResponse"
                                 }
                             }
                         }
@@ -3792,36 +2639,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "module_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "methodology_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "user_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "module_score": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 92
-                                        },
-                                        "answers": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "submitted_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UserAnswersResponse"
                                 }
                             }
                         }
@@ -3877,29 +2695,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "answers"
-                                ],
-                                "properties": {
-                                    "answers": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "question_id": {
-                                                    "type": "integer"
-                                                },
-                                                "answer_id": {
-                                                    "type": "integer"
-                                                },
-                                                "value": {
-                                                    "type": "integer"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/SubmitAnswersRequest"
                             }
                         }
                     }
@@ -3910,22 +2706,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Module answers submitted successfully"
-                                        },
-                                        "module_score": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 92
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/SubmitAnswersResponse"
                                 }
                             }
                         }
@@ -3996,40 +2777,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "module_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "pillar_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "methodology_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "user_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "module_score": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 88.5
-                                        },
-                                        "answers": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "submitted_at": {
-                                            "type": "string",
-                                            "format": "date-time"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/UserAnswersResponse"
                                 }
                             }
                         }
@@ -4095,29 +2843,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "answers"
-                                ],
-                                "properties": {
-                                    "answers": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "question_id": {
-                                                    "type": "integer"
-                                                },
-                                                "answer_id": {
-                                                    "type": "integer"
-                                                },
-                                                "value": {
-                                                    "type": "integer"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/SubmitAnswersRequest"
                             }
                         }
                     }
@@ -4128,22 +2854,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Pillar module answers submitted successfully"
-                                        },
-                                        "module_score": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 88.5
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/SubmitAnswersResponse"
                                 }
                             }
                         }
@@ -5046,10 +3757,6 @@
                         ],
                         "example": "multiple_choice"
                     },
-                    "order": {
-                        "type": "integer",
-                        "example": 1
-                    },
                     "answers": {
                         "type": "array",
                         "items": {
@@ -5285,9 +3992,56 @@
                         "type": "string",
                         "example": "30 Minutes"
                     },
-                    "order": {
-                        "type": "integer",
-                        "example": 1
+                    "header": {
+                        "type": "string",
+                        "example": "Journal Entry Header",
+                        "nullable": true
+                    },
+                    "content": {
+                        "type": "string",
+                        "example": "Article content or mission description",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Detailed description of the objective",
+                        "nullable": true
+                    },
+                    "content_url": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/video.mp4",
+                        "nullable": true
+                    },
+                    "content_image": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/book-cover.jpg",
+                        "nullable": true
+                    },
+                    "advices": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "Follow daily routine",
+                            "Practice mindfulness",
+                            "Set clear goals"
+                        ],
+                        "nullable": true
+                    },
+                    "challenges": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "30-day challenge",
+                            "Weekly reflection",
+                            "Goal achievement"
+                        ],
+                        "nullable": true
                     },
                     "created_at": {
                         "type": "string",
@@ -5309,38 +4063,6 @@
                         "properties": {
                             "program": {
                                 "$ref": "#/components/schemas/Program"
-                            },
-                            "type_specific_data": {
-                                "type": "object",
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/JournalData"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/ArticleData"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/AdviceData"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/DailyMissionData"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/QuizData"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/VideoData"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/AudioData"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/BookData"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/ChallengeData"
-                                    }
-                                ]
                             }
                         },
                         "type": "object"
@@ -5353,8 +4075,7 @@
                     "name",
                     "type",
                     "time_to_finish",
-                    "time_type",
-                    "type_specific_data"
+                    "time_type"
                 ],
                 "properties": {
                     "program_id": {
@@ -5395,16 +4116,56 @@
                         ],
                         "example": "minutes"
                     },
-                    "type_specific_data": {
-                        "type": "object",
-                        "example": {
-                            "questions": "array of question IDs"
-                        }
+                    "header": {
+                        "type": "string",
+                        "example": "Journal Entry Header",
+                        "nullable": true
                     },
-                    "order": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "example": 1
+                    "content": {
+                        "type": "string",
+                        "example": "Article content or mission description",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Detailed description of the objective",
+                        "nullable": true
+                    },
+                    "content_url": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/video.mp4",
+                        "nullable": true
+                    },
+                    "content_image": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/book-cover.jpg",
+                        "nullable": true
+                    },
+                    "advices": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "Follow daily routine",
+                            "Practice mindfulness",
+                            "Set clear goals"
+                        ],
+                        "nullable": true
+                    },
+                    "challenges": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "30-day challenge",
+                            "Weekly reflection",
+                            "Goal achievement"
+                        ],
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -5449,32 +4210,56 @@
                         ],
                         "example": "minutes"
                     },
-                    "type_specific_data": {
-                        "type": "object",
-                        "example": {
-                            "questions": "array of question IDs"
-                        }
+                    "header": {
+                        "type": "string",
+                        "example": "Updated Journal Entry Header",
+                        "nullable": true
                     },
-                    "order": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "example": 2
-                    }
-                },
-                "type": "object"
-            },
-            "ReorderObjectivesRequest": {
-                "required": [
-                    "objective_orders"
-                ],
-                "properties": {
-                    "objective_orders": {
-                        "description": "Array of objective IDs in the desired order",
+                    "content": {
+                        "type": "string",
+                        "example": "Updated article content or mission description",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Updated detailed description of the objective",
+                        "nullable": true
+                    },
+                    "content_url": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/updated-video.mp4",
+                        "nullable": true
+                    },
+                    "content_image": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/updated-book-cover.jpg",
+                        "nullable": true
+                    },
+                    "advices": {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "string"
                         },
-                        "example": "array of objective IDs"
+                        "example": [
+                            "Updated daily routine",
+                            "Enhanced mindfulness practice",
+                            "Refined goal setting"
+                        ],
+                        "nullable": true
+                    },
+                    "challenges": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "Extended 30-day challenge",
+                            "Bi-weekly reflection",
+                            "Advanced goal achievement"
+                        ],
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -5692,6 +4477,332 @@
                     }
                 },
                 "type": "object"
+            },
+            "ReorderObjectivesRequest": {
+                "required": [
+                    "objective_ids"
+                ],
+                "properties": {
+                    "objective_ids": {
+                        "description": "Array of objective IDs in the desired order",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "example": [
+                            1,
+                            3,
+                            2,
+                            4
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "UserProgram": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Program"
+                    },
+                    {
+                        "properties": {
+                            "status": {
+                                "description": "User's progress status for this program",
+                                "type": "string",
+                                "enum": [
+                                    "in_progress",
+                                    "completed"
+                                ],
+                                "example": "in_progress"
+                            },
+                            "started_at": {
+                                "description": "When the user started this program",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2024-01-15T10:30:00Z",
+                                "nullable": true
+                            },
+                            "completed_at": {
+                                "description": "When the user completed this program",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2024-01-25T14:45:00Z",
+                                "nullable": true
+                            },
+                            "objectives": {
+                                "description": "Program objectives",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Objective"
+                                }
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "Step": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "program_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Daily Reflection"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Write about your day and experiences"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "journal",
+                            "quiz",
+                            "challenge"
+                        ],
+                        "example": "journal"
+                    },
+                    "order": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "StepResource": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Step"
+                    },
+                    {
+                        "properties": {
+                            "program": {
+                                "$ref": "#/components/schemas/Program"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "StepDetailedResource": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/StepResource"
+                    },
+                    {
+                        "properties": {
+                            "user_progress": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/UserStepProgress"
+                                    }
+                                ],
+                                "nullable": true,
+                                "description": "User's progress for this step"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "UserStepProgress": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "program_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "step_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "not_started",
+                            "in_progress",
+                            "completed"
+                        ],
+                        "example": "in_progress"
+                    },
+                    "thought": {
+                        "description": "For journal type steps",
+                        "type": "string",
+                        "example": "Today I learned about patience and resilience",
+                        "nullable": true
+                    },
+                    "score": {
+                        "description": "For quiz type steps",
+                        "type": "integer",
+                        "example": 85,
+                        "nullable": true
+                    },
+                    "challenges_done": {
+                        "description": "For challenge type steps",
+                        "type": "integer",
+                        "example": 7,
+                        "nullable": true
+                    },
+                    "percentage": {
+                        "description": "For challenge type steps",
+                        "type": "number",
+                        "format": "float",
+                        "example": 87.5,
+                        "nullable": true
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:30:00Z",
+                        "nullable": true
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T11:00:00Z",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "JournalStepCompletionRequest": {
+                "required": [
+                    "thought"
+                ],
+                "properties": {
+                    "thought": {
+                        "description": "Reflection text for journal step completion",
+                        "type": "string",
+                        "maxLength": 2000,
+                        "example": "Today I reflected on my spiritual journey and realized the importance of consistency in my daily practices."
+                    }
+                },
+                "type": "object"
+            },
+            "QuizStepCompletionRequest": {
+                "required": [
+                    "score"
+                ],
+                "properties": {
+                    "score": {
+                        "description": "Quiz score between 0-100",
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 0,
+                        "example": 85
+                    }
+                },
+                "type": "object"
+            },
+            "ChallengeStepCompletionRequest": {
+                "required": [
+                    "challenges_done",
+                    "percentage"
+                ],
+                "properties": {
+                    "challenges_done": {
+                        "description": "Number of challenges completed",
+                        "type": "integer",
+                        "minimum": 0,
+                        "example": 7
+                    },
+                    "percentage": {
+                        "description": "Completion percentage",
+                        "type": "number",
+                        "format": "float",
+                        "maximum": 100,
+                        "minimum": 0,
+                        "example": 87.5
+                    }
+                },
+                "type": "object"
+            },
+            "ChallengeProgressRequest": {
+                "required": [
+                    "challenges_done"
+                ],
+                "properties": {
+                    "challenges_done": {
+                        "description": "Number of challenges completed so far",
+                        "type": "integer",
+                        "minimum": 0,
+                        "example": 5
+                    }
+                },
+                "type": "object"
+            },
+            "ChallengeProgressResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Challenge progress updated successfully"
+                    },
+                    "data": {
+                        "properties": {
+                            "challenges_done": {
+                                "type": "integer",
+                                "example": 5
+                            },
+                            "total_challenges": {
+                                "type": "integer",
+                                "example": 10
+                            },
+                            "percentage": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 50
+                            },
+                            "status": {
+                                "type": "string",
+                                "enum": [
+                                    "not_started",
+                                    "in_progress",
+                                    "completed"
+                                ],
+                                "example": "in_progress"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -5728,11 +4839,7 @@
         },
         {
             "name": "Programs",
-            "description": "Program management and module linking endpoints"
-        },
-        {
-            "name": "Objectives",
-            "description": "Program objectives management endpoints"
+            "description": "Program progress and step management endpoints"
         },
         {
             "name": "User Management",

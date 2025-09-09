@@ -109,4 +109,49 @@ class ContextStatusService
 
         return $status;
     }
+
+    /**
+     * Determine completion status for a program for a given user
+     * Returns: not_started | in_progress | completed
+     */
+    public function getProgramStatus(int $userId, int $programId): string
+    {
+        $userProgram = \App\Models\Program::find($programId)
+            ->users()
+            ->wherePivot('user_id', $userId)
+            ->first();
+
+        if (! $userProgram) {
+            return 'not_started';
+        }
+
+        return $userProgram->pivot->status;
+    }
+
+    /**
+     * Determine completion status for a step for a given user
+     * Returns: not_started | in_progress | completed
+     */
+    public function getStepStatus(int $userId, int $stepId, int $programId): string
+    {
+        $userStepProgress = \App\Models\UserStepProgress::forUserAndProgram($userId, $programId)
+            ->where('step_id', $stepId)
+            ->first();
+
+        if (! $userStepProgress) {
+            return 'not_started';
+        }
+
+        return $userStepProgress->status ?? 'not_started';
+    }
+
+    /**
+     * Get count of completed steps for a user in a program
+     */
+    public function getCompletedStepsCount(int $userId, int $programId): int
+    {
+        return \App\Models\UserStepProgress::forUserAndProgram($userId, $programId)
+            ->completed()
+            ->count();
+    }
 }

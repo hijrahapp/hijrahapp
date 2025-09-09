@@ -4,7 +4,7 @@
             <span class="kt-modal-title text-xl font-semibold">
                 {{ $isEditMode ? 'Edit Program' : 'Add Program' }}
             </span>
-            <button class="kt-btn kt-btn-sm kt-btn-icon kt-btn-dim shrink-0" data-kt-modal-dismiss="true">
+            <button class="kt-btn kt-btn-sm kt-btn-icon kt-btn-dim shrink-0" wire:click="resetForm" data-kt-modal-dismiss="true">
                 <i class="ki-filled ki-cross"></i>
             </button>
         </div>
@@ -38,32 +38,26 @@
                     </div>
 
                     <div class="mt-4">
-                        <label class="block text-sm font-medium mb-1">Description <span class="text-destructive">*</span></label>
-                        <livewire:shared.components.textarea wire:model.defer="description" placeholder="Enter program description" rows="3" />
+                        <livewire:shared.components.textarea :label="'Description'" wire:model.defer="description" :required="true" :placeholder="'Enter program description'" :rows="3" :maxlength="200" />
                         @error('description')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                     </div>
 
                     <div class="mt-4">
-                        <label class="block text-sm font-medium mb-1">Definition <span class="text-destructive">*</span></label>
-                        <livewire:shared.components.rich-text wire:model.defer="definition" placeholder="Enter program definition" />
+                        <livewire:shared.components.textarea :label="'Definition'" wire:model.defer="definition" :required="true" :placeholder="'Enter program definition'" :rows="3" />
                         @error('definition')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                     </div>
 
                     <div class="mt-4">
-                        <label class="block text-sm font-medium mb-1">Objectives <span class="text-destructive">*</span></label>
-                        <livewire:shared.components.rich-text wire:model.defer="objectives" placeholder="Enter program objectives" />
+                        <label class="block text-sm font-medium mb-1">Objectives</label>
+                        <livewire:shared.components.rich-text :model="$objectives" wire:model="objectives" :placeholder="'Enter program objectives'" :editorId="'program_objectives_modal_editor'" :minHeight="'150px'" />
                         @error('objectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                     </div>
                 </div>
             </div>
 
-            <div class="kt-modal-footer justify-center p-5">
-                <div class="flex gap-4">
-                    <button type="button" class="kt-btn kt-btn-light" data-kt-modal-dismiss="true">Cancel</button>
-                    <button type="submit" class="kt-btn kt-btn-primary">
-                        {{ $isEditMode ? 'Update Program' : 'Add Program' }}
-                    </button>
-                </div>
+            <div class="kt-modal-footer flex gap-2 justify-end p-5">
+                <button type="button" class="kt-btn kt-btn-outline" wire:click="resetForm" data-kt-modal-dismiss="true">Cancel</button>
+                <button type="submit" class="kt-btn kt-btn-primary">{{ $isEditMode ? 'Update Program' : 'Create Program' }}</button>
             </div>
         </form>
     </div>

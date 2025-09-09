@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\DeletesStoredImages;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 
@@ -73,5 +74,63 @@ class User extends Model
     public function userAnswers(): HasMany
     {
         return $this->hasMany(UserAnswer::class);
+    }
+
+    /**
+     * Programs the user has interacted with.
+     */
+    public function programs(): BelongsToMany
+    {
+        return $this->belongsToMany(Program::class, 'user_programs')
+            ->withPivot('status', 'started_at', 'completed_at')
+            ->withTimestamps();
+    }
+
+    /**
+     * Programs the user is currently working on.
+     */
+    public function programsInProgress(): BelongsToMany
+    {
+        return $this->programs()->wherePivot('status', 'in_progress');
+    }
+
+    /**
+     * Programs the user has completed.
+     */
+    public function completedPrograms(): BelongsToMany
+    {
+        return $this->programs()->wherePivot('status', 'completed');
+    }
+
+    /**
+     * User's step progress records.
+     */
+    public function stepProgress(): HasMany
+    {
+        return $this->hasMany(UserStepProgress::class);
+    }
+
+    /**
+     * Get user's progress for a specific program.
+     */
+    public function programStepProgress(int $programId): HasMany
+    {
+        return $this->stepProgress()->where('program_id', $programId);
+    }
+
+    /**
+     * Get user's completed steps for a specific program.
+     */
+    public function completedStepsForProgram(int $programId): HasMany
+    {
+        return $this->programStepProgress($programId)->completed();
+    }
+
+    /**
+     * Get user's in-progress steps for a specific program.
+     */
+    public function inProgressStepsForProgram(int $programId): HasMany
+    {
+        return $this->programStepProgress($programId)->inProgress();
     }
 }
