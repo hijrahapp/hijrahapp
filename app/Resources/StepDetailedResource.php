@@ -34,6 +34,40 @@ class StepDetailedResource extends JsonResource
             'challenges' => $this->challenges,
         ];
 
+        // Add questions for quiz-type steps
+        if ($this->type === 'quiz' && $this->relationLoaded('questions')) {
+            $userAnswers = $this->relationLoaded('userAnswers') ? $this->userAnswers : collect();
+            $hasUser = $request->authUserId !== null;
+
+            $array['questions'] = $this->questions->map(function ($question) use ($userAnswers, $hasUser) {
+                $questionUserAnswers = $userAnswers->get($question->id, collect());
+
+                $questionData = [
+                    'id' => $question->id,
+                    'title' => $question->title,
+                    'answers' => $question->answers->map(function ($answer) use ($question) {
+                        return [
+                            'id' => $answer->id,
+                            'text' => $answer->title,
+                            'is_correct' => $answer->id == $question->pivot->correct_answer_id,
+                        ];
+                    })->toArray(),
+                ];
+
+                // Only include user_answers if user is authenticated
+                if ($hasUser) {
+                    $questionData['user_answers'] = $questionUserAnswers->map(function ($userAnswer) {
+                        return [
+                            'id' => $userAnswer->answer->id,
+                            'text' => $userAnswer->answer->title,
+                        ];
+                    })->toArray();
+                }
+
+                return $questionData;
+            })->toArray();
+        }
+
         // Add user progress using ContextStatusService
         if ($request->authUserId) {
             $contextStatusService = app(ContextStatusService::class);
@@ -45,8 +79,8 @@ class StepDetailedResource extends JsonResource
                 $array['score'] = $progress->score;
                 $array['challenges_done'] = $progress->challenges_done;
                 $array['percentage'] = $progress->percentage ?? 0;
-                $array['started_at'] = $progress->started_at;
-                $array['completed_at'] = $progress->completed_at;
+                // $array['started_at'] = $progress->started_at;
+                // $array['completed_at'] = $progress->completed_at;
             }
         }
 

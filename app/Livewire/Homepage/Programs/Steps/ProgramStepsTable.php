@@ -52,22 +52,7 @@ class ProgramStepsTable extends Component
 
     public function manageQuestions($stepId)
     {
-        $step = Step::find($stepId);
-
-        if ($step && $step->program_id === $this->program->id && $step->type === 'quiz') {
-            // TODO: Implement questions management modal similar to methodology questions
-            $this->dispatch('showAlert', [
-                'type' => 'info',
-                'title' => 'Coming Soon',
-                'message' => 'Questions management for quiz steps will be available soon.',
-            ]);
-        } else {
-            $this->dispatch('showAlert', [
-                'type' => 'error',
-                'title' => 'Error!',
-                'message' => 'Step not found or not a quiz type.',
-            ]);
-        }
+        $this->dispatch('open-step-questions-modal', stepId: $stepId);
     }
 
     public function deleteStep($stepId)

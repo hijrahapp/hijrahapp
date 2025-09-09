@@ -90,4 +90,7 @@
 
     {{-- Pagination outside the table card --}}
     <x-ktui-pagination :paginator="$steps" />
+
+    {{-- Step Questions Modal --}}
+    <livewire:homepage.programs.steps.step-questions-modal />
 </div>

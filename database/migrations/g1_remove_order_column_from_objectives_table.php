@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('objectives', function (Blueprint $table) {
+            $table->dropIndex(['program_id', 'order']);
             $table->dropColumn('order');
         });
     }
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('objectives', function (Blueprint $table) {
             $table->integer('order')->default(0)->after('time_type');
+            $table->index(['program_id', 'order']);
         });
     }
 };

@@ -3,7 +3,9 @@
 namespace App\Http\Repositories;
 
 use App\Models\Step;
+use App\Models\UserStepProgress;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class StepRepository
 {
@@ -46,20 +48,30 @@ class StepRepository
     /**
      * Complete a step for a user with type-specific data
      */
-    public function completeStep(int $userId, int $programId, int $stepId, array $data = []): bool
+    public function completeStep(int $userId, int $programId, int $stepId, array $data = []): array
     {
         $step = Step::find($stepId);
         if (! $step || $step->program_id !== $programId) {
-            return false;
+            return ['success' => false, 'message' => 'Step not found'];
         }
 
         $progress = $step->getOrCreateProgressForUser($userId, $programId);
+
+        // Handle quiz completion specially
+        if ($step->type === 'quiz') {
+            return $this->completeQuizStep($step, $progress, $userId, $data);
+        }
 
         // Prepare completion data based on step type
         $completionData = $this->prepareCompletionData($step, $data);
 
         // Mark as completed
-        return $progress->markAsCompleted($completionData);
+        $success = $progress->markAsCompleted($completionData);
+
+        return [
+            'success' => $success,
+            'message' => $success ? 'Step completed successfully' : 'Failed to complete step',
+        ];
     }
 
     /**
@@ -128,6 +140,96 @@ class StepRepository
     }
 
     /**
+     * Complete a quiz step with answer validation and scoring
+     */
+    private function completeQuizStep(Step $step, UserStepProgress $progress, int $userId, array $data): array
+    {
+        // Load step questions with correct answers
+        $step->load(['questions' => function ($query) {
+            $query->orderBy('step_question.sequence');
+        }]);
+
+        if ($step->questions->isEmpty()) {
+            return ['success' => false, 'message' => 'No questions found for this quiz step'];
+        }
+
+        $userAnswers = $data['answers'] ?? [];
+        $totalQuestions = $step->questions->count();
+        $correctAnswers = 0;
+
+        // Validate that all questions are answered
+        if (count($userAnswers) !== $totalQuestions) {
+            return ['success' => false, 'message' => 'All questions must be answered'];
+        }
+
+        // Create a map of question_id => correct_answer_id for quick lookup
+        $correctAnswersMap = $step->questions->pluck('pivot.correct_answer_id', 'id')->toArray();
+
+        // Validate and score answers
+        $validatedAnswers = [];
+        foreach ($userAnswers as $answer) {
+            $questionId = (int) $answer['question_id'];
+            $answerId = (int) $answer['answer_id'];
+
+            // Validate question exists in this step
+            if (! isset($correctAnswersMap[$questionId])) {
+                return ['success' => false, 'message' => 'Invalid question for this step'];
+            }
+
+            // Check if answer is correct
+            $isCorrect = $answerId === $correctAnswersMap[$questionId];
+            if ($isCorrect) {
+                $correctAnswers++;
+            }
+
+            $validatedAnswers[] = [
+                'user_id' => $userId,
+                'context_type' => 'module',
+                'context_id' => $step->id,
+                'question_id' => $questionId,
+                'answer_id' => $answerId,
+            ];
+        }
+
+        // Store user answers
+        DB::transaction(function () use ($validatedAnswers, $userId, $step) {
+            // Delete existing answers for this step
+            \App\Models\UserAnswer::where('user_id', $userId)
+                ->where('context_type', 'module')
+                ->where('context_id', $step->id)
+                ->delete();
+
+            // Insert new answers
+            \App\Models\UserAnswer::insert($validatedAnswers);
+        });
+
+        // Calculate score and percentage
+        $score = $correctAnswers;
+        $percentage = round(($correctAnswers / $totalQuestions) * 100, 2);
+
+        // Mark step as completed with score
+        $success = $progress->markAsCompleted([
+            'score' => $score,
+            'percentage' => $percentage,
+        ]);
+
+        if (! $success) {
+            return ['success' => false, 'message' => 'Failed to save quiz results'];
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Quiz completed successfully',
+            'data' => [
+                'score' => $score,
+                'total_questions' => $totalQuestions,
+                'correct_answers' => $correctAnswers,
+                'percentage' => $percentage,
+            ],
+        ];
+    }
+
+    /**
      * Prepare completion data based on step type
      */
     private function prepareCompletionData(Step $step, array $data): array
@@ -138,12 +240,6 @@ class StepRepository
             case 'journal':
                 if (isset($data['thought'])) {
                     $completionData['thought'] = $data['thought'];
-                }
-                break;
-
-            case 'quiz':
-                if (isset($data['score'])) {
-                    $completionData['score'] = (int) $data['score'];
                 }
                 break;
 

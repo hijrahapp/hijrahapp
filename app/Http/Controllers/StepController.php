@@ -28,14 +28,36 @@ class StepController
                 ], 404);
             }
 
+            // Load relationships
+            $step->load(['program']);
+
+            // Load questions with answers for quiz-type steps
+            if ($step->type === 'quiz') {
+                $step->load(['questions.answers']);
+            }
+
             // Load user progress if user is authenticated
             if ($user) {
                 $step->load(['userProgress' => function ($query) use ($user) {
                     $query->where('user_id', $user->id);
                 }]);
+
+                // Load user answers for quiz-type steps
+                if ($step->type === 'quiz') {
+                    $userAnswers = \App\Models\UserAnswer::where('user_id', $user->id)
+                        ->where('context_type', 'module')
+                        ->where('context_id', $step->id)
+                        ->with(['question', 'answer'])
+                        ->get()
+                        ->groupBy('question_id');
+
+                    $step->setRelation('userAnswers', $userAnswers);
+                }
             }
 
-            return response()->json(new StepDetailedResource($step));
+            $resource = new StepDetailedResource($step);
+
+            return response()->json($resource->toArray($request));
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -83,24 +105,31 @@ class StepController
             }
 
             // Complete the step
-            $success = $this->stepRepo->completeStep(
+            $result = $this->stepRepo->completeStep(
                 $user->id,
                 $programId,
                 $stepId,
                 $request->all()
             );
 
-            if (! $success) {
+            if (! $result['success']) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('messages.error_completing_step'),
+                    'message' => $result['message'] ?? __('messages.error_completing_step'),
                 ], 400);
             }
 
-            return response()->json([
+            $response = [
                 'success' => true,
                 'message' => __('messages.step_completed_successfully'),
-            ], 200);
+            ];
+
+            // Add quiz-specific data if it's a quiz step
+            if ($step->type === 'quiz' && isset($result['data'])) {
+                $response['data'] = $result['data'];
+            }
+
+            return response()->json($response, 200);
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -199,7 +228,9 @@ class StepController
                 'thought' => 'required|string|max:2000',
             ],
             'quiz' => [
-                'score' => 'required|integer|min:0',
+                'answers' => 'required|array|min:1',
+                'answers.*.question_id' => 'required|integer|exists:questions,id',
+                'answers.*.answer_id' => 'required|integer|exists:answers,id',
             ],
             'challenge' => [
                 'challenges_done' => 'required|integer|min:0',

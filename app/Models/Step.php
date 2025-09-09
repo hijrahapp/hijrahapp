@@ -191,10 +191,12 @@ class Step extends Model
     {
         return $this->belongsToMany(
             \App\Models\Question::class,
-            'step_questions',
+            'step_question',
             'step_id',
             'question_id'
-        )->withPivot('correct_answer_id')->withTimestamps();
+        )->withPivot('correct_answer_id', 'sequence')
+            ->withTimestamps()
+            ->orderBy('step_question.sequence');
     }
 
     /**
