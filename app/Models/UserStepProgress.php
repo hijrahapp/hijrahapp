@@ -26,7 +26,7 @@ class UserStepProgress extends Model
 
     protected $casts = [
         'score' => 'integer',
-        'challenges_done' => 'integer',
+        'challenges_done' => 'json', // Changed from 'array' to 'json' to force reload
         'percentage' => 'decimal:2',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
@@ -251,6 +251,21 @@ class UserStepProgress extends Model
     public function isSkipped(): bool
     {
         return $this->status === 'skipped';
+    }
+
+    /**
+     * Get challenges done as array (temporary workaround for caching issue)
+     */
+    public function getChallengesDoneArray(): array
+    {
+        $raw = $this->getRawOriginal('challenges_done');
+        if (is_string($raw)) {
+            $decoded = json_decode($raw, true);
+
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return is_array($raw) ? $raw : [];
     }
 
     /**

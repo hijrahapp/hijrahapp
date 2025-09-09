@@ -181,14 +181,16 @@ class StepController
 
             // Validate the request
             $request->validate([
-                'challenges_done' => 'required|integer|min:0',
+                'challenge_id' => 'required|integer|min:1',
+                'is_completed' => 'required|boolean',
             ]);
 
-            $result = $this->stepRepo->updateChallengeProgress(
+            $result = $this->stepRepo->toggleChallengeProgress(
                 $user->id,
                 $programId,
                 $stepId,
-                $request->input('challenges_done')
+                $request->input('challenge_id'),
+                $request->input('is_completed')
             );
 
             if (! $result['success']) {
@@ -231,10 +233,6 @@ class StepController
                 'answers' => 'required|array|min:1',
                 'answers.*.question_id' => 'required|integer|exists:questions,id',
                 'answers.*.answer_id' => 'required|integer|exists:answers,id',
-            ],
-            'challenge' => [
-                'challenges_done' => 'required|integer|min:0',
-                'percentage' => 'required|numeric|min:0|max:100',
             ],
             default => [],
         };

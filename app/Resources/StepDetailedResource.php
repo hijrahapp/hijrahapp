@@ -31,7 +31,7 @@ class StepDetailedResource extends JsonResource
             'content_url' => $this->content_url,
             'content_image' => $this->content_image,
             'advices' => $this->advices,
-            'challenges' => $this->challenges,
+            'challenges' => $this->formatChallenges($request),
         ];
 
         // Add questions for quiz-type steps
@@ -85,5 +85,34 @@ class StepDetailedResource extends JsonResource
         }
 
         return $array;
+    }
+
+    /**
+     * Format challenges as array of objects with id and text
+     */
+    private function formatChallenges($request): array
+    {
+        if (! $this->challenges || ! is_array($this->challenges)) {
+            return [];
+        }
+
+        // Get completed challenge IDs from user progress
+        $completedChallengeIds = [];
+        if ($request->authUserId) {
+            $progress = $this->progressForUser($request->authUserId);
+            if ($progress) {
+                $completedChallengeIds = $progress->getChallengesDoneArray();
+            }
+        }
+
+        return collect($this->challenges)->map(function ($challenge, $index) use ($completedChallengeIds) {
+            $challengeId = $index + 1; // Use 1-based indexing for challenge IDs
+
+            return [
+                'id' => $challengeId,
+                'text' => $challenge,
+                'is_completed' => in_array($challengeId, $completedChallengeIds),
+            ];
+        })->toArray();
     }
 }

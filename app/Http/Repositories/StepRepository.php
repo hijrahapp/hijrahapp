@@ -96,9 +96,9 @@ class StepRepository
     }
 
     /**
-     * Update challenge progress for a step
+     * Toggle individual challenge progress for a step
      */
-    public function updateChallengeProgress(int $userId, int $programId, int $stepId, int $challengesDone): array
+    public function toggleChallengeProgress(int $userId, int $programId, int $stepId, int $challengeId, bool $isCompleted): array
     {
         $step = Step::find($stepId);
         if (! $step || $step->program_id !== $programId) {
@@ -117,25 +117,85 @@ class StepRepository
             return ['success' => false, 'message' => 'No challenges found for this step'];
         }
 
+        // Validate challenge ID is within the valid range
+        if ($challengeId < 1 || $challengeId > $totalChallenges) {
+            return ['success' => false, 'message' => 'Invalid challenge ID'];
+        }
+
         // Get or create user progress
         $progress = $step->getOrCreateProgressForUser($userId, $programId);
 
-        // Calculate percentage
-        $percentage = min(100, round(($challengesDone / $totalChallenges) * 100, 2));
+        // Get current completed challenges - use workaround for caching issue
+        $currentChallenges = [];
+        $rawChallenges = $progress->getRawOriginal('challenges_done');
+        if (is_string($rawChallenges)) {
+            $decoded = json_decode($rawChallenges, true);
+            $currentChallenges = is_array($decoded) ? $decoded : [];
+        } elseif (is_array($rawChallenges)) {
+            $currentChallenges = $rawChallenges;
+        }
 
-        // Update progress
-        $success = $progress->updateProgress($percentage, [
-            'challenges_done' => min($challengesDone, $totalChallenges),
-        ]);
+        // Update the challenges array based on completion status
+        if ($isCompleted) {
+            // Add challenge ID if not already present
+            if (! in_array($challengeId, $currentChallenges)) {
+                $currentChallenges[] = $challengeId;
+            }
+        } else {
+            // Remove challenge ID if present
+            $currentChallenges = array_filter($currentChallenges, function ($id) use ($challengeId) {
+                return $id !== $challengeId;
+            });
+        }
+
+        // Remove duplicates and sort
+        $currentChallenges = array_unique(array_values($currentChallenges));
+        sort($currentChallenges);
+
+        // Calculate percentage
+        $challengesDoneCount = count($currentChallenges);
+        $percentage = min(100, round(($challengesDoneCount / $totalChallenges) * 100, 2));
+
+        // Determine step status
+        $stepStatus = $progress->status ?? 'not_started';
+        if ($challengesDoneCount === 0) {
+            $stepStatus = 'not_started';
+        } elseif ($challengesDoneCount === $totalChallenges) {
+            $stepStatus = 'completed';
+        } else {
+            $stepStatus = 'in_progress';
+        }
+
+        // Update progress with new status
+        $updateData = [
+            'challenges_done' => json_encode($currentChallenges), // Use json_encode to bypass casting issue
+            'percentage' => $percentage,
+            'status' => $stepStatus,
+        ];
+
+        // Set timestamps based on status
+        if ($stepStatus === 'in_progress' && $progress->isNotStarted()) {
+            $updateData['started_at'] = now();
+        } elseif ($stepStatus === 'completed') {
+            $updateData['completed_at'] = now();
+        }
+
+        // Direct database update to bypass model casting issues
+        $success = DB::table('user_step_progress')
+            ->where('id', $progress->id)
+            ->update($updateData + ['updated_at' => now()]);
+
+        // Refresh the progress model to get updated data
+        $progress->refresh();
 
         return [
-            'success' => $success,
-            'data' => [
-                'challenges_done' => min($challengesDone, $totalChallenges),
-                'total_challenges' => $totalChallenges,
-                'percentage' => $percentage,
-                'status' => $progress->status,
-            ],
+            'challenge_id' => $challengeId,
+            'is_completed' => $isCompleted,
+            'challenges_done' => $currentChallenges,
+            'challenges_done_count' => $challengesDoneCount,
+            'total_challenges' => $totalChallenges,
+            'percentage' => $percentage,
+            'status' => $stepStatus,
         ];
     }
 
@@ -218,14 +278,10 @@ class StepRepository
         }
 
         return [
-            'success' => true,
-            'message' => 'Quiz completed successfully',
-            'data' => [
-                'score' => $score,
-                'total_questions' => $totalQuestions,
-                'correct_answers' => $correctAnswers,
-                'percentage' => $percentage,
-            ],
+            'score' => $score,
+            'total_questions' => $totalQuestions,
+            'correct_answers' => $correctAnswers,
+            'percentage' => $percentage,
         ];
     }
 
@@ -240,15 +296,6 @@ class StepRepository
             case 'journal':
                 if (isset($data['thought'])) {
                     $completionData['thought'] = $data['thought'];
-                }
-                break;
-
-            case 'challenge':
-                if (isset($data['challenges_done'])) {
-                    $completionData['challenges_done'] = (int) $data['challenges_done'];
-                }
-                if (isset($data['percentage'])) {
-                    $completionData['percentage'] = (float) $data['percentage'];
                 }
                 break;
         }

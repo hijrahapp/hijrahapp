@@ -75,7 +75,7 @@ Route::middleware('locale')->group(function () {
         // Step progress endpoints
         Route::post('{programId}/step/{stepId}/start', [StepController::class, 'startStep']);
         Route::post('{programId}/step/{stepId}/complete', [StepController::class, 'completeStep']);
-        Route::post('{programId}/step/{stepId}/challenge-progress', [StepController::class, 'updateChallengeProgress']);
+        Route::post('{programId}/step/{stepId}/challenge', [StepController::class, 'updateChallengeProgress']);
 
         // User interaction endpoints
         Route::post('{programId}/start', [ProgramController::class, 'startProgram']);
