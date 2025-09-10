@@ -50,9 +50,8 @@ class MethodologyFactory extends Factory
             'pillars_definition' => $this->faker->optional()->sentence(),
             'modules_definition' => $this->faker->optional()->sentence(),
             'questions_description' => $this->faker->optional()->paragraph(),
-            'questions_estimated_time' => $this->faker->optional()->randomElement(['15-20 minutes','45-60 minutes','60-90 minutes']),
-            'questions_count' => 0,
+            'questions_estimated_time' => $this->faker->optional()->randomElement(['15-20 minutes', '45-60 minutes', '60-90 minutes']),
             'tags' => $this->faker->optional()->randomElements([1, 2, 3, 4, 5], $this->faker->numberBetween(1, 3)),
         ], $firstSection, $secondSection);
     }
-} 
+}

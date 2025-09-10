@@ -72,33 +72,7 @@
                 </button>
                 <div class="kt-accordion-content" aria-labelledby="modules_management_toggle" id="modules_management_content">
                     <div class="kt-card-body p-5">
-                        <div class="flex justify-between items-center mb-4">
-                            <p class="text-sm text-gray-600">Manage modules associated with this program</p>
-                            <button class="kt-btn kt-btn-outline" data-kt-modal-toggle="#program_module_add_modal">
-                                <i class="ki-filled ki-plus"></i>
-                                Add Module
-                            </button>
-                        </div>
-
-                        <div class="kt-scrollable-x-auto">
-                            <table class="kt-table kt-table-border table-fixed w-full">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">#</th>
-                                        <th>Module Name</th>
-                                        <th>Methodology</th>
-                                        <th>Pillar</th>
-                                        <th class="text-center">Score Range</th>
-                                        <th class="w-20 text-center">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td colspan="6" class="text-center py-4">No modules assigned to this program</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <livewire:homepage.programs.modules.program-modules-table :program="$program" />
                     </div>
                 </div>
             </div>
