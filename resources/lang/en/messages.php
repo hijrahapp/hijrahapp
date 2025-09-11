@@ -158,4 +158,16 @@ return [
     'program_not_found_or_not_in_progress' => 'Program not found or not in progress',
     'program_completed_successfully' => 'Program completed successfully',
     'error_completing_program' => 'Error completing program',
+
+    // Liabilities
+    'error_fetching_liabilities' => 'Error fetching liabilities',
+    'liability_not_found' => 'Liability not found',
+    'error_fetching_liability' => 'Error fetching liability',
+    'validation_error' => 'Validation error',
+    'error_updating_todo' => 'Error updating todo',
+    'todo_updated_successfully' => 'Todo updated successfully',
+    'liability_not_found_or_todos_not_completed' => 'Liability not found or todos not completed',
+    'todos_not_completed' => 'All todos must be completed before finishing the liability',
+    'liability_completed_successfully' => 'Liability completed successfully',
+    'error_completing_liability' => 'Error completing liability',
 ];

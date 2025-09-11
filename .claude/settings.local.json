@@ -14,7 +14,9 @@
       "Bash(php artisan l5-swagger:generate:*)",
       "Bash(php artisan:*)",
       "Bash(vendor/bin/pint:*)",
-      "Bash(php:*)"
+      "Bash(php:*)",
+      "Bash(mv:*)",
+      "Bash(find:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

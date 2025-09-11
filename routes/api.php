@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LiabilityController;
 use App\Http\Controllers\MethodologyController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\ProgramController;
@@ -80,6 +81,16 @@ Route::middleware('locale')->group(function () {
         // User interaction endpoints
         Route::post('{programId}/start', [ProgramController::class, 'startProgram']);
         Route::post('{programId}/complete', [ProgramController::class, 'completeProgram']);
+    });
+
+    Route::prefix('liability')->middleware(['auth.jwt', 'auth.user'])->group(function () {
+        // Liability endpoints
+        Route::get('my', [LiabilityController::class, 'getMyLiabilities']);
+        Route::get('{liabilityId}', [LiabilityController::class, 'get']);
+
+        // Todo progress endpoints
+        Route::post('{liabilityId}/todo/update', [LiabilityController::class, 'updateTodo']);
+        Route::post('{liabilityId}/complete', [LiabilityController::class, 'completeLiability']);
     });
 
 });

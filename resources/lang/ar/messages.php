@@ -158,4 +158,16 @@ return [
     'program_not_found_or_not_in_progress' => 'البرنامج غير موجود أو ليس قيد التقدم',
     'program_completed_successfully' => 'تم إكمال البرنامج بنجاح',
     'error_completing_program' => 'خطأ في إكمال البرنامج',
+
+    // الالتزامات
+    'error_fetching_liabilities' => 'خطأ في جلب الالتزامات',
+    'liability_not_found' => 'الالتزام غير موجود',
+    'error_fetching_liability' => 'خطأ في جلب الالتزام',
+    'validation_error' => 'خطأ في التحقق من صحة البيانات',
+    'error_updating_todo' => 'خطأ في تحديث المهمة',
+    'todo_updated_successfully' => 'تم تحديث المهمة بنجاح',
+    'liability_not_found_or_todos_not_completed' => 'الالتزام غير موجود أو المهام غير مكتملة',
+    'todos_not_completed' => 'يجب إكمال جميع المهام قبل إنهاء الالتزام',
+    'liability_completed_successfully' => 'تم إكمال الالتزام بنجاح',
+    'error_completing_liability' => 'خطأ في إكمال الالتزام',
 ];

@@ -154,4 +154,37 @@ class ContextStatusService
             ->completed()
             ->count();
     }
+
+    /**
+     * Determine completion status for a liability for a given user
+     * Returns: not_started | in_progress | completed
+     */
+    public function getLiabilityStatus(int $userId, int $liabilityId): string
+    {
+        $liability = \App\Models\Liability::find($liabilityId);
+        if (! $liability) {
+            return 'not_started';
+        }
+
+        $userProgress = \App\Models\UserLiabilityProgress::where('user_id', $userId)
+            ->where('liability_id', $liabilityId)
+            ->first();
+
+        if (! $userProgress) {
+            return 'not_started';
+        }
+
+        // If liability is marked as completed
+        if ($userProgress->is_completed) {
+            return 'completed';
+        }
+
+        // Check if any todos are completed (in_progress)
+        $completedTodos = $userProgress->completed_todos ?? [];
+        if (count($completedTodos) > 0) {
+            return 'in_progress';
+        }
+
+        return 'not_started';
+    }
 }
