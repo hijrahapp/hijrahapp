@@ -9,6 +9,7 @@ use App\Services\ResultCalculationService;
 use App\Traits\HasTagTitles;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 
 class ModuleDetailedResource extends JsonResource
 {
@@ -44,7 +45,7 @@ class ModuleDetailedResource extends JsonResource
         $pivotEstimatedTime = null;
         if ($methodologyId) {
             if ($pillarId) {
-                $pm = \DB::table('pillar_module')
+                $pm = DB::table('pillar_module')
                     ->where('methodology_id', (int) $methodologyId)
                     ->where('pillar_id', (int) $pillarId)
                     ->where('module_id', $this->id)
@@ -53,7 +54,7 @@ class ModuleDetailedResource extends JsonResource
                     $pivotDescription = property_exists($pm, 'questions_description') ? $pm->questions_description : null;
                     $pivotEstimatedTime = property_exists($pm, 'questions_estimated_time') ? $pm->questions_estimated_time : null;
                     // No sequence column in pillar_module; derive order by creation id within this pillar + methodology
-                    $orderedModuleIds = \DB::table('pillar_module')
+                    $orderedModuleIds = DB::table('pillar_module')
                         ->where('methodology_id', (int) $methodologyId)
                         ->where('pillar_id', (int) $pillarId)
                         ->orderBy('id')
@@ -65,7 +66,7 @@ class ModuleDetailedResource extends JsonResource
                     }
                 }
             } else {
-                $mm = \DB::table('methodology_module')
+                $mm = DB::table('methodology_module')
                     ->where('methodology_id', (int) $methodologyId)
                     ->where('module_id', $this->id)
                     ->first();
@@ -73,7 +74,7 @@ class ModuleDetailedResource extends JsonResource
                     $pivotDescription = property_exists($mm, 'questions_description') ? $mm->questions_description : null;
                     $pivotEstimatedTime = property_exists($mm, 'questions_estimated_time') ? $mm->questions_estimated_time : null;
                     // No sequence column in methodology_module; derive order by creation id within this methodology
-                    $orderedModuleIds = \DB::table('methodology_module')
+                    $orderedModuleIds = DB::table('methodology_module')
                         ->where('methodology_id', (int) $methodologyId)
                         ->orderBy('id')
                         ->pluck('module_id')
@@ -110,6 +111,11 @@ class ModuleDetailedResource extends JsonResource
             if ($result) {
                 $payload['result'] = $result;
             }
+
+            $eligiblePrograms = $this->getEligiblePrograms($request, $questions['status'], $methodologyId, $pillarId, $result);
+            if (! empty($eligiblePrograms)) {
+                $payload['programs'] = $eligiblePrograms;
+            }
         }
 
         return $payload;
@@ -127,6 +133,65 @@ class ModuleDetailedResource extends JsonResource
         }
 
         return null;
+    }
+
+    /**
+     * Get programs that the user is eligible for based on module completion and score
+     */
+    private function getEligiblePrograms(Request $request, string $moduleStatus, ?string $methodologyId, ?string $pillarId, ?array $result): array
+    {
+        // Only show eligible programs if user is authenticated and module is completed
+        if (! $this->user_id || ! $methodologyId || $moduleStatus !== 'completed' || ! $result || ! isset($result['percentage'])) {
+            return [];
+        }
+
+        $userScore = $result['percentage'];
+
+        // Query programs where user score falls within min_score and max_score range
+        $eligiblePrograms = DB::table('program_module as pm')
+            ->join('programs as p', 'pm.program_id', '=', 'p.id')
+            ->where('pm.module_id', $this->id)
+            ->where('pm.methodology_id', $methodologyId)
+            ->where(function ($query) use ($pillarId) {
+                if ($pillarId) {
+                    $query->where('pm.pillar_id', $pillarId);
+                } else {
+                    $query->whereNull('pm.pillar_id');
+                }
+            })
+            ->where('pm.min_score', '<=', $userScore)
+            ->where('pm.max_score', '>=', $userScore)
+            ->select('p.*', 'pm.min_score', 'pm.max_score')
+            ->get();
+
+        // Get steps count for each program separately
+        if ($eligiblePrograms->isNotEmpty()) {
+            $programIds = $eligiblePrograms->pluck('id')->toArray();
+            $stepsCounts = DB::table('steps')
+                ->whereIn('program_id', $programIds)
+                ->select('program_id', DB::raw('COUNT(*) as steps_count'))
+                ->groupBy('program_id')
+                ->pluck('steps_count', 'program_id');
+
+            // Add steps_count to each program
+            $eligiblePrograms = $eligiblePrograms->map(function ($program) use ($stepsCounts) {
+                $program->steps_count = $stepsCounts->get($program->id, 0);
+                return $program;
+            });
+        }
+
+        // Transform to ProgramResource format
+        $programs = [];
+        foreach ($eligiblePrograms as $program) {
+            // Create a new request with the authenticated user ID
+            $requestWithAuth = clone $request;
+            $requestWithAuth->merge(['authUserId' => $this->user_id]);
+
+            $programResource = new ProgramResource((object) $program);
+            $programs[] = $programResource->toArray($requestWithAuth);
+        }
+
+        return $programs;
     }
 
     /**
