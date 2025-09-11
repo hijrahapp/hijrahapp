@@ -316,14 +316,10 @@ class ProgramController
             }
 
             return response()->json([
-                'success' => true,
-                'data' => [
                     'version' => $form->version,
                     'name' => $form->name,
-                    'language' => $form->language,
-                    'form_structure' => $form->form_structure,
                     'description' => $form->description,
-                ],
+                    'form_structure' => $form->form_structure,
             ]);
         } catch (\Exception $e) {
             return response()->json([
