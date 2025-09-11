@@ -105,4 +105,30 @@ class Program extends Model
     {
         return $this->users()->wherePivot('status', 'completed');
     }
+
+    /**
+     * Feedback submissions for this program.
+     */
+    public function feedback(): HasMany
+    {
+        return $this->hasMany(ProgramFeedback::class);
+    }
+
+    /**
+     * Get average rating for this program.
+     */
+    public function getAverageRating(): ?float
+    {
+        return $this->feedback()
+            ->selectRaw('AVG(JSON_EXTRACT(responses, "$.overall_rating")) as avg_rating')
+            ->value('avg_rating');
+    }
+
+    /**
+     * Get total feedback count for this program.
+     */
+    public function getFeedbackCount(): int
+    {
+        return $this->feedback()->count();
+    }
 }

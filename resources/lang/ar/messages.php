@@ -157,6 +157,12 @@ return [
     'error_starting_program' => 'خطأ في بدء البرنامج',
     'program_not_found_or_not_in_progress' => 'البرنامج غير موجود أو ليس قيد التقدم',
     'program_completed_successfully' => 'تم إكمال البرنامج بنجاح',
+    'program_not_completed_cannot_submit_feedback' => 'يجب إكمال البرنامج قبل إرسال التقييم',
+    'feedback_submitted_successfully' => 'تم إرسال التقييم بنجاح',
+    'error_submitting_feedback' => 'خطأ في إرسال التقييم',
+    'error_fetching_feedback_stats' => 'خطأ في استرجاع إحصائيات التقييم',
+    'feedback_form_not_found' => 'نموذج التقييم غير موجود',
+    'error_fetching_feedback_form' => 'خطأ في استرجاع نموذج التقييم',
     'error_completing_program' => 'خطأ في إكمال البرنامج',
 
     // الالتزامات

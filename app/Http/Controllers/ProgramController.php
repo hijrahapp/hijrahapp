@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Repositories\ProgramRepository;
+use App\Http\Requests\SubmitProgramFeedbackRequest;
+use App\Models\FeedbackForm;
+use App\Models\Program;
+use App\Models\ProgramFeedback;
 use App\Resources\ProgramDetailedResource;
 use App\Resources\ProgramResource;
 use Illuminate\Http\JsonResponse;
@@ -189,6 +193,142 @@ class ProgramController
             return response()->json([
                 'success' => false,
                 'message' => __('messages.error_fetching_filters'),
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function submitFeedback(SubmitProgramFeedbackRequest $request, int $programId): JsonResponse
+    {
+        try {
+            $user = $request->authUser;
+
+            // Check if program exists and user completed it
+            Program::findOrFail($programId);
+            $userProgram = $user->programs()->wherePivot('program_id', $programId)->first();
+
+            if (! $userProgram || $userProgram->pivot->status !== 'completed') {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.program_not_completed_cannot_submit_feedback'),
+                ], 400);
+            }
+
+            // Create or update feedback
+            $feedback = ProgramFeedback::updateOrCreate(
+                ['user_id' => $user->id, 'program_id' => $programId],
+                [
+                    'responses' => $request->validated('responses'),
+                    'form_version' => $request->validated('form_version', '1.0'),
+                    'submitted_at' => now(),
+                ]
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => __('messages.feedback_submitted_successfully'),
+                'data' => [
+                    'feedback_id' => $feedback->id,
+                    'submitted_at' => $feedback->submitted_at->toISOString(),
+                ],
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.error_submitting_feedback'),
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getFeedbackStats(int $programId): JsonResponse
+    {
+        try {
+            $program = Program::findOrFail($programId);
+
+            $stats = ProgramFeedback::where('program_id', $programId)
+                ->selectRaw("
+                    COUNT(*) as total_responses,
+                    AVG(JSON_EXTRACT(responses, '$.overall_rating')) as avg_overall_rating,
+                    COUNT(CASE WHEN JSON_EXTRACT(responses, '$.life_improvement') = 'yes' THEN 1 END) as life_improvement_yes,
+                    COUNT(CASE WHEN JSON_EXTRACT(responses, '$.life_improvement') = 'somewhat' THEN 1 END) as life_improvement_somewhat,
+                    COUNT(CASE WHEN JSON_EXTRACT(responses, '$.life_improvement') = 'no' THEN 1 END) as life_improvement_no,
+                    COUNT(CASE WHEN JSON_EXTRACT(responses, '$.content_clarity') = 'excellent' THEN 1 END) as content_excellent,
+                    COUNT(CASE WHEN JSON_EXTRACT(responses, '$.content_clarity') = 'good' THEN 1 END) as content_good,
+                    COUNT(CASE WHEN JSON_EXTRACT(responses, '$.content_clarity') = 'needs_improvement' THEN 1 END) as content_needs_improvement
+                ")
+                ->first();
+
+            // Get most popular content types
+            $contentTypes = ProgramFeedback::where('program_id', $programId)
+                ->get()
+                ->flatMap(function ($feedback) {
+                    return $feedback->getMostBeneficialContent();
+                })
+                ->countBy()
+                ->sortDesc()
+                ->take(5);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'program_name' => $program->name,
+                    'total_responses' => (int) $stats->total_responses,
+                    'average_rating' => round($stats->avg_overall_rating, 2),
+                    'life_improvement' => [
+                        'yes' => (int) $stats->life_improvement_yes,
+                        'somewhat' => (int) $stats->life_improvement_somewhat,
+                        'no' => (int) $stats->life_improvement_no,
+                    ],
+                    'content_clarity' => [
+                        'excellent' => (int) $stats->content_excellent,
+                        'good' => (int) $stats->content_good,
+                        'needs_improvement' => (int) $stats->content_needs_improvement,
+                    ],
+                    'popular_content_types' => $contentTypes->toArray(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.error_fetching_feedback_stats'),
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getFeedbackForm(Request $request): JsonResponse
+    {
+        try {
+            $language = $request->input('language', 'ar');
+            $version = $request->input('version');
+
+            // Get form by version or active form
+            $form = $version
+                ? FeedbackForm::getByVersion($version, $language)
+                : FeedbackForm::getActiveForm($language);
+
+            if (! $form) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.feedback_form_not_found'),
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'version' => $form->version,
+                    'name' => $form->name,
+                    'language' => $form->language,
+                    'form_structure' => $form->form_structure,
+                    'description' => $form->description,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.error_fetching_feedback_form'),
                 'error' => $e->getMessage(),
             ], 500);
         }

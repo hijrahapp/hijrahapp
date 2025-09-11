@@ -158,6 +158,12 @@ return [
     'program_not_found_or_not_in_progress' => 'Program not found or not in progress',
     'program_completed_successfully' => 'Program completed successfully',
     'error_completing_program' => 'Error completing program',
+    'program_not_completed_cannot_submit_feedback' => 'You must complete the program before submitting feedback',
+    'feedback_submitted_successfully' => 'Feedback submitted successfully',
+    'error_submitting_feedback' => 'Error submitting feedback',
+    'error_fetching_feedback_stats' => 'Error fetching feedback statistics',
+    'feedback_form_not_found' => 'Feedback form not found',
+    'error_fetching_feedback_form' => 'Error fetching feedback form',
 
     // Liabilities
     'error_fetching_liabilities' => 'Error fetching liabilities',

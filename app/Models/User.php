@@ -133,4 +133,28 @@ class User extends Model
     {
         return $this->programStepProgress($programId)->inProgress();
     }
+
+    /**
+     * User's feedback submissions.
+     */
+    public function programFeedback(): HasMany
+    {
+        return $this->hasMany(ProgramFeedback::class);
+    }
+
+    /**
+     * Check if user has submitted feedback for a program.
+     */
+    public function hasSubmittedFeedbackFor(int $programId): bool
+    {
+        return $this->programFeedback()->where('program_id', $programId)->exists();
+    }
+
+    /**
+     * Get user's feedback for a specific program.
+     */
+    public function getFeedbackFor(int $programId): ?ProgramFeedback
+    {
+        return $this->programFeedback()->where('program_id', $programId)->first();
+    }
 }

@@ -83,6 +83,11 @@ Route::middleware('locale')->group(function () {
         // User interaction endpoints
         Route::post('{programId}/start', [ProgramController::class, 'startProgram']);
         Route::post('{programId}/complete', [ProgramController::class, 'completeProgram']);
+
+        // Feedback endpoints
+        Route::get('feedback/form', [ProgramController::class, 'getFeedbackForm']);
+        Route::post('{programId}/feedback', [ProgramController::class, 'submitFeedback']);
+        Route::get('{programId}/feedback/stats', [ProgramController::class, 'getFeedbackStats']);
     });
 
     Route::prefix('liability')->middleware(['auth.jwt', 'auth.user'])->group(function () {
