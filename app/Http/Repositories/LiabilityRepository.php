@@ -22,14 +22,25 @@ class LiabilityRepository
     /**
      * Get liabilities that the user is eligible for based on their completed modules.
      */
-    public function getUserLiabilities(int $userId): Collection
+    public function getUserLiabilities(int $userId, array $methodologyIds = [], array $moduleIds = [], ?string $status = null): Collection
     {
         // Get all user's completed modules with their methodology and pillar contexts
-        $userCompletedModules = DB::table('user_context_statuses as ucs')
+        $userModuleQuery = DB::table('user_context_statuses as ucs')
             ->where('ucs.user_id', $userId)
             ->where('ucs.context_type', 'module')
-            ->where('ucs.status', 'completed')
-            ->get(['context_id as module_id', 'methodology_id', 'pillar_id']);
+            ->where('ucs.status', 'completed');
+
+        // Apply methodology filter
+        if (! empty($methodologyIds)) {
+            $userModuleQuery->whereIn('ucs.methodology_id', $methodologyIds);
+        }
+
+        // Apply module filter
+        if (! empty($moduleIds)) {
+            $userModuleQuery->whereIn('ucs.context_id', $moduleIds);
+        }
+
+        $userCompletedModules = $userModuleQuery->get(['context_id as module_id', 'methodology_id', 'pillar_id']);
 
         if ($userCompletedModules->isEmpty()) {
             return Liability::query()->whereRaw('1 = 0')->get(); // Return empty Eloquent Collection
@@ -69,6 +80,32 @@ class LiabilityRepository
 
         // Remove duplicates based on liability ID while preserving the first occurrence
         $uniqueLiabilities = $eligibleLiabilities->unique('id');
+
+        // Apply status filter if provided
+        if ($status && $uniqueLiabilities->isNotEmpty()) {
+            $liabilityIds = $uniqueLiabilities->pluck('id')->toArray();
+
+            // Get user progress for these liabilities
+            $userProgress = UserLiabilityProgress::where('user_id', $userId)
+                ->whereIn('liability_id', $liabilityIds)
+                ->pluck('is_completed', 'liability_id');
+
+            $uniqueLiabilities = $uniqueLiabilities->filter(function ($liability) use ($status, $userProgress) {
+                $isCompleted = $userProgress->get($liability->id, false);
+                $hasProgress = $userProgress->has($liability->id);
+
+                switch ($status) {
+                    case 'completed':
+                        return $isCompleted;
+                    case 'in_progress':
+                        return $hasProgress && ! $isCompleted;
+                    case 'not_started':
+                        return ! $hasProgress;
+                    default:
+                        return true;
+                }
+            });
+        }
 
         // Convert back to Eloquent Collection
         return new Collection($uniqueLiabilities->values()->all());

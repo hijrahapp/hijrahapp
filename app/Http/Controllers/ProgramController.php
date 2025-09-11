@@ -16,7 +16,26 @@ class ProgramController
     {
         try {
             $user = $request->authUser;
-            $programs = $this->programRepo->getSuggestedPrograms($user->id);
+
+            // Get filter parameters
+            $methodologyIds = $request->input('methodologyIds', []);
+            $moduleIds = $request->input('moduleIds', []);
+            $status = $request->input('status');
+
+            // Ensure array inputs
+            if (is_string($methodologyIds)) {
+                $methodologyIds = explode(',', $methodologyIds);
+            }
+            if (is_string($moduleIds)) {
+                $moduleIds = explode(',', $moduleIds);
+            }
+
+            $programs = $this->programRepo->getSuggestedPrograms(
+                $user->id,
+                array_filter($methodologyIds),
+                array_filter($moduleIds),
+                $status
+            );
 
             return response()->json(ProgramResource::collection($programs));
         } catch (\Exception $e) {
@@ -32,7 +51,26 @@ class ProgramController
     {
         try {
             $user = $request->authUser;
-            $programs = $this->programRepo->getUserPrograms($user->id);
+
+            // Get filter parameters
+            $methodologyIds = $request->input('methodologyIds', []);
+            $moduleIds = $request->input('moduleIds', []);
+            $status = $request->input('status');
+
+            // Ensure array inputs
+            if (is_string($methodologyIds)) {
+                $methodologyIds = explode(',', $methodologyIds);
+            }
+            if (is_string($moduleIds)) {
+                $moduleIds = explode(',', $moduleIds);
+            }
+
+            $programs = $this->programRepo->getUserPrograms(
+                $user->id,
+                array_filter($methodologyIds),
+                array_filter($moduleIds),
+                $status
+            );
 
             return response()->json(ProgramResource::collection($programs));
         } catch (\Exception $e) {

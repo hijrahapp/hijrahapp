@@ -20,7 +20,26 @@ class LiabilityController
     {
         try {
             $user = $request->authUser;
-            $liabilities = $this->liabilityRepo->getUserLiabilities($user->id);
+
+            // Get filter parameters
+            $methodologyIds = $request->input('methodologyIds', []);
+            $moduleIds = $request->input('moduleIds', []);
+            $status = $request->input('status');
+
+            // Ensure array inputs
+            if (is_string($methodologyIds)) {
+                $methodologyIds = explode(',', $methodologyIds);
+            }
+            if (is_string($moduleIds)) {
+                $moduleIds = explode(',', $moduleIds);
+            }
+
+            $liabilities = $this->liabilityRepo->getUserLiabilities(
+                $user->id,
+                array_filter($methodologyIds),
+                array_filter($moduleIds),
+                $status
+            );
 
             return response()->json(LiabilityResource::collection($liabilities));
         } catch (\Exception $e) {

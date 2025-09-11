@@ -26,14 +26,25 @@ class ProgramRepository
     /**
      * Get suggested programs that the user is eligible for based on their module scores.
      */
-    public function getSuggestedPrograms(int $userId): Collection
+    public function getSuggestedPrograms(int $userId, array $methodologyIds = [], array $moduleIds = [], ?string $status = null): Collection
     {
         // Get all user's completed modules with their methodology and pillar contexts
-        $userModuleScores = DB::table('user_context_statuses as ucs')
+        $userModuleQuery = DB::table('user_context_statuses as ucs')
             ->where('ucs.user_id', $userId)
             ->where('ucs.context_type', 'module')
-            ->where('ucs.status', 'completed')
-            ->get(['context_id as module_id', 'methodology_id', 'pillar_id']);
+            ->where('ucs.status', 'completed');
+
+        // Apply methodology filter
+        if (! empty($methodologyIds)) {
+            $userModuleQuery->whereIn('ucs.methodology_id', $methodologyIds);
+        }
+
+        // Apply module filter
+        if (! empty($moduleIds)) {
+            $userModuleQuery->whereIn('ucs.context_id', $moduleIds);
+        }
+
+        $userModuleScores = $userModuleQuery->get(['context_id as module_id', 'methodology_id', 'pillar_id']);
 
         if ($userModuleScores->isEmpty()) {
             return Program::query()->whereRaw('1 = 0')->get(); // Return empty Eloquent Collection
@@ -124,6 +135,22 @@ class ProgramRepository
             return $program;
         });
 
+        // Apply status filter if provided
+        if ($status && $programs->isNotEmpty()) {
+            // Get user's program statuses
+            $programIds = $programs->pluck('id')->toArray();
+            $userPrograms = DB::table('user_programs')
+                ->where('user_id', $userId)
+                ->whereIn('program_id', $programIds)
+                ->pluck('status', 'program_id');
+
+            $programs = $programs->filter(function ($program) use ($status, $userPrograms) {
+                $programStatus = $userPrograms->get($program->id, 'not_started');
+
+                return $programStatus === $status;
+            });
+        }
+
         // Load the stepsList relationship for each program
         $programIds = $programs->pluck('id');
         $programsWithSteps = Program::query()
@@ -145,17 +172,40 @@ class ProgramRepository
     /**
      * Get programs the user has interacted with.
      */
-    public function getUserPrograms(int $userId): Collection
+    public function getUserPrograms(int $userId, array $methodologyIds = [], array $moduleIds = [], ?string $status = null): Collection
     {
-        return Program::query()
+        $query = Program::query()
             ->join('user_programs', 'programs.id', '=', 'user_programs.program_id')
-            ->where('user_programs.user_id', $userId)
-            ->select([
-                'programs.*',
-                'user_programs.status',
-                'user_programs.started_at',
-                'user_programs.completed_at',
-            ])
+            ->where('user_programs.user_id', $userId);
+
+        // Apply status filter
+        if ($status) {
+            $query->where('user_programs.status', $status);
+        }
+
+        // Apply methodology and module filters by checking program requirements
+        if (! empty($methodologyIds) || ! empty($moduleIds)) {
+            $query->whereExists(function ($subQuery) use ($methodologyIds, $moduleIds) {
+                $subQuery->select(DB::raw(1))
+                    ->from('program_module as pm')
+                    ->whereRaw('pm.program_id = programs.id');
+
+                if (! empty($methodologyIds)) {
+                    $subQuery->whereIn('pm.methodology_id', $methodologyIds);
+                }
+
+                if (! empty($moduleIds)) {
+                    $subQuery->whereIn('pm.module_id', $moduleIds);
+                }
+            });
+        }
+
+        return $query->select([
+            'programs.*',
+            'user_programs.status',
+            'user_programs.started_at',
+            'user_programs.completed_at',
+        ])
             ->with(['stepsList'])
             ->orderBy('user_programs.created_at', 'desc')
             ->get();
