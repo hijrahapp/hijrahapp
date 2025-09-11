@@ -23,6 +23,12 @@ class LiabilityManage extends Component
 
     public bool $isBasicDirty = false;
 
+    public bool $isTodosDirty = false;
+
+    protected $listeners = [
+        'list-updated' => 'handleTodosUpdate',
+    ];
+
     public function mount($liabilityId)
     {
         // Check if user has a valid session token
@@ -64,12 +70,35 @@ class LiabilityManage extends Component
             'description' => $this->description,
             'title' => $this->title,
             'header' => $this->header,
-            'todos' => $this->todos,
         ]);
 
         $this->isBasicDirty = false;
         session()->flash('success', 'Liability details updated successfully.');
         $this->dispatch('section-saved', ['section' => 'basic']);
+    }
+
+    public function saveTodos()
+    {
+        $this->validate([
+            'todos' => 'array',
+            'todos.*' => 'string|max:500',
+        ]);
+
+        $this->liability->update([
+            'todos' => $this->todos,
+        ]);
+
+        $this->isTodosDirty = false;
+        session()->flash('success', 'Todos updated successfully.');
+        $this->dispatch('section-saved', ['section' => 'todos']);
+    }
+
+    public function handleTodosUpdate($identifier, $items)
+    {
+        if ($identifier === 'todos') {
+            $this->todos = $items;
+            $this->isTodosDirty = true;
+        }
     }
 
     public function backToList()

@@ -38,6 +38,7 @@ class LiabilityAddModal extends Component
     protected $listeners = [
         'reset-modal' => 'resetForm',
         'edit-liability' => 'editLiability',
+        'list-updated' => 'handleTodosUpdate',
     ];
 
     public function resetForm()
@@ -76,6 +77,13 @@ class LiabilityAddModal extends Component
     {
         unset($this->todos[$index]);
         $this->todos = array_values($this->todos);
+    }
+
+    public function handleTodosUpdate($identifier, $items)
+    {
+        if ($identifier === 'todos') {
+            $this->todos = $items;
+        }
     }
 
     public function save()

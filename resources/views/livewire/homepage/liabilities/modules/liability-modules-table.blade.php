@@ -80,7 +80,7 @@
                                         <button class="kt-btn kt-btn-outline" data-kt-dropdown-toggle="true">
                                             <i class="ki-filled ki-dots-horizontal text-secondary-foreground"></i>
                                         </button>
-                                        <div class="kt-dropdown-menu w-52" data-kt-dropdown-menu="true">
+                                        <div class="kt-dropdown-menu" data-kt-dropdown-menu="true">
                                             <ul class="kt-dropdown-menu-sub">
                                                 <li>
                                                     <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" 
@@ -127,9 +127,7 @@
     </div>
 
     {{-- Pagination outside the table card --}}
-    @if($modules->hasPages())
-        <x-ktui-pagination :paginator="$modules" />
-    @endif
+    <x-ktui-pagination :paginator="$modules" />
 
     {{-- Module Add Modal --}}
     <livewire:homepage.liabilities.modules.liability-module-add-modal />

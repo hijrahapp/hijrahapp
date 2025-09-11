@@ -155,7 +155,7 @@
                                             <button class="kt-btn kt-btn-outline" data-kt-dropdown-toggle="true">
                                                 <i class="ki-filled ki-dots-horizontal text-secondary-foreground"></i>
                                             </button>
-                                            <div class="kt-dropdown-menu w-52" data-kt-dropdown-menu="true">
+                                            <div class="kt-dropdown-menu" data-kt-dropdown-menu="true">
                                                 <ul class="kt-dropdown-menu-sub">
                                                     <li>
                                                         <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="setEditingQuestion({{ $question->id }})" data-kt-modal-toggle="#methodology_question_add_modal">

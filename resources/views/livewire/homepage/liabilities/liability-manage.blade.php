@@ -57,6 +57,38 @@
             </div>
         </div>
 
+        <!-- Todos Management Section -->
+        <div data-kt-accordion="true" class="kt-accordion">
+            <div class="kt-card kt-accordion-item active" data-kt-accordion-item="true">
+                <button
+                    id="todos_management_toggle"
+                    data-kt-accordion-toggle="true"
+                    aria-controls="todos_management_content"
+                    class="kt-accordion-toggle kt-card-header"
+                >
+                    <h3 class="kt-card-title">Todos Management</h3>
+                    <span aria-hidden="true" class="kt-accordion-indicator">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus kt-accordion-indicator-on" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus kt-accordion-indicator-off" aria-hidden="true"><path d="M5 12h14"></path></svg>
+                    </span>
+                </button>
+                <div class="kt-accordion-content" aria-labelledby="todos_management_toggle" id="todos_management_content" x-data="{ dirty: $wire.entangle('isTodosDirty') }" x-on:input="dirty = true" x-on:change="dirty = true" x-on:section-saved.window="if ($event.detail.section === 'todos') dirty = false">
+                    <div class="kt-card-body p-5">
+                        <livewire:shared.components.list-input 
+                            :items="$todos" 
+                            label="Todo Items" 
+                            placeholder="Enter todo item" 
+                            addButtonText="Add Todo"
+                            identifier="todos"
+                            :reorderEnabled="true" />
+                    </div>
+                    <div class="kt-card-footer flex items-center justify-end gap-2">
+                        <button class="kt-btn kt-btn-primary disabled:opacity-50 disabled:cursor-not-allowed" wire:click="saveTodos" :disabled="!dirty" wire:loading.attr="disabled" wire:target="saveTodos">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Placeholder for Liability Modules Management Section -->
         <div data-kt-accordion="true" class="kt-accordion">
             <div class="kt-card kt-accordion-item active" data-kt-accordion-item="true">

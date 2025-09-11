@@ -44,17 +44,17 @@
                                         <button class="kt-btn kt-btn-outline" data-kt-dropdown-toggle="true">
                                             <i class="ki-filled ki-dots-horizontal text-secondary-foreground"></i>
                                         </button>
-                                        <div class="kt-dropdown-menu w-52" data-kt-dropdown-menu="true">
+                                        <div class="kt-dropdown-menu" data-kt-dropdown-menu="true">
                                             <ul class="kt-dropdown-menu-sub">
                                                 <li>
                                                     <a class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="manageLiability({{ $liability->id }})">
-                                                        <i class="ki-filled ki-gear text-base-content"></i>
+                                                        <i class="ki-filled ki-setting-2"></i>
                                                         Manage
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" onclick="confirmDelete('{{ $liability->id }}', '{{ addslashes($liability->name) }}')">
-                                                        <i class="ki-filled ki-trash text-destructive"></i>
+                                                        <i class="ki-filled ki-trash"></i>
                                                         Delete
                                                     </a>
                                                 </li>
@@ -77,12 +77,9 @@
                 </table>
             </div>
         </div>
-        @if($this->liabilities->hasPages())
-            <div class="kt-card-footer justify-center">
-                {{ $this->liabilities->links() }}
-            </div>
-        @endif
     </div>
+
+    <x-ktui-pagination :paginator="$this->liabilities" />
 
     <script>
         function confirmDelete(liabilityId, liabilityName) {

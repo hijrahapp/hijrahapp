@@ -20,7 +20,9 @@ class ListInput extends Component
 
     public string $identifier = '';
 
-    public function mount($items = [], $label = '', $placeholder = 'Enter item', $addButtonText = 'Add', $required = false, $identifier = '')
+    public bool $reorderEnabled = false;
+
+    public function mount($items = [], $label = '', $placeholder = 'Enter item', $addButtonText = 'Add', $required = false, $identifier = '', $reorderEnabled = false)
     {
         $this->items = is_array($items) ? $items : [];
         $this->label = $label;
@@ -28,6 +30,7 @@ class ListInput extends Component
         $this->addButtonText = $addButtonText;
         $this->required = $required;
         $this->identifier = $identifier;
+        $this->reorderEnabled = $reorderEnabled;
     }
 
     public function addItem()
@@ -54,6 +57,26 @@ class ListInput extends Component
     {
         // Called when any item in the array is updated via wire:model
         $this->dispatchUpdate();
+    }
+
+    public function moveUp($index)
+    {
+        if ($index > 0 && isset($this->items[$index])) {
+            $temp = $this->items[$index];
+            $this->items[$index] = $this->items[$index - 1];
+            $this->items[$index - 1] = $temp;
+            $this->dispatchUpdate();
+        }
+    }
+
+    public function moveDown($index)
+    {
+        if ($index < count($this->items) - 1 && isset($this->items[$index])) {
+            $temp = $this->items[$index];
+            $this->items[$index] = $this->items[$index + 1];
+            $this->items[$index + 1] = $temp;
+            $this->dispatchUpdate();
+        }
     }
 
     private function dispatchUpdate()

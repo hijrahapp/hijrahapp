@@ -44,12 +44,12 @@
                                         <button class="kt-btn kt-btn-outline" data-kt-dropdown-toggle="true">
                                             <i class="ki-filled ki-dots-horizontal text-secondary-foreground"></i>
                                         </button>
-                                        <div class="kt-dropdown-menu w-52" data-kt-dropdown-menu="true">
+                                        <div class="kt-dropdown-menu" data-kt-dropdown-menu="true">
                                             <ul class="kt-dropdown-menu-sub">
                                                 <li>
                                                     <a class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="manageProgram({{ $program->id }})">
                                                         <i class="ki-filled ki-setting-2"></i>
-                                                        Manage Program
+                                                        Manage
                                                     </a>
                                                 </li>
                                                 <li>
@@ -72,8 +72,7 @@
                 </table>
             </div>
         </div>
-        <div class="kt-card-footer">
-            {{ $this->programs->links() }}
-        </div>
     </div>
+    
+    <x-ktui-pagination :paginator="$this->programs" />
 </div>

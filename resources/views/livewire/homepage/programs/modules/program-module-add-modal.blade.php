@@ -68,53 +68,51 @@
                 </div>
 
                 <!-- Module Selection -->
-                @if($selectedMethodologyId)
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-medium">Select Module</h3>
-                            <div class="kt-input max-w-48">
-                                <i class="ki-filled ki-magnifier"></i>
-                                <input type="text" class="kt-input" placeholder="Search modules..." wire:model.live="search" />
-                            </div>
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium">Select Module</h3>
+                        <div class="kt-input max-w-48">
+                            <i class="ki-filled ki-magnifier"></i>
+                            <input type="text" class="kt-input" placeholder="Search modules..." wire:model.live="search" />
                         </div>
+                    </div>
 
-                        @if(count($availableModules) > 0)
-                            <div class="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
-                                @foreach($availableModules as $module)
-                                    <div class="border-b last:border-b-0 p-3 hover:bg-gray-50 cursor-pointer {{ $selectedModuleId == $module->id ? 'bg-primary/10 border-primary' : '' }}" 
-                                         wire:click="selectModule({{ $module->id }})">
-                                        <div class="flex justify-between items-start">
-                                            <div class="flex-1">
-                                                <h4 class="font-medium text-sm {{ $selectedModuleId == $module->id ? 'text-primary' : '' }}">
-                                                    {{ $module->name }}
-                                                </h4>
-                                                @if($module->description)
-                                                    <p class="text-gray-600 text-xs mt-1">
-                                                        {{ Str::limit($module->description, 80) }}
-                                                    </p>
-                                                @endif
-                                            </div>
-                                            <div class="ml-2">
-                                                @if($selectedModuleId == $module->id)
-                                                    <i class="ki-filled ki-check text-primary"></i>
-                                                @endif
-                                            </div>
+                    @if(count($availableModules) > 0)
+                        <div class="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
+                            @foreach($availableModules as $module)
+                                <div class="border-gray-200 {{ !$loop->last ? 'border-b' : '' }} p-3 cursor-pointer {{ $selectedModuleId == $module->id ? 'bg-primary/10' : '' }}" 
+                                        wire:click="selectModule({{ $module->id }})">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <h4 class="font-medium text-sm {{ $selectedModuleId == $module->id ? 'text-primary' : '' }}">
+                                                {{ $module->name }}
+                                            </h4>
+                                            @if($module->description)
+                                                <p class="text-gray-600 text-xs mt-1">
+                                                    {{ Str::limit($module->description, 80) }}
+                                                </p>
+                                            @endif
+                                        </div>
+                                        <div class="ml-2">
+                                            @if($selectedModuleId == $module->id)
+                                                <i class="ki-filled ki-check text-primary"></i>
+                                            @endif
                                         </div>
                                     </div>
-                                @endforeach
-                            </div>
-                            @error('selectedModuleId')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                        @else
-                            <div class="text-center py-8 text-gray-500">
-                                <i class="ki-filled ki-element-4 text-4xl mb-2"></i>
-                                <p>No available modules found for the selected criteria</p>
-                                @if($search)
-                                    <p class="text-sm">Try adjusting your search or selection</p>
-                                @endif
-                            </div>
-                        @endif
-                    </div>
-                @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        @error('selectedModuleId')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                    @else
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="ki-filled ki-element-4 text-4xl mb-2"></i>
+                            <p>No available modules found for the selected criteria</p>
+                            @if($search)
+                                <p class="text-sm">Try adjusting your search or selection</p>
+                            @endif
+                        </div>
+                    @endif
+                </div>
 
                 <!-- Score Configuration -->
                 <div>

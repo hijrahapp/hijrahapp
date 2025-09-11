@@ -36,6 +36,26 @@
                         wire:model="items.{{ $index }}"
                         placeholder="Item {{ $index + 1 }}"
                     />
+                    @if($reorderEnabled)
+                        <button
+                            type="button"
+                            class="kt-btn kt-btn-outline"
+                            wire:click="moveUp({{ $index }})"
+                            title="Move up"
+                            @disabled($index === 0)
+                        >
+                            <i class="ki-filled ki-arrow-up"></i>
+                        </button>
+                        <button
+                            type="button"
+                            class="kt-btn kt-btn-outline"
+                            wire:click="moveDown({{ $index }})"
+                            title="Move down"
+                            @disabled($index === count($items) - 1)
+                        >
+                            <i class="ki-filled ki-arrow-down"></i>
+                        </button>
+                    @endif
                     <button
                         type="button"
                         class="kt-btn kt-btn-outline kt-btn-destructive text-destructive"

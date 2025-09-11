@@ -58,39 +58,14 @@
 
                 <!-- Todos Section -->
                 <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-medium">Todos</h3>
-                        <button type="button" class="kt-btn kt-btn-outline kt-btn-sm" wire:click="addTodo">
-                            <i class="ki-filled ki-plus"></i>
-                            Add Todo
-                        </button>
-                    </div>
-
-                    @if(count($todos) > 0)
-                        <div class="space-y-3">
-                            @foreach($todos as $index => $todo)
-                                <div class="flex gap-2 items-start">
-                                    <div class="flex-1">
-                                        <input type="text" 
-                                               class="kt-input w-full" 
-                                               wire:model.defer="todos.{{ $index }}" 
-                                               placeholder="Enter todo item" 
-                                               maxlength="500" />
-                                        @error("todos.{$index}")<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                                    </div>
-                                    <button type="button" 
-                                            class="kt-btn kt-btn-outline kt-btn-sm text-destructive border-destructive hover:bg-destructive hover:text-white" 
-                                            wire:click="removeTodo({{ $index }})">
-                                        <i class="ki-filled ki-trash"></i>
-                                    </button>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="text-gray-500 text-center py-4">
-                            No todos added yet. Click "Add Todo" to add items.
-                        </div>
-                    @endif
+                    <h3 class="text-lg font-medium mb-4">Todos</h3>
+                    <livewire:shared.components.list-input 
+                        :items="$todos" 
+                        label="Todo Items" 
+                        placeholder="Enter todo item" 
+                        addButtonText="Add Todo"
+                        identifier="todos"
+                        :reorderEnabled="true" />
                 </div>
             </div>
             <div class="kt-modal-footer flex justify-end gap-2 py-4 px-5">
