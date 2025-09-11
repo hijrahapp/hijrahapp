@@ -16,7 +16,11 @@
       "Bash(vendor/bin/pint:*)",
       "Bash(php:*)",
       "Bash(mv:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__laravel-boost__read-log-entries",
+      "mcp__laravel-boost__get-absolute-url",
+      "Bash(composer:*)",
+      "Bash(curl:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -170,4 +170,5 @@ return [
     'todos_not_completed' => 'يجب إكمال جميع المهام قبل إنهاء الالتزام',
     'liability_completed_successfully' => 'تم إكمال الالتزام بنجاح',
     'error_completing_liability' => 'خطأ في إكمال الالتزام',
+    'error_fetching_filters' => 'خطأ في جلب المرشحات',
 ];

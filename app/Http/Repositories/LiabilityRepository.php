@@ -189,4 +189,53 @@ class LiabilityRepository
 
         return $liability;
     }
+
+    /**
+     * Get unique methodologies and modules from user liabilities for filtering.
+     */
+    public function getUserLiabilitiesFilters(int $userId): array
+    {
+        // Get unique methodologies and modules from user's eligible liabilities
+        $methodologyAndModules = DB::table('user_context_statuses as ucs')
+            ->join('liability_module as lm', function ($join) {
+                $join->on('ucs.context_id', '=', 'lm.module_id')
+                    ->on('ucs.methodology_id', '=', 'lm.methodology_id');
+            })
+            ->leftJoin('methodology as m', 'lm.methodology_id', '=', 'm.id')
+            ->leftJoin('modules as mod', 'lm.module_id', '=', 'mod.id')
+            ->where('ucs.user_id', $userId)
+            ->where('ucs.context_type', 'module')
+            ->where('ucs.status', 'completed')
+            ->whereNotNull('m.id')
+            ->whereNotNull('mod.id')
+            ->select(
+                'm.id as methodology_id',
+                'm.name as methodology_name',
+                'mod.id as module_id',
+                'mod.name as module_name'
+            )
+            ->distinct()
+            ->get();
+
+        // Group by methodology and module
+        $methodologies = $methodologyAndModules->groupBy('methodology_id')
+            ->map(fn ($group) => [
+                'id' => $group->first()->methodology_id,
+                'name' => $group->first()->methodology_name,
+            ])
+            ->values();
+
+        $modules = $methodologyAndModules->groupBy('module_id')
+            ->map(fn ($group) => [
+                'id' => $group->first()->module_id,
+                'name' => $group->first()->module_name,
+            ])
+            ->values();
+
+        return [
+            'methodologies' => $methodologies->toArray(),
+            'modules' => $modules->toArray(),
+            'statuses' => ['not_started', 'in_progress', 'completed'],
+        ];
+    }
 }

@@ -3,14 +3,14 @@
 namespace App\Http\Repositories;
 
 use App\Models\Program;
-use App\Services\ResultCalculationService;
-use Illuminate\Database\Eloquent\Collection;
+use App\Services\ResultCalculationOptimizedService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ProgramRepository
 {
     public function __construct(
-        private readonly ResultCalculationService $resultCalculationService
+        private readonly ResultCalculationOptimizedService $resultCalculationService
     ) {}
 
     public function findById(int $programId): ?Program
@@ -23,197 +23,6 @@ class ProgramRepository
         return Program::all();
     }
 
-    /**
-     * Get suggested programs that the user is eligible for based on their module scores.
-     */
-    public function getSuggestedPrograms(int $userId, array $methodologyIds = [], array $moduleIds = [], array $status = []): Collection
-    {
-        // Get all user's completed modules with their methodology and pillar contexts
-        $userModuleQuery = DB::table('user_context_statuses as ucs')
-            ->where('ucs.user_id', $userId)
-            ->where('ucs.context_type', 'module')
-            ->where('ucs.status', 'completed');
-
-        // Apply methodology filter
-        if (! empty($methodologyIds)) {
-            $userModuleQuery->whereIn('ucs.methodology_id', $methodologyIds);
-        }
-
-        // Apply module filter
-        if (! empty($moduleIds)) {
-            $userModuleQuery->whereIn('ucs.context_id', $moduleIds);
-        }
-
-        $userModuleScores = $userModuleQuery->get(['context_id as module_id', 'methodology_id', 'pillar_id']);
-
-        if ($userModuleScores->isEmpty()) {
-            return Program::query()->whereRaw('1 = 0')->get(); // Return empty Eloquent Collection
-        }
-
-        $eligiblePrograms = collect();
-
-        foreach ($userModuleScores as $moduleScore) {
-            // Calculate the user's score for this module
-            $moduleResult = $this->resultCalculationService->calculateModuleResult(
-                $userId,
-                $moduleScore->module_id,
-                $moduleScore->methodology_id ?: 0,
-                $moduleScore->pillar_id ?: null
-            );
-
-            if (! $moduleResult || ! isset($moduleResult['percentage'])) {
-                continue;
-            }
-
-            $userScore = $moduleResult['percentage'];
-
-            // Find programs where this module score qualifies the user
-            $programs = Program::query()
-                ->join('program_module', 'programs.id', '=', 'program_module.program_id')
-                ->where('program_module.module_id', $moduleScore->module_id)
-                ->where('program_module.methodology_id', $moduleScore->methodology_id ?: 0)
-                ->where('program_module.min_score', '<=', $userScore)
-                ->where('program_module.max_score', '>=', $userScore);
-
-            // Filter by pillar if specified
-            if ($moduleScore->pillar_id) {
-                $programs->where('program_module.pillar_id', $moduleScore->pillar_id);
-            } else {
-                $programs->whereNull('program_module.pillar_id');
-            }
-
-            $qualifyingPrograms = $programs
-                ->leftJoin('methodology', 'program_module.methodology_id', '=', 'methodology.id')
-                ->leftJoin('modules', 'program_module.module_id', '=', 'modules.id')
-                ->leftJoin('pillars', 'program_module.pillar_id', '=', 'pillars.id')
-                ->select(
-                    'programs.*',
-                    'program_module.min_score',
-                    'program_module.max_score',
-                    'program_module.methodology_id',
-                    'program_module.pillar_id',
-                    DB::raw($userScore.' as user_score'),
-                    DB::raw($moduleScore->module_id.' as qualifying_module_id'),
-                    'methodology.name as methodology_name',
-                    'modules.name as module_name',
-                    'pillars.name as pillar_name'
-                )->get();
-
-            $eligiblePrograms = $eligiblePrograms->merge($qualifyingPrograms);
-        }
-
-        // Remove duplicates and convert to Eloquent Collection
-        $uniquePrograms = $eligiblePrograms
-            ->unique('id')
-            ->values();
-
-        if ($uniquePrograms->isEmpty()) {
-            return Program::query()->whereRaw('1 = 0')->get(); // Return empty Eloquent Collection
-        }
-
-        // Convert to Eloquent models while preserving the additional data
-        $programs = $uniquePrograms->map(function ($programData) {
-            // Create a Program model instance
-            $program = new Program;
-            $program->fill($programData->toArray());
-            $program->exists = true; // Mark as existing to avoid save issues
-
-            // Ensure the ID is properly set
-            $program->setAttribute('id', $programData->id);
-
-            // Add the additional fields as attributes
-            $program->setAttribute('user_score', $programData->user_score);
-            $program->setAttribute('qualifying_module_id', $programData->qualifying_module_id);
-            $program->setAttribute('module_name', $programData->module_name);
-            $program->setAttribute('methodology_id', $programData->methodology_id);
-            $program->setAttribute('methodology_name', $programData->methodology_name);
-            $program->setAttribute('pillar_id', $programData->pillar_id);
-            $program->setAttribute('pillar_name', $programData->pillar_name);
-            $program->setAttribute('min_score', $programData->min_score);
-            $program->setAttribute('max_score', $programData->max_score);
-
-            return $program;
-        });
-
-        // Apply status filter if provided
-        if (! empty($status) && $programs->isNotEmpty()) {
-            // Get user's program statuses
-            $programIds = $programs->pluck('id')->toArray();
-            $userPrograms = DB::table('user_programs')
-                ->where('user_id', $userId)
-                ->whereIn('program_id', $programIds)
-                ->pluck('status', 'program_id');
-
-            $programs = $programs->filter(function ($program) use ($status, $userPrograms) {
-                $programStatus = $userPrograms->get($program->id, 'not_started');
-
-                return in_array($programStatus, $status);
-            });
-        }
-
-        // Load the stepsList relationship for each program
-        $programIds = $programs->pluck('id');
-        $programsWithSteps = Program::query()
-            ->whereIn('id', $programIds)
-            ->with(['stepsList'])
-            ->get()
-            ->keyBy('id');
-
-        // Merge the stepsList data into our programs
-        $programs->each(function ($program) use ($programsWithSteps) {
-            if ($programsWithSteps->has($program->id)) {
-                $program->setRelation('stepsList', $programsWithSteps[$program->id]->stepsList);
-            }
-        });
-
-        return new Collection($programs->sortBy('name')->values());
-    }
-
-    /**
-     * Get programs the user has interacted with.
-     */
-    public function getUserPrograms(int $userId, array $methodologyIds = [], array $moduleIds = [], array $status = []): Collection
-    {
-        $query = Program::query()
-            ->join('user_programs', 'programs.id', '=', 'user_programs.program_id')
-            ->where('user_programs.user_id', $userId);
-
-        // Apply status filter
-        if (! empty($status)) {
-            $query->whereIn('user_programs.status', $status);
-        }
-
-        // Apply methodology and module filters by checking program requirements
-        if (! empty($methodologyIds) || ! empty($moduleIds)) {
-            $query->whereExists(function ($subQuery) use ($methodologyIds, $moduleIds) {
-                $subQuery->select(DB::raw(1))
-                    ->from('program_module as pm')
-                    ->whereRaw('pm.program_id = programs.id');
-
-                if (! empty($methodologyIds)) {
-                    $subQuery->whereIn('pm.methodology_id', $methodologyIds);
-                }
-
-                if (! empty($moduleIds)) {
-                    $subQuery->whereIn('pm.module_id', $moduleIds);
-                }
-            });
-        }
-
-        return $query->select([
-            'programs.*',
-            'user_programs.status',
-            'user_programs.started_at',
-            'user_programs.completed_at',
-        ])
-            ->with(['stepsList'])
-            ->orderBy('user_programs.created_at', 'desc')
-            ->get();
-    }
-
-    /**
-     * Start a program for a user.
-     */
     public function startProgram(int $userId, int $programId): bool
     {
         $program = Program::find($programId);
@@ -221,41 +30,429 @@ class ProgramRepository
             return false;
         }
 
-        // Check if already started
-        $existing = $program->users()
-            ->wherePivot('user_id', $userId)
-            ->exists();
+        $existingUserProgram = DB::table('user_programs')
+            ->where('user_id', $userId)
+            ->where('program_id', $programId)
+            ->first();
 
-        if ($existing) {
-            return false; // User already has this program
+        if ($existingUserProgram) {
+            return false;
         }
 
-        $program->users()->attach($userId, [
+        DB::table('user_programs')->insert([
+            'user_id' => $userId,
+            'program_id' => $programId,
             'status' => 'in_progress',
             'started_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         return true;
     }
 
     /**
-     * Complete a program for a user.
+     * Get programs suggested for user based on their completed modules and scores.
      */
-    public function completeProgram(int $userId, int $programId): bool
+    public function getSuggestedPrograms(int $userId, array $methodologyIds = [], array $moduleIds = [], array $statuses = []): Collection
     {
-        $program = Program::find($programId);
-        if (! $program) {
-            return false;
-        }
-
-        $updated = $program->users()
-            ->wherePivot('user_id', $userId)
-            ->wherePivot('status', 'in_progress')
-            ->updateExistingPivot($userId, [
-                'status' => 'completed',
-                'completed_at' => now(),
+        // Get all program-module combinations
+        $programModulesQuery = DB::table('program_module as pm')
+            ->join('programs as p', 'p.id', '=', 'pm.program_id')
+            ->join('modules as m', 'm.id', '=', 'pm.module_id')
+            ->join('methodology as mth', 'mth.id', '=', 'pm.methodology_id')
+            ->leftJoin('pillars as pil', 'pil.id', '=', 'pm.pillar_id')
+            ->leftJoin('user_programs as up', function ($join) use ($userId) {
+                $join->on('up.program_id', '=', 'pm.program_id')
+                    ->where('up.user_id', '=', $userId);
+            })
+            // ->whereNull('up.id') // Exclude programs user is already enrolled in
+            ->select([
+                'pm.program_id',
+                'pm.module_id',
+                'pm.methodology_id',
+                'pm.pillar_id',
+                'pm.min_score',
+                'pm.max_score',
+                'p.name as program_name',
+                'p.description as program_description',
+                'p.definition as program_definition',
+                'p.objectives as program_objectives',
+                'p.created_at as program_created_at',
+                'p.updated_at as program_updated_at',
+                'm.name as module_name',
+                'm.description as module_description',
+                'm.definition as module_definition',
+                'm.objectives as module_objectives',
+                'mth.name as methodology_name',
+                'pil.name as pillar_name',
             ]);
 
-        return $updated > 0;
+        // Apply filters
+        if (! empty($methodologyIds)) {
+            $programModulesQuery->whereIn('pm.methodology_id', $methodologyIds);
+        }
+        if (! empty($moduleIds)) {
+            $programModulesQuery->whereIn('pm.module_id', $moduleIds);
+        }
+
+        $programModules = $programModulesQuery->get();
+
+        $qualifiedPrograms = collect();
+
+        foreach ($programModules as $pm) {
+            // Check if module is completed and calculate score
+            $moduleResult = null;
+
+            if ($pm->pillar_id) {
+                // Module under pillar context
+                $moduleResult = $this->resultCalculationService->calculateModuleResult(
+                    $userId,
+                    $pm->module_id,
+                    $pm->methodology_id,
+                    $pm->pillar_id
+                );
+            } else {
+                // Module directly under methodology
+                $moduleResult = $this->resultCalculationService->calculateModuleResult(
+                    $userId,
+                    $pm->module_id,
+                    $pm->methodology_id,
+                    null
+                );
+            }
+
+            // Check if module is completed and score qualifies
+            if ($moduleResult && isset($moduleResult['percentage'])) {
+                $userScore = $moduleResult['percentage'];
+
+                if ($userScore >= $pm->min_score && $userScore <= $pm->max_score) {
+                    // Check if we already have this program in our qualified list
+                    $existingProgram = $qualifiedPrograms->firstWhere('id', $pm->program_id);
+
+                    if (! $existingProgram) {
+                        $program = new Program;
+                        $program->id = $pm->program_id;
+                        $program->name = $pm->program_name;
+                        $program->description = $pm->program_description;
+                        $program->definition = $pm->program_definition;
+                        $program->objectives = $pm->program_objectives;
+                        $program->created_at = $pm->program_created_at;
+                        $program->updated_at = $pm->program_updated_at;
+
+                        // Add the qualifying module details
+                        $program->qualifying_module = [
+                            'id' => $pm->module_id,
+                            'name' => $pm->module_name,
+                            'description' => $pm->module_description,
+                            'definition' => $pm->module_definition,
+                            'objectives' => $pm->module_objectives,
+                            'pillar' => $pm->pillar_id ? [
+                                'id' => $pm->pillar_id,
+                                'name' => $pm->pillar_name,
+                            ] : null,
+                            'methodology' => [
+                                'id' => $pm->methodology_id,
+                                'name' => $pm->methodology_name,
+                            ],
+                            'user_score' => $userScore,
+                            'required_range' => [
+                                'min' => $pm->min_score,
+                                'max' => $pm->max_score,
+                            ],
+                        ];
+
+                        $stepsCount = DB::table('steps')
+                            ->where('program_id', $pm->program_id)
+                            ->count();
+                        $program->steps_count = $stepsCount;
+
+                        $qualifiedPrograms->push($program);
+                    }
+                }
+            }
+        }
+
+        // Apply status filter if provided
+        if (! empty($statuses)) {
+            $qualifiedPrograms = $qualifiedPrograms->filter(function ($program) use ($statuses, $userId) {
+                // Get the user's status for this program
+                $userProgram = DB::table('user_programs')
+                    ->where('user_id', $userId)
+                    ->where('program_id', $program->id)
+                    ->first();
+                
+                $programStatus = $userProgram ? $userProgram->status : 'not_started';
+                
+                return in_array($programStatus, $statuses);
+            });
+        }
+
+        return $qualifiedPrograms;
+    }
+
+    /**
+     * Get programs the user has interacted with.
+     */
+    public function getUserPrograms(int $userId, array $methodologyIds = [], array $moduleIds = [], array $statuses = []): Collection
+    {
+        // Get all user programs
+        $userProgramsQuery = DB::table('user_programs as up')
+            ->join('programs as p', 'p.id', '=', 'up.program_id')
+            ->where('up.user_id', $userId)
+            ->select([
+                'up.program_id',
+                'up.status as user_program_status',
+                'up.started_at',
+                'up.completed_at',
+                'p.name as program_name',
+                'p.description as program_description',
+                'p.definition as program_definition',
+                'p.objectives as program_objectives',
+                'p.created_at as program_created_at',
+                'p.updated_at as program_updated_at',
+            ]);
+
+        // Apply status filter
+        if (! empty($statuses)) {
+            $userProgramsQuery->whereIn('up.status', $statuses);
+        }
+
+        $userPrograms = $userProgramsQuery->get();
+        $result = collect();
+
+        foreach ($userPrograms as $up) {
+            // Get program-module combinations for this program
+            $programModulesQuery = DB::table('program_module as pm')
+                ->join('modules as m', 'm.id', '=', 'pm.module_id')
+                ->join('methodology as mth', 'mth.id', '=', 'pm.methodology_id')
+                ->leftJoin('pillars as pil', 'pil.id', '=', 'pm.pillar_id')
+                ->where('pm.program_id', $up->program_id)
+                ->select([
+                    'pm.module_id',
+                    'pm.methodology_id',
+                    'pm.pillar_id',
+                    'pm.min_score',
+                    'pm.max_score',
+                    'm.name as module_name',
+                    'm.description as module_description',
+                    'm.definition as module_definition',
+                    'm.objectives as module_objectives',
+                    'mth.name as methodology_name',
+                    'pil.name as pillar_name',
+                ]);
+
+            // Apply methodology and module filters
+            if (! empty($methodologyIds)) {
+                $programModulesQuery->whereIn('pm.methodology_id', $methodologyIds);
+            }
+            if (! empty($moduleIds)) {
+                $programModulesQuery->whereIn('pm.module_id', $moduleIds);
+            }
+
+            $programModules = $programModulesQuery->get();
+            $qualifyingModule = null;
+
+            // Find the first qualifying module
+            foreach ($programModules as $pm) {
+                $moduleResult = null;
+
+                if ($pm->pillar_id) {
+                    $moduleResult = $this->resultCalculationService->calculateModuleResult(
+                        $userId,
+                        $pm->module_id,
+                        $pm->methodology_id,
+                        $pm->pillar_id
+                    );
+                } else {
+                    $moduleResult = $this->resultCalculationService->calculateModuleResult(
+                        $userId,
+                        $pm->module_id,
+                        $pm->methodology_id,
+                        null
+                    );
+                }
+
+                if ($moduleResult && isset($moduleResult['percentage'])) {
+                    $userScore = $moduleResult['percentage'];
+
+                    if ($userScore >= $pm->min_score && $userScore <= $pm->max_score) {
+                        $qualifyingModule = [
+                            'id' => $pm->module_id,
+                            'name' => $pm->module_name,
+                            'description' => $pm->module_description,
+                            'definition' => $pm->module_definition,
+                            'objectives' => $pm->module_objectives,
+                            'pillar' => $pm->pillar_id ? [
+                                'id' => $pm->pillar_id,
+                                'name' => $pm->pillar_name,
+                            ] : null,
+                            'methodology' => [
+                                'id' => $pm->methodology_id,
+                                'name' => $pm->methodology_name,
+                            ],
+                            'user_score' => $userScore,
+                            'required_range' => [
+                                'min' => $pm->min_score,
+                                'max' => $pm->max_score,
+                            ],
+                        ];
+                        break; // Use first qualifying module
+                    }
+                }
+            }
+
+            // Only include if there's a qualifying module (or no filters applied)
+            if ($qualifyingModule || (empty($methodologyIds) && empty($moduleIds))) {
+                $program = new Program;
+                $program->id = $up->program_id;
+                $program->name = $up->program_name;
+                $program->description = $up->program_description;
+                $program->definition = $up->program_definition;
+                $program->objectives = $up->program_objectives;
+                $program->created_at = $up->program_created_at;
+                $program->updated_at = $up->program_updated_at;
+
+                // Add user program specific data
+                $program->user_program_status = $up->user_program_status;
+                $program->started_at = $up->started_at;
+                $program->completed_at = $up->completed_at;
+                $program->qualifying_module = $qualifyingModule;
+
+                // Add steps count for this program
+                $stepsCount = DB::table('steps')
+                    ->where('program_id', $up->program_id)
+                    ->count();
+                $program->steps_count = $stepsCount;
+
+                $result->push($program);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get unique methodologies and modules from suggested programs for filtering.
+     */
+    public function getSuggestedProgramsFilters(int $userId): array
+    {
+        // Get all program-module combinations for programs user is not enrolled in
+        $programModules = DB::table('program_module as pm')
+            ->join('methodology as mth', 'mth.id', '=', 'pm.methodology_id')
+            ->join('modules as m', 'm.id', '=', 'pm.module_id')
+            ->leftJoin('user_programs as up', function ($join) use ($userId) {
+                $join->on('up.program_id', '=', 'pm.program_id')
+                    ->where('up.user_id', '=', $userId);
+            })
+            // ->whereNull('up.id') // Exclude programs user is already enrolled in
+            ->select([
+                'pm.methodology_id',
+                'mth.name as methodology_name',
+                'pm.module_id',
+                'm.name as module_name',
+            ])
+            ->distinct()
+            ->get();
+
+        $methodologies = $programModules->groupBy('methodology_id')->map(function ($group) {
+            $first = $group->first();
+
+            return [
+                'id' => $first->methodology_id,
+                'name' => $first->methodology_name,
+            ];
+        })->values();
+
+        $modules = $programModules->groupBy('module_id')->map(function ($group) {
+            $first = $group->first();
+
+            return [
+                'id' => $first->module_id,
+                'name' => $first->module_name,
+            ];
+        })->values();
+
+        return [
+            'methodologies' => $methodologies->toArray(),
+            'modules' => $modules->toArray(),
+            'statuses' => ['not_started', "in_progress", "completed"] // Suggested programs are always not started
+        ];
+    }
+
+    /**
+     * Get unique methodologies and modules from user programs for filtering.
+     */
+    public function getUserProgramsFilters(int $userId): array
+    {
+        // Get all program-module combinations for user's programs
+        $programModules = DB::table('user_programs as up')
+            ->join('program_module as pm', 'pm.program_id', '=', 'up.program_id')
+            ->join('methodology as mth', 'mth.id', '=', 'pm.methodology_id')
+            ->join('modules as m', 'm.id', '=', 'pm.module_id')
+            ->where('up.user_id', $userId)
+            ->select([
+                'pm.methodology_id',
+                'mth.name as methodology_name',
+                'pm.module_id',
+                'm.name as module_name',
+            ])
+            ->distinct()
+            ->get();
+
+        $methodologies = $programModules->groupBy('methodology_id')->map(function ($group) {
+            $first = $group->first();
+
+            return [
+                'id' => $first->methodology_id,
+                'name' => $first->methodology_name,
+            ];
+        })->values();
+
+        $modules = $programModules->groupBy('module_id')->map(function ($group) {
+            $first = $group->first();
+
+            return [
+                'id' => $first->module_id,
+                'name' => $first->module_name,
+            ];
+        })->values();
+
+        return [
+            'methodologies' => $methodologies->toArray(),
+            'modules' => $modules->toArray(),
+            'statuses' => ['not_started', 'in_progress', 'completed'],
+        ];
+    }
+
+    public function completeProgram(int $userId, int $programId): array
+    {
+        try {
+            $userProgram = DB::table('user_programs')
+                ->where('user_id', $userId)
+                ->where('program_id', $programId)
+                ->first();
+
+            if (! $userProgram) {
+                return ['success' => false, 'error' => 'program_not_found'];
+            }
+
+            if ($userProgram->status === 'completed') {
+                return ['success' => false, 'error' => 'program_already_completed'];
+            }
+
+            DB::table('user_programs')
+                ->where('user_id', $userId)
+                ->where('program_id', $programId)
+                ->update([
+                    'status' => 'completed',
+                    'completed_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+            return ['success' => true];
+        } catch (\Exception) {
+            return ['success' => false, 'error' => 'exception'];
+        }
     }
 }

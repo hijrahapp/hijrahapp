@@ -66,7 +66,9 @@ Route::middleware('locale')->group(function () {
     Route::prefix('program')->middleware(['auth.jwt', 'auth.user'])->group(function () {
         // Program endpoints
         Route::get('suggested', [ProgramController::class, 'getSuggestedPrograms']);
+        Route::get('suggested/filters', [ProgramController::class, 'getSuggestedProgramsFilters']);
         Route::get('my', [ProgramController::class, 'getMyPrograms']);
+        Route::get('my/filters', [ProgramController::class, 'getMyProgramsFilters']);
         Route::get('{programId}', [ProgramController::class, 'get']);
 
         // Steps endpoints
@@ -86,6 +88,7 @@ Route::middleware('locale')->group(function () {
     Route::prefix('liability')->middleware(['auth.jwt', 'auth.user'])->group(function () {
         // Liability endpoints
         Route::get('my', [LiabilityController::class, 'getMyLiabilities']);
+        Route::get('my/filters', [LiabilityController::class, 'getMyLiabilitiesFilters']);
         Route::get('{liabilityId}', [LiabilityController::class, 'get']);
 
         // Todo progress endpoints

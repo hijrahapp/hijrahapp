@@ -170,4 +170,20 @@ class LiabilityController
             ], 500);
         }
     }
+
+    public function getMyLiabilitiesFilters(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->authUser;
+            $filters = $this->liabilityRepo->getUserLiabilitiesFilters($user->id);
+
+            return response()->json($filters);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.error_fetching_filters'),
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

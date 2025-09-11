@@ -170,4 +170,5 @@ return [
     'todos_not_completed' => 'All todos must be completed before finishing the liability',
     'liability_completed_successfully' => 'Liability completed successfully',
     'error_completing_liability' => 'Error completing liability',
+    'error_fetching_filters' => 'Error fetching filters',
 ];
