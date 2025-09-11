@@ -189,13 +189,16 @@ class StepRepository
         $progress->refresh();
 
         return [
-            'challenge_id' => $challengeId,
-            'is_completed' => $isCompleted,
-            'challenges_done' => $currentChallenges,
-            'challenges_done_count' => $challengesDoneCount,
-            'total_challenges' => $totalChallenges,
-            'percentage' => $percentage,
-            'status' => $stepStatus,
+            'success' => true,
+            'data' => [
+                'challenge_id' => $challengeId,
+                'is_completed' => $isCompleted,
+                'challenges_done' => $currentChallenges,
+                'challenges_done_count' => $challengesDoneCount,
+                'total_challenges' => $totalChallenges,
+                'percentage' => $percentage,
+                'status' => $stepStatus,
+            ],
         ];
     }
 
