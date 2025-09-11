@@ -21,8 +21,9 @@ class ProgramResource extends JsonResource
             'description' => $this->description,
             'definition' => $this->definition,
             'objectives' => $this->objectives,
+            'img_url' => $this->img_url,
             'steps_count' => $this->when(
-                isset($this->steps_count), 
+                isset($this->steps_count),
                 function () {
                     return $this->steps_count;
                 }
@@ -44,7 +45,7 @@ class ProgramResource extends JsonResource
 
         // Include modules if available from repository
         // if (isset($this->modules)) {
-            // $array['modules'] = $this->modules;
+        // $array['modules'] = $this->modules;
         // }
 
         // Include timestamps if available
@@ -59,11 +60,11 @@ class ProgramResource extends JsonResource
         if (isset($this->qualifying_module)) {
             $array['module_id'] = $this->qualifying_module['id'];
             $array['module_name'] = $this->qualifying_module['name'];
-            if($this->qualifying_module['pillar']) {
+            if ($this->qualifying_module['pillar']) {
                 $array['pillar_id'] = $this->qualifying_module['pillar']['id'];
                 $array['pillar_name'] = $this->qualifying_module['pillar']['name'];
             }
-            if($this->qualifying_module['methodology']) {
+            if ($this->qualifying_module['methodology']) {
                 $array['methodology_id'] = $this->qualifying_module['methodology']['id'];
                 $array['methodology_name'] = $this->qualifying_module['methodology']['name'];
             }

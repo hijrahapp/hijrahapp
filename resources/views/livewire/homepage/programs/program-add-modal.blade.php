@@ -52,6 +52,11 @@
                         <livewire:shared.components.rich-text :model="$objectives" wire:model="objectives" :placeholder="'Enter program objectives'" :editorId="'program_objectives_modal_editor'" :minHeight="'150px'" />
                         @error('objectives')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                     </div>
+
+                    <div class="mt-4">
+                        <livewire:shared.components.image-picker wire:model="img_url" :label="'Program Image'" :placeholder="'/assets/media/avatars/blank.png'" :required="false" />
+                        @error('img_url')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                    </div>
                 </div>
             </div>
 

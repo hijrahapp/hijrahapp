@@ -24,6 +24,7 @@ class ProgramDetailedResource extends JsonResource
             'description' => $this->description,
             'definition' => $this->definition,
             'objectives' => $this->objectives,
+            'img_url' => $this->img_url,
             'steps_count' => $this->stepsList->groupBy('type')->map->count(),
         ];
 

@@ -20,6 +20,8 @@ class ProgramManage extends Component
 
     public string $steps = '';
 
+    public string $img_url = '';
+
     // Dirty state flags per section
     public bool $isBasicDirty = false;
 
@@ -36,6 +38,7 @@ class ProgramManage extends Component
             'description' => 'required|string|min:3|max:500',
             'definition' => 'required|string|min:3',
             'steps' => 'nullable|string',
+            'img_url' => 'nullable|string',
         ];
     }
 
@@ -52,6 +55,7 @@ class ProgramManage extends Component
         $this->description = $program->description;
         $this->definition = $program->definition;
         $this->steps = $program->getRawOriginal('objectives') ?? '';
+        $this->img_url = $program->img_url ?? '';
     }
 
     public function saveBasicDetails()
@@ -66,6 +70,7 @@ class ProgramManage extends Component
                 'description' => $this->description,
                 'definition' => $this->definition,
                 'objectives' => $this->steps,
+                'img_url' => $this->img_url,
             ];
 
             $program = Program::findOrFail($this->programId);
@@ -101,7 +106,7 @@ class ProgramManage extends Component
     public function updated(string $property, mixed $value): void
     {
         // Basic information fields
-        if (in_array($property, ['name', 'description', 'definition', 'steps'], true)) {
+        if (in_array($property, ['name', 'description', 'definition', 'steps', 'img_url'], true)) {
             $this->isBasicDirty = true;
 
             return;

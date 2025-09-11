@@ -17,6 +17,7 @@ class Program extends Model
         'description',
         'definition',
         'objectives',
+        'img_url',
     ];
 
     protected $casts = [

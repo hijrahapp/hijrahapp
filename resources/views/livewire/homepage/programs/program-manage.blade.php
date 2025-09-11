@@ -47,6 +47,11 @@
                             <livewire:shared.components.rich-text :model="$steps" wire:model="steps" :placeholder="'Enter program steps'" :editorId="'program_steps_editor'" :minHeight="'150px'" />
                             @error('steps')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                         </div>
+
+                        <div class="mt-4">
+                            <livewire:shared.components.image-picker wire:model="img_url" :label="'Program Image'" :placeholder="'/assets/media/avatars/blank.png'" :required="false" />
+                            @error('img_url')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
+                        </div>
                     </div>
                     <div class="kt-card-footer flex items-center justify-end gap-2">
                         <button class="kt-btn kt-btn-primary disabled:opacity-50 disabled:cursor-not-allowed" wire:click="saveBasicDetails" :disabled="!dirty" wire:loading.attr="disabled" wire:target="saveBasicDetails">Save</button>

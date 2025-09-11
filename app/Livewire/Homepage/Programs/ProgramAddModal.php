@@ -15,6 +15,8 @@ class ProgramAddModal extends Component
 
     public string $objectives = '';
 
+    public string $img_url = '';
+
     public string $error = '';
 
     public bool $isEditMode = false;
@@ -28,6 +30,7 @@ class ProgramAddModal extends Component
             'description' => 'required|string|min:3|max:200',
             'definition' => 'required|string|min:3',
             'objectives' => 'nullable|string',
+            'img_url' => 'nullable|string',
         ];
     }
 
@@ -42,6 +45,7 @@ class ProgramAddModal extends Component
         $this->description = '';
         $this->definition = '';
         $this->objectives = '';
+        $this->img_url = '';
         $this->error = '';
         $this->isEditMode = false;
         $this->programId = null;
@@ -57,6 +61,7 @@ class ProgramAddModal extends Component
             $this->description = $program->description;
             $this->definition = $program->definition;
             $this->objectives = $program->objectives;
+            $this->img_url = $program->img_url ?? '';
             $this->isEditMode = true;
         }
     }
@@ -71,6 +76,7 @@ class ProgramAddModal extends Component
                 'description' => $this->description,
                 'definition' => $this->definition,
                 'objectives' => $this->objectives,
+                'img_url' => $this->img_url,
             ];
 
             if ($this->isEditMode && $this->programId) {
