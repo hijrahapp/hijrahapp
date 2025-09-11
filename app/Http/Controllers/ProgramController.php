@@ -20,7 +20,7 @@ class ProgramController
             // Get filter parameters
             $methodologyIds = $request->input('methodologyIds', []);
             $moduleIds = $request->input('moduleIds', []);
-            $status = $request->input('status');
+            $status = $request->input('status', []);
 
             // Ensure array inputs
             if (is_string($methodologyIds)) {
@@ -29,12 +29,15 @@ class ProgramController
             if (is_string($moduleIds)) {
                 $moduleIds = explode(',', $moduleIds);
             }
+            if (is_string($status)) {
+                $status = explode(',', $status);
+            }
 
             $programs = $this->programRepo->getSuggestedPrograms(
                 $user->id,
                 array_filter($methodologyIds),
                 array_filter($moduleIds),
-                $status
+                array_filter($status)
             );
 
             return response()->json(ProgramResource::collection($programs));
@@ -55,7 +58,7 @@ class ProgramController
             // Get filter parameters
             $methodologyIds = $request->input('methodologyIds', []);
             $moduleIds = $request->input('moduleIds', []);
-            $status = $request->input('status');
+            $status = $request->input('status', []);
 
             // Ensure array inputs
             if (is_string($methodologyIds)) {
@@ -64,12 +67,15 @@ class ProgramController
             if (is_string($moduleIds)) {
                 $moduleIds = explode(',', $moduleIds);
             }
+            if (is_string($status)) {
+                $status = explode(',', $status);
+            }
 
             $programs = $this->programRepo->getUserPrograms(
                 $user->id,
                 array_filter($methodologyIds),
                 array_filter($moduleIds),
-                $status
+                array_filter($status)
             );
 
             return response()->json(ProgramResource::collection($programs));

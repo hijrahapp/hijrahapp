@@ -22,7 +22,7 @@ class LiabilityRepository
     /**
      * Get liabilities that the user is eligible for based on their completed modules.
      */
-    public function getUserLiabilities(int $userId, array $methodologyIds = [], array $moduleIds = [], ?string $status = null): Collection
+    public function getUserLiabilities(int $userId, array $methodologyIds = [], array $moduleIds = [], array $status = []): Collection
     {
         // Get all user's completed modules with their methodology and pillar contexts
         $userModuleQuery = DB::table('user_context_statuses as ucs')
@@ -82,7 +82,7 @@ class LiabilityRepository
         $uniqueLiabilities = $eligibleLiabilities->unique('id');
 
         // Apply status filter if provided
-        if ($status && $uniqueLiabilities->isNotEmpty()) {
+        if (! empty($status) && $uniqueLiabilities->isNotEmpty()) {
             $liabilityIds = $uniqueLiabilities->pluck('id')->toArray();
 
             // Get user progress for these liabilities
@@ -94,16 +94,14 @@ class LiabilityRepository
                 $isCompleted = $userProgress->get($liability->id, false);
                 $hasProgress = $userProgress->has($liability->id);
 
-                switch ($status) {
-                    case 'completed':
-                        return $isCompleted;
-                    case 'in_progress':
-                        return $hasProgress && ! $isCompleted;
-                    case 'not_started':
-                        return ! $hasProgress;
-                    default:
-                        return true;
+                $liabilityStatus = 'not_started';
+                if ($isCompleted) {
+                    $liabilityStatus = 'completed';
+                } elseif ($hasProgress) {
+                    $liabilityStatus = 'in_progress';
                 }
+
+                return in_array($liabilityStatus, $status);
             });
         }
 

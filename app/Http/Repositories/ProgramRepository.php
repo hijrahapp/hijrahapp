@@ -26,7 +26,7 @@ class ProgramRepository
     /**
      * Get suggested programs that the user is eligible for based on their module scores.
      */
-    public function getSuggestedPrograms(int $userId, array $methodologyIds = [], array $moduleIds = [], ?string $status = null): Collection
+    public function getSuggestedPrograms(int $userId, array $methodologyIds = [], array $moduleIds = [], array $status = []): Collection
     {
         // Get all user's completed modules with their methodology and pillar contexts
         $userModuleQuery = DB::table('user_context_statuses as ucs')
@@ -136,7 +136,7 @@ class ProgramRepository
         });
 
         // Apply status filter if provided
-        if ($status && $programs->isNotEmpty()) {
+        if (! empty($status) && $programs->isNotEmpty()) {
             // Get user's program statuses
             $programIds = $programs->pluck('id')->toArray();
             $userPrograms = DB::table('user_programs')
@@ -147,7 +147,7 @@ class ProgramRepository
             $programs = $programs->filter(function ($program) use ($status, $userPrograms) {
                 $programStatus = $userPrograms->get($program->id, 'not_started');
 
-                return $programStatus === $status;
+                return in_array($programStatus, $status);
             });
         }
 
@@ -172,15 +172,15 @@ class ProgramRepository
     /**
      * Get programs the user has interacted with.
      */
-    public function getUserPrograms(int $userId, array $methodologyIds = [], array $moduleIds = [], ?string $status = null): Collection
+    public function getUserPrograms(int $userId, array $methodologyIds = [], array $moduleIds = [], array $status = []): Collection
     {
         $query = Program::query()
             ->join('user_programs', 'programs.id', '=', 'user_programs.program_id')
             ->where('user_programs.user_id', $userId);
 
         // Apply status filter
-        if ($status) {
-            $query->where('user_programs.status', $status);
+        if (! empty($status)) {
+            $query->whereIn('user_programs.status', $status);
         }
 
         // Apply methodology and module filters by checking program requirements

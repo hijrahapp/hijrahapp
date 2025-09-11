@@ -24,7 +24,7 @@ class LiabilityController
             // Get filter parameters
             $methodologyIds = $request->input('methodologyIds', []);
             $moduleIds = $request->input('moduleIds', []);
-            $status = $request->input('status');
+            $status = $request->input('status', []);
 
             // Ensure array inputs
             if (is_string($methodologyIds)) {
@@ -33,12 +33,15 @@ class LiabilityController
             if (is_string($moduleIds)) {
                 $moduleIds = explode(',', $moduleIds);
             }
+            if (is_string($status)) {
+                $status = explode(',', $status);
+            }
 
             $liabilities = $this->liabilityRepo->getUserLiabilities(
                 $user->id,
                 array_filter($methodologyIds),
                 array_filter($moduleIds),
-                $status
+                array_filter($status)
             );
 
             return response()->json(LiabilityResource::collection($liabilities));
