@@ -165,4 +165,22 @@ class User extends Model
     {
         return $this->programFeedback()->where('program_id', $programId)->first();
     }
+
+    /**
+     * User's liability progress records.
+     */
+    public function liabilityProgress(): HasMany
+    {
+        return $this->hasMany(UserLiabilityProgress::class);
+    }
+
+    /**
+     * Liabilities the user has interacted with.
+     */
+    public function liabilities(): BelongsToMany
+    {
+        return $this->belongsToMany(Liability::class, 'user_liability_progress')
+            ->withPivot('completed_todos', 'is_completed')
+            ->withTimestamps();
+    }
 }

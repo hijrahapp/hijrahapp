@@ -110,16 +110,6 @@ class LiabilityRepository
     }
 
     /**
-     * Get user's liability progress.
-     */
-    public function getUserLiabilityProgress(int $userId, int $liabilityId): ?UserLiabilityProgress
-    {
-        return UserLiabilityProgress::where('user_id', $userId)
-            ->where('liability_id', $liabilityId)
-            ->first();
-    }
-
-    /**
      * Update todo completion status for a user's liability.
      */
     public function updateTodoCompletion(int $userId, int $liabilityId, int $todoId, bool $isCompleted): bool
@@ -140,6 +130,16 @@ class LiabilityRepository
             }
 
             $progress->save();
+
+            // Check if all todos are completed and update liability status
+            if ($progress->areAllTodosCompleted()) {
+                $progress->is_completed = true;
+                $progress->save();
+            } else {
+                // If not all todos are completed, ensure is_completed is false
+                $progress->is_completed = false;
+                $progress->save();
+            }
 
             return true;
         } catch (\Exception $e) {
@@ -180,12 +180,37 @@ class LiabilityRepository
 
     /**
      * Get liability with detailed information for a specific user.
+     * Automatically creates or updates user progress to "in_progress" when accessed.
      */
     public function getLiabilityWithUserProgress(int $liabilityId, int $userId): ?Liability
     {
         $liability = Liability::with(['userProgress' => function ($query) use ($userId) {
             $query->where('user_id', $userId);
         }])->find($liabilityId);
+
+        if (! $liability) {
+            return null;
+        }
+
+        // Create or update user progress to "in_progress" when liability is accessed
+        $progress = UserLiabilityProgress::firstOrCreate([
+            'user_id' => $userId,
+            'liability_id' => $liabilityId,
+        ], [
+            'completed_todos' => [],
+            'is_completed' => false,
+        ]);
+
+        // If the liability is not completed and user is accessing it, ensure it's marked as in_progress
+        if (! $progress->is_completed) {
+            // The progress record already exists with is_completed = false, which means it's in_progress
+            // We don't need to update anything here as the status is already correct
+        }
+
+        // Reload the liability with the updated progress
+        $liability->load(['userProgress' => function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        }]);
 
         return $liability;
     }

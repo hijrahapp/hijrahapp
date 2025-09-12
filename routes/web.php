@@ -8,6 +8,8 @@ use App\Livewire\Auth\ResetPasswordEnterEmail;
 use App\Livewire\Homepage\Index as HomepageIndex;
 use App\Livewire\Homepage\Liabilities\Liabilities;
 use App\Livewire\Homepage\Liabilities\LiabilityManage;
+use App\Livewire\Homepage\Liabilities\Users\LiabilityUserDetails;
+use App\Livewire\Homepage\Liabilities\Users\LiabilityUserList;
 use App\Livewire\Homepage\Methodologies\Methodologies;
 use App\Livewire\Homepage\Methodologies\MethodologyManage;
 use App\Livewire\Homepage\Methodologies\MethodologyQuestions\MethodologyQuestions;
@@ -67,3 +69,7 @@ Route::prefix('app')->get('/program/{program}/user/{user}', ProgramUserDetails::
 
 Route::prefix('app')->get('/liabilities', Liabilities::class)->name('liabilities');
 Route::prefix('app')->get('/liability/{liabilityId}', LiabilityManage::class)->name('liability.manage');
+
+// User Answers Per Liability
+Route::prefix('app')->get('/liability/{liability}/users', LiabilityUserList::class)->name('liability.users');
+Route::prefix('app')->get('/liability/{liability}/user/{user}', LiabilityUserDetails::class)->name('liability.user.details');

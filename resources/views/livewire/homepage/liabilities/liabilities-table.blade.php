@@ -52,8 +52,20 @@
                                                         Manage
                                                     </a>
                                                 </li>
+
+                                                <li class="kt-dropdown-menu-separator"></li>
+
                                                 <li>
-                                                    <a class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" onclick="confirmDelete('{{ $liability->id }}', '{{ addslashes($liability->name) }}')">
+                                                    <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="viewUsers({{ $liability->id }})">
+                                                        <i class="ki-filled ki-users"></i>
+                                                        View Users
+                                                    </a>
+                                                </li>
+
+                                                <li class="kt-dropdown-menu-separator"></li>
+
+                                                <li>
+                                                    <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" onclick="confirmDelete('{{ $liability->id }}', '{{ addslashes($liability->name) }}')">
                                                         <i class="ki-filled ki-trash"></i>
                                                         Delete
                                                     </a>

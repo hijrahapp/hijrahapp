@@ -41,6 +41,11 @@ class LiabilitiesTable extends Component
         return redirect()->route('liability.manage', ['liabilityId' => $liabilityId]);
     }
 
+    public function viewUsers($liabilityId)
+    {
+        return redirect()->route('liability.users', ['liability' => $liabilityId]);
+    }
+
     public function deleteLiability($liabilityId)
     {
         try {
