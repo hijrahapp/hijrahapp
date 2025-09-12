@@ -38,6 +38,9 @@ class StepController
 
             // Load user progress if user is authenticated
             if ($user) {
+                // Start the step if not already started
+                $this->stepRepo->startStep($user->id, $programId, $stepId);
+
                 $step->load(['userProgress' => function ($query) use ($user) {
                     $query->where('user_id', $user->id);
                 }]);
@@ -45,7 +48,7 @@ class StepController
                 // Load user answers for quiz-type steps
                 if ($step->type === 'quiz') {
                     $userAnswers = \App\Models\UserAnswer::where('user_id', $user->id)
-                        ->where('context_type', 'module')
+                        ->where('context_type', 'step')
                         ->where('context_id', $step->id)
                         ->with(['question', 'answer'])
                         ->get()

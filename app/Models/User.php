@@ -87,6 +87,14 @@ class User extends Model
     }
 
     /**
+     * User programs relationship (pivot table access).
+     */
+    public function userPrograms(): HasMany
+    {
+        return $this->hasMany(UserProgram::class);
+    }
+
+    /**
      * Programs the user is currently working on.
      */
     public function programsInProgress(): BelongsToMany

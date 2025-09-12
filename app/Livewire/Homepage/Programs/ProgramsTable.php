@@ -42,6 +42,11 @@ class ProgramsTable extends Component
         return redirect()->route('program.manage', ['programId' => $programId]);
     }
 
+    public function viewUsers($programId)
+    {
+        return redirect()->route('program.users', ['program' => $programId]);
+    }
+
     public function deleteProgram($programId)
     {
         try {

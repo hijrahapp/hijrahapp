@@ -52,7 +52,7 @@ class StepRepository
     {
         $step = Step::find($stepId);
         if (! $step || $step->program_id !== $programId) {
-            return ['success' => false, 'message' => 'Step not found'];
+            return ['success' => false, 'message' => __('messages.step_not_found')];
         }
 
         $progress = $step->getOrCreateProgressForUser($userId, $programId);
@@ -62,15 +62,25 @@ class StepRepository
             return $this->completeQuizStep($step, $progress, $userId, $data);
         }
 
+        // Handle challenge completion validation
+        if ($step->type === 'challenge') {
+            return $this->completeChallengeStep($step, $progress, $userId, $data);
+        }
+
         // Prepare completion data based on step type
         $completionData = $this->prepareCompletionData($step, $data);
 
         // Mark as completed
         $success = $progress->markAsCompleted($completionData);
 
+        // Update program status based on step progress
+        if ($success) {
+            $this->updateProgramStatus($userId, $programId);
+        }
+
         return [
             'success' => $success,
-            'message' => $success ? 'Step completed successfully' : 'Failed to complete step',
+            'message' => $success ? __('messages.step_completed_successfully') : __('messages.error_completing_step'),
         ];
     }
 
@@ -92,7 +102,14 @@ class StepRepository
         }
 
         // Mark as started
-        return $progress->markAsStarted();
+        $success = $progress->markAsStarted();
+
+        // Update program status based on step progress
+        if ($success) {
+            $this->updateProgramStatus($userId, $programId);
+        }
+
+        return $success;
     }
 
     /**
@@ -102,11 +119,11 @@ class StepRepository
     {
         $step = Step::find($stepId);
         if (! $step || $step->program_id !== $programId) {
-            return ['success' => false, 'message' => 'Step not found'];
+            return ['success' => false, 'message' => __('messages.step_not_found')];
         }
 
         if ($step->type !== 'challenge') {
-            return ['success' => false, 'message' => 'Invalid step type for challenge progress'];
+            return ['success' => false, 'message' => __('messages.invalid_step_type_for_challenge_progress')];
         }
 
         // Get total challenges count from the challenges JSON field
@@ -114,12 +131,12 @@ class StepRepository
         $totalChallenges = is_array($challenges) ? count($challenges) : 0;
 
         if ($totalChallenges === 0) {
-            return ['success' => false, 'message' => 'No challenges found for this step'];
+            return ['success' => false, 'message' => __('messages.no_challenges_found_for_step')];
         }
 
         // Validate challenge ID is within the valid range
         if ($challengeId < 1 || $challengeId > $totalChallenges) {
-            return ['success' => false, 'message' => 'Invalid challenge ID'];
+            return ['success' => false, 'message' => __('messages.invalid_challenge_id')];
         }
 
         // Get or create user progress
@@ -156,14 +173,13 @@ class StepRepository
         $challengesDoneCount = count($currentChallenges);
         $percentage = min(100, round(($challengesDoneCount / $totalChallenges) * 100, 2));
 
-        // Determine step status
-        $stepStatus = $progress->status ?? 'not_started';
-        if ($challengesDoneCount === 0) {
-            $stepStatus = 'not_started';
-        } elseif ($challengesDoneCount === $totalChallenges) {
+        // Determine step status based on challenge completion
+        // - If no challenges completed: not_started
+        // - If all challenges completed: completed
+        // - If at least one but not all completed: in_progress
+        $stepStatus = "in_progress";
+        if ($challengesDoneCount === $totalChallenges) {
             $stepStatus = 'completed';
-        } else {
-            $stepStatus = 'in_progress';
         }
 
         // Update progress with new status
@@ -173,11 +189,12 @@ class StepRepository
             'status' => $stepStatus,
         ];
 
-        // Set timestamps based on status
-        if ($stepStatus === 'in_progress' && $progress->isNotStarted()) {
-            $updateData['started_at'] = now();
-        } elseif ($stepStatus === 'completed') {
+        // Set timestamps based on status changes
+        if ($stepStatus === 'completed') {
+            // Just completed the step
             $updateData['completed_at'] = now();
+        } else {
+            $updateData['completed_at'] = null;
         }
 
         // Direct database update to bypass model casting issues
@@ -187,6 +204,9 @@ class StepRepository
 
         // Refresh the progress model to get updated data
         $progress->refresh();
+
+        // Update program status based on step progress
+        $this->updateProgramStatus($userId, $programId);
 
         return [
             'success' => true,
@@ -213,7 +233,7 @@ class StepRepository
         }]);
 
         if ($step->questions->isEmpty()) {
-            return ['success' => false, 'message' => 'No questions found for this quiz step'];
+            return ['success' => false, 'message' => __('messages.no_questions_found_for_quiz_step')];
         }
 
         $userAnswers = $data['answers'] ?? [];
@@ -222,7 +242,7 @@ class StepRepository
 
         // Validate that all questions are answered
         if (count($userAnswers) !== $totalQuestions) {
-            return ['success' => false, 'message' => 'All questions must be answered'];
+            return ['success' => false, 'message' => __('messages.all_questions_must_be_answered')];
         }
 
         // Create a map of question_id => correct_answer_id for quick lookup
@@ -236,7 +256,7 @@ class StepRepository
 
             // Validate question exists in this step
             if (! isset($correctAnswersMap[$questionId])) {
-                return ['success' => false, 'message' => 'Invalid question for this step'];
+                return ['success' => false, 'message' => __('messages.invalid_question_for_step')];
             }
 
             // Check if answer is correct
@@ -247,7 +267,7 @@ class StepRepository
 
             $validatedAnswers[] = [
                 'user_id' => $userId,
-                'context_type' => 'module',
+                'context_type' => 'step',
                 'context_id' => $step->id,
                 'question_id' => $questionId,
                 'answer_id' => $answerId,
@@ -258,7 +278,7 @@ class StepRepository
         DB::transaction(function () use ($validatedAnswers, $userId, $step) {
             // Delete existing answers for this step
             \App\Models\UserAnswer::where('user_id', $userId)
-                ->where('context_type', 'module')
+                ->where('context_type', 'step')
                 ->where('context_id', $step->id)
                 ->delete();
 
@@ -277,15 +297,145 @@ class StepRepository
         ]);
 
         if (! $success) {
-            return ['success' => false, 'message' => 'Failed to save quiz results'];
+            return ['success' => false, 'message' => __('messages.failed_to_save_quiz_results')];
+        }
+
+        // Update program status based on step progress
+        $this->updateProgramStatus($userId, $step->program_id);
+
+        return [
+            'success' => true,
+            'data' => [
+                'score' => $score,
+                'total_questions' => $totalQuestions,
+                'correct_answers' => $correctAnswers,
+                'percentage' => $percentage,
+            ],
+        ];
+    }
+
+    /**
+     * Complete a challenge step with validation
+     */
+    private function completeChallengeStep(Step $step, UserStepProgress $progress, int $userId, array $data): array
+    {
+        // Get total challenges count from the challenges JSON field
+        $challenges = $step->challenges ?? [];
+        $totalChallenges = is_array($challenges) ? count($challenges) : 0;
+
+        if ($totalChallenges === 0) {
+            return [
+                'success' => false,
+                'message' => __('messages.no_challenges_found_for_step'),
+            ];
+        }
+
+        // Get current completed challenges - use workaround for caching issue
+        $currentChallenges = [];
+        $rawChallenges = $progress->getRawOriginal('challenges_done');
+        if (is_string($rawChallenges)) {
+            $decoded = json_decode($rawChallenges, true);
+            $currentChallenges = is_array($decoded) ? $decoded : [];
+        } elseif (is_array($rawChallenges)) {
+            $currentChallenges = $rawChallenges;
+        }
+
+        $completedChallengesCount = count($currentChallenges);
+
+        // Validate that all challenges are completed
+        if ($completedChallengesCount < $totalChallenges) {
+            $remainingChallenges = $totalChallenges - $completedChallengesCount;
+
+            return [
+                'success' => false,
+                'message' => __('messages.cannot_complete_step_challenges_remaining', ['remaining' => $remainingChallenges]),
+                'data' => [
+                    'completed_challenges' => $completedChallengesCount,
+                    'total_challenges' => $totalChallenges,
+                    'remaining_challenges' => $remainingChallenges,
+                    'challenges_done' => $currentChallenges,
+                ],
+            ];
+        }
+
+        // All challenges are completed, proceed with step completion
+        $completionData = [
+            'challenges_done' => json_encode($currentChallenges),
+            'percentage' => 100.00,
+        ];
+
+        // Mark as completed
+        $success = $progress->markAsCompleted($completionData);
+
+        // Update program status based on step progress
+        if ($success) {
+            $this->updateProgramStatus($userId, $step->program_id);
         }
 
         return [
-            'score' => $score,
-            'total_questions' => $totalQuestions,
-            'correct_answers' => $correctAnswers,
-            'percentage' => $percentage,
+            'success' => $success,
+            'message' => $success ? __('messages.challenge_step_completed_successfully') : __('messages.failed_to_complete_challenge_step'),
+            'data' => [
+                'completed_challenges' => $completedChallengesCount,
+                'total_challenges' => $totalChallenges,
+                'challenges_done' => $currentChallenges,
+                'percentage' => 100.00,
+            ],
         ];
+    }
+
+    /**
+     * Update program status based on step progress
+     */
+    private function updateProgramStatus(int $userId, int $programId): void
+    {
+        // Get all steps for this program
+        $totalSteps = Step::where('program_id', $programId)->count();
+
+        if ($totalSteps === 0) {
+            return;
+        }
+
+        // Get all step progress for this user and program
+        $stepProgresses = UserStepProgress::where('user_id', $userId)
+            ->where('program_id', $programId)
+            ->get();
+
+        // Count completed steps
+        $completedSteps = $stepProgresses->where('status', 'completed')->count();
+
+        $programStatus = "in_progress";
+        if ($completedSteps > 0 && $completedSteps === $totalSteps) {
+                $programStatus = 'completed';
+        }
+
+        // Update or create user program record
+        $userProgram = \App\Models\UserProgram::where('user_id', $userId)
+            ->where('program_id', $programId)
+            ->first();
+
+        if (! $userProgram) {
+            // Create new user program record
+            \App\Models\UserProgram::create([
+                'user_id' => $userId,
+                'program_id' => $programId,
+                'status' => $programStatus,
+                'started_at' => $programStatus !== 'not_started' ? now() : null,
+                'completed_at' => $programStatus === 'completed' ? now() : null,
+            ]);
+        } else {
+            // Update existing user program record
+            $updateData = ['status' => $programStatus];
+
+            // Set timestamps based on status changes
+            if ($programStatus === 'completed') {
+                $updateData['completed_at'] = now();
+            } else {
+                $updateData['completed_at'] = null;
+            }
+
+            $userProgram->update($updateData);
+        }
     }
 
     /**

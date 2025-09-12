@@ -177,4 +177,16 @@ return [
     'liability_completed_successfully' => 'Liability completed successfully',
     'error_completing_liability' => 'Error completing liability',
     'error_fetching_filters' => 'Error fetching filters',
+
+    // Step Repository Messages
+    'invalid_step_type_for_challenge_progress' => 'Invalid step type for challenge progress',
+    'no_challenges_found_for_step' => 'No challenges found for this step',
+    'invalid_challenge_id' => 'Invalid challenge ID',
+    'no_questions_found_for_quiz_step' => 'No questions found for this quiz step',
+    'all_questions_must_be_answered' => 'All questions must be answered',
+    'invalid_question_for_step' => 'Invalid question for this step',
+    'failed_to_save_quiz_results' => 'Failed to save quiz results',
+    'cannot_complete_step_challenges_remaining' => 'Cannot complete step. :remaining challenge(s) remaining to be completed.',
+    'challenge_step_completed_successfully' => 'Challenge step completed successfully',
+    'failed_to_complete_challenge_step' => 'Failed to complete challenge step',
 ];

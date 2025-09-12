@@ -52,6 +52,18 @@
                                                         Manage
                                                     </a>
                                                 </li>
+
+                                                <li class="kt-dropdown-menu-separator"></li>
+
+                                                <li>
+                                                    <a href="#" class="kt-dropdown-menu-link" data-kt-dropdown-dismiss="true" wire:click="viewUsers({{ $program->id }})">
+                                                        <i class="ki-filled ki-users"></i>
+                                                        View Users
+                                                    </a>
+                                                </li>
+
+                                                <li class="kt-dropdown-menu-separator"></li>
+
                                                 <li>
                                                     <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="confirmDelete('{{ $program->id }}', 'deleteProgram')">
                                                         <i class="ki-filled ki-trash"></i>

@@ -17,6 +17,8 @@ use App\Livewire\Homepage\Modules\Modules;
 use App\Livewire\Homepage\Pillars\Pillars;
 use App\Livewire\Homepage\Programs\ProgramManage;
 use App\Livewire\Homepage\Programs\Programs;
+use App\Livewire\Homepage\Programs\Users\ProgramUserDetails;
+use App\Livewire\Homepage\Programs\Users\ProgramUserList;
 use App\Livewire\Homepage\Questions\Questions;
 use App\Livewire\Homepage\Tags\Tags;
 use App\Livewire\Homepage\Users\Admins\Admins;
@@ -58,6 +60,10 @@ Route::prefix('app')->get('/tags', Tags::class)->name('tags');
 
 Route::prefix('app')->get('/programs', Programs::class)->name('programs');
 Route::prefix('app')->get('/program/{programId}', ProgramManage::class)->name('program.manage');
+
+// User Answers Per Program
+Route::prefix('app')->get('/program/{program}/users', ProgramUserList::class)->name('program.users');
+Route::prefix('app')->get('/program/{program}/user/{user}', ProgramUserDetails::class)->name('program.user.answers');
 
 Route::prefix('app')->get('/liabilities', Liabilities::class)->name('liabilities');
 Route::prefix('app')->get('/liability/{liabilityId}', LiabilityManage::class)->name('liability.manage');

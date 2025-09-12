@@ -177,4 +177,16 @@ return [
     'liability_completed_successfully' => 'تم إكمال الالتزام بنجاح',
     'error_completing_liability' => 'خطأ في إكمال الالتزام',
     'error_fetching_filters' => 'خطأ في جلب المرشحات',
+
+    // رسائل مستودع الخطوات
+    'invalid_step_type_for_challenge_progress' => 'نوع خطوة غير صالح لتقدم التحدي',
+    'no_challenges_found_for_step' => 'لم يتم العثور على تحديات لهذه الخطوة',
+    'invalid_challenge_id' => 'معرف التحدي غير صالح',
+    'no_questions_found_for_quiz_step' => 'لم يتم العثور على أسئلة لهذه الخطوة',
+    'all_questions_must_be_answered' => 'يجب الإجابة على جميع الأسئلة',
+    'invalid_question_for_step' => 'سؤال غير صالح لهذه الخطوة',
+    'failed_to_save_quiz_results' => 'فشل في حفظ نتائج الاختبار',
+    'cannot_complete_step_challenges_remaining' => 'لا يمكن إكمال الخطوة. :remaining تحدي(ات) متبقي(ة) للإكمال.',
+    'challenge_step_completed_successfully' => 'تم إكمال خطوة التحدي بنجاح',
+    'failed_to_complete_challenge_step' => 'فشل في إكمال خطوة التحدي',
 ];
