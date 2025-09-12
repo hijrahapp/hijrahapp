@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Homepage\Programs\Users;
 
+use App\Models\FeedbackForm;
 use App\Models\Program;
+use App\Models\ProgramFeedback;
 use App\Models\Step;
 use App\Models\User;
 use App\Models\UserStepProgress;
@@ -57,6 +59,28 @@ class ProgramUserDetails extends Component
         return $this->user->userPrograms()
             ->where('program_id', $this->program->id)
             ->first();
+    }
+
+    #[Computed]
+    public function userFeedback()
+    {
+        return ProgramFeedback::where('user_id', $this->user->id)
+            ->where('program_id', $this->program->id)
+            ->latest('submitted_at')
+            ->first();
+    }
+
+    #[Computed]
+    public function feedbackForm()
+    {
+        $feedback = $this->userFeedback;
+
+        if (! $feedback) {
+            return null;
+        }
+
+        return FeedbackForm::getByVersion($feedback->form_version, 'ar')
+            ?? FeedbackForm::getByVersion($feedback->form_version, 'en');
     }
 
     #[Computed]
@@ -258,6 +282,40 @@ class ProgramUserDetails extends Component
             'challenge' => 'Challenge',
             default => ucfirst($type),
         };
+    }
+
+    public function getFeedbackResponseDisplay(array $question, mixed $response): string
+    {
+        if ($response === null) {
+            return 'No response provided';
+        }
+
+        switch ($question['type']) {
+            case 'rating':
+                return $response.' / '.$question['max_value'];
+
+            case 'single_choice':
+                $option = collect($question['options'])->firstWhere('value', $response);
+
+                return $option['label'] ?? $response;
+
+            case 'multiple_choice':
+                if (! is_array($response)) {
+                    return 'Invalid response format';
+                }
+                $labels = collect($question['options'])
+                    ->whereIn('value', $response)
+                    ->pluck('label')
+                    ->toArray();
+
+                return implode(', ', $labels);
+
+            case 'text':
+                return $response;
+
+            default:
+                return (string) $response;
+        }
     }
 
     public function render()
