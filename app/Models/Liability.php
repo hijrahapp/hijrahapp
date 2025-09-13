@@ -18,12 +18,14 @@ class Liability extends Model
         'title',
         'header',
         'todos',
+        'active',
     ];
 
     protected function casts(): array
     {
         return [
             'todos' => 'array',
+            'active' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

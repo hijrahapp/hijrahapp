@@ -7,6 +7,16 @@
                     <i class="ki-filled ki-magnifier"></i>
                     <input type="text" class="kt-input" placeholder="Search Programs" wire:model.live="search" />
                 </div>
+                <div class="relative">
+                    <div class="kt-input">
+                        <i class="ki-filled ki-filter"></i>
+                        <select wire:model.live="statusFilter">
+                            <option value=''>All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
                 <button class="kt-btn kt-btn-outline flex items-center justify-center" data-kt-modal-toggle="#program_add_modal" title="Add Program">
                     <i class="ki-filled ki-plus"></i>
                 </button>
@@ -21,6 +31,7 @@
                             <th class="">Name</th>
                             <th class="">Description</th>
                             <th class="text-center">Steps Count</th>
+                            <th class="text-center">Status</th>
                             <th class="w-20 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -38,6 +49,17 @@
                                 </td>
                                 <td class="text-center">
                                     <span class="kt-badge kt-badge-light-primary">{{ $program->stepsList->count() }}</span>
+                                </td>
+                                <td class="text-center">
+                                    @if($program->active)
+                                        <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" x-on:click="$wire.call('openProgramStatusModal', {{ Js::from(['id' => $program->id, 'active' => false]) }})" title="Deactivate Program">
+                                            Deactivate
+                                        </button>
+                                    @else
+                                        <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-primary" x-on:click="$wire.call('openProgramStatusModal', {{ Js::from(['id' => $program->id, 'active' => true]) }})" title="Activate Program">
+                                            Activate
+                                        </button>
+                                    @endif
                                 </td>
                                 <td class="text-center" wire:ignore>
                                     <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">
@@ -65,7 +87,7 @@
                                                 <li class="kt-dropdown-menu-separator"></li>
 
                                                 <li>
-                                                    <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="confirmDelete('{{ $program->id }}', 'deleteProgram')">
+                                                    <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="openDeleteProgramModal('{{ $program->id }}')">
                                                         <i class="ki-filled ki-trash"></i>
                                                         Delete
                                                     </a>
@@ -77,7 +99,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-4">No programs found</td>
+                                <td colspan="6" class="text-center py-4">No programs found</td>
                             </tr>
                         @endforelse
                     </tbody>

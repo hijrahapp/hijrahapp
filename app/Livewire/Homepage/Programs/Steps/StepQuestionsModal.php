@@ -50,11 +50,7 @@ class StepQuestionsModal extends Component
         $this->step = Step::find($stepId);
 
         if (! $this->step) {
-            $this->dispatch('showAlert', [
-                'type' => 'error',
-                'title' => 'Error!',
-                'message' => 'Step not found.',
-            ]);
+            $this->dispatch('show-toast', type: 'error', message: 'Step not found.');
 
             return;
         }
@@ -110,11 +106,7 @@ class StepQuestionsModal extends Component
         $question = Question::find($questionId);
         $typeEnum = $question?->type;
         if ($typeEnum instanceof QuestionType && $typeEnum === QuestionType::MCQMultiple) {
-            $this->dispatch('showAlert', [
-                'type' => 'error',
-                'title' => 'Error!',
-                'message' => 'Multiple Select questions are not allowed for quiz steps.',
-            ]);
+            $this->dispatch('show-toast', type: 'error', message: 'Multiple Select questions are not allowed for quiz steps.');
 
             return;
         }
@@ -151,11 +143,7 @@ class StepQuestionsModal extends Component
         // Validate that each question has a correct answer
         foreach ($this->selectedQuestionIds as $questionId) {
             if (! isset($this->correctAnswers[$questionId]) || ! $this->correctAnswers[$questionId]) {
-                $this->dispatch('showAlert', [
-                    'type' => 'error',
-                    'title' => 'Error!',
-                    'message' => 'Please select a correct answer for each question.',
-                ]);
+                $this->dispatch('show-toast', type: 'error', message: 'Please select a correct answer for each question.');
 
                 return;
             }
@@ -178,11 +166,7 @@ class StepQuestionsModal extends Component
             ]);
         }
 
-        $this->dispatch('showAlert', [
-            'type' => 'success',
-            'title' => 'Success!',
-            'message' => 'Step questions updated successfully.',
-        ]);
+        $this->dispatch('show-toast', type: 'success', message: 'Step questions updated successfully.');
         $this->dispatch('refreshTable');
         $this->dispatch('click');
     }

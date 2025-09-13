@@ -21,6 +21,7 @@
                             <th class="">Name</th>
                             <th class="">Description</th>
                             <th class="text-center">Todos Count</th>
+                            <th class="text-center">Status</th>
                             <th class="w-20 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -38,6 +39,17 @@
                                 </td>
                                 <td class="text-center">
                                     <span class="kt-badge kt-badge-light-primary">{{ count($liability->todos ?? []) }}</span>
+                                </td>
+                                <td class="text-center">
+                                    @if($liability->active)
+                                        <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-destructive" x-on:click="$wire.call('openLiabilityStatusModal', {{ Js::from(['id' => $liability->id, 'active' => false]) }})" title="Deactivate Liability">
+                                            Deactivate
+                                        </button>
+                                    @else
+                                        <button class="kt-btn kt-btn-outline kt-btn-sm kt-btn-primary" x-on:click="$wire.call('openLiabilityStatusModal', {{ Js::from(['id' => $liability->id, 'active' => true]) }})" title="Activate Liability">
+                                            Activate
+                                        </button>
+                                    @endif
                                 </td>
                                 <td class="text-center" wire:ignore>
                                     <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">
@@ -65,7 +77,7 @@
                                                 <li class="kt-dropdown-menu-separator"></li>
 
                                                 <li>
-                                                    <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" onclick="confirmDelete('{{ $liability->id }}', '{{ addslashes($liability->name) }}')">
+                                                    <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="openDeleteLiabilityModal('{{ $liability->id }}')">
                                                         <i class="ki-filled ki-trash"></i>
                                                         Delete
                                                     </a>
@@ -77,7 +89,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-8">
+                                <td colspan="6" class="text-center py-8">
                                     <div class="flex flex-col items-center gap-2">
                                         <i class="ki-filled ki-file-down text-gray-400 text-3xl"></i>
                                         <span class="text-gray-500">No liabilities found</span>
@@ -92,12 +104,4 @@
     </div>
 
     <x-ktui-pagination :paginator="$this->liabilities" />
-
-    <script>
-        function confirmDelete(liabilityId, liabilityName) {
-            if (confirm('Are you sure you want to delete "' + liabilityName + '"? This action cannot be undone.')) {
-                @this.call('deleteLiability', liabilityId);
-            }
-        }
-    </script>
 </div>

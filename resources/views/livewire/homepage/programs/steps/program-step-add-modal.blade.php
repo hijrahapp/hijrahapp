@@ -77,30 +77,31 @@
 
                         @if($type === 'journal')
                             <div>
-                                <livewire:shared.components.textarea :label="'Header'" wire:model.defer="header" :placeholder="'Enter journal header'" :rows="3" />
+                                <livewire:shared.components.textarea :label="'Header'" :required="true" wire:model.defer="header" :placeholder="'Enter journal header'" :rows="3" />
                                 @error('header')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                             </div>
                         @elseif($type === 'article')
                             <div class="space-y-4">
                                 <div>
-                                    <livewire:shared.components.textarea :label="'Header'" wire:model.defer="header" :placeholder="'Enter article header'" :rows="2" />
+                                    <livewire:shared.components.textarea :label="'Header'" :required="true" wire:model.defer="header" :placeholder="'Enter article header'" :rows="2" />
                                     @error('header')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                                 <div>
-                                    <livewire:shared.components.textarea :label="'Content'" wire:model.defer="content" :placeholder="'Enter article content'" :rows="5" />
+                                    <livewire:shared.components.textarea :label="'Content'" :required="true" wire:model.defer="content" :placeholder="'Enter article content'" :rows="5" />
                                     @error('content')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                         @elseif($type === 'advice')
                             <div class="space-y-4">
                                 <div>
-                                    <livewire:shared.components.textarea :label="'Header'" wire:model.defer="header" :placeholder="'Enter advice header'" :rows="2" />
+                                    <livewire:shared.components.textarea :label="'Header'" :required="true" wire:model.defer="header" :placeholder="'Enter advice header'" :rows="2" />
                                     @error('header')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                                 <div>
                                     <livewire:shared.components.list-input
                                         :items="$advices"
                                         label="Advices"
+                                        :required="true"
                                         placeholder="Enter advice"
                                         addButtonText="Add Advice"
                                         identifier="advices"
@@ -112,11 +113,11 @@
                         @elseif($type === 'daily_mission')
                             <div class="space-y-4">
                                 <div>
-                                    <livewire:shared.components.textarea :label="'Header'" wire:model.defer="header" :placeholder="'Enter mission header'" :rows="2" />
+                                    <livewire:shared.components.textarea :label="'Header'" :required="true" wire:model.defer="header" :placeholder="'Enter mission header'" :rows="2" />
                                     @error('header')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                                 <div>
-                                    <livewire:shared.components.textarea :label="'Content'" wire:model.defer="content" :placeholder="'Enter mission content'" :rows="4" />
+                                    <livewire:shared.components.textarea :label="'Content'" :required="true" wire:model.defer="content" :placeholder="'Enter mission content'" :rows="4" />
                                     @error('content')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                             </div>
@@ -136,7 +137,7 @@
                                     @error('contentUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                                 <div>
-                                    <livewire:shared.components.textarea :label="'Description'" wire:model.defer="description" :placeholder="'Enter description'" :rows="3" />
+                                    <livewire:shared.components.textarea :label="'Description (Optional)'" wire:model.defer="description" :placeholder="'Enter description'" :rows="3" />
                                     @error('description')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                             </div>
@@ -157,20 +158,21 @@
                                     @error('contentImage')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                                 <div>
-                                    <livewire:shared.components.textarea :label="'Description'" wire:model.defer="description" :placeholder="'Enter book description'" :rows="3" />
+                                    <livewire:shared.components.textarea :label="'Description (Optional)'" wire:model.defer="description" :placeholder="'Enter book description'" :rows="3" />
                                     @error('description')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                         @elseif($type === 'challenge')
                             <div class="space-y-4">
                                 <div>
-                                    <livewire:shared.components.textarea :label="'Header'" wire:model.defer="header" :placeholder="'Enter challenge header'" :rows="2" />
+                                    <livewire:shared.components.textarea :label="'Header'" :required="true" wire:model.defer="header" :placeholder="'Enter challenge header'" :rows="2" />
                                     @error('header')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                                 <div>
                                     <livewire:shared.components.list-input
                                         :items="$challenges"
                                         label="Challenges"
+                                        :required="true"
                                         placeholder="Enter challenge"
                                         addButtonText="Add Challenge"
                                         identifier="challenges"

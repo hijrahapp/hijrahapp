@@ -56,7 +56,8 @@ class LiabilityRepository
                 ->join('methodology as mt', 'lm.methodology_id', '=', 'mt.id')
                 ->leftJoin('pillars as p', 'lm.pillar_id', '=', 'p.id')
                 ->where('lm.module_id', $moduleData->module_id)
-                ->where('lm.methodology_id', $moduleData->methodology_id);
+                ->where('lm.methodology_id', $moduleData->methodology_id)
+                ->where('liabilities.active', true);
 
             // Add pillar condition if pillar exists
             if ($moduleData->pillar_id) {

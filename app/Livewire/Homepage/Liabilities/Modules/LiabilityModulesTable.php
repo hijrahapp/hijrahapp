@@ -26,7 +26,7 @@ class LiabilityModulesTable extends Component
 
     protected $listeners = [
         'refreshTable' => 'reloadTable',
-        'moduleRemoved' => 'reloadTable',
+        'removeModule' => 'removeModule',
     ];
 
     public function mount(Liability $liability)
@@ -94,9 +94,37 @@ class LiabilityModulesTable extends Component
         $this->dispatch('openLiabilityModuleModal', $this->liability->id);
     }
 
-    public function removeModule($moduleId, $methodologyId, $pillarId = null)
+    public function openRemoveModuleModal($request)
+    {
+        // Parse the comma-separated parameters
+        $params = explode(',', $request);
+        $moduleId = $params[0];
+        $methodologyId = $params[1];
+        $pillarId = $params[2] ?? null;
+
+        $modal = [
+            'title' => __('messages.remove_liability_module_title'),
+            'message' => __('messages.remove_liability_module_message'),
+            'note' => __('messages.remove_liability_module_note'),
+            'action' => __('messages.remove_liability_module_action'),
+            'callback' => 'removeModule',
+            'object' => [
+                'moduleId' => $moduleId,
+                'methodologyId' => $methodologyId,
+                'pillarId' => $pillarId,
+            ],
+        ];
+
+        $this->dispatch('openConfirmationModal', $modal);
+    }
+
+    public function removeModule($request)
     {
         try {
+            $moduleId = $request['moduleId'];
+            $methodologyId = $request['methodologyId'];
+            $pillarId = $request['pillarId'] ?? null;
+
             $query = $this->liability->modules()
                 ->wherePivot('module_id', $moduleId)
                 ->wherePivot('methodology_id', $methodologyId);
@@ -109,10 +137,11 @@ class LiabilityModulesTable extends Component
 
             $query->detach($moduleId);
 
-            session()->flash('success', 'Module removed from liability successfully.');
-            $this->dispatch('refreshTable');
+            $this->dispatch('show-toast', type: 'success', message: 'Module removed successfully.');
+
+            $this->reloadTable();
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to remove module: '.$e->getMessage());
+            $this->dispatch('show-toast', type: 'error', message: 'Failed to remove module: '.$e->getMessage());
         }
     }
 

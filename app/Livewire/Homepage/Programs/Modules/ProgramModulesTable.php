@@ -26,7 +26,7 @@ class ProgramModulesTable extends Component
 
     protected $listeners = [
         'refreshTable' => 'reloadTable',
-        'moduleRemoved' => 'reloadTable',
+        'removeModule' => 'removeModule',
     ];
 
     public function mount(Program $program)
@@ -105,22 +105,30 @@ class ProgramModulesTable extends Component
         $this->dispatch('open-add-module-modal', programId: $this->program->id);
     }
 
+    public function openRemoveModuleModal($request)
+    {
+        $modal = [
+            'title' => __('messages.remove_module_title'),
+            'message' => __('messages.remove_module_message'),
+            'note' => __('messages.remove_module_note'),
+            'action' => __('messages.remove_module_action'),
+            'callback' => 'removeModule',
+            'object' => $request,
+        ];
+
+        $this->dispatch('openConfirmationModal', $modal);
+    }
+
     public function removeModule($moduleId)
     {
         try {
             $this->program->modules()->detach($moduleId);
 
-            $this->dispatch('show-toast', [
-                'type' => 'success',
-                'message' => 'Module removed successfully!',
-            ]);
+            $this->dispatch('show-toast', type: 'success', message: 'Module removed successfully.');
 
             $this->reloadTable();
         } catch (\Exception $e) {
-            $this->dispatch('show-toast', [
-                'type' => 'error',
-                'message' => 'Failed to remove module: '.$e->getMessage(),
-            ]);
+            $this->dispatch('show-toast', type: 'error', message: 'Failed to remove module: '.$e->getMessage());
         }
     }
 

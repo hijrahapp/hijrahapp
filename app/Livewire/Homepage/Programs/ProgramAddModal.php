@@ -77,6 +77,7 @@ class ProgramAddModal extends Component
                 'definition' => $this->definition,
                 'objectives' => $this->objectives,
                 'img_url' => $this->img_url,
+                'active' => false,
             ];
 
             if ($this->isEditMode && $this->programId) {
@@ -88,23 +89,19 @@ class ProgramAddModal extends Component
                 $message = 'Program created successfully';
             }
 
-            $this->dispatch('showAlert', [
-                'type' => 'success',
-                'title' => 'Success!',
-                'message' => $message,
-            ]);
-
             $this->dispatch('refreshTable');
-            $this->resetForm();
-            $this->dispatch('closeModal');
+            $this->closeModal();
+            $this->dispatch('show-toast', type: 'success', message: $message);
         } catch (\Exception $e) {
             $this->error = 'Failed to save program: '.$e->getMessage();
-            $this->dispatch('showAlert', [
-                'type' => 'error',
-                'title' => 'Error!',
-                'message' => $this->error,
-            ]);
+            $this->dispatch('show-toast', type: 'error', message: $this->error);
         }
+    }
+
+    public function closeModal()
+    {
+        $this->dispatch('click');
+        $this->resetForm();
     }
 
     public function render()

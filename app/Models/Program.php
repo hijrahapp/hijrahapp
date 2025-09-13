@@ -18,9 +18,11 @@ class Program extends Model
         'definition',
         'objectives',
         'img_url',
+        'active',
     ];
 
     protected $casts = [
+        'active' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

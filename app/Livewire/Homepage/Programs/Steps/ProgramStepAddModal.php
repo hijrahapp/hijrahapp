@@ -69,7 +69,7 @@ class ProgramStepAddModal extends Component
                         $rules['content'] = 'required|string|min:10';
                         break;
                     case 'description':
-                        $rules['description'] = 'required|string|min:10|max:1000';
+                        $rules['description'] = 'nullable|string|min:10|max:1000';
                         break;
                     case 'content_url':
                         $rules['contentUrl'] = 'required|url|max:500';
@@ -110,7 +110,6 @@ class ProgramStepAddModal extends Component
             'header.max' => 'The header may not be greater than 255 characters.',
             'content.required' => 'The content is required for this step type.',
             'content.min' => 'The content must be at least 10 characters.',
-            'description.required' => 'The description is required for this step type.',
             'description.min' => 'The description must be at least 10 characters.',
             'description.max' => 'The description may not be greater than 1000 characters.',
             'contentUrl.required' => 'The content URL is required for this step type.',
@@ -201,22 +200,14 @@ class ProgramStepAddModal extends Component
                 $message = 'Step created successfully';
             }
 
-            $this->dispatch('showAlert', [
-                'type' => 'success',
-                'title' => 'Success!',
-                'message' => $message,
-            ]);
+            $this->dispatch('show-toast', type: 'success', message: $message);
 
             $this->dispatch('refreshTable');
             $this->dispatch('click');
             $this->resetForm();
         } catch (\Exception $e) {
             $this->error = 'Failed to save step: '.$e->getMessage();
-            $this->dispatch('showAlert', [
-                'type' => 'error',
-                'title' => 'Error!',
-                'message' => $this->error,
-            ]);
+            $this->dispatch('show-toast', type: 'error', message: $this->error);
         }
     }
 
@@ -251,8 +242,8 @@ class ProgramStepAddModal extends Component
             'advice' => ['header', 'advices'],
             'daily_mission' => ['header', 'content'],
             'quiz' => [], // Questions will be managed separately
-            'video', 'audio' => ['content_url', 'description'],
-            'book' => ['content_url', 'content_image', 'description'],
+            'video', 'audio' => ['content_url'],
+            'book' => ['content_url', 'content_image'],
             'challenge' => ['header', 'challenges'],
             default => [],
         };

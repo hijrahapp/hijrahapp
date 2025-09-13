@@ -66,6 +66,7 @@ class ProgramRepository
                 $join->on('up.program_id', '=', 'pm.program_id')
                     ->where('up.user_id', '=', $userId);
             })
+            ->where('p.active', true) // Only include active programs
             // ->whereNull('up.id') // Exclude programs user is already enrolled in
             ->select([
                 'pm.program_id',
@@ -181,9 +182,9 @@ class ProgramRepository
                     ->where('user_id', $userId)
                     ->where('program_id', $program->id)
                     ->first();
-                
+
                 $programStatus = $userProgram ? $userProgram->status : 'not_started';
-                
+
                 return in_array($programStatus, $statuses);
             });
         }
@@ -200,6 +201,7 @@ class ProgramRepository
         $userProgramsQuery = DB::table('user_programs as up')
             ->join('programs as p', 'p.id', '=', 'up.program_id')
             ->where('up.user_id', $userId)
+            ->where('p.active', true) // Only include active programs
             ->select([
                 'up.program_id',
                 'up.status as user_program_status',
@@ -339,12 +341,14 @@ class ProgramRepository
     {
         // Get all program-module combinations for programs user is not enrolled in
         $programModules = DB::table('program_module as pm')
+            ->join('programs as p', 'p.id', '=', 'pm.program_id')
             ->join('methodology as mth', 'mth.id', '=', 'pm.methodology_id')
             ->join('modules as m', 'm.id', '=', 'pm.module_id')
             ->leftJoin('user_programs as up', function ($join) use ($userId) {
                 $join->on('up.program_id', '=', 'pm.program_id')
                     ->where('up.user_id', '=', $userId);
             })
+            ->where('p.active', true) // Only include active programs
             // ->whereNull('up.id') // Exclude programs user is already enrolled in
             ->select([
                 'pm.methodology_id',
@@ -376,7 +380,7 @@ class ProgramRepository
         return [
             'methodologies' => $methodologies->toArray(),
             'modules' => $modules->toArray(),
-            'statuses' => ['not_started', "in_progress", "completed"] // Suggested programs are always not started
+            'statuses' => ['not_started', 'in_progress', 'completed'], // Suggested programs are always not started
         ];
     }
 
@@ -387,10 +391,12 @@ class ProgramRepository
     {
         // Get all program-module combinations for user's programs
         $programModules = DB::table('user_programs as up')
+            ->join('programs as p', 'p.id', '=', 'up.program_id')
             ->join('program_module as pm', 'pm.program_id', '=', 'up.program_id')
             ->join('methodology as mth', 'mth.id', '=', 'pm.methodology_id')
             ->join('modules as m', 'm.id', '=', 'pm.module_id')
             ->where('up.user_id', $userId)
+            ->where('p.active', true) // Only include active programs
             ->select([
                 'pm.methodology_id',
                 'mth.name as methodology_name',

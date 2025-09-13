@@ -101,25 +101,30 @@ class LiabilityAddModal extends Component
                 'title' => $this->title,
                 'header' => $this->header,
                 'todos' => array_values($todos),
+                'active' => false,
             ];
 
             if ($this->isEditMode && $this->liabilityId) {
                 $liability = Liability::find($this->liabilityId);
                 if ($liability) {
                     $liability->update($data);
-                    $this->dispatch('refreshTable');
-                    session()->flash('success', 'Liability updated successfully.');
                 }
             } else {
                 Liability::create($data);
-                $this->dispatch('refreshTable');
-                session()->flash('success', 'Liability created successfully.');
             }
 
-            $this->resetForm();
+            $this->dispatch('refreshTable');
+            $this->closeModal();
+            $this->dispatch('show-toast', type: 'success', message: $this->isEditMode ? 'Liability updated successfully.' : 'Liability created successfully.');
         } catch (\Exception $e) {
             $this->error = 'Failed to save liability: '.$e->getMessage();
         }
+    }
+
+    public function closeModal()
+    {
+        $this->dispatch('click');
+        $this->resetForm();
     }
 
     public function render()

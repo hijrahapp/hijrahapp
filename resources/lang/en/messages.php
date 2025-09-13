@@ -130,6 +130,19 @@ return [
     'deactivate_methodology_title' => 'Deactivate Methodology',
     'deactivate_methodology_message' => 'Are you sure you want to deactivate this methodology?',
     'deactivate_methodology_note' => 'This will prevent the methodology from being used by customers.',
+    'activate_program_title' => 'Activate Program',
+    'activate_program_message' => 'Are you sure you want to activate this program?',
+    'deactivate_program_title' => 'Deactivate Program',
+    'deactivate_program_message' => 'Are you sure you want to deactivate this program?',
+    'deactivate_program_note' => 'This will prevent the program from being used by customers.',
+    'activate_liability_title' => 'Activate Liability',
+    'activate_liability_message' => 'Are you sure you want to activate this liability?',
+    'deactivate_liability_title' => 'Deactivate Liability',
+    'deactivate_liability_message' => 'Are you sure you want to deactivate this liability?',
+    'deactivate_liability_note' => 'This will prevent the liability from being used by customers.',
+    'delete_program_title' => 'Delete Program',
+    'delete_program_message' => 'Are you sure you want to delete this program?',
+    'delete_program_note' => 'This will remove any related steps and users progress.',
     'delete_methodology_title' => 'Delete Methodology',
     'delete_methodology_message' => 'Deleting this methodology will also delete all associated pillars and modules. Are you sure?',
     'delete_methodology_note' => 'This action cannot be undone.',
@@ -189,4 +202,28 @@ return [
     'cannot_complete_step_challenges_remaining' => 'Cannot complete step. :remaining challenge(s) remaining to be completed.',
     'challenge_step_completed_successfully' => 'Challenge step completed successfully',
     'failed_to_complete_challenge_step' => 'Failed to complete challenge step',
+
+    // Step Management
+    'remove_title' => 'Remove Step',
+    'remove_message' => 'Are you sure you want to remove this step?',
+    'remove_note' => 'This will permanently delete the step and all associated data.',
+    'remove_action' => 'Remove',
+
+    // Module Management
+    'remove_module_title' => 'Remove Module',
+    'remove_module_message' => 'Are you sure you want to remove this module from the program?',
+    'remove_module_note' => 'This will remove the module from the program but will not delete the module itself.',
+    'remove_module_action' => 'Remove',
+
+    // Liability Management
+    'delete_liability_title' => 'Delete Liability',
+    'delete_liability_message' => 'Are you sure you want to delete this liability?',
+    'delete_liability_note' => 'This will permanently delete the liability and all associated data.',
+    'delete_liability_action' => 'Delete',
+
+    // Liability Module Management
+    'remove_liability_module_title' => 'Remove Module',
+    'remove_liability_module_message' => 'Are you sure you want to remove this module from the liability?',
+    'remove_liability_module_note' => 'This will remove the module from the liability but will not delete the module itself.',
+    'remove_liability_module_action' => 'Remove',
 ];

@@ -59,9 +59,9 @@
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="confirmDelete('{{ $step->id }}', 'deleteStep')">
+                                                    <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" wire:click="openRemoveStepModal('{{ $step->id }}')">
                                                         <i class="ki-filled ki-trash"></i>
-                                                        Delete
+                                                        Remove
                                                     </a>
                                                 </li>
                                             </ul>

@@ -130,6 +130,19 @@ return [
     'deactivate_methodology_title' => 'إلغاء تفعيل المنهجية',
     'deactivate_methodology_message' => 'هل أنت متأكد من أنك تريد إلغاء تفعيل هذه المنهجية؟',
     'deactivate_methodology_note' => 'سيؤدي ذلك إلى منع المنهجية من الاستخدام في المنهجيات الجديدة.',
+    'activate_program_title' => 'تفعيل البرنامج',
+    'activate_program_message' => 'هل أنت متأكد من أنك تريد تفعيل هذا البرنامج؟',
+    'deactivate_program_title' => 'إلغاء تفعيل البرنامج',
+    'deactivate_program_message' => 'هل أنت متأكد من أنك تريد إلغاء تفعيل هذا البرنامج؟',
+    'deactivate_program_note' => 'سيؤدي ذلك إلى منع البرنامج من الاستخدام من قبل العملاء.',
+    'activate_liability_title' => 'تفعيل المسؤولية',
+    'activate_liability_message' => 'هل أنت متأكد من أنك تريد تفعيل هذه المسؤولية؟',
+    'deactivate_liability_title' => 'إلغاء تفعيل المسؤولية',
+    'deactivate_liability_message' => 'هل أنت متأكد من أنك تريد إلغاء تفعيل هذه المسؤولية؟',
+    'deactivate_liability_note' => 'سيؤدي ذلك إلى منع المسؤولية من الاستخدام من قبل العملاء.',
+    'delete_program_title' => 'حذف البرنامج',
+    'delete_program_message' => 'هل أنت متأكد من أنك تريد حذف هذا البرنامج؟',
+    'delete_program_note' => 'سيؤدي ذلك إلى إزالة أي خطوات مرتبطة وتقدم المستخدمين.',
     'delete_methodology_title' => 'حذف المنهجية',
     'delete_methodology_message' => 'هل أنت متأكد من أنك تريد حذف هذه المنهجية؟',
     'delete_methodology_note' => 'سيؤدي ذلك إلى حذف المنهجية من أي ركائز أو وحدات أو أسئلة مرتبطة.',
@@ -189,4 +202,28 @@ return [
     'cannot_complete_step_challenges_remaining' => 'لا يمكن إكمال الخطوة. :remaining تحدي(ات) متبقي(ة) للإكمال.',
     'challenge_step_completed_successfully' => 'تم إكمال خطوة التحدي بنجاح',
     'failed_to_complete_challenge_step' => 'فشل في إكمال خطوة التحدي',
+
+    // إدارة الخطوات
+    'remove_title' => 'إزالة الخطوة',
+    'remove_message' => 'هل أنت متأكد من أنك تريد إزالة هذه الخطوة؟',
+    'remove_note' => 'سيؤدي ذلك إلى حذف الخطوة وجميع البيانات المرتبطة بها نهائياً.',
+    'remove_action' => 'إزالة',
+
+    // إدارة الوحدات
+    'remove_module_title' => 'إزالة الوحدة',
+    'remove_module_message' => 'هل أنت متأكد من أنك تريد إزالة هذه الوحدة من البرنامج؟',
+    'remove_module_note' => 'سيؤدي ذلك إلى إزالة الوحدة من البرنامج ولكن لن يتم حذف الوحدة نفسها.',
+    'remove_module_action' => 'إزالة',
+
+    // إدارة الالتزامات
+    'delete_liability_title' => 'حذف الالتزام',
+    'delete_liability_message' => 'هل أنت متأكد من أنك تريد حذف هذا الالتزام؟',
+    'delete_liability_note' => 'سيؤدي ذلك إلى حذف الالتزام وجميع البيانات المرتبطة به نهائياً.',
+    'delete_liability_action' => 'حذف',
+
+    // إدارة وحدات الالتزامات
+    'remove_liability_module_title' => 'إزالة الوحدة',
+    'remove_liability_module_message' => 'هل أنت متأكد من أنك تريد إزالة هذه الوحدة من الالتزام؟',
+    'remove_liability_module_note' => 'سيؤدي ذلك إلى إزالة الوحدة من الالتزام ولكن لن يتم حذف الوحدة نفسها.',
+    'remove_liability_module_action' => 'إزالة',
 ];

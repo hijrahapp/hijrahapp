@@ -20,7 +20,7 @@ class ProgramStepsTable extends Component
 
     protected $listeners = [
         'refreshTable' => 'reloadTable',
-        'deleteStep' => 'deleteStep',
+        'removeStep' => 'removeStep',
     ];
 
     public function mount(Program $program)
@@ -55,25 +55,31 @@ class ProgramStepsTable extends Component
         $this->dispatch('open-step-questions-modal', stepId: $stepId);
     }
 
-    public function deleteStep($stepId)
+    public function openRemoveStepModal($request)
+    {
+        $modal = [
+            'title' => __('messages.remove_title'),
+            'message' => __('messages.remove_message'),
+            'note' => __('messages.remove_note'),
+            'action' => __('messages.remove_action'),
+            'callback' => 'removeStep',
+            'object' => $request,
+        ];
+
+        $this->dispatch('openConfirmationModal', $modal);
+    }
+
+    public function removeStep($stepId)
     {
         try {
             $step = Step::find($stepId);
             if ($step && $step->program_id === $this->program->id) {
                 $step->delete();
-                $this->dispatch('showAlert', [
-                    'type' => 'success',
-                    'title' => 'Success!',
-                    'message' => 'Step deleted successfully.',
-                ]);
+                $this->dispatch('show-toast', type: 'success', message: 'Step removed successfully.');
                 $this->reloadTable();
             }
         } catch (\Exception $e) {
-            $this->dispatch('showAlert', [
-                'type' => 'error',
-                'title' => 'Error!',
-                'message' => 'Failed to delete step: '.$e->getMessage(),
-            ]);
+            $this->dispatch('show-toast', type: 'error', message: 'Failed to remove step: '.$e->getMessage());
         }
     }
 

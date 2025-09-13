@@ -4,7 +4,7 @@
             <span class="kt-modal-title text-xl font-semibold">
                 {{ $isEditMode ? 'Edit Program' : 'Add Program' }}
             </span>
-            <button class="kt-btn kt-btn-sm kt-btn-icon kt-btn-dim shrink-0" wire:click="resetForm" data-kt-modal-dismiss="true">
+            <button class="kt-btn kt-btn-sm kt-btn-icon kt-btn-dim shrink-0" wire:click="closeModal">
                 <i class="ki-filled ki-cross"></i>
             </button>
         </div>
@@ -61,7 +61,7 @@
             </div>
 
             <div class="kt-modal-footer flex gap-2 justify-end p-5">
-                <button type="button" class="kt-btn kt-btn-outline" wire:click="resetForm" data-kt-modal-dismiss="true">Cancel</button>
+                <button type="button" class="kt-btn kt-btn-outline" wire:click="closeModal">Cancel</button>
                 <button type="submit" class="kt-btn kt-btn-primary">{{ $isEditMode ? 'Update Program' : 'Create Program' }}</button>
             </div>
         </form>

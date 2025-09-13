@@ -152,6 +152,7 @@ class ModuleDetailedResource extends JsonResource
             ->join('programs as p', 'pm.program_id', '=', 'p.id')
             ->where('pm.module_id', $this->id)
             ->where('pm.methodology_id', $methodologyId)
+            ->where('p.active', true) // Only include active programs
             ->where(function ($query) use ($pillarId) {
                 if ($pillarId) {
                     $query->where('pm.pillar_id', $pillarId);
@@ -176,6 +177,7 @@ class ModuleDetailedResource extends JsonResource
             // Add steps_count to each program
             $eligiblePrograms = $eligiblePrograms->map(function ($program) use ($stepsCounts) {
                 $program->steps_count = $stepsCounts->get($program->id, 0);
+
                 return $program;
             });
         }

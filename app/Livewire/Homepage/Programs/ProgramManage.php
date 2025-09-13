@@ -18,7 +18,7 @@ class ProgramManage extends Component
 
     public string $definition = '';
 
-    public string $steps = '';
+    public string $objectives = '';
 
     public string $img_url = '';
 
@@ -37,7 +37,7 @@ class ProgramManage extends Component
             'name' => 'required|string|min:3',
             'description' => 'required|string|min:3|max:500',
             'definition' => 'required|string|min:3',
-            'steps' => 'nullable|string',
+            'objectives' => 'nullable|string',
             'img_url' => 'nullable|string',
         ];
     }
@@ -54,7 +54,7 @@ class ProgramManage extends Component
         $this->name = $program->name;
         $this->description = $program->description;
         $this->definition = $program->definition;
-        $this->steps = $program->getRawOriginal('objectives') ?? '';
+        $this->objectives = $program->objectives ?? '';
         $this->img_url = $program->img_url ?? '';
     }
 
@@ -69,7 +69,7 @@ class ProgramManage extends Component
                 'name' => $this->name,
                 'description' => $this->description,
                 'definition' => $this->definition,
-                'objectives' => $this->steps,
+                'objectives' => $this->objectives,
                 'img_url' => $this->img_url,
             ];
 

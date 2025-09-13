@@ -39,7 +39,7 @@ class LiabilityManage extends Component
         $this->liability = Liability::find($liabilityId);
 
         if (! $this->liability) {
-            session()->flash('error', 'Liability not found.');
+            $this->dispatch('show-toast', type: 'error', message: 'Liability not found.');
 
             return redirect()->route('liabilities');
         }
@@ -73,7 +73,7 @@ class LiabilityManage extends Component
         ]);
 
         $this->isBasicDirty = false;
-        session()->flash('success', 'Liability details updated successfully.');
+        $this->dispatch('show-toast', type: 'success', message: 'Liability details updated successfully.');
         $this->dispatch('section-saved', ['section' => 'basic']);
     }
 
@@ -89,7 +89,7 @@ class LiabilityManage extends Component
         ]);
 
         $this->isTodosDirty = false;
-        session()->flash('success', 'Todos updated successfully.');
+        $this->dispatch('show-toast', type: 'success', message: 'Todos updated successfully.');
         $this->dispatch('section-saved', ['section' => 'todos']);
     }
 

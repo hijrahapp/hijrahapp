@@ -94,8 +94,7 @@
                                             <ul class="kt-dropdown-menu-sub">
                                                 <li>
                                                     <a class="kt-dropdown-menu-link text-danger" data-kt-dropdown-dismiss="true" 
-                                                       wire:click="removeModule({{ $module->id }})" 
-                                                       wire:confirm="Are you sure you want to remove this module from the program?">
+                                                       wire:click="openRemoveModuleModal('{{ $module->id }}')">
                                                         <i class="ki-filled ki-trash"></i>
                                                         Remove
                                                     </a>

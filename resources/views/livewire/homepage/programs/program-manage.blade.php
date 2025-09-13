@@ -43,8 +43,8 @@
                         </div>
 
                         <div class="mt-4">
-                            <label class="block text-sm font-medium mb-1">Steps</label>
-                            <livewire:shared.components.rich-text :model="$steps" wire:model="steps" :placeholder="'Enter program steps'" :editorId="'program_steps_editor'" :minHeight="'150px'" />
+                            <label class="block text-sm font-medium mb-1">Objectives</label>
+                            <livewire:shared.components.rich-text :model="$objectives" wire:model="objectives" :placeholder="'Enter program objectives'" :editorId="'program_objectives_editor'" :minHeight="'150px'" />
                             @error('steps')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                         </div>
 
