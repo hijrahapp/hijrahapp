@@ -185,12 +185,19 @@
                                     @error('header')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                                 <div>
+                                    <div class="mb-2">
+                                        <label class="block text-sm font-medium mb-1">Challenges <span class="text-destructive">*</span></label>
+                                        <p class="text-sm text-gray-600 mb-2">
+                                            You need to add exactly <strong>{{ $timeToFinish }} challenge{{ $timeToFinish > 1 ? 's' : '' }}</strong> 
+                                            (one for each {{ $timeType }} of duration).
+                                        </p>
+                                    </div>
                                     <livewire:shared.components.list-input
                                         :items="$challenges"
-                                        label="Challenges"
+                                        label=""
                                         :required="true"
                                         placeholder="Enter challenge"
-                                        addButtonText="Add Challenge"
+                                        addButtonText="Add"
                                         identifier="challenges"
                                         wire:key="challenges-list"
                                     />

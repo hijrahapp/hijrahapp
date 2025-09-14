@@ -87,6 +87,10 @@ class ProgramStepAddModal extends Component
                     case 'challenges':
                         $rules['challenges'] = 'required|array|min:1';
                         $rules['challenges.*'] = 'required|string|min:5|max:500';
+                        // For challenge type, ensure number of challenges equals duration
+                        if ($this->type === 'challenge') {
+                            $rules['challenges'] = 'required|array|size:'.$this->timeToFinish;
+                        }
                         break;
                 }
             }
@@ -142,6 +146,7 @@ class ProgramStepAddModal extends Component
             'challenges.required' => 'At least one challenge is required for this step type.',
             'challenges.array' => 'Challenges must be provided as a list.',
             'challenges.min' => 'At least one challenge is required.',
+            'challenges.size' => 'The number of challenges must equal the duration ('.$this->timeToFinish.' '.$this->timeType.') for this step type.',
             'challenges.*.required' => 'Each challenge is required.',
             'challenges.*.min' => 'Each challenge must be at least 5 characters.',
             'challenges.*.max' => 'Each challenge may not be greater than 500 characters.',
