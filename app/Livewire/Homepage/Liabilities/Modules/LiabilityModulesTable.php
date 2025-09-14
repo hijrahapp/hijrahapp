@@ -5,14 +5,14 @@ namespace App\Livewire\Homepage\Liabilities\Modules;
 use App\Models\Liability;
 use App\Models\Methodology;
 use App\Models\Pillar;
+use App\Traits\WithoutUrlPagination;
 use App\Traits\WithTableReload;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class LiabilityModulesTable extends Component
 {
-    use WithPagination, WithTableReload;
+    use WithoutUrlPagination, WithTableReload;
 
     public Liability $liability;
 
@@ -70,7 +70,9 @@ class LiabilityModulesTable extends Component
                 $modules->where('liability_module.pillar_id', $this->selectedPillarId);
             }
 
-            $paginatedModules = $modules->orderBy('modules.name')->paginate($this->perPage);
+            // Use custom pagination without URL caching
+            $page = $this->getPage();
+            $paginatedModules = $modules->orderBy('modules.name')->paginate($this->perPage, ['*'], 'page', $page);
 
             // Load methodology and pillar data for each module
             $methodologyIds = $paginatedModules->pluck('pivot.methodology_id')->filter()->unique();

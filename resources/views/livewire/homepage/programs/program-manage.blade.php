@@ -49,7 +49,7 @@
                         </div>
 
                         <div class="mt-4">
-                            <livewire:shared.components.image-picker wire:model="img_url" :label="'Program Image'" :placeholder="'/assets/media/avatars/blank.png'" :required="false" />
+                            <livewire:shared.components.image-picker wire:model.live="img_url" :label="'Program Image'" :placeholder="'/assets/media/avatars/blank.png'" :required="false" />
                             @error('img_url')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                         </div>
                     </div>

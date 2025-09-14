@@ -3,6 +3,8 @@
 namespace App\Resources;
 
 use App\Http\Repositories\QuestionRepository;
+use App\Models\Methodology;
+use App\Models\Pillar;
 use App\Services\ContextStatusService;
 use App\Services\ResultCalculationOptimizedService;
 use App\Services\ResultCalculationService;
@@ -182,12 +184,27 @@ class ModuleDetailedResource extends JsonResource
             });
         }
 
+        $qualifying_module = [
+            'id' => $this->id,
+            'name' => $this->name,
+            'pillar' => $pillarId ? [
+                'id' => $pillarId,
+                'name' => Pillar::find($pillarId)->name,
+            ] : null,
+            'methodology' => [
+                'id' => $methodologyId,
+                'name' => Methodology::find($methodologyId)->name,
+            ],
+        ];
+
         // Transform to ProgramResource format
         $programs = [];
         foreach ($eligiblePrograms as $program) {
             // Create a new request with the authenticated user ID
             $requestWithAuth = clone $request;
             $requestWithAuth->merge(['authUserId' => $this->user_id]);
+
+            $program->qualifying_module = $qualifying_module;
 
             $programResource = new ProgramResource((object) $program);
             $programs[] = $programResource->toArray($requestWithAuth);

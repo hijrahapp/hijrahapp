@@ -4,17 +4,19 @@ namespace App\Livewire\Homepage\Programs\Steps;
 
 use App\Models\Program;
 use App\Models\Step;
+use App\Traits\WithoutUrlPagination;
 use App\Traits\WithTableReload;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class ProgramStepsTable extends Component
 {
-    use WithPagination, WithTableReload;
+    use WithoutUrlPagination, WithTableReload;
 
     public Program $program;
 
     public string $search = '';
+
+    public ?string $typeFilter = null;
 
     public int $perPage = 10;
 
@@ -31,12 +33,19 @@ class ProgramStepsTable extends Component
     public function getStepsProperty()
     {
         return $this->handleReloadState(function () {
-            return $this->program->stepsList()
+            $query = $this->program->stepsList()
                 ->when($this->search, function ($query) {
                     $query->where('name', 'like', '%'.$this->search.'%');
                 })
-                ->ordered()
-                ->paginate($this->perPage);
+                ->when($this->typeFilter !== null && $this->typeFilter !== '', function ($query) {
+                    $query->where('type', $this->typeFilter);
+                })
+                ->ordered();
+
+            // Use custom pagination without URL caching
+            $page = $this->getPage();
+
+            return $query->paginate($this->perPage, ['*'], 'page', $page);
         });
     }
 
@@ -81,6 +90,11 @@ class ProgramStepsTable extends Component
         } catch (\Exception $e) {
             $this->dispatch('show-toast', type: 'error', message: 'Failed to remove step: '.$e->getMessage());
         }
+    }
+
+    public function getStepTypesProperty()
+    {
+        return Step::TYPES;
     }
 
     public function render()

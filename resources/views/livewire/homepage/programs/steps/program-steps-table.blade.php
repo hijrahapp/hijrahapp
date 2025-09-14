@@ -7,6 +7,17 @@
                     <i class="ki-filled ki-magnifier"></i>
                     <input type="text" class="kt-input" placeholder="Search Steps" wire:model.live="search" />
                 </div>
+                <div class="relative">
+                    <div class="kt-input">
+                        <i class="ki-filled ki-filter"></i>
+                        <select wire:model.live="typeFilter">
+                            <option value=''>All Types</option>
+                            @foreach($this->stepTypes as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
                 <button class="kt-btn kt-btn-outline flex items-center justify-center" title="Add Step" wire:click="openAddModal">
                     <i class="ki-filled ki-plus"></i>
                 </button>
@@ -25,7 +36,7 @@
                     </thead>
                     <tbody>
                         @forelse($steps as $index => $step)
-                            <tr>
+                            <tr wire:key="step-{{ $step->id }}">
                                 <td class="">{{ $step->name }}</td>
                                 <td class="text-center">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
@@ -38,7 +49,7 @@
                                     </span>
                                 </td>
                                 <td class="text-center" wire:ignore>
-                                    <div data-kt-dropdown="true" data-kt-dropdown-trigger="click">
+                                    <div data-kt-dropdown="true" data-kt-dropdown-trigger="click" wire:key="dropdown-{{ $step->id }}">
                                         <button class="kt-btn kt-btn-outline" data-kt-dropdown-toggle="true">
                                             <i class="ki-filled ki-dots-horizontal text-secondary-foreground"></i>
                                         </button>

@@ -40,7 +40,7 @@
 
                         <div>
                             <label class="block text-sm font-medium mb-1">Type <span class="text-destructive">*</span></label>
-                            <select class="kt-select w-full" wire:model.live="type">
+                            <select class="kt-select w-full" wire:model.live="type" @if($isEditMode) disabled @endif>
                                 <option value="">Select Type</option>
                                 @foreach($stepTypes as $key => $label)
                                     <option value="{{ $key }}">{{ $label }}</option>
@@ -132,8 +132,16 @@
                         @elseif(in_array($type, ['video', 'audio']))
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Content URL <span class="text-destructive">*</span></label>
-                                    <input type="url" class="kt-input w-full" wire:model.defer="contentUrl" placeholder="Enter {{ $type }} URL" />
+                                    <livewire:shared.components.file-picker 
+                                        :label="'Content File'" 
+                                        :required="true"
+                                        :placeholder="'Enter ' . $type . ' URL or upload a file'"
+                                        wire:model="contentUrl" 
+                                        :allowedTypes="$type === 'video' ? ['mp4', 'mov', 'avi'] : ['mp3', 'wav', 'aac']"
+                                        :maxSize="50"
+                                        :helpText="'Upload a ' . $type . ' file or provide a URL'"
+                                        wire:key="content-file-picker-{{ $type }}-{{ $stepId ?? 'new' }}"
+                                    />
                                     @error('contentUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                                 <div>
@@ -144,14 +152,22 @@
                         @elseif($type === 'book')
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Content URL <span class="text-destructive">*</span></label>
-                                    <input type="url" class="kt-input w-full" wire:model.defer="contentUrl" placeholder="Enter book URL or file path" />
+                                    <livewire:shared.components.file-picker 
+                                        :label="'Book File'" 
+                                        :required="true"
+                                        :placeholder="'Enter book URL or upload a PDF file'"
+                                        wire:model="contentUrl" 
+                                        :allowedTypes="['pdf']"
+                                        :maxSize="10"
+                                        :helpText="'Upload a PDF file or provide a URL ending with .pdf'"
+                                        wire:key="book-file-picker-{{ $stepId ?? 'new' }}"
+                                    />
                                     @error('contentUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
                                 <div>
                                     <livewire:shared.components.image-picker 
                                         :label="'Cover Image'" 
-                                        wire:model.defer="contentImage" 
+                                        wire:model="contentImage" 
                                         :required="true"
                                         wire:key="content-image-picker"
                                     />

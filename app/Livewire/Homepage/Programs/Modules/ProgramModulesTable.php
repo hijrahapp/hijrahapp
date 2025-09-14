@@ -5,14 +5,14 @@ namespace App\Livewire\Homepage\Programs\Modules;
 use App\Models\Methodology;
 use App\Models\Pillar;
 use App\Models\Program;
+use App\Traits\WithoutUrlPagination;
 use App\Traits\WithTableReload;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class ProgramModulesTable extends Component
 {
-    use WithPagination, WithTableReload;
+    use WithoutUrlPagination, WithTableReload;
 
     public Program $program;
 
@@ -70,7 +70,9 @@ class ProgramModulesTable extends Component
                 $modules->where('program_module.pillar_id', $this->selectedPillarId);
             }
 
-            $paginatedModules = $modules->orderBy('modules.name')->paginate($this->perPage);
+            // Use custom pagination without URL caching
+            $page = $this->getPage();
+            $paginatedModules = $modules->orderBy('modules.name')->paginate($this->perPage, ['*'], 'page', $page);
 
             // Load methodology and pillar data for each module
             $methodologyIds = $paginatedModules->pluck('pivot.methodology_id')->filter()->unique();
@@ -92,12 +94,14 @@ class ProgramModulesTable extends Component
     public function updatedSelectedMethodologyId()
     {
         $this->selectedPillarId = null;
-        $this->resetPageAndReload();
+        $this->setPage(1);
+        $this->reloadTable();
     }
 
     public function updatedSelectedPillarId()
     {
-        $this->resetPageAndReload();
+        $this->setPage(1);
+        $this->reloadTable();
     }
 
     public function openAddModal()

@@ -5,9 +5,12 @@ namespace App\Livewire\Homepage\Programs\Steps;
 use App\Models\Step;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class ProgramStepAddModal extends Component
 {
+    use WithFileUploads;
+
     public ?int $programId = null;
 
     public ?int $stepId = null;
@@ -72,7 +75,7 @@ class ProgramStepAddModal extends Component
                         $rules['description'] = 'nullable|string|min:10|max:1000';
                         break;
                     case 'content_url':
-                        $rules['contentUrl'] = 'required|url|max:500';
+                        $rules['contentUrl'] = 'nullable|url|max:500';
                         break;
                     case 'content_image':
                         $rules['contentImage'] = 'required|url|max:500';
@@ -90,6 +93,18 @@ class ProgramStepAddModal extends Component
         }
 
         return $rules;
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            // Check if content_url is required but not provided
+            if (in_array($this->type, ['video', 'audio', 'book'])) {
+                if (empty($this->contentUrl)) {
+                    $validator->errors()->add('contentUrl', 'Either a content URL or file upload is required for this step type.');
+                }
+            }
+        });
     }
 
     protected function messages(): array

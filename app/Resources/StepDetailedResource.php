@@ -79,8 +79,6 @@ class StepDetailedResource extends JsonResource
                 $array['score'] = $progress->score;
                 $array['challenges_done'] = $progress->challenges_done;
                 $array['percentage'] = $progress->percentage ?? 0;
-                // $array['started_at'] = $progress->started_at;
-                // $array['completed_at'] = $progress->completed_at;
             }
         }
 
@@ -106,10 +104,12 @@ class StepDetailedResource extends JsonResource
         }
 
         return collect($this->challenges)->map(function ($challenge, $index) use ($completedChallengeIds) {
-            $challengeId = $index + 1; // Use 1-based indexing for challenge IDs
-
+            $challengeId = $index + 1;
+            $timeType = __('lookups.'. str_replace('s', '', $this->time_type));
+            $timeToFinish =  __('lookups.'. $challengeId);
             return [
                 'id' => $challengeId,
+                'title' => $timeType . ' ' . $timeToFinish,
                 'text' => $challenge,
                 'is_completed' => in_array($challengeId, $completedChallengeIds),
             ];

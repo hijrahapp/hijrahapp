@@ -1,4 +1,4 @@
-<div class="space-y-2" wire:ignore>
+<div class="space-y-2">
     <!-- Label -->
     <label class="block text-sm font-medium text-gray-700">
         {{ $label }}

@@ -20,7 +20,9 @@
       "mcp__laravel-boost__read-log-entries",
       "mcp__laravel-boost__get-absolute-url",
       "Bash(composer:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "mcp__laravel-boost__search-docs",
+      "Bash(chmod:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
