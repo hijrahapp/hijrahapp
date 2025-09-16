@@ -72,7 +72,7 @@
                                             {{ $module->pillar->name }}
                                         </span>
                                     @else
-                                        <span class="text-gray-400">Direct</span>
+                                        <span class="text-gray-400">-</span>
                                     @endif
                                 </td>
                                 <td class="text-center" wire:ignore>
