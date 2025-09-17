@@ -3,8 +3,10 @@
 namespace App\Http\Repositories;
 
 use App\Models\Liability;
+use App\Models\UserContextStatus;
 use App\Models\UserLiabilityProgress;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Facades\DB;
 
 class LiabilityRepository
@@ -24,71 +26,102 @@ class LiabilityRepository
      */
     public function getUserLiabilities(int $userId, array $methodologyIds = [], array $moduleIds = [], array $status = []): Collection
     {
-        // Get all user's completed modules with their methodology and pillar contexts
-        $userModuleQuery = DB::table('user_context_statuses as ucs')
-            ->where('ucs.user_id', $userId)
-            ->where('ucs.context_type', 'module')
-            ->where('ucs.status', 'completed');
+        // Get user's completed modules using Eloquent model
+        $userCompletedModulesQuery = UserContextStatus::where('user_id', $userId)
+            ->where('context_type', 'module')
+            ->where('status', 'completed');
 
-        // Apply methodology filter
+        // Apply filters
         if (! empty($methodologyIds)) {
-            $userModuleQuery->whereIn('ucs.methodology_id', $methodologyIds);
+            $userCompletedModulesQuery->whereIn('methodology_id', $methodologyIds);
         }
 
-        // Apply module filter
         if (! empty($moduleIds)) {
-            $userModuleQuery->whereIn('ucs.context_id', $moduleIds);
+            $userCompletedModulesQuery->whereIn('context_id', $moduleIds);
         }
 
-        $userCompletedModules = $userModuleQuery->get(['context_id as module_id', 'methodology_id', 'pillar_id']);
+        $userCompletedModules = $userCompletedModulesQuery->get(['context_id as module_id', 'methodology_id', 'pillar_id']);
 
         if ($userCompletedModules->isEmpty()) {
-            return Liability::query()->whereRaw('1 = 0')->get(); // Return empty Eloquent Collection
+            return collect(); // Return empty collection
         }
 
-        $eligibleLiabilities = collect();
+        // Build constraints for liability query based on user's completed modules
+        $moduleConstraints = $userCompletedModules->map(function ($moduleData) {
+            return [
+                'module_id' => $moduleData->module_id,
+                'methodology_id' => $moduleData->methodology_id,
+                'pillar_id' => $moduleData->pillar_id,
+            ];
+        });
 
-        foreach ($userCompletedModules as $moduleData) {
-            // Find liabilities linked to this specific module, methodology, and pillar combination
-            $query = Liability::query()
-                ->join('liability_module as lm', 'liabilities.id', '=', 'lm.liability_id')
-                ->join('modules as m', 'lm.module_id', '=', 'm.id')
-                ->join('methodology as mt', 'lm.methodology_id', '=', 'mt.id')
-                ->leftJoin('pillars as p', 'lm.pillar_id', '=', 'p.id')
-                ->where('lm.module_id', $moduleData->module_id)
-                ->where('lm.methodology_id', $moduleData->methodology_id)
-                ->where('liabilities.active', true);
+        // Get eligible liabilities using a single optimized query with eager loading
+        $liabilitiesQuery = Liability::with([
+            'modules' => function ($query) use ($moduleConstraints) {
+                $query->with(['methodologies:id,name', 'pillars:id,name']);
+            }
+        ])
+            ->where('active', true)
+            ->whereHas('modules', function ($query) use ($moduleConstraints) {
+                $query->where(function ($innerQuery) use ($moduleConstraints) {
+                    foreach ($moduleConstraints as $constraint) {
+                        $innerQuery->orWhere(function ($constraintQuery) use ($constraint) {
+                            $constraintQuery->where('liability_module.module_id', $constraint['module_id'])
+                                ->where('liability_module.methodology_id', $constraint['methodology_id']);
 
-            // Add pillar condition if pillar exists
-            if ($moduleData->pillar_id) {
-                $query->where('lm.pillar_id', $moduleData->pillar_id);
-            } else {
-                $query->whereNull('lm.pillar_id');
+                            if ($constraint['pillar_id']) {
+                                $constraintQuery->where('liability_module.pillar_id', $constraint['pillar_id']);
+                            } else {
+                                $constraintQuery->whereNull('liability_module.pillar_id');
+                            }
+                        });
+                    }
+                });
+            });
+
+        $liabilities = $liabilitiesQuery->get();
+
+        // Get user progress data in bulk to avoid N+1 queries
+        $userProgressData = collect();
+        if (! empty($status) && $liabilities->isNotEmpty()) {
+            $userProgressData = UserLiabilityProgress::where('user_id', $userId)
+                ->whereIn('liability_id', $liabilities->pluck('id'))
+                ->get()
+                ->keyBy('liability_id');
+        }
+
+        // Process liabilities and add qualifying module information
+        $processedLiabilities = $liabilities->map(function ($liability) use ($moduleConstraints, $userProgressData, $status, $userId) {
+            // Find the qualifying module for this liability
+            foreach ($liability->modules as $module) {
+                $pivot = $module->pivot;
+
+                // Check if this module matches any of the user's completed modules
+                $matchingConstraint = $moduleConstraints->first(function ($constraint) use ($pivot) {
+                    return $constraint['module_id'] == $pivot->module_id &&
+                           $constraint['methodology_id'] == $pivot->methodology_id &&
+                           $constraint['pillar_id'] == $pivot->pillar_id;
+                });
+
+                if ($matchingConstraint) {
+                    // Get methodology and pillar data
+                    $methodology = $module->methodologies->where('id', $pivot->methodology_id)->first();
+                    $pillar = $pivot->pillar_id ? $module->pillars->where('id', $pivot->pillar_id)->first() : null;
+
+                    // Add qualifying module data to liability
+                    $liability->qualifying_module_id = $module->id;
+                    $liability->module_name = $module->name;
+                    $liability->methodology_id = $pivot->methodology_id;
+                    $liability->methodology_name = $methodology?->name;
+                    $liability->pillar_id = $pivot->pillar_id;
+                    $liability->pillar_name = $pillar?->name;
+                    break; // Use first qualifying module
+                }
             }
 
-            $liabilities = $query->select([
-                'liabilities.*',
-                'lm.module_id as qualifying_module_id',
-                'm.name as module_name',
-                'mt.id as methodology_id',
-                'mt.name as methodology_name',
-                'p.id as pillar_id',
-                'p.name as pillar_name',
-            ])->get();
-
-            $eligibleLiabilities = $eligibleLiabilities->merge($liabilities);
-        }
-
-        // Remove duplicates based on liability ID while preserving the first occurrence
-        $uniqueLiabilities = $eligibleLiabilities->unique('id');
-
-        // Apply status filter if provided
-        if (! empty($status) && $uniqueLiabilities->isNotEmpty()) {
-            $uniqueLiabilities = $uniqueLiabilities->filter(function ($liability) use ($status, $userId) {
-                $userProgress = UserLiabilityProgress::query()
-                ->where('user_id', $userId)
-                ->where('liability_id', $liability->id)
-                ->first();
+            // Add user progress data if status filtering is needed
+            if (! empty($status)) {
+                $userProgress = $userProgressData->get($liability->id);
                 $isCompleted = $userProgress ? $userProgress->is_completed : false;
                 $hasProgress = $userProgress && $userProgress->getCompletedTodosCount() > 0;
 
@@ -99,12 +132,74 @@ class LiabilityRepository
                     $liabilityStatus = 'in_progress';
                 }
 
-                return in_array($liabilityStatus, $status);
+                $liability->user_status = $liabilityStatus;
+            }
+
+            return $liability;
+        });
+
+        // Apply status filter if provided
+        if (! empty($status)) {
+            $processedLiabilities = $processedLiabilities->filter(function ($liability) use ($status) {
+                return in_array($liability->user_status, $status);
             });
         }
 
-        // Convert back to Eloquent Collection
-        return new Collection($uniqueLiabilities->values()->all());
+        return $processedLiabilities->values();
+    }
+
+    /**
+     * Get unique methodologies and modules from user liabilities for filtering.
+     */
+    public function getUserLiabilitiesFilters(int $userId): array
+    {
+        // Reuse the getUserLiabilities method to get actual user liabilities
+        $userLiabilities = $this->getUserLiabilities($userId);
+
+        // Extract filters from user liabilities
+        $filters = $this->extractFiltersFromLiabilities($userLiabilities);
+
+        return [
+            'methodologies' => $filters['methodologies'],
+            'modules' => $filters['modules'],
+            'statuses' => ['not_started', 'in_progress', 'completed'],
+        ];
+    }
+
+    /**
+     * Extract unique methodologies and modules from liabilities with qualifying module data.
+     */
+    private function extractFiltersFromLiabilities(BaseCollection $liabilities): array
+    {
+        $methodologies = collect();
+        $modules = collect();
+
+        foreach ($liabilities as $liability) {
+            if (isset($liability->methodology_id) && isset($liability->methodology_name)) {
+                // Add methodology if not already added
+                if (! $methodologies->contains('id', $liability->methodology_id)) {
+                    $methodologies->push([
+                        'id' => $liability->methodology_id,
+                        'name' => $liability->methodology_name,
+                    ]);
+                }
+            }
+
+            if (isset($liability->qualifying_module_id) && isset($liability->module_name)) {
+                // Add module if not already added
+                if (! $modules->contains('id', $liability->qualifying_module_id)) {
+                    $modules->push([
+                        'id' => $liability->qualifying_module_id,
+                        'name' => $liability->module_name,
+                    ]);
+                }
+            }
+        }
+
+        return [
+            'methodologies' => $methodologies->sortBy('name')->values()->toArray(),
+            'modules' => $modules->sortBy('name')->values()->toArray(),
+        ];
     }
 
     /**
@@ -213,52 +308,4 @@ class LiabilityRepository
         return $liability;
     }
 
-    /**
-     * Get unique methodologies and modules from user liabilities for filtering.
-     */
-    public function getUserLiabilitiesFilters(int $userId): array
-    {
-        // Get unique methodologies and modules from user's eligible liabilities
-        $methodologyAndModules = DB::table('user_context_statuses as ucs')
-            ->join('liability_module as lm', function ($join) {
-                $join->on('ucs.context_id', '=', 'lm.module_id')
-                    ->on('ucs.methodology_id', '=', 'lm.methodology_id');
-            })
-            ->leftJoin('methodology as m', 'lm.methodology_id', '=', 'm.id')
-            ->leftJoin('modules as mod', 'lm.module_id', '=', 'mod.id')
-            ->where('ucs.user_id', $userId)
-            ->where('ucs.context_type', 'module')
-            ->where('ucs.status', 'completed')
-            ->whereNotNull('m.id')
-            ->whereNotNull('mod.id')
-            ->select(
-                'm.id as methodology_id',
-                'm.name as methodology_name',
-                'mod.id as module_id',
-                'mod.name as module_name'
-            )
-            ->distinct()
-            ->get();
-
-        // Group by methodology and module
-        $methodologies = $methodologyAndModules->groupBy('methodology_id')
-            ->map(fn ($group) => [
-                'id' => $group->first()->methodology_id,
-                'name' => $group->first()->methodology_name,
-            ])
-            ->values();
-
-        $modules = $methodologyAndModules->groupBy('module_id')
-            ->map(fn ($group) => [
-                'id' => $group->first()->module_id,
-                'name' => $group->first()->module_name,
-            ])
-            ->values();
-
-        return [
-            'methodologies' => $methodologies->toArray(),
-            'modules' => $modules->toArray(),
-            'statuses' => ['not_started', 'in_progress', 'completed'],
-        ];
-    }
 }
