@@ -56,6 +56,15 @@ class ProgramRepository
             ->get()
             ->keyBy('program_id');
 
+        // Get user step progress data in bulk if status filtering is needed
+        $userStepProgressData = collect();
+        if (! empty($statuses) && $programs->isNotEmpty()) {
+            $userStepProgressData = \App\Models\UserStepProgress::where('user_id', $userId)
+                ->whereIn('program_id', $programs->pluck('id'))
+                ->get()
+                ->groupBy('program_id');
+        }
+
         // Get methodologies and pillars data in bulk
         $methodologyIds_toLoad = [];
         $pillarIds_toLoad = [];
@@ -151,7 +160,25 @@ class ProgramRepository
 
                 // Add user program status if exists
                 $userProgram = $userProgramStatuses->get($program->id);
-                $program->user_program_status = $userProgram?->status ?? 'not_started';
+
+                // Calculate status based on step progress if status filtering is needed
+                if (! empty($statuses)) {
+                    $stepProgress = $userStepProgressData->get($program->id, collect());
+                    $completedSteps = $stepProgress->where('status', 'completed')->count();
+                    $inProgressSteps = $stepProgress->where('status', 'in_progress')->count();
+
+                    $programStatus = 'not_started';
+                    if ($userProgram && $userProgram->status === 'completed') {
+                        $programStatus = 'completed';
+                    } elseif ($completedSteps > 0 || $inProgressSteps > 0) {
+                        $programStatus = 'in_progress';
+                    }
+
+                    $program->user_program_status = $programStatus;
+                } else {
+                    $program->user_program_status = $userProgram?->status ?? 'not_started';
+                }
+
                 $program->started_at = $userProgram?->started_at;
                 $program->completed_at = $userProgram?->completed_at;
 
@@ -191,10 +218,7 @@ class ProgramRepository
             }
         ])->where('user_id', $userId);
 
-        // Apply status filter
-        if (! empty($statuses)) {
-            $userProgramsQuery->whereIn('status', $statuses);
-        }
+        // Note: Status filtering is applied after step-based calculation below
 
         // Only get programs that are active
         $userProgramsQuery->whereHas('program', function ($query) {
@@ -232,6 +256,15 @@ class ProgramRepository
             $pillars = \App\Models\Pillar::whereIn('id', array_unique($pillarIds_toLoad))
                 ->get()
                 ->keyBy('id');
+        }
+
+        // Get user step progress data in bulk if status filtering is needed
+        $userStepProgressData = collect();
+        if (! empty($statuses) && $userPrograms->isNotEmpty()) {
+            $userStepProgressData = \App\Models\UserStepProgress::where('user_id', $userId)
+                ->whereIn('program_id', $userPrograms->pluck('program.id')->filter())
+                ->get()
+                ->groupBy('program_id');
         }
 
         $result = collect();
@@ -302,14 +335,37 @@ class ProgramRepository
 
             // Only include if there's a qualifying module (or no filters applied)
             if ($qualifyingModule || (empty($methodologyIds) && empty($moduleIds))) {
-                // Add user program specific data to the program model
-                $program->user_program_status = $userProgram->status;
+                // Calculate status based on step progress if status filtering is needed
+                if (! empty($statuses)) {
+                    $stepProgress = $userStepProgressData->get($program->id, collect());
+                    $completedSteps = $stepProgress->where('status', 'completed')->count();
+                    $inProgressSteps = $stepProgress->where('status', 'in_progress')->count();
+
+                    $programStatus = 'not_started';
+                    if ($userProgram->status === 'completed') {
+                        $programStatus = 'completed';
+                    } elseif ($completedSteps > 0 || $inProgressSteps > 0) {
+                        $programStatus = 'in_progress';
+                    }
+
+                    $program->user_program_status = $programStatus;
+                } else {
+                    $program->user_program_status = $userProgram->status;
+                }
+
                 $program->started_at = $userProgram->started_at;
                 $program->completed_at = $userProgram->completed_at;
                 $program->qualifying_module = $qualifyingModule;
 
                 $result->push($program);
             }
+        }
+
+        // Apply status filter if provided (after step-based calculation)
+        if (! empty($statuses)) {
+            $result = $result->filter(function ($program) use ($statuses) {
+                return in_array($program->user_program_status, $statuses);
+            });
         }
 
         return $result;
