@@ -84,16 +84,13 @@ class LiabilityRepository
 
         // Apply status filter if provided
         if (! empty($status) && $uniqueLiabilities->isNotEmpty()) {
-            $liabilityIds = $uniqueLiabilities->pluck('id')->toArray();
-
-            // Get user progress for these liabilities
-            $userProgress = UserLiabilityProgress::where('user_id', $userId)
-                ->whereIn('liability_id', $liabilityIds)
-                ->pluck('is_completed', 'liability_id');
-
-            $uniqueLiabilities = $uniqueLiabilities->filter(function ($liability) use ($status, $userProgress) {
-                $isCompleted = $userProgress->get($liability->id, false);
-                $hasProgress = $userProgress->has($liability->id);
+            $uniqueLiabilities = $uniqueLiabilities->filter(function ($liability) use ($status, $userId) {
+                $userProgress = UserLiabilityProgress::query()
+                ->where('user_id', $userId)
+                ->where('liability_id', $liability->id)
+                ->first();
+                $isCompleted = $userProgress ? $userProgress->is_completed : false;
+                $hasProgress = $userProgress && $userProgress->getCompletedTodosCount() > 0;
 
                 $liabilityStatus = 'not_started';
                 if ($isCompleted) {
@@ -132,15 +129,15 @@ class LiabilityRepository
 
             $progress->save();
 
-            // Check if all todos are completed and update liability status
-            if ($progress->areAllTodosCompleted()) {
-                $progress->is_completed = true;
-                $progress->save();
-            } else {
-                // If not all todos are completed, ensure is_completed is false
-                $progress->is_completed = false;
-                $progress->save();
-            }
+            // // Check if all todos are completed and update liability status
+            // if ($progress->areAllTodosCompleted()) {
+            //     $progress->is_completed = true;
+            //     $progress->save();
+            // } else {
+            //     // If not all todos are completed, ensure is_completed is false
+            //     $progress->is_completed = false;
+            //     $progress->save();
+            // }
 
             return true;
         } catch (\Exception $e) {
@@ -194,19 +191,19 @@ class LiabilityRepository
         }
 
         // Create or update user progress to "in_progress" when liability is accessed
-        $progress = UserLiabilityProgress::firstOrCreate([
-            'user_id' => $userId,
-            'liability_id' => $liabilityId,
-        ], [
-            'completed_todos' => [],
-            'is_completed' => false,
-        ]);
+        // $progress = UserLiabilityProgress::firstOrCreate([
+        //     'user_id' => $userId,
+        //     'liability_id' => $liabilityId,
+        // ], [
+        //     'completed_todos' => [],
+        //     'is_completed' => false,
+        // ]);
 
         // If the liability is not completed and user is accessing it, ensure it's marked as in_progress
-        if (! $progress->is_completed) {
+        // if (! $progress->is_completed) {
             // The progress record already exists with is_completed = false, which means it's in_progress
             // We don't need to update anything here as the status is already correct
-        }
+        // }
 
         // Reload the liability with the updated progress
         $liability->load(['userProgress' => function ($query) use ($userId) {

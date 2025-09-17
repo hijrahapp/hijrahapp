@@ -166,6 +166,32 @@ class ProgramController
         }
     }
 
+    public function resetProgram(Request $request, int $programId): JsonResponse
+    {
+        try {
+            $user = $request->authUser;
+            $success = $this->programRepo->resetProgram($user->id, $programId);
+
+            if (! $success) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.program_not_found_or_not_started'),
+                ], 400);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => __('messages.program_reset_successfully'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.error_resetting_program'),
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function getSuggestedProgramsFilters(Request $request): JsonResponse
     {
         try {

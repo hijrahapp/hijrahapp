@@ -5,6 +5,7 @@ namespace App\Resources;
 use App\Services\ContextStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Lang;
 
 class StepDetailedResource extends JsonResource
 {
@@ -46,9 +47,11 @@ class StepDetailedResource extends JsonResource
                     'id' => $question->id,
                     'title' => $question->title,
                     'answers' => $question->answers->map(function ($answer) use ($question) {
+                        $lookupKey = 'lookups.' . $answer->title;
+                        $translatedTitle = Lang::has($lookupKey) ? __($lookupKey) : $answer->title;
                         return [
                             'id' => $answer->id,
-                            'text' => $answer->title,
+                            'text' => $translatedTitle,
                             'is_correct' => $answer->id == $question->pivot->correct_answer_id,
                         ];
                     })->toArray(),

@@ -83,6 +83,7 @@ Route::middleware('locale')->group(function () {
         // User interaction endpoints
         Route::post('{programId}/start', [ProgramController::class, 'startProgram']);
         Route::post('{programId}/complete', [ProgramController::class, 'completeProgram']);
+        Route::post('{programId}/reset', [ProgramController::class, 'resetProgram']);
 
         // Feedback endpoints
         Route::get('feedback/form', [ProgramController::class, 'getFeedbackForm']);

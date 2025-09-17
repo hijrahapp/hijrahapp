@@ -25,6 +25,7 @@ class StepResource extends JsonResource
             'time' => $this->time_to_finish,
             'time_type' => $this->time_type_display,
             'duration' => $this->formatted_duration,
+            'description' => $this->description,
         ];
 
         // Add user progress using ContextStatusService

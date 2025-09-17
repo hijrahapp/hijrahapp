@@ -153,11 +153,11 @@ class ModuleDetailedResource extends JsonResource
         $eligiblePrograms = DB::table('program_module as pm')
             ->join('programs as p', 'pm.program_id', '=', 'p.id')
             ->where('pm.module_id', $this->id)
-            ->where('pm.methodology_id', $methodologyId)
+            ->where('pm.methodology_id', (int) $methodologyId)
             ->where('p.active', true) // Only include active programs
             ->where(function ($query) use ($pillarId) {
                 if ($pillarId) {
-                    $query->where('pm.pillar_id', $pillarId);
+                    $query->where('pm.pillar_id', (int) $pillarId);
                 } else {
                     $query->whereNull('pm.pillar_id');
                 }
@@ -188,11 +188,11 @@ class ModuleDetailedResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'pillar' => $pillarId ? [
-                'id' => $pillarId,
+                'id' => (int) $pillarId,
                 'name' => Pillar::find($pillarId)->name,
             ] : null,
             'methodology' => [
-                'id' => $methodologyId,
+                'id' => (int) $methodologyId,
                 'name' => Methodology::find($methodologyId)->name,
             ],
         ];

@@ -3,6 +3,8 @@
 namespace App\Http\Repositories;
 
 use App\Models\Program;
+use App\Models\UserProgram;
+use App\Models\UserStepProgress;
 use App\Services\ResultCalculationOptimizedService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -459,6 +461,35 @@ class ProgramRepository
             return ['success' => true];
         } catch (\Exception) {
             return ['success' => false, 'error' => 'exception'];
+        }
+    }
+
+    public function resetProgram(int $userId, int $programId): bool
+    {
+        try {
+            DB::beginTransaction();
+
+            // Check if user has enrolled in this program
+            $userProgram = UserProgram::where('user_id', $userId)
+                ->where('program_id', $programId)
+                ->first();
+
+            if (! $userProgram) {
+                DB::rollback();
+                return false;
+            }
+
+            // Remove all step progress for this user and program
+            UserStepProgress::forUserAndProgram($userId, $programId)->delete();
+
+            // Remove user program enrollment
+            $userProgram->delete();
+
+            DB::commit();
+            return true;
+        } catch (\Exception) {
+            DB::rollback();
+            return false;
         }
     }
 }
