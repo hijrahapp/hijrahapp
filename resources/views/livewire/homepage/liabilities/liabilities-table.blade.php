@@ -20,7 +20,7 @@
                             <th class="w-20 text-center">#</th>
                             <th class="">Name</th>
                             <th class="">Description</th>
-                            <th class="text-center">Todos Count</th>
+                            <th class="text-center">To-Do Items Count</th>
                             <th class="text-center">Status</th>
                             <th class="w-20 text-center">Actions</th>
                         </tr>

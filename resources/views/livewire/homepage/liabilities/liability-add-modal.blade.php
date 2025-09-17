@@ -58,12 +58,12 @@
 
                 <!-- Todos Section -->
                 <div>
-                    <h3 class="text-lg font-medium mb-4">Todos</h3>
+                    <h3 class="text-lg font-medium mb-4">To-Do Items</h3>
                     <livewire:shared.components.list-input 
                         :items="$todos" 
-                        label="Todo Items" 
-                        placeholder="Enter todo item" 
-                        addButtonText="Add Todo"
+                        label="To-Do Items" 
+                        placeholder="Enter to-do item" 
+                        addButtonText="Add"
                         identifier="todos"
                         :reorderEnabled="true" />
                 </div>

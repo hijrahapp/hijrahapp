@@ -103,7 +103,7 @@
                                         label="Advices"
                                         :required="true"
                                         placeholder="Enter advice"
-                                        addButtonText="Add Advice"
+                                        addButtonText="Add"
                                         identifier="advices"
                                         wire:key="advices-list"
                                     />
