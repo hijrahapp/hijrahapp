@@ -1,20 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @OA\Schema(
- *     schema="Interest",
- *     type="object",
- *
- *     @OA\Property(property="id", type="integer", example=1),
- *     @OA\Property(property="name", type="string", example="Technology"),
- *     @OA\Property(property="imgUrl", type="string", example="https://example.com/image.jpg")
- * )
- */
 class InterestResource extends JsonResource
 {
     /**

@@ -61,4 +61,10 @@ return [
     'audio' => 'Audios',
     'book' => 'Books',
     'challenge' => 'Challenges',
+    'short-video' => 'Short Videos',
+    // Enrichment Categories
+    'health' => 'Health',
+    'money' => 'Money',
+    'family' => 'Family',
+    'spirituality' => 'Spirituality',
 ];

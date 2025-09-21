@@ -232,4 +232,17 @@ return [
 
     // الاهتمامات
     'user_interests_updated_successfully' => 'تم تحديث اهتمامات المستخدم بنجاح',
+
+    // الإثراءات
+    'error_fetching_enrichments' => 'خطأ في جلب الإثراءات',
+    'error_fetching_explore_enrichments' => 'خطأ في جلب إثراءات الاستكشاف',
+    'enrichment_not_found' => 'الإثراء غير موجود',
+    'error_fetching_enrichment' => 'خطأ في جلب الإثراء',
+    'authentication_required' => 'يتطلب تسجيل الدخول',
+    'enrichment_liked' => 'تم إعجاب الإثراء بنجاح',
+    'enrichment_unliked' => 'تم إلغاء إعجاب الإثراء بنجاح',
+    'error_toggling_like' => 'خطأ في تغيير حالة الإعجاب',
+    'enrichment_favorited' => 'تم إضافة الإثراء إلى المفضلة',
+    'enrichment_unfavorited' => 'تم إزالة الإثراء من المفضلة',
+    'error_toggling_favorite' => 'خطأ في تغيير حالة المفضلة',
 ];

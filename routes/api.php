@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EnrichmentController;
 use App\Http\Controllers\InterestController;
 use App\Http\Controllers\LiabilityController;
 use App\Http\Controllers\MethodologyController;
@@ -110,6 +111,14 @@ Route::middleware('locale')->group(function () {
         // User interests
         Route::get('user', [InterestController::class, 'getUserInterests']);
         Route::post('user/update', [InterestController::class, 'updateUserInterests']);
+    });
+
+    Route::prefix('enrichment')->middleware(['auth.jwt', 'auth.user'])->group(function () {
+        Route::get('all', [EnrichmentController::class, 'all']);
+        Route::get('explore', [EnrichmentController::class, 'explore']);
+        Route::get('{enrichmentId}', [EnrichmentController::class, 'get']);
+        Route::post('{enrichmentId}/like', [EnrichmentController::class, 'toggleLike']);
+        Route::post('{enrichmentId}/favorite', [EnrichmentController::class, 'toggleFavorite']);
     });
 
 });

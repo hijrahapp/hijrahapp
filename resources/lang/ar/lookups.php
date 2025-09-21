@@ -61,4 +61,10 @@ return [
     'audio' => 'مقاطع صوتية',
     'book' => 'كتيبات  PDF',
     'challenge' => 'تحديات',
+    'short-video' => 'فيديوهات قصيرة',
+    // Enrichment Categories
+    'health' => 'الصحة',
+    'money' => 'المال',
+    'family' => 'الأسرة',
+    'spirituality' => 'الروحانية',
 ];

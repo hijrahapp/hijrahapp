@@ -232,4 +232,17 @@ return [
 
     // Interests
     'user_interests_updated_successfully' => 'User interests updated successfully',
+
+    // Enrichments
+    'error_fetching_enrichments' => 'Error fetching enrichments',
+    'error_fetching_explore_enrichments' => 'Error fetching explore enrichments',
+    'enrichment_not_found' => 'Enrichment not found',
+    'error_fetching_enrichment' => 'Error fetching enrichment',
+    'authentication_required' => 'Authentication required',
+    'enrichment_liked' => 'Enrichment liked successfully',
+    'enrichment_unliked' => 'Enrichment unliked successfully',
+    'error_toggling_like' => 'Error toggling like status',
+    'enrichment_favorited' => 'Enrichment added to favorites',
+    'enrichment_unfavorited' => 'Enrichment removed from favorites',
+    'error_toggling_favorite' => 'Error toggling favorite status',
 ];
