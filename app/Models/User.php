@@ -28,6 +28,7 @@ class User extends Model
         'roleId',
         'firebase_uid',
         'profile_picture',
+        'interests',
     ];
 
     protected $hidden = [
@@ -46,6 +47,7 @@ class User extends Model
         'birthDate' => 'date',
         'active' => 'boolean',
         'password' => 'hashed',
+        'interests' => 'array',
     ];
 
     protected function imageUrlAttributes(): array

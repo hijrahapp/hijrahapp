@@ -229,4 +229,7 @@ return [
     'remove_liability_module_message' => 'هل أنت متأكد من أنك تريد إزالة هذه الوحدة من الالتزام؟',
     'remove_liability_module_note' => 'سيؤدي ذلك إلى إزالة الوحدة من الالتزام ولكن لن يتم حذف الوحدة نفسها.',
     'remove_liability_module_action' => 'إزالة',
+
+    // الاهتمامات
+    'user_interests_updated_successfully' => 'تم تحديث اهتمامات المستخدم بنجاح',
 ];

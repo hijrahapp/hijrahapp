@@ -229,4 +229,7 @@ return [
     'remove_liability_module_message' => 'Are you sure you want to remove this module from the liability?',
     'remove_liability_module_note' => 'This will remove the module from the liability but will not delete the module itself.',
     'remove_liability_module_action' => 'Remove',
+
+    // Interests
+    'user_interests_updated_successfully' => 'User interests updated successfully',
 ];

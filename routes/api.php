@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InterestController;
 use App\Http\Controllers\LiabilityController;
 use App\Http\Controllers\MethodologyController;
 use App\Http\Controllers\PasswordController;
@@ -100,6 +101,15 @@ Route::middleware('locale')->group(function () {
         // Todo progress endpoints
         Route::post('{liabilityId}/todo/update', [LiabilityController::class, 'updateTodo']);
         Route::post('{liabilityId}/complete', [LiabilityController::class, 'completeLiability']);
+    });
+
+    Route::prefix('interest')->middleware(['auth.jwt', 'auth.user'])->group(function () {
+        // Get all interests (public endpoint)
+        Route::get('all', [InterestController::class, 'all']);
+
+        // User interests
+        Route::get('user', [InterestController::class, 'getUserInterests']);
+        Route::post('user/update', [InterestController::class, 'updateUserInterests']);
     });
 
 });

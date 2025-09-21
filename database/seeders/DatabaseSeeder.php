@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
         // Seed answers and demo methodologies
         $this->call([
             AnswerSeeder::class,
+            InterestSeeder::class,
             // Choose one of the following seeders (comment out the one you don't need):
             DemoArabicSeeder::class, // Arabic demo data
             // DemoSeeder::class,        // English demo data
