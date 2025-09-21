@@ -7,6 +7,7 @@ use App\Models\Module;
 use App\Models\Pillar;
 use App\Models\Question;
 use App\Models\Tag;
+use App\Traits\HasDataTable;
 use App\Traits\WithoutUrlPagination;
 use App\Traits\WithTableReload;
 use Livewire\Attributes\Computed;
@@ -15,83 +16,58 @@ use Livewire\WithFileUploads;
 
 class TagsTable extends Component
 {
-    use WithFileUploads, WithoutUrlPagination, WithTableReload;
+    use WithFileUploads, WithoutUrlPagination, WithTableReload, HasDataTable;
 
     public $search = '';
     public $perPage = 10;
+
+    protected string $modelClass = Tag::class;
+    protected string $entityName = 'tag';
+    protected array $searchFields = ['title'];
+    protected string $defaultOrderBy = 'created_at';
+    protected string $defaultOrderDirection = 'desc';
 
     protected $listeners = [
         'refreshTable' => 'reloadTable',
         'changeTagStatus' => 'changeTagStatus',
         'deleteTag' => 'deleteTag',
+        'changeStatus' => 'changeTagStatus',
+        'deleteRecord' => 'deleteTag',
     ];
 
     #[Computed]
     public function tags()
     {
-        $query = Tag::where('title', 'like', '%'.$this->search.'%')
-            ->orderBy('created_at', 'desc');
-
-        // Use custom pagination without URL caching
+        $query = $this->getBaseQuery();
         $page = $this->getPage();
         return $query->paginate($this->perPage, ['*'], 'page', $page);
     }
 
     public function openTagStatusModal($request) {
-        if($request['active']) {
-            $title = __('messages.activate_tag_title');
-            $message = __('messages.activate_tag_message');
-            $action = __('messages.activate_action');
-            $note = null;
-        } else {
-            $title = __('messages.deactivate_tag_title');
-            $message = __('messages.deactivate_tag_message');
-            $action = __('messages.deactivate_action');
-            $note = __('messages.deactivate_tag_note');
-        }
-        $modal = [
-            'title' => $title,
-            'message' => $message,
-            'note' => $note,
-            'action' => $action,
-            'callback' => 'changeTagStatus',
-            'object' => $request
-        ];
-        $this->dispatch('openConfirmationModal', $modal);
+        $this->openStatusModal($request);
     }
 
     public function openTagDeleteModal($request) {
-        $modal = [
-            "title" => __('messages.delete_tag_title'),
-            "message" => __("messages.delete_tag_message"),
-            "note" => __("messages.delete_tag_note"),
-            "action" => __("messages.delete_action"),
-            "callback" => "deleteTag",
-            "object" => $request
-        ];
-        $this->dispatch('openConfirmationModal', $modal);
+        $this->openDeleteModal($request);
     }
 
     public function changeTagStatus($request)
     {
         $tag = Tag::findOrFail($request['id']);
-        $tag->active = $request['active'];
-        $tag->save();
-        if ($tag->active === false) {
+        if ($request['active'] === false) {
             // On deactivation, remove the tag from all related entities
             $this->removeTagFromAllEntities((int) $tag->id);
         }
-        $this->reloadTable();
+        $this->changeStatus($request);
     }
 
     public function deleteTag($request)
     {
-        $tag = Tag::findOrFail($request['id']);
+        $tagId = is_array($request) ? $request['id'] : $request;
+        $tag = Tag::findOrFail($tagId);
         // Remove tag from all related entities' tags arrays
         $this->removeTagFromAllEntities((int) $tag->id);
-        // Delete the tag itself
-        $tag->delete();
-        $this->reloadTable();
+        $this->deleteRecord($tagId);
     }
 
     private function removeTagFromAllEntities(int $tagId): void

@@ -4,6 +4,7 @@ namespace App\Livewire\Homepage\Users\Customers;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Traits\HasDataTable;
 use App\Traits\WithoutUrlPagination;
 use App\Traits\WithTableReload;
 use Livewire\Component;
@@ -11,31 +12,32 @@ use Livewire\WithFileUploads;
 
 class CustomersTable extends Component
 {
-    use WithFileUploads, WithoutUrlPagination, WithTableReload;
+    use WithFileUploads, WithoutUrlPagination, WithTableReload, HasDataTable;
 
     public $search = '';
     public $perPage = 10;
 
+    protected string $modelClass = User::class;
+    protected string $entityName = 'user';
+    protected array $searchFields = ['name', 'email'];
+    protected string $defaultOrderBy = 'created_at';
+    protected string $defaultOrderDirection = 'desc';
+
     protected $listeners = [
         'refreshTable' => 'reloadTable',
-        'changeUserStatus' => 'changeUserStatus'
+        'changeUserStatus' => 'changeUserStatus',
+        'changeStatus' => 'changeUserStatus',
     ];
 
     public function getUsersProperty()
     {
         return $this->handleReloadState(function () {
             $customerRoleId = Role::where('name', 'Customer')->value('id');
-            $query = User::with('role')
+            $query = $this->getBaseQuery()
+                ->with('role')
                 ->whereIn('roleId', [$customerRoleId])
-                ->orderBy('id', 'asc')
-                ->when($this->search, function($q) {
-                    $q->where(function($q) {
-                        $q->where('name', 'like', '%'.$this->search.'%')
-                        ->orWhere('email', 'like', '%'.$this->search.'%');
-                    });
-                });
+                ->orderBy('id', 'asc');
 
-            // Use custom pagination without URL caching
             $page = $this->getPage();
             return $query->paginate($this->perPage, ['*'], 'page', $page);
         });
@@ -47,34 +49,18 @@ class CustomersTable extends Component
     }
 
     public function handleUserStatusOpen($request) {
-        if($request['status']) {
-            $title = __('messages.activate_user_title');
-            $message = __('messages.activate_user_message');
-            $action = __('messages.activate_action');
-            $note = null;
-        } else {
-            $title = __('messages.deactivate_user_title');
-            $message = __('messages.deactivate_user_message');
-            $action = __('messages.deactivate_action');
-            $note = __('messages.deactivate_user_note');
-        }
-        $modal = [
-            'title' => $title,
-            'message' => $message,
-            'note' => $note,
-            'action' => $action,
-            'callback' => 'changeUserStatus',
-            'object' => $request
-        ];
-        $this->dispatch('openConfirmationModal', $modal);
+        $statusRequest = ['id' => $request['userId'], 'active' => $request['status']];
+        $this->openStatusModal($statusRequest);
     }
 
     public function changeUserStatus($request)
     {
-        $user = User::findOrFail($request['userId']);
-        $user->active = $request['status'];
-        $user->save();
-        $this->reloadTable();
+        if (isset($request['userId'])) {
+            $statusRequest = ['id' => $request['userId'], 'active' => $request['status']];
+        } else {
+            $statusRequest = $request;
+        }
+        $this->changeStatus($statusRequest);
     }
 
     public function render()

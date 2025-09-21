@@ -4,6 +4,7 @@ namespace App\Livewire\Homepage\Methodologies;
 
 use App\Models\Methodology;
 use App\Models\Tag;
+use App\Traits\HasDataTable;
 use App\Traits\WithoutUrlPagination;
 use App\Traits\WithTableReload;
 use Illuminate\Support\Facades\DB;
@@ -13,11 +14,16 @@ use Livewire\WithFileUploads;
 
 class MethodologyTable extends Component
 {
-    use WithFileUploads, WithoutUrlPagination, WithTableReload;
+    use WithFileUploads, WithoutUrlPagination, WithTableReload, HasDataTable;
 
     public string $search = '';
-
     public int $perPage = 10;
+
+    protected string $modelClass = Methodology::class;
+    protected string $entityName = 'methodology';
+    protected array $searchFields = ['name', 'description'];
+    protected string $defaultOrderBy = 'created_at';
+    protected string $defaultOrderDirection = 'desc';
 
     public string $tagFilter = '';
 
@@ -31,22 +37,21 @@ class MethodologyTable extends Component
         'refreshTable' => 'reloadTable',
         'deleteMethodology' => 'deleteMethodology',
         'changeMethodologyStatus' => 'changeMethodologyStatus',
+        'deleteRecord' => 'deleteMethodology',
+        'changeStatus' => 'changeMethodologyStatus',
     ];
 
     #[Computed]
     public function methodologies()
     {
         return $this->handleReloadState(function () {
-            $query = Methodology::where('name', 'like', '%'.$this->search.'%')
+            $query = $this->getBaseQuery()
                 ->when($this->tagFilter, function ($q) {
                     $q->whereJsonContains('tags', (int) $this->tagFilter);
                 })
-                ->withCount(['pillars', 'modules', 'questions'])
-                ->orderBy('created_at', 'desc');
+                ->withCount(['pillars', 'modules', 'questions']);
 
-            // Use custom pagination without URL caching
             $page = $this->getPage();
-
             return $query->paginate($this->perPage, ['*'], 'page', $page);
         });
     }
@@ -125,45 +130,12 @@ class MethodologyTable extends Component
 
     public function openDeleteMethodologyModal($request)
     {
-        $methodology = Methodology::findOrFail($request['id']);
-
-        $modal = [
-            'title' => __('messages.delete_methodology_title'),
-            'message' => __('messages.delete_methodology_message'),
-            'note' => __('messages.delete_methodology_note'),
-            'action' => __('messages.delete_action'),
-            'callback' => 'deleteMethodology',
-            'object' => $request,
-        ];
-
-        $this->dispatch('openConfirmationModal', $modal);
+        $this->openDeleteModal($request);
     }
 
     public function openMethodologyStatusModal($request)
     {
-        $methodology = Methodology::findOrFail($request['id']);
-
-        if ($request['active']) {
-            $title = __('messages.activate_methodology_title');
-            $message = __('messages.activate_methodology_message');
-            $action = __('messages.activate_action');
-            $note = null;
-        } else {
-            $title = __('messages.deactivate_methodology_title');
-            $message = __('messages.deactivate_methodology_message');
-            $action = __('messages.deactivate_action');
-            $note = __('messages.deactivate_methodology_note');
-        }
-
-        $modal = [
-            'title' => $title,
-            'message' => $message,
-            'note' => $note,
-            'action' => $action,
-            'callback' => 'changeMethodologyStatus',
-            'object' => $request,
-        ];
-        $this->dispatch('openConfirmationModal', $modal);
+        $this->openStatusModal($request);
     }
 
     public function changeMethodologyStatus($request)
@@ -179,10 +151,7 @@ class MethodologyTable extends Component
             }
         }
 
-        $methodology->active = $request['active'];
-        $methodology->save();
-        $this->reloadTable();
-        $this->dispatch('show-toast', type: 'success', message: $request['active'] ? 'Methodology activated successfully!' : 'Methodology deactivated successfully!');
+        $this->changeStatus($request);
     }
 
     /**
