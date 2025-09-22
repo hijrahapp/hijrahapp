@@ -119,9 +119,9 @@ class StepQuestionsModal extends Component
         $this->sequences[$questionId] = count($this->selectedQuestionIds);
 
         // Set first answer as default correct answer
-        if ($question && $question->answers->count() > 0) {
-            $this->correctAnswers[$questionId] = $question->answers->first()->id;
-        }
+        // if ($question && $question->answers->count() > 0) {
+        // $this->correctAnswers[$questionId] = null;
+        // }
     }
 
     public function removeQuestion(int $questionId): void

@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Shared\Components;
 
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Modelable;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
 
 class FilePicker extends Component
 {
@@ -24,41 +24,85 @@ class FilePicker extends Component
 
     public $file = null;
 
+    public string $fileType = '';
+
     public array $allowedTypes = [];
+
+    public array $allowedServices = [];
 
     public int $maxSize = 10; // 10MB
 
     public string $helpText = '';
 
+    public bool $enableValidation = false;
+
+    public bool $validateOnUpdate = false;
+
     protected $listeners = [
         'refreshFilePicker' => 'refreshComponent',
     ];
 
-    protected $rules = [];
+    protected function rules(): array
+    {
+        if (! $this->enableValidation || empty($this->fileType)) {
+            return [];
+        }
 
-    protected $messages = [];
+        $rules = ['nullable', 'max:500'];
+
+        // Add file-type specific validation
+        if ($this->fileType === 'video') {
+            $rules[] = \App\Rules\FileUrlValidation::video();
+        } elseif ($this->fileType === 'audio') {
+            $rules[] = \App\Rules\FileUrlValidation::audio();
+        } elseif ($this->fileType === 'book') {
+            $rules[] = \App\Rules\FileUrlValidation::book();
+        }
+
+        return [
+            'contentUrl' => $rules,
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'contentUrl.max' => 'The URL may not be greater than 500 characters.',
+        ];
+    }
 
     public function mount(
         string $label = 'File',
         bool $required = false,
         string $placeholder = 'Enter file URL or upload a file',
-        array $allowedTypes = [],
+        string $fileType = '',
         int $maxSize = 10,
         string $helpText = '',
+        bool $enableValidation = false,
+        bool $validateOnUpdate = false,
     ) {
         $this->label = $label;
         $this->required = $required;
         $this->placeholder = $placeholder;
-        $this->allowedTypes = $allowedTypes;
+        if ($fileType == 'video') {
+            $this->allowedTypes = ['mp4', 'mov', 'avi'];
+            $this->allowedServices = ['youtube.com', 'vimeo.com', 'dailymotion.com', 'peertube', 'drive.google.com'];
+        } elseif ($fileType == 'audio') {
+            $this->allowedTypes = ['mp3', 'wav', 'aac'];
+            $this->allowedServices = ['audiomack.com', 'mixcloud.com', 'podbean.com', 'drive.google.com'];
+        } elseif ($fileType == 'book') {
+            $this->allowedTypes = ['pdf'];
+            $this->allowedServices = ['drive.google.com'];
+        }
         $this->maxSize = $maxSize;
         $this->helpText = $helpText;
+        $this->enableValidation = $enableValidation;
+        $this->validateOnUpdate = $validateOnUpdate;
 
         // Initialize contentUrl from value if provided
         if (! empty($this->value)) {
             $this->contentUrl = $this->value;
         }
-
-        // Livewire will handle validation through global rules
     }
 
     public function updatedFile()
@@ -66,7 +110,7 @@ class FilePicker extends Component
         if ($this->file) {
             // Clear URL when file is uploaded
             $this->contentUrl = '';
-            // Store the file and update contentUrl with the file URL  
+            // Store the file and update contentUrl with the file URL
             $this->storeFileAndUpdateUrl();
             // Update parent component value
             $this->value = $this->contentUrl;
@@ -79,6 +123,11 @@ class FilePicker extends Component
         // Clear the file when URL is manually entered
         if (! empty($this->contentUrl) && $this->file) {
             $this->file = null;
+        }
+
+        // Validate URL if validateOnUpdate is enabled
+        if ($this->validateOnUpdate && ! empty($this->contentUrl) && $this->enableValidation) {
+            $this->validateOnly('contentUrl');
         }
 
         // Update parent component value
@@ -94,15 +143,15 @@ class FilePicker extends Component
             // Resolve paths
             $sourcePath = Storage::disk('public')->path($filePath);
             $publicStorageRoot = public_path('storage');
-            $destinationPath = $publicStorageRoot . DIRECTORY_SEPARATOR . $filePath;
+            $destinationPath = $publicStorageRoot.DIRECTORY_SEPARATOR.$filePath;
 
             // Determine if public/storage is a symlink to storage/app/public.
             // If they resolve to the same real path, copying is unnecessary and unlinking would delete the same file.
             $storagePublicRoot = storage_path('app/public');
             $isSameTarget = realpath($publicStorageRoot) && realpath($publicStorageRoot) === realpath($storagePublicRoot);
 
-            if (!$isSameTarget) {
-                if (!file_exists(dirname($destinationPath))) {
+            if (! $isSameTarget) {
+                if (! file_exists(dirname($destinationPath))) {
                     mkdir(dirname($destinationPath), 0755, true);
                 }
                 // Copy then remove source
@@ -112,11 +161,9 @@ class FilePicker extends Component
             }
 
             // Save URL (works whether symlinked or physically copied)
-            $this->contentUrl = asset('storage/' . $filePath);
+            $this->contentUrl = asset('storage/'.$filePath);
         }
     }
-
-
 
     public function clearFile()
     {
@@ -130,6 +177,7 @@ class FilePicker extends Component
     {
         $this->contentUrl = '';
         $this->value = '';
+        $this->resetValidation('contentUrl');
     }
 
     public function clear()
@@ -137,7 +185,7 @@ class FilePicker extends Component
         $this->file = null;
         $this->contentUrl = '';
         $this->value = '';
-        $this->resetErrorBag('file');
+        $this->resetValidation(['file', 'contentUrl']);
     }
 
     public function getFileSize()

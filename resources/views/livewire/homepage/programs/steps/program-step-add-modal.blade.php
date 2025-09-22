@@ -137,9 +137,11 @@
                                         :required="true"
                                         :placeholder="'Enter ' . $type . ' URL or upload a file'"
                                         wire:model="contentUrl" 
-                                        :allowedTypes="$type === 'video' ? ['mp4', 'mov', 'avi'] : ['mp3', 'wav', 'aac']"
+                                        :fileType="$type"
                                         :maxSize="50"
                                         :helpText="'Upload a ' . $type . ' file or provide a URL'"
+                                        :enableValidation="true"
+                                        :validateOnUpdate="false"
                                         wire:key="content-file-picker-{{ $type }}-{{ $stepId ?? 'new' }}"
                                     />
                                     @error('contentUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
@@ -157,9 +159,11 @@
                                         :required="true"
                                         :placeholder="'Enter book URL or upload a PDF file'"
                                         wire:model="contentUrl" 
-                                        :allowedTypes="['pdf']"
+                                        :fileType="$type"
                                         :maxSize="10"
                                         :helpText="'Upload a PDF file or provide a URL ending with .pdf'"
+                                        :enableValidation="true"
+                                        :validateOnUpdate="false"
                                         wire:key="book-file-picker-{{ $stepId ?? 'new' }}"
                                     />
                                     @error('contentUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror

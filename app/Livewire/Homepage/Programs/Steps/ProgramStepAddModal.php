@@ -3,6 +3,7 @@
 namespace App\Livewire\Homepage\Programs\Steps;
 
 use App\Models\Step;
+use App\Rules\FileUrlValidation;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -75,7 +76,18 @@ class ProgramStepAddModal extends Component
                         $rules['description'] = 'nullable|string|min:10|max:1000';
                         break;
                     case 'content_url':
-                        $rules['contentUrl'] = 'nullable|url|max:500';
+                        $validationRule = match ($this->type) {
+                            'video' => FileUrlValidation::video(),
+                            'audio' => FileUrlValidation::audio(),
+                            'book' => FileUrlValidation::book(),
+                            default => null,
+                        };
+
+                        $rules['contentUrl'] = array_filter([
+                            'required',
+                            'max:500',
+                            $validationRule,
+                        ]);
                         break;
                     case 'content_image':
                         $rules['contentImage'] = 'required|url|max:500';
@@ -99,18 +111,6 @@ class ProgramStepAddModal extends Component
         return $rules;
     }
 
-    public function withValidator($validator)
-    {
-        $validator->after(function ($validator) {
-            // Check if content_url is required but not provided
-            if (in_array($this->type, ['video', 'audio', 'book'])) {
-                if (empty($this->contentUrl)) {
-                    $validator->errors()->add('contentUrl', 'Either a content URL or file upload is required for this step type.');
-                }
-            }
-        });
-    }
-
     protected function messages(): array
     {
         return [
@@ -131,8 +131,7 @@ class ProgramStepAddModal extends Component
             'content.min' => 'The content must be at least 10 characters.',
             'description.min' => 'The description must be at least 10 characters.',
             'description.max' => 'The description may not be greater than 1000 characters.',
-            'contentUrl.required' => 'The content URL is required for this step type.',
-            'contentUrl.url' => 'Please enter a valid URL.',
+            'contentUrl.required' => 'Either a URL or file upload is required for this step type.',
             'contentUrl.max' => 'The content URL may not be greater than 500 characters.',
             'contentImage.required' => 'The cover image is required for this step type.',
             'contentImage.url' => 'Please enter a valid image URL.',

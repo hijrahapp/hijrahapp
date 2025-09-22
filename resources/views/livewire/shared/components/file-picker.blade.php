@@ -12,13 +12,14 @@
         <!-- URL Input -->
         <div>
             <input 
-                type="url" 
                 class="kt-input w-full @error('contentUrl') border-red-500 @enderror" 
                 wire:model.live="contentUrl"
                 placeholder="{{ $placeholder }}"
+                wire:loading.attr="disabled"
+                wire:target="file"
             >
             @error('contentUrl')
-                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                <p class="text-xs text-destructive mt-1">{{ $message }}</p>
             @enderror
         </div>
 
@@ -40,10 +41,20 @@
                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 wire:model="file"
                 @if(!empty($allowedTypes)) accept=".{{ implode(',.', $allowedTypes) }}" @endif
-            >
+                wire:loading.attr="disabled"
+                wire:target="file"
+            />
+
+            <!-- Loading Overlay -->
+            <div wire:loading wire:target="file" class="w-full min-h-[100px] border-2 border-dashed border-gray-300 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center relative hover:border-gray-400 transition-colors">
+                <div class="text-center p-4">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
+                    <p class="text-sm text-gray-600">Uploading...</p>
+                </div>
+            </div>
 
             <!-- Upload Display -->
-            <div class="w-full min-h-[100px] border-2 border-dashed border-gray-300 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center relative hover:border-gray-400 transition-colors">
+            <div class="w-full min-h-[100px] border-2 border-dashed border-gray-300 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center relative hover:border-gray-400 transition-colors" wire:loading.class="hidden" wire:target="file">
                 @if($file || $contentUrl)
                     <!-- File Selected or Existing File -->
                     <div class="text-center p-4">
@@ -76,24 +87,6 @@
                             @endphp
                             <p class="text-xs text-gray-500">{{ $extension ?: 'FILE' }} • External URL</p>
                         @endif
-                        
-                        <!-- Action Buttons -->
-                        <div class="mt-2 flex items-center justify-center gap-3">
-                            <button
-                                type="button"
-                                onclick="window.open('{{ $contentUrl ?: ($file ? $this->getFileUrl() : '') }}', '_blank')"
-                                class="text-blue-500 hover:text-blue-700 text-xs underline"
-                            >
-                                View
-                            </button>
-                            <button
-                                type="button"
-                                wire:click="clear"
-                                class="text-red-500 hover:text-red-700 text-xs underline"
-                            >
-                                Remove
-                            </button>
-                        </div>
                     </div>
                 @else
                     <!-- Upload Placeholder -->
@@ -148,8 +141,11 @@
                 <div class="flex items-center gap-2">
                     <button
                         type="button"
-                        onclick="window.open('{{ $contentUrl ?: ($file ? $this->getFileUrl() : '') }}', '_blank')"
+                        onclick="window.open('@if($contentUrl){{ $contentUrl }}@elseif($file){{ $this->getFileUrl() }}@endif', '_blank')"
                         class="text-blue-600 hover:text-blue-800 underline"
+                        wire:loading.class="opacity-50 pointer-events-none"
+                        wire:target="file"
+                        wire:loading.attr="disabled"
                     >
                         View
                     </button>
@@ -157,6 +153,9 @@
                         type="button"
                         wire:click="clear"
                         class="text-blue-600 hover:text-blue-800 underline"
+                        wire:loading.class="opacity-50 pointer-events-none"
+                        wire:target="file"
+                        wire:loading.attr="disabled"
                     >
                         Clear
                     </button>
