@@ -3,11 +3,12 @@
 namespace App\Http\Repositories;
 
 use App\Models\Liability;
+use App\Models\Methodology;
+use App\Models\Pillar;
 use App\Models\UserContextStatus;
 use App\Models\UserLiabilityProgress;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as BaseCollection;
-use Illuminate\Support\Facades\DB;
 
 class LiabilityRepository
 {
@@ -105,8 +106,8 @@ class LiabilityRepository
 
                 if ($matchingConstraint) {
                     // Get methodology and pillar data
-                    $methodology = $module->methodologies->where('id', $pivot->methodology_id)->first();
-                    $pillar = $pivot->pillar_id ? $module->pillars->where('id', $pivot->pillar_id)->first() : null;
+                    $methodology = Methodology::find($pivot->methodology_id);
+                    $pillar = $pivot->pillar_id ? Pillar::find($pivot->pillar_id) : null;
 
                     // Add qualifying module data to liability
                     $liability->qualifying_module_id = $module->id;

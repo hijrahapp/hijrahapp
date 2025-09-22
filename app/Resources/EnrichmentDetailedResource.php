@@ -23,7 +23,7 @@ class EnrichmentDetailedResource extends JsonResource
             'categoryLabel' => __('lookups.'.$this->category),
             'type' => $this->type,
             'typeLabel' => __('lookups.'.$this->type),
-            'img_url' => $this->img_url,
+            'imgUrl' => $this->img_url,
             'header' => $this->header,
             'content' => $this->content,
             'content_url' => $this->content_url,
