@@ -67,6 +67,10 @@ Route::prefix('app')->get('/program/{programId}', ProgramManage::class)->name('p
 Route::prefix('app')->get('/program/{program}/users', ProgramUserList::class)->name('program.users');
 Route::prefix('app')->get('/program/{program}/user/{user}', ProgramUserDetails::class)->name('program.user.answers');
 
+// Enrichments Management
+Route::prefix('app')->get('/categories', \App\Livewire\Homepage\Categories\Categories::class)->name('categories');
+Route::prefix('app')->get('/interests', \App\Livewire\Homepage\Interests\Interests::class)->name('interests');
+
 Route::prefix('app')->get('/liabilities', Liabilities::class)->name('liabilities');
 Route::prefix('app')->get('/liability/{liabilityId}', LiabilityManage::class)->name('liability.manage');
 

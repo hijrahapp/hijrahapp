@@ -51,7 +51,7 @@ class EnrichmentRepository
                 }
 
                 // Search in interests
-                $interestIds = Interest::where('name', 'like', "%{$search}%")->pluck('id');
+                $interestIds = Interest::where('name', 'like', "%{$search}%")->where('active', true)->pluck('id');
                 if ($interestIds->isNotEmpty()) {
                     foreach ($interestIds as $interestId) {
                         $q->orWhereJsonContains('interests', $interestId);
@@ -92,14 +92,14 @@ class EnrichmentRepository
         $response['categories'] = CategoryResource::collection($categories);
         $response['new'] = EnrichmentResource::collection(Enrichment::orderBy('created_at', 'desc')->limit(10)->get());
         $response['short-videos'] = EnrichmentResource::collection(Enrichment::where('type', 'short-video')->orderBy('created_at', 'desc')->limit(10)->get());
-        
+
         foreach ($categories as $category) {
             $response['categoriesContents'][] = [
                 'name' => $category->name,
                 'list' => EnrichmentResource::collection(Enrichment::whereJsonContains('categories', $category->id)
-                            ->orderBy('created_at', 'desc')
-                            ->limit(10)
-                            ->get())
+                    ->orderBy('created_at', 'desc')
+                    ->limit(10)
+                    ->get()),
             ];
         }
 
