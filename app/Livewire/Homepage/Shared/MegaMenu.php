@@ -67,6 +67,10 @@ class MegaMenu extends Component
                 $this->currentSection = 'Methodologies';
                 $this->currentSubSection = 'Tags Management';
                 break;
+            case 'feedback-forms':
+                $this->currentSection = 'Programs';
+                $this->currentSubSection = 'Feedback Form Management';
+                break;
             default:
                 $this->currentSection = 'Home';
         }

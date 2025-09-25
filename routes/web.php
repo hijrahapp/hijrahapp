@@ -5,6 +5,7 @@ use App\Livewire\Auth\ResetPassword2fa;
 use App\Livewire\Auth\ResetPasswordChanged;
 use App\Livewire\Auth\ResetPasswordChangePassword;
 use App\Livewire\Auth\ResetPasswordEnterEmail;
+use App\Livewire\Homepage\FeedbackForms\FeedbackFormManagement;
 use App\Livewire\Homepage\Index as HomepageIndex;
 use App\Livewire\Homepage\Liabilities\Liabilities;
 use App\Livewire\Homepage\Liabilities\LiabilityManage;
@@ -19,6 +20,7 @@ use App\Livewire\Homepage\Modules\Modules;
 use App\Livewire\Homepage\Pillars\Pillars;
 use App\Livewire\Homepage\Programs\ProgramManage;
 use App\Livewire\Homepage\Programs\Programs;
+use App\Livewire\Homepage\Programs\ProgramsStatistics;
 use App\Livewire\Homepage\Programs\Users\ProgramUserDetails;
 use App\Livewire\Homepage\Programs\Users\ProgramUserList;
 use App\Livewire\Homepage\Questions\Questions;
@@ -73,3 +75,6 @@ Route::prefix('app')->get('/liability/{liabilityId}', LiabilityManage::class)->n
 // User Answers Per Liability
 Route::prefix('app')->get('/liability/{liability}/users', LiabilityUserList::class)->name('liability.users');
 Route::prefix('app')->get('/liability/{liability}/user/{user}', LiabilityUserDetails::class)->name('liability.user.details');
+
+// Feedback Forms Management
+Route::prefix('app')->get('/feedback-forms', FeedbackFormManagement::class)->name('feedback-forms');

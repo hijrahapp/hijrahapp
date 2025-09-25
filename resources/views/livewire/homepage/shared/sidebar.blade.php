@@ -1,7 +1,6 @@
-<div class="kt-sidebar fixed bottom-0 top-0 z-20 hidden shrink-0 flex-col items-stretch border-e border-e-border bg-background [--kt-drawer-enable:true] lg:flex lg:[--kt-drawer-enable:false]"
+<div class="kt-sidebar fixed bottom-0 top-0 z-20 shrink-0 flex-col items-stretch border-e border-e-border bg-background [--kt-drawer-enable:true] lg:flex lg:[--kt-drawer-enable:false]"
     data-kt-drawer="true" data-kt-drawer-class="kt-drawer kt-drawer-start top-0 bottom-0" id="sidebar" style="background-color: var(--card); border: unset;">
-    <div class="kt-sidebar-header relative hidden shrink-0 items-center justify-between px-3 lg:flex lg:px-6"
-        id="sidebar_header">
+    <div class="kt-sidebar-header relative shrink-0 items-center justify-between px-3 lg:flex lg:px-6" id="sidebar_header">
         <a class="dark:hidden" href="home">
             <img class="default-logo max-w-32" src="/assets/media/app/big-logo.png" />
             <img class="small-logo" style="max-width: 31px;" src="/assets/media/app/logo.png" />
@@ -22,8 +21,7 @@
         <div class="kt-scrollable-y-hover flex shrink-0 grow pe-1 ps-2 lg:pe-3 lg:ps-5" data-kt-scrollable="true"
             data-kt-scrollable-dependencies="#sidebar_header" data-kt-scrollable-height="auto"
             data-kt-scrollable-offset="0px" data-kt-scrollable-wrappers="#sidebar_content" id="sidebar_scrollable">
-            <div class="kt-menu flex grow flex-col gap-1" data-kt-menu="true" data-kt-menu-accordion-expand-all="false"
-                id="sidebar_menu">
+            <div class="kt-menu flex grow flex-col gap-1" data-kt-menu="true" data-kt-menu-accordion-expand-all="true" id="sidebar_menu">
                 @php $role = session('user')["role"] ?? null; @endphp
                 @if($role === 'SuperAdmin' || $role === 'Admin')
                     <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">

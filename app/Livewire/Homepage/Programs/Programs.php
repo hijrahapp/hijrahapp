@@ -10,7 +10,6 @@ class Programs extends Component
 {
     public function mount()
     {
-        // Check if user has a valid session token
         if (! session('jwt_token')) {
             return redirect()->route('login');
         }
@@ -19,5 +18,10 @@ class Programs extends Component
     public function render()
     {
         return view('livewire.homepage.programs.programs');
+    }
+
+    public function openFeedbackFormManagement()
+    {
+        return redirect()->route('feedback-forms');
     }
 }
