@@ -5,7 +5,7 @@ namespace App\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EnrichmentResource extends JsonResource
+class CategoryResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,12 +16,8 @@ class EnrichmentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'title' => $this->title,
-            'description' => $this->description,
-            'type' => $this->type,
-            'typeLabel' => __('lookups.'.$this->type),
-            'imgUrl' => $this->img_url,
-            'categories' => $this->getCategoriesObjects()->pluck('name'),
+            'name' => $this->name,
+            'icon' => $this->icon,
         ];
     }
 }

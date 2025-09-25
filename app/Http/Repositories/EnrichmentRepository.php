@@ -2,10 +2,13 @@
 
 namespace App\Http\Repositories;
 
+use App\Models\Category;
 use App\Models\Enrichment;
 use App\Models\Interest;
 use App\Models\Tag;
 use App\Models\UserEnrichment;
+use App\Resources\CategoryResource;
+use App\Resources\EnrichmentResource;
 use Illuminate\Database\Eloquent\Collection;
 
 class EnrichmentRepository
@@ -13,13 +16,17 @@ class EnrichmentRepository
     /**
      * Get all enrichments with optional filters.
      */
-    public function getAllWithFilters(?string $category = null, ?string $type = null, ?string $search = null): Collection
+    public function getAllWithFilters(?array $categories = null, ?string $type = null, ?string $search = null): Collection
     {
         $query = Enrichment::query();
 
-        // Category filter
-        if ($category) {
-            $query->where('category', $category);
+        // Categories filter
+        if ($categories && ! empty($categories)) {
+            $query->where(function ($q) use ($categories) {
+                foreach ($categories as $categoryId) {
+                    $q->orWhereJsonContains('categories', (int) $categoryId);
+                }
+            });
         }
 
         // Type filter
@@ -43,16 +50,6 @@ class EnrichmentRepository
                     }
                 }
 
-                // Search in category (check both English and Arabic lookups)
-                $categories = ['health', 'money', 'family', 'spirituality'];
-                foreach ($categories as $category) {
-                    $englishLabel = __('lookups.'.$category, [], 'en');
-                    $arabicLabel = __('lookups.'.$category, [], 'ar');
-                    if (stripos($englishLabel, $search) !== false || stripos($arabicLabel, $search) !== false) {
-                        $q->orWhere('category', $category);
-                    }
-                }
-
                 // Search in interests
                 $interestIds = Interest::where('name', 'like', "%{$search}%")->pluck('id');
                 if ($interestIds->isNotEmpty()) {
@@ -68,6 +65,14 @@ class EnrichmentRepository
                         $q->orWhereJsonContains('tags', $tagId);
                     }
                 }
+
+                // Search in categories
+                $categoryIds = Category::where('name', 'like', "%{$search}%")->pluck('id');
+                if ($categoryIds->isNotEmpty()) {
+                    foreach ($categoryIds as $categoryId) {
+                        $q->orWhereJsonContains('categories', $categoryId);
+                    }
+                }
             });
         }
 
@@ -79,14 +84,26 @@ class EnrichmentRepository
      */
     public function getExploreData(): array
     {
-        return [
-            'new' => Enrichment::orderBy('created_at', 'desc')->limit(10)->get(),
-            'short-videos' => Enrichment::where('type', 'short-video')->orderBy('created_at', 'desc')->limit(10)->get(),
-            'health' => Enrichment::where('category', 'health')->orderBy('created_at', 'desc')->limit(10)->get(),
-            'money' => Enrichment::where('category', 'money')->orderBy('created_at', 'desc')->limit(10)->get(),
-            'family' => Enrichment::where('category', 'family')->orderBy('created_at', 'desc')->limit(10)->get(),
-            'spirituality' => Enrichment::where('category', 'spirituality')->orderBy('created_at', 'desc')->limit(10)->get(),
-        ];
+        $response = [];
+
+        // Get all active categories and add enrichments for each
+        $categories = Category::where('active', true)->get();
+
+        $response['categories'] = CategoryResource::collection($categories);
+        $response['new'] = EnrichmentResource::collection(Enrichment::orderBy('created_at', 'desc')->limit(10)->get());
+        $response['short-videos'] = EnrichmentResource::collection(Enrichment::where('type', 'short-video')->orderBy('created_at', 'desc')->limit(10)->get());
+        
+        foreach ($categories as $category) {
+            $response['categoriesContents'][] = [
+                'name' => $category->name,
+                'list' => EnrichmentResource::collection(Enrichment::whereJsonContains('categories', $category->id)
+                            ->orderBy('created_at', 'desc')
+                            ->limit(10)
+                            ->get())
+            ];
+        }
+
+        return $response;
     }
 
     /**
