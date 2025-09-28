@@ -52,6 +52,19 @@ class MegaMenu extends Component
                 $this->currentSection = 'Programs';
                 $this->currentSubSection = 'Programs Management';
                 break;
+            case 'categories':
+                $this->currentSection = 'Enrichments';
+                $this->currentSubSection = 'Category Management';
+                break;
+            case 'interests':
+                $this->currentSection = 'Enrichments';
+                $this->currentSubSection = 'Interest Management';
+                break;
+            case 'enrichments':
+            case 'enrichment.manage':
+                $this->currentSection = 'Enrichments';
+                $this->currentSubSection = 'Enrichment Management';
+                break;
             case 'liabilities':
             case 'liability.manage':
             case 'liability.users':

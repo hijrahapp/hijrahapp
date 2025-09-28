@@ -19,8 +19,6 @@ class EnrichmentDetailedResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
-            'category' => $this->category,
-            'categoryLabel' => __('lookups.'.$this->category),
             'type' => $this->type,
             'typeLabel' => __('lookups.'.$this->type),
             'imgUrl' => $this->img_url,
@@ -28,10 +26,9 @@ class EnrichmentDetailedResource extends JsonResource
             'content' => $this->content,
             'content_url' => $this->content_url,
             'content_image' => $this->content_image,
-            // 'interests' => InterestResource::collection($this->getInterestsObjects()),
-            'tags' => $this->getTagsObjects()->map(function ($tag) {
-                return $tag->title;
-            }),
+            'interests' => InterestResource::collection($this->getInterestsObjects()),
+            'categories' => CategoryResource::collection($this->getCategoriesObjects()),
+            'tags' => $this->getTagsObjects()->pluck('title'),
             'createdAt' => $this->formatLocalizedDate($this->created_at),
             'isLiked' => $this->getUserInteraction('like', $request),
             'isFavorited' => $this->getUserInteraction('favorite', $request),

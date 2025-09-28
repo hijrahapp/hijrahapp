@@ -17,7 +17,7 @@ class InterestController extends Controller
      */
     public function all(): JsonResponse
     {
-        $interests = Interest::all();
+        $interests = Interest::where('active', true)->get();
 
         return response()->json(InterestResource::collection($interests));
     }
@@ -84,7 +84,7 @@ class InterestController extends Controller
         }
 
         $userInterestIds = $user->interests ?? [];
-        $interests = Interest::whereIn('id', $userInterestIds)->get();
+        $interests = Interest::whereIn('id', $userInterestIds)->where('active', true)->get();
 
         return response()->json(InterestResource::collection($interests));
     }

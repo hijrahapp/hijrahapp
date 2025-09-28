@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Repositories\EnrichmentRepository;
+use App\Models\Category;
 use App\Models\User;
 use App\Resources\EnrichmentDetailedResource;
 use App\Resources\EnrichmentResource;
@@ -20,8 +21,20 @@ class EnrichmentController extends Controller
     public function all(Request $request): JsonResponse
     {
         try {
+            // Handle category parameter - can be single name or array of names
+            $categoryIds = [];
+            if ($request->has('category')) {
+                $categoryNames = is_array($request->category) ? $request->category : [$request->category];
+
+                // Convert category names to IDs
+                $categoryIds = Category::whereIn('name', $categoryNames)
+                    ->where('active', true)
+                    ->pluck('id')
+                    ->toArray();
+            }
+
             $enrichments = $this->enrichmentRepository->getAllWithFilters(
-                $request->category,
+                $categoryIds,
                 $request->type,
                 $request->search
             );
@@ -30,18 +43,29 @@ class EnrichmentController extends Controller
                 'count' => $enrichments->count(),
             ];
 
-            // Add categories metadata when there's search but no category filter
             if ($request->search && ! $request->category) {
-                $categories = $enrichments->pluck('category')->unique()->map(function ($category) {
-                    return [
-                        'value' => $category,
-                        'label' => __('lookups.'.$category),
-                    ];
-                })->values();
+                // Add categories metadata
+                // Extract all unique category IDs from enrichments
+                $categoryIds = $enrichments
+                    ->pluck('categories') // Get all categories arrays
+                    ->flatten() // Flatten arrays into single array
+                    ->unique() // Get unique category IDs
+                    ->filter(); // Remove any null values
+
+                // Fetch actual Category objects and format them
+                $categories = Category::whereIn('id', $categoryIds)
+                    ->where('active', true)
+                    ->orderBy('name')
+                    ->get()
+                    ->map(function ($category) {
+                        return [
+                            'value' => $category->name,
+                            'label' => $category->name,
+                        ];
+                    });
                 $metadata['categories'] = $categories;
             }
 
-            // Add types metadata when there's search and category filter
             if ($request->search && $request->category) {
                 $types = $enrichments->pluck('type')->unique()->map(function ($type) {
                     return [
@@ -61,6 +85,8 @@ class EnrichmentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('messages.error_fetching_enrichments'),
+                'error' => $e->getMessage(),
+                'stack' => $e->getTrace(),
             ], 500);
         }
     }
@@ -73,18 +99,14 @@ class EnrichmentController extends Controller
         try {
             $data = $this->enrichmentRepository->getExploreData();
 
-            // Transform each collection to resources
-            $transformedData = [];
-            foreach ($data as $key => $enrichments) {
-                $transformedData[$key] = EnrichmentResource::collection($enrichments);
-            }
-
-            return response()->json($transformedData);
+            return response()->json($data);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.error_fetching_explore_enrichments'),
+                'error' => $e->getMessage(),
+                'stack' => $e->getTrace(),
             ], 500);
         }
     }

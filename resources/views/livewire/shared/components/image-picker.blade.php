@@ -12,7 +12,7 @@
         <!-- File Input (invisible overlay) -->
         <input 
             type="file" 
-            accept="image/*" 
+            accept="image/jpeg,image/jpg,image/png,image/gif,image/bmp,image/webp,image/svg+xml,.ico" 
             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             wire:model="file"
         >
@@ -73,7 +73,7 @@
         @if($value)
             Click to change image or use × to remove
         @else
-            Supports PNG, JPG, JPEG (max 2MB)
+            Supports PNG, JPG, JPEG, SVG, ICO (max 2MB)
         @endif
     </p>
 

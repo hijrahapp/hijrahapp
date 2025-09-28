@@ -106,6 +106,15 @@
                 </table>
             </div>
         </div>
+        <div class="kt-card-footer flex-col justify-center gap-5 text-sm font-medium text-secondary-foreground md:flex-row md:justify-between">
+            <div class="order-2 flex items-center gap-2 md:order-1">
+            </div>
+            <div class="order-1 flex items-center gap-4 md:order-2">
+                <span>
+                    Showing {{ $this->programs->firstItem() ?? 0 }} to {{ $this->programs->lastItem() ?? 0 }} of {{ $this->programs->total() ?? 0 }} Programs
+                </span>
+            </div>
+        </div>
     </div>
     
     <x-ktui-pagination :paginator="$this->programs" />

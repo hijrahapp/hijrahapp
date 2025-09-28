@@ -9,7 +9,6 @@ class Enrichment extends Model
     protected $fillable = [
         'title',
         'description',
-        'category',
         'type',
         'img_url',
         'header',
@@ -17,12 +16,16 @@ class Enrichment extends Model
         'content_url',
         'content_image',
         'interests',
+        'categories',
         'tags',
+        'active',
     ];
 
     protected $casts = [
         'interests' => 'array',
+        'categories' => 'array',
         'tags' => 'array',
+        'active' => 'boolean',
     ];
 
     /**
@@ -47,5 +50,17 @@ class Enrichment extends Model
         }
 
         return Tag::whereIn('id', $this->tags)->get();
+    }
+
+    /**
+     * Get the categories associated with this enrichment.
+     */
+    public function getCategoriesObjects()
+    {
+        if (empty($this->categories)) {
+            return collect();
+        }
+
+        return Category::whereIn('id', $this->categories)->get();
     }
 }
