@@ -51,7 +51,7 @@
                                 <label class="block text-sm font-medium mb-1">Form Version <span class="text-destructive">*</span></label>
                                 <input type="text" class="kt-input w-full" wire:model.live="formVersion" placeholder="Enter form version (e.g., 1.0)" />
                                 @error('formVersion')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                                <p class="text-xs text-muted-foreground mt-1">Version must be greater than the current highest version</p>
+                                <p class="text-xs text-muted-foreground mt-1">Version must be greater than the current version</p>
                             </div>
                         </div>
 
@@ -116,21 +116,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Rating Options (only shown when type is rating) -->
-                                @if($questionType === 'rating')
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Minimum Value <span class="text-destructive">*</span></label>
-                                            <input type="number" min="1" class="kt-input w-full" wire:model="ratingMin" placeholder="1" />
-                                            @error('ratingMin')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Maximum Value <span class="text-destructive">*</span></label>
-                                            <input type="number" min="1" class="kt-input w-full" wire:model="ratingMax" placeholder="5" />
-                                            @error('ratingMax')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                                        </div>
-                                    </div>
-                                @endif
 
                                 <!-- Choice Options (only shown when type is single_choice or multiple_choice) -->
                                 @if(in_array($questionType, ['single_choice', 'multiple_choice']))
@@ -174,7 +159,7 @@
                                     <i class="ki-filled ki-message-question text-4xl mb-4"></i>
                                     <p class="text-lg font-medium">No questions added yet</p>
                                     <p class="text-sm">Use the Question Builder above to add questions to your form</p>
-                                    <p class="text-xs text-orange-600 mt-2">Note: At least one required rating question is required</p>
+                                    <p class="text-xs text-orange-600 mt-2">Note: Exactly one rating question is required</p>
                                 </div>
                             @else
                                 <div class="space-y-3">

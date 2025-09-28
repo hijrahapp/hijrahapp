@@ -19,9 +19,4 @@ class Programs extends Component
     {
         return view('livewire.homepage.programs.programs');
     }
-
-    public function openFeedbackFormManagement()
-    {
-        return redirect()->route('feedback-forms');
-    }
 }

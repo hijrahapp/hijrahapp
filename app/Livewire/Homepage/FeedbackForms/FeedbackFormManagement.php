@@ -3,7 +3,6 @@
 namespace App\Livewire\Homepage\FeedbackForms;
 
 use App\Models\FeedbackForm;
-use App\Models\ProgramFeedback;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
@@ -30,10 +29,6 @@ class FeedbackFormManagement extends Component
     public $questionType = '';
 
     public $questionRequired = false;
-
-    public $ratingMin = 1;
-
-    public $ratingMax = 5;
 
     public $questionOptions = [];
 
@@ -83,6 +78,22 @@ class FeedbackFormManagement extends Component
         // Validate question form using Livewire rules
         $this->validateQuestionForm();
 
+        // Check if trying to add a rating question when one already exists
+        if ($this->questionType === 'rating') {
+            $existingRatingQuestions = 0;
+            foreach ($this->questions as $existingQuestion) {
+                if ($existingQuestion['type'] === 'rating') {
+                    $existingRatingQuestions++;
+                }
+            }
+
+            if ($existingRatingQuestions >= 1) {
+                $this->dispatch('show-toast', type: 'error', message: 'Only one rating question is allowed per feedback form. Please remove the existing rating question first.');
+
+                return;
+            }
+        }
+
         $question = [
             'key' => count($this->questions),
             'text' => $this->questionText,
@@ -92,8 +103,8 @@ class FeedbackFormManagement extends Component
 
         switch ($this->questionType) {
             case 'rating':
-                $question['min_value'] = $this->ratingMin;
-                $question['max_value'] = $this->ratingMax;
+                $question['min_value'] = 1;
+                $question['max_value'] = 5;
                 break;
             case 'single_choice':
             case 'multiple_choice':
@@ -163,8 +174,6 @@ class FeedbackFormManagement extends Component
         $this->questionText = '';
         $this->questionType = '';
         $this->questionRequired = false;
-        $this->ratingMin = 1;
-        $this->ratingMax = 5;
         $this->questionOptions = [];
         $this->questionMaxLength = 500;
     }
@@ -214,18 +223,22 @@ class FeedbackFormManagement extends Component
             return;
         }
 
-        // Validate that at least one required rating question exists
-        $hasRequiredRatingQuestion = false;
+        // Validate that exactly one rating question exists
+        $ratingQuestionCount = 0;
         foreach ($this->questions as $question) {
-            if ($question['type'] === 'rating' && ($question['required'] ?? false)) {
-                $hasRequiredRatingQuestion = true;
-                break;
+            if ($question['type'] === 'rating') {
+                $ratingQuestionCount++;
             }
         }
 
-        if (! $hasRequiredRatingQuestion) {
-            $this->addError('questions', 'At least one required rating question is required for the feedback form.');
-            $this->dispatch('show-toast', type: 'error', message: 'At least one required rating question is required for the feedback form.');
+        if ($ratingQuestionCount !== 1) {
+            if ($ratingQuestionCount === 0) {
+                $this->addError('questions', 'Exactly one rating question is required for the feedback form.');
+                $this->dispatch('show-toast', type: 'error', message: 'Exactly one rating question is required for the feedback form.');
+            } else {
+                $this->addError('questions', 'Only one rating question is allowed per feedback form. You have '.$ratingQuestionCount.' rating questions.');
+                $this->dispatch('show-toast', type: 'error', message: 'Only one rating question is allowed per feedback form. You have '.$ratingQuestionCount.' rating questions.');
+            }
 
             return;
         }
@@ -334,13 +347,7 @@ class FeedbackFormManagement extends Component
         // Add type-specific validation rules
         switch ($this->questionType) {
             case 'rating':
-                $rules['ratingMin'] = 'required|integer|min:1';
-                $rules['ratingMax'] = 'required|integer|min:2|gt:ratingMin';
-                $messages['ratingMin.required'] = 'Minimum rating value is required for rating questions.';
-                $messages['ratingMin.min'] = 'Minimum rating must be at least 1.';
-                $messages['ratingMax.required'] = 'Maximum rating value is required for rating questions.';
-                $messages['ratingMax.min'] = 'Maximum rating must be at least 2.';
-                $messages['ratingMax.gt'] = 'Maximum rating must be greater than minimum rating.';
+                // No additional validation needed for rating questions (fixed 1-5 scale)
                 break;
 
             case 'single_choice':
@@ -380,7 +387,7 @@ class FeedbackFormManagement extends Component
 
     public function backToList()
     {
-        return redirect()->route('programs');
+        return redirect()->route('feedback');
     }
 
     public function render()

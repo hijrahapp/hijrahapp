@@ -134,4 +134,36 @@ class Program extends Model
     {
         return $this->feedback()->count();
     }
+
+    /**
+     * Get average rating for this program from dynamic feedback forms.
+     * This method finds rating questions from feedback responses and calculates the average.
+     */
+    public function getDynamicAverageRating(): ?float
+    {
+        $feedbacks = $this->feedback()->get();
+
+        if ($feedbacks->isEmpty()) {
+            return null;
+        }
+
+        $ratingValues = [];
+
+        foreach ($feedbacks as $feedback) {
+            if (! $feedback->responses) {
+                continue;
+            }
+
+            // Find rating values in the responses array
+            foreach ($feedback->responses as $key => $value) {
+                // Check if this looks like a rating value (integer between 1-10)
+                if (is_numeric($value) && $value >= 1 && $value <= 10) {
+                    $ratingValues[] = (float) $value;
+                    break; // Only take the first rating value found per feedback
+                }
+            }
+        }
+
+        return empty($ratingValues) ? null : round(array_sum($ratingValues) / count($ratingValues), 1);
+    }
 }
