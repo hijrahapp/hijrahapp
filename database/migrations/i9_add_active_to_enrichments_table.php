@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('interests', function (Blueprint $table) {
+        Schema::table('enrichments', function (Blueprint $table) {
             $table->boolean('active')->default(true);
         });
     }
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('interests', function (Blueprint $table) {
+        Schema::table('enrichments', function (Blueprint $table) {
             $table->dropColumn('active');
         });
     }

@@ -76,7 +76,7 @@ class EnrichmentRepository
             });
         }
 
-        return $query->orderBy('created_at', 'desc')->get();
+        return $query->where('active', true)->orderBy('created_at', 'desc')->get();
     }
 
     /**
@@ -90,13 +90,14 @@ class EnrichmentRepository
         $categories = Category::where('active', true)->get();
 
         $response['categories'] = CategoryResource::collection($categories);
-        $response['new'] = EnrichmentResource::collection(Enrichment::orderBy('created_at', 'desc')->limit(10)->get());
-        $response['short-videos'] = EnrichmentResource::collection(Enrichment::where('type', 'short-video')->orderBy('created_at', 'desc')->limit(10)->get());
+        $response['new'] = EnrichmentResource::collection(Enrichment::where('active', true)->orderBy('created_at', 'desc')->limit(10)->get());
+        $response['short-videos'] = EnrichmentResource::collection(Enrichment::where('type', 'short-video')->where('active', true)->orderBy('created_at', 'desc')->limit(10)->get());
 
         foreach ($categories as $category) {
             $response['categoriesContents'][] = [
                 'name' => $category->name,
                 'list' => EnrichmentResource::collection(Enrichment::whereJsonContains('categories', $category->id)
+                    ->where('active', true)
                     ->orderBy('created_at', 'desc')
                     ->limit(10)
                     ->get()),

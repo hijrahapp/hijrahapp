@@ -68,6 +68,7 @@ Route::prefix('app')->get('/program/{program}/users', ProgramUserList::class)->n
 Route::prefix('app')->get('/program/{program}/user/{user}', ProgramUserDetails::class)->name('program.user.answers');
 
 // Enrichments Management
+Route::prefix('app')->get('/enrichments', \App\Livewire\Homepage\Enrichments\Enrichments::class)->name('enrichments');
 Route::prefix('app')->get('/categories', \App\Livewire\Homepage\Categories\Categories::class)->name('categories');
 Route::prefix('app')->get('/interests', \App\Livewire\Homepage\Interests\Interests::class)->name('interests');
 

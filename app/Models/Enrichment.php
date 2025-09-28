@@ -18,12 +18,14 @@ class Enrichment extends Model
         'interests',
         'categories',
         'tags',
+        'active',
     ];
 
     protected $casts = [
         'interests' => 'array',
         'categories' => 'array',
         'tags' => 'array',
+        'active' => 'boolean',
     ];
 
     /**
