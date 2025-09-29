@@ -64,6 +64,7 @@ Route::prefix('app')->get('/modules', Modules::class)->name('modules');
 Route::prefix('app')->get('/questions', Questions::class)->name('questions');
 Route::prefix('app')->get('/tags', Tags::class)->name('tags');
 
+// Programs Management
 Route::prefix('app')->get('/programs', Programs::class)->name('programs');
 Route::prefix('app')->get('/program/{programId}', ProgramManage::class)->name('program.manage');
 
@@ -71,12 +72,7 @@ Route::prefix('app')->get('/program/{programId}', ProgramManage::class)->name('p
 Route::prefix('app')->get('/program/{program}/users', ProgramUserList::class)->name('program.users');
 Route::prefix('app')->get('/program/{program}/user/{user}', ProgramUserDetails::class)->name('program.user.answers');
 
-// Enrichments Management
-Route::prefix('app')->get('/enrichments', \App\Livewire\Homepage\Enrichments\Enrichments::class)->name('enrichments');
-Route::prefix('app')->get('/enrichment/{enrichmentId}', \App\Livewire\Homepage\Enrichments\EnrichmentManage::class)->name('enrichment.manage');
-Route::prefix('app')->get('/categories', \App\Livewire\Homepage\Categories\Categories::class)->name('categories');
-Route::prefix('app')->get('/interests', \App\Livewire\Homepage\Interests\Interests::class)->name('interests');
-
+// Liabilities Management
 Route::prefix('app')->get('/liabilities', Liabilities::class)->name('liabilities');
 Route::prefix('app')->get('/liability/{liabilityId}', LiabilityManage::class)->name('liability.manage');
 
@@ -84,10 +80,14 @@ Route::prefix('app')->get('/liability/{liabilityId}', LiabilityManage::class)->n
 Route::prefix('app')->get('/liability/{liability}/users', LiabilityUserList::class)->name('liability.users');
 Route::prefix('app')->get('/liability/{liability}/user/{user}', LiabilityUserDetails::class)->name('liability.user.details');
 
-// Feedback Forms Management
-Route::prefix('app')->get('/feedback-forms', FeedbackFormManagement::class)->name('feedback-forms');
+// Enrichments Management
+Route::prefix('app')->get('/enrichments', \App\Livewire\Homepage\Enrichments\Enrichments::class)->name('enrichments');
+Route::prefix('app')->get('/enrichment/{enrichmentId}', \App\Livewire\Homepage\Enrichments\EnrichmentManage::class)->name('enrichment.manage');
+Route::prefix('app')->get('/categories', \App\Livewire\Homepage\Categories\Categories::class)->name('categories');
+Route::prefix('app')->get('/interests', \App\Livewire\Homepage\Interests\Interests::class)->name('interests');
 
 // Feedback Management
 Route::prefix('app')->get('/feedback', Feedback::class)->name('feedback');
+Route::prefix('app')->get('/feedback-forms', FeedbackFormManagement::class)->name('feedback-forms');
 Route::prefix('app')->get('/program/{program}/feedback', ProgramFeedbackUsers::class)->name('program.feedback.users');
 Route::prefix('app')->get('/program/{program}/feedback/user/{user}', UserFeedbackDetails::class)->name('program.feedback.user.details');
