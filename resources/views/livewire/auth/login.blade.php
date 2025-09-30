@@ -2,7 +2,8 @@
     <div class="kt-card max-w-[440px] w-full">
         <form wire:submit.prevent="login" class="kt-card-content flex flex-col gap-5 p-10">
             <div class="text-center mb-2.5">
-                <h1 class="text-2xl font-bold text-center mb-5">Welcome to Hijrah</h1>
+                <div class="flex justify-center mb-2.5"><img class="max-w-16" src="/assets/media/app/logo.png" /></div>
+                <h1 class="text-2xl font-bold text-center mb-5 text-primary">Welcome to Hijrah</h1>
                 <h2 class="text-lg font-medium text-mono leading-none mb-2.5">
                     Login
                 </h2>

@@ -1,19 +1,20 @@
 <div class="kt-sidebar fixed bottom-0 top-0 z-20 shrink-0 flex-col items-stretch border-e border-e-border bg-background [--kt-drawer-enable:true] lg:flex lg:[--kt-drawer-enable:false]"
     data-kt-drawer="true" data-kt-drawer-class="kt-drawer kt-drawer-start top-0 bottom-0" id="sidebar" style="background-color: var(--card); border: unset;">
-    <div class="kt-sidebar-header relative shrink-0 items-center justify-between px-3 lg:flex lg:px-6" id="sidebar_header">
+    <div class="kt-sidebar-header relative shrink-0 items-center justify-start px-3 lg:flex lg:px-6" id="sidebar_header">
         <a class="dark:hidden" href="home">
-            <img class="default-logo max-w-32" src="/assets/media/app/big-logo.png" />
+            <img class="default-logo" style="max-width: 31px;" src="/assets/media/app/logo.png" />
             <img class="small-logo" style="max-width: 31px;" src="/assets/media/app/logo.png" />
         </a>
         <a class="hidden dark:block" href="html/demo1.html">
-            <img class="default-logo max-w-32" src="/assets/media/app/big-logo.png" />
+            <img class="default-logo" style="max-width: 31px;" src="/assets/media/app/logo.png" />
             <img class="small-logo" style="max-width: 31px;" src="/assets/media/app/logo.png" />
         </a>
+        <p class="default-logo font-semibold pl-2.5 text-primary text-xl">HIJRAH</p>
         <button
             class="kt-btn kt-btn-outline kt-btn-icon absolute start-full top-2/4 -translate-x-2/4 -translate-y-2/4 rtl:translate-x-2/4"
             data-kt-toggle="body" data-kt-toggle-class="kt-sidebar-collapse" id="sidebar_toggle" style="background-color: #F8D87D; border-radius: 100%;">
             <i
-                class="ki-filled ki-right kt-toggle-active:rotate-180 rtl:translate rtl:kt-toggle-active:rotate-0 transition-all duration-300 rtl:rotate-180">
+                class="ki-filled ki-left kt-toggle-active:rotate-180 rtl:translate rtl:kt-toggle-active:rotate-0 transition-all duration-300 rtl:rotate-180">
             </i>
         </button>
     </div>
@@ -24,7 +25,7 @@
             <div class="kt-menu flex grow flex-col gap-1" data-kt-menu="true" data-kt-menu-accordion-expand-all="true" id="sidebar_menu">
                 @php $role = session('user')["role"] ?? null; @endphp
                 @if($role === 'SuperAdmin' || $role === 'Admin')
-                <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
+                <div class="kt-menu-item show" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
                     <div class="kt-menu-link flex items-center grow cursor-pointer border border-transparent gap-[10px] ps-[10px] pe-[10px] py-[6px]">
                         <span class="kt-menu-icon items-start text-muted-foreground w-[20px]">
                             <i class="ki-filled ki-users text-lg kt-menu-title kt-menu-item-active:text-primary kt-menu-item-active:font-semibold kt-menu-link-hover:!text-primary font-normal text-foreground">
@@ -75,7 +76,7 @@
                     </div>
                 </div>
                 @endif
-                <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
+                <div class="kt-menu-item show" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
                     <div class="kt-menu-link flex items-center grow cursor-pointer border border-transparent gap-[10px] ps-[10px] pe-[10px] py-[6px]">
                         <span class="kt-menu-icon items-start text-muted-foreground w-[20px]">
                             <i class="ki-filled ki-book text-lg kt-menu-title kt-menu-item-active:text-primary kt-menu-item-active:font-semibold kt-menu-link-hover:!text-primary font-normal text-foreground">
@@ -145,7 +146,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
+                <div class="kt-menu-item show" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
                     <div class="kt-menu-link flex items-center grow cursor-pointer border border-transparent gap-[10px] ps-[10px] pe-[10px] py-[6px]">
                         <span class="kt-menu-icon items-start text-muted-foreground w-[20px]">
                             <i class="ki-filled ki-file-sheet text-lg kt-menu-title kt-menu-item-active:text-primary kt-menu-item-active:font-semibold kt-menu-link-hover:!text-primary font-normal text-foreground">
@@ -197,7 +198,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="kt-menu-item" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
+                <div class="kt-menu-item show" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
                     <div class="kt-menu-link flex items-center grow cursor-pointer border border-transparent gap-[10px] ps-[10px] pe-[10px] py-[6px]">
                         <span class="kt-menu-icon items-start text-muted-foreground w-[20px]">
                             <i class="ki-filled ki-star text-lg kt-menu-title kt-menu-item-active:text-primary kt-menu-item-active:font-semibold kt-menu-link-hover:!text-primary font-normal text-foreground">

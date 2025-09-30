@@ -4,7 +4,7 @@
         @include('layouts.partials.head')
         @livewireStyles
     </head>
-    <body class="demo1 kt-sidebar-fixed kt-sidebar-collapse kt-header-fixed flex h-full bg-background text-base text-foreground antialiased">
+    <body class="demo1 kt-sidebar-fixed kt-header-fixed flex h-full bg-background text-base text-foreground antialiased">
         <livewire:shared.modals.search />
         <livewire:shared.modals.confirmation-modal />
         <livewire:homepage.shared.user-profile />
