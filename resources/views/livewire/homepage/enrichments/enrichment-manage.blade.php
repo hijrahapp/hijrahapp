@@ -133,16 +133,6 @@
                 <div class="kt-accordion-content" aria-labelledby="content_details_toggle" id="content_details_content" x-data="{ dirty: $wire.entangle('isContentDirty') }" x-on:input="dirty = true" x-on:change="dirty = true" x-on:section-saved.window="if ($event.detail.section === 'content') dirty = false">
                     <div class="kt-card-body p-5">
                         <div class="grid grid-cols-1 gap-4">
-                            <!-- Header (Optional) -->
-                            <div>
-                                <livewire:shared.components.textarea 
-                                    :label="'Header (Optional)'" 
-                                    wire:model.defer="header" 
-                                    :required="false" 
-                                    :placeholder="'Enter header text'" 
-                                    :rows="2" />
-                                @error('header')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
-                            </div>
 
                             <!-- Content (for article type) -->
                             @if($type === 'article')

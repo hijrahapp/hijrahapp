@@ -22,7 +22,7 @@ class EnrichmentManage extends Component
 
     public string $type = '';
 
-    public string $header = '';
+    // public string $header = '';
 
     public array $categories = [];
 
@@ -171,7 +171,7 @@ class EnrichmentManage extends Component
         try {
             // Validate content fields based on type
             $contentRules = [
-                'header' => 'nullable|string',
+                // 'header' => 'nullable|string',
             ];
 
             if ($this->type === 'article') {
@@ -196,7 +196,7 @@ class EnrichmentManage extends Component
             $this->validate($contentRules);
 
             $data = [
-                'header' => $this->header ?: null,
+                // 'header' => $this->header ?: null,
                 'content' => $this->content ?: null,
                 'content_url' => $this->contentUrl ?: null,
                 'content_image' => $this->contentImage ?: null,
