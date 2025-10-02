@@ -164,7 +164,9 @@
                                         wire:key="{{ $enrichmentId }}-content-{{ $type }}" />
                                     @error('contentUrl')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
                                 </div>
+                            @endif
 
+                            @if($type === 'book')
                                 <!-- Content Cover Image -->
                                 <div>
                                     <livewire:shared.components.image-picker

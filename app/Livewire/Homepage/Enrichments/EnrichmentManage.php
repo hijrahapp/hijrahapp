@@ -57,7 +57,7 @@ class EnrichmentManage extends Component
             'interests.*' => 'integer',
             'tags' => 'array',
             'tags.*' => 'integer',
-            'header' => 'nullable|string',
+            // 'header' => 'nullable|string',
         ];
 
         // Add conditional content rules based on type
@@ -77,7 +77,9 @@ class EnrichmentManage extends Component
                 $validationRule,
             ]);
 
-            $rules['contentImage'] = 'required|url|max:500';
+            if ($this->type === 'book') {
+                $rules['contentImage'] = 'required|url|max:500';
+            }
         }
 
         return $rules;
@@ -108,7 +110,7 @@ class EnrichmentManage extends Component
         $this->description = $enrichment->description;
         $this->imgUrl = $enrichment->img_url ?? '';
         $this->type = $enrichment->type;
-        $this->header = $enrichment->header ?? '';
+        // $this->header = $enrichment->header ?? '';
         $this->categories = $enrichment->categories ?? [];
         $this->interests = $enrichment->interests ?? [];
         $this->tags = $enrichment->tags ?? [];
@@ -190,7 +192,9 @@ class EnrichmentManage extends Component
                     $validationRule,
                 ]);
 
-                $contentRules['contentImage'] = 'required|url|max:500';
+                if ($this->type === 'book') {
+                    $contentRules['contentImage'] = 'required|url|max:500';
+                }
             }
 
             $this->validate($contentRules);
