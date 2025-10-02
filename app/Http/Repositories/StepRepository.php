@@ -74,9 +74,9 @@ class StepRepository
         $success = $progress->markAsCompleted($completionData);
 
         // Update program status based on step progress
-        if ($success) {
-            $this->updateProgramStatus($userId, $programId);
-        }
+        // if ($success) {
+        //     $this->updateProgramStatus($userId, $programId);
+        // }
 
         return [
             'success' => $success,
@@ -206,7 +206,7 @@ class StepRepository
         $progress->refresh();
 
         // Update program status based on step progress
-        $this->updateProgramStatus($userId, $programId);
+        // $this->updateProgramStatus($userId, $programId);
 
         return [
             'success' => true,
@@ -301,7 +301,7 @@ class StepRepository
         }
 
         // Update program status based on step progress
-        $this->updateProgramStatus($userId, $step->program_id);
+        // $this->updateProgramStatus($userId, $step->program_id);
 
         return [
             'success' => true,
