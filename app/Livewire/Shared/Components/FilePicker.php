@@ -86,7 +86,7 @@ class FilePicker extends Component
         $this->placeholder = $placeholder;
         if ($fileType == 'video' || $fileType == 'short-video') {
             $this->allowedTypes = ['mp4', 'mov', 'avi'];
-            $this->allowedServices = ['youtube.com', 'vimeo.com', 'dailymotion.com', 'peertube', 'drive.google.com'];
+            $this->allowedServices = ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com', 'peertube', 'drive.google.com'];
         } elseif ($fileType == 'audio') {
             $this->allowedTypes = ['mp3', 'wav', 'aac'];
             $this->allowedServices = ['audiomack.com', 'mixcloud.com', 'podbean.com', 'drive.google.com'];

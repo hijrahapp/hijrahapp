@@ -148,7 +148,7 @@ class FileUrlValidation implements ValidationRule
     {
         return new self(
             ['mp4', 'mov', 'avi'],
-            ['youtube.com', 'vimeo.com', 'dailymotion.com', 'peertube', 'drive.google.com']
+            ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com', 'peertube', 'drive.google.com']
         );
     }
 
