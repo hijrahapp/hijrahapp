@@ -60,23 +60,23 @@ class CategoryPicker extends Component
         }
     }
 
-    public function add(): void
-    {
-        $name = trim($this->query);
-        if ($name === '') {
-            return;
-        }
+    // public function add(): void
+    // {
+    //     $name = trim($this->query);
+    //     if ($name === '') {
+    //         return;
+    //     }
 
-        $existing = Category::where('name', $name)->first();
-        if ($existing) {
-            $this->pushCategoryId($existing->id);
-        } else {
-            $new = Category::create(['name' => $name, 'active' => true]);
-            $this->pushCategoryId($new->id);
-        }
+    //     $existing = Category::where('name', $name)->first();
+    //     if ($existing) {
+    //         $this->pushCategoryId($existing->id);
+    //     } else {
+    //         $new = Category::create(['name' => $name, 'active' => true]);
+    //         $this->pushCategoryId($new->id);
+    //     }
 
-        $this->clearQuery();
-    }
+    //     $this->clearQuery();
+    // }
 
     public function select(int $categoryId, string $name): void
     {

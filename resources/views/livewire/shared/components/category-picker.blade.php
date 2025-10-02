@@ -5,7 +5,7 @@
     <div class="relative">
         <div class="flex gap-2">
             <input type="text" class="kt-input flex-1" wire:model.live="query" placeholder="{{ $placeholder }}" />
-            <button type="button" class="kt-btn kt-btn-outline" wire:click="add">{{ $addButtonText }}</button>
+            <!-- <button type="button" class="kt-btn kt-btn-outline" wire:click="add">{{ $addButtonText }}</button> -->
         </div>
 
         @if($showSuggestions && count($suggestions) > 0)

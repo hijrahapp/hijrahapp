@@ -60,23 +60,23 @@ class InterestPicker extends Component
         }
     }
 
-    public function add(): void
-    {
-        $name = trim($this->query);
-        if ($name === '') {
-            return;
-        }
+    // public function add(): void
+    // {
+    //     $name = trim($this->query);
+    //     if ($name === '') {
+    //         return;
+    //     }
 
-        $existing = Interest::where('name', $name)->first();
-        if ($existing) {
-            $this->pushInterestId($existing->id);
-        } else {
-            $new = Interest::create(['name' => $name, 'active' => true]);
-            $this->pushInterestId($new->id);
-        }
+    //     $existing = Interest::where('name', $name)->first();
+    //     if ($existing) {
+    //         $this->pushInterestId($existing->id);
+    //     } else {
+    //         $new = Interest::create(['name' => $name, 'active' => true]);
+    //         $this->pushInterestId($new->id);
+    //     }
 
-        $this->clearQuery();
-    }
+    //     $this->clearQuery();
+    // }
 
     public function select(int $interestId, string $name): void
     {
