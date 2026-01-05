@@ -80,7 +80,7 @@
                         <livewire:shared.components.category-picker 
                             wire:model="categories" 
                             :label="'Categories'" 
-                            :placeholder="'Search or add categories'" 
+                            :placeholder="'Search in categories'" 
                             :addButtonText="'Add'" 
                             :required="true" />
                         @error('categories')<span class="text-destructive text-xs">{{ $message }}</span>@enderror
@@ -91,7 +91,7 @@
                         <livewire:shared.components.interest-picker 
                             wire:model="interests" 
                             :label="'Interests'" 
-                            :placeholder="'Search or add interests'" 
+                            :placeholder="'Search in interests'" 
                             :addButtonText="'Add'" 
                             :required="true" />
                         @error('interests')<span class="text-destructive text-xs">{{ $message }}</span>@enderror

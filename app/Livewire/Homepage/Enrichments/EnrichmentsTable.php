@@ -31,7 +31,7 @@ class EnrichmentsTable extends Component
     public function enrichments()
     {
         return $this->handleReloadState(function () {
-            $query = Enrichment::where('title', 'like', '%'.$this->search.'%')
+            $query = Enrichment::where('title', 'like', '%' . $this->search . '%')
                 ->when($this->typeFilter, function ($q) {
                     $q->where('type', $this->typeFilter);
                 })
@@ -58,7 +58,7 @@ class EnrichmentsTable extends Component
 
     public function getCategoryTitles($categoryIds, $limit = 2)
     {
-        if (empty($categoryIds) || ! is_array($categoryIds)) {
+        if (empty($categoryIds) || !is_array($categoryIds)) {
             return [
                 'categories' => [],
                 'hasMore' => false,
@@ -86,7 +86,7 @@ class EnrichmentsTable extends Component
 
     public function getInterestTitles($interestIds, $limit = 2)
     {
-        if (empty($interestIds) || ! is_array($interestIds)) {
+        if (empty($interestIds) || !is_array($interestIds)) {
             return [
                 'interests' => [],
                 'hasMore' => false,
@@ -114,7 +114,7 @@ class EnrichmentsTable extends Component
 
     public function getTagTitles($tagIds, $limit = 2)
     {
-        if (empty($tagIds) || ! is_array($tagIds)) {
+        if (empty($tagIds) || !is_array($tagIds)) {
             return [
                 'tags' => [],
                 'hasMore' => false,
@@ -147,7 +147,7 @@ class EnrichmentsTable extends Component
         if ($request['active']) {
             // Validate enrichment for activation
             $validationResult = $this->validateEnrichmentForActivation($enrichment);
-            if (! $validationResult['valid']) {
+            if (!$validationResult['valid']) {
                 $this->dispatch('show-toast', type: 'error', message: $validationResult['message']);
 
                 return;
@@ -200,7 +200,7 @@ class EnrichmentsTable extends Component
             $errors[] = 'Type is required';
         }
 
-        if (empty($enrichment->categories) || ! is_array($enrichment->categories) || count($enrichment->categories) === 0) {
+        if (empty($enrichment->categories) || !is_array($enrichment->categories) || count($enrichment->categories) === 0) {
             $errors[] = 'At least one category is required';
         } else {
             // Check if categories exist and are active
@@ -212,7 +212,7 @@ class EnrichmentsTable extends Component
             }
         }
 
-        if (empty($enrichment->interests) || ! is_array($enrichment->interests) || count($enrichment->interests) === 0) {
+        if (empty($enrichment->interests) || !is_array($enrichment->interests) || count($enrichment->interests) === 0) {
             $errors[] = 'At least one interest is required';
         } else {
             // Check if interests exist and are active
@@ -231,10 +231,10 @@ class EnrichmentsTable extends Component
             }
         } elseif (in_array($enrichment->type, ['video', 'audio', 'book', 'short-video'])) {
             if (empty($enrichment->content_url)) {
-                $errors[] = 'Content file/URL is required for '.$enrichment->type.' type';
+                $errors[] = 'Content file/URL is required for ' . $enrichment->type . ' type';
             }
-            if (empty($enrichment->content_image)) {
-                $errors[] = 'Content cover image is required for '.$enrichment->type.' type';
+            if ($enrichment->type === 'book' && empty($enrichment->content_image)) {
+                $errors[] = 'Content cover image is required for ' . $enrichment->type . ' type';
             }
         }
 
@@ -244,7 +244,7 @@ class EnrichmentsTable extends Component
 
         return [
             'valid' => false,
-            'message' => 'Cannot activate enrichment. Please complete the missing required fields in the manage page:<br>• '.implode('<br>• ', $errors),
+            'message' => 'Cannot activate enrichment. Please complete the missing required fields in the manage page:<br>• ' . implode('<br>• ', $errors),
         ];
     }
 
@@ -255,7 +255,7 @@ class EnrichmentsTable extends Component
         // If activating, validate the enrichment meets all criteria
         if ($request['active']) {
             $validationResult = $this->validateEnrichmentForActivation($enrichment);
-            if (! $validationResult['valid']) {
+            if (!$validationResult['valid']) {
                 $this->dispatch('show-toast', type: 'error', message: $validationResult['message']);
 
                 return;
